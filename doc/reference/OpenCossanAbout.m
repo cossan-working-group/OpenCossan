@@ -40,4 +40,4 @@
 % * <https://cossan.co.uk/wiki/index.php/Category:Theory_Manual "Theory Manual"> 
 %
 
-% Copyright 2018, COSSAN Working Group
+% Copyright 2019, COSSAN Working Group

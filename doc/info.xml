@@ -1,0 +1,90 @@
+<productinfo
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="optional">
+    <?xml-stylesheet type="text/xsl" href="optional"?>
+    
+<!--
+    % See also: https://cossan.co.uk/wiki/index.php/@OpenCossan
+    %
+    % Author: Edoardo Patelli
+    % Cossan Working Group
+    % email address: openengine@cossan.co.uk
+    % Website: https://www.cossan.co.uk
+    
+    % =====================================================================
+    % This file is part of openCOSSAN.  The open general purpose matlab
+    % toolbox for numerical analysis, risk and uncertainty quantification.
+    %
+    % openCOSSAN is free software: you can redistribute it and/or modify
+    % it under the terms of the GNU General Public License as published by
+    % the Free Software Foundation, either version 3 of the License.
+    %
+    % openCOSSAN is distributed in the hope that it will be useful,
+    % but WITHOUT ANY WARRANTY; without even the implied warranty of
+    % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    % GNU General Public License for more details.
+    %
+    %  You should have received a copy of the GNU General Public License
+    %  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
+    % =====================================================================
+-->
+  
+    <matlabrelease>R2019a</matlabrelease>
+    <name>OpenCossan</name>
+    <type>toolbox</type>
+    <icon>none</icon>
+    <help_location>/html</help_location>
+    <help_contents_icon>none</help_contents_icon>
+    
+    <list>
+        
+<listitem>
+<label>Help</label>
+<callback>doc opencossan/</callback>
+<icon>fullfile('images','OpenCossanIcon.png')</icon>
+</listitem>
+        
+        <listitem>
+            <!-- The label provides the text for this menu item --> 
+            <label>Documentation</label>
+            <!-- This callback is a command to open your documentation -->
+            <callback>web(fullfile(OpenCossan.getCossanRoot,'doc','html','COSSAN_product_page.html'),'-helpbrowser')
+            </callback>
+            <!-- Menu item icon (a toolbox icon from the help browser ) -->
+            <icon>$toolbox/matlab/icons/bookicon.gif</icon>
+        </listitem>
+        
+        <listitem>
+            <label>Demos </label>
+            <callback>demo toolbox 'OpenCossan'</callback>
+            <icon>ApplicationIcon.DEMOS</icon>
+        </listitem>
+        
+        
+        <listitem>
+            <label>Help - User Manual (web)</label>
+            <callback>web('http://www.cossan.co.uk/wiki/index.php/Category:User_Manual','-browser');</callback>
+            <icon>$toolbox/matlab/icons/book_mat.gif</icon>
+        </listitem>
+        
+        <listitem>
+            <label>Help - Refernce Manual (web)</label>
+            <callback>web('http://www.cossan.co.uk/wiki/index.php/Category:Reference_Manual','-browser');</callback>
+            <icon>$toolbox/matlab/icons/book_mat.gif</icon>
+        </listitem>
+        
+        <listitem>
+            <label>Help - Theory Manual (web)</label>
+            <callback>web('http://www.cossan.co.uk/wiki/index.php/Category:Theory_Manual','-browser');</callback>
+            <icon>$toolbox/matlab/icons/book_mat.gif</icon>
+        </listitem>
+        
+        <listitem>
+            <label>Web Site (web) </label>
+            <callback>web('https://www.cossan.co.uk','-browser');</callback>
+            <icon>$docroot/techdoc/matlab_env/examples/webicon.gif</icon>
+        </listitem>
+        
+    </list>
+    
+</productinfo>

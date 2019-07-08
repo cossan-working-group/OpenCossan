@@ -38,7 +38,7 @@ disp('');
 disp('----------------------------------------------------------------------------------------------------------');
 disp('The open general purpose software for numerical analysis, risk and uncertainty quantification');
 disp('(c) Cossan Working Group, Contacts: W:<a href = "https://www.cossan.co.uk">cossan.co.uk</a>; E:<a href ="mailto:info@cossan.co.uk">info@cossan.co.uk</a>');
-disp('Supported by: University of Strathclyde, Glasgow (Scotland), University of Liverpool (England) and Leibniz Universität Hannover (Germany)');
+disp('Supported by: University of Strathclyde, Glasgow (Scotland), University of Liverpool (England) and Leibniz Universitaet Hannover (Germany)');
 disp('----------------------------------------------------------------------------------------------------------');
 disp('<a href ="matlab: open GettingStarted.mlx">Getting started</a> and <a href ="matlab: demo toolbox OpenCossan">OpenCossan Demo</a> are available on these links.' )
 

@@ -1,6 +1,6 @@
 classdef Timer < handle
-    %TIMER This class is used to monitor the elapsed time in COSSAN-X
-    %   Please define this object as a GLOBAL MATLAB variable
+    %TIMER This class is used to monitor the elapsed time in OpenCossan
+    % This object is initialised automatically by OpenCossan
     
     properties
         Cdescription    % Description of the Timer object
@@ -155,7 +155,7 @@ classdef Timer < handle
             
             % Check inputs
             if ~isempty(varargin)
-                OpenCossan.validateCossanInputs(varargin);
+                OpenCossan.validateCossanInputs(varargin{:});
             end
             
             for k=1:2:length(varargin)
@@ -177,7 +177,7 @@ classdef Timer < handle
             ylabel('Cumulative Time (s)')
             set(gca,'XTick',0:length(Xobj.Vtime))
             set(gca,'XTickLabel',Xobj.Cdescription)
-            xticklabel_rotate(0:length(Xobj.Vtime),90,['Initial Time' Xobj.Cdescription],'interpreter','none');
+  %          xticklabel_rotate(0:length(Xobj.Vtime),90,['Initial Time' Xobj.Cdescription],'interpreter','none');
             set(gca, 'XGrid','on','FontSize',12)
             
             if exist('Stitle','var')
@@ -187,9 +187,9 @@ classdef Timer < handle
             end
             if exist('SfigureName','var')
                 if exist('Sexportformat','var')
-                    exportFigure('figureHandle',fh,'SfigureName',SfigureName,'SexportFormat',Sexportformat)
+                    exportFigure('HfigureHandle',fh,'SfigureName',SfigureName,'SexportFormat',Sexportformat)
                 else
-                    exportFigure('figureHandle',fh,'SfigureName',SfigureName)
+                    exportFigure('HfigureHandle',fh,'SfigureName',SfigureName)
                 end
             end
         end
@@ -205,8 +205,12 @@ classdef Timer < handle
         end
         
         function totalTime=get.totalTime(Xobj)
+            if isempty(Xobj.Vtime)
+                Xobj.starttime
+            end
+            
             if Xobj.LrunningTime
-                totalTime=toc(Xobj.Ctimelabel{1});
+                totalTime=toc(Xobj.Ctimelabel{end});
             else
                 totalTime=sum(Xobj.Vtime);
             end
