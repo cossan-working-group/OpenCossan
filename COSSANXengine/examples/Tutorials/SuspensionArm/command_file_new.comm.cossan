@@ -1,0 +1,386 @@
+DEBUT(PAR_LOT='NON',IGNORE_ALARM = ('SUPERVIS_1','CALCULEL2_63 '))
+
+#---------------------------------------------------------------------------
+# parameters from the Wizard 
+#------------------------------
+
+# h0 : initial elements size 
+h0 = 1.0
+
+# hc : target elements size (taille cible)
+hc = 0.1
+
+#---------------------------------------------------------------------------
+# useful parameters
+#------------------
+
+# number of mesh refinements
+n = (log(h0)-log(hc))/log(2)
+nb_raff = int(n)+1
+
+# h : final elements size 
+h = h0/(2.**nb_raff)
+
+# radius of refinements disc
+r_raff = 6*h
+
+# initialization
+MA    = [None]*(nb_raff+1)
+MO    = [None]*nb_raff
+CHERR = [None]*nb_raff
+
+i_raff=0   
+MA[i_raff]=LIRE_MAILLAGE(FORMAT='MED',);
+
+#---------------------------------------------------------------------------
+# parameters for the cracks definition
+#------------------
+
+cracks_len1 = (<cossan name="crack1len1" format="%12.5e" original="3.0"/>,
+               <cossan name="crack2len1" format="%12.5e" original="3.0"/>,
+               <cossan name="crack3len1" format="%12.5e" original="3.0"/>,
+               <cossan name="crack4len1" format="%12.5e" original="3.0"/>,
+               <cossan name="crack5len1" format="%12.5e" original="3.0"/>,
+               <cossan name="crack6len1" format="%12.5e" original="3.0"/>,)
+cracks_len2 = (4.0,4.0,4.0,4.0,4.0,4.0,)
+cracks_zpos = (4.0,4.0,4.0,4.0,4.0,4.0,)
+
+vect_X=((1.0, -0.3, 0.0),
+        (1.0, -0.3, 0.0),
+        (1.0, -0.3, 0.0),
+        (1.0, -0.3, 0.0),
+        (1.0, -0.3, 0.0),
+        (1.0, -0.3, 0.0),)
+
+centres = ((52.0, 98.5,),(81.0, 90.5,),(69.0, 160.0,),
+ (104.0, 153.5,),(81.0, 229.5,),(125.0, 213.5,),)
+
+smallest_length = (0.5,0.5,0.5,0.7,0.7,0.5)
+
+#nb_raff: indicates the number of mesh refinements to be carried out. 
+# E.g.: nb_raff = 1 no refinements
+#       nb_raff = 3 high refinement
+nb_raff = <cossan name="refinement" format="%1d" original="1"/>
+
+# refinements loop
+for i_raff in range(nb_raff) :
+
+   MO[i_raff]=AFFE_MODELE(MAILLAGE=MA[i_raff],
+                          AFFE=_F(TOUT='OUI',
+                                  PHENOMENE='MECANIQUE',
+                                  MODELISATION='3D'))
+   
+   Fiss  = [None]*6
+   
+   for i_fiss in range(6):
+       
+       if cracks_len1[i_fiss] > smallest_length[i_fiss]:
+           Fiss[i_fiss] = DEFI_FISS_XFEM(MODELE=MO[i_raff],
+                       DEFI_FISS=(
+                           _F(FORM_FISS='ELLIPSE',
+                              DEMI_GRAND_AXE=cracks_len1[i_fiss],
+                              DEMI_PETIT_AXE=cracks_len2[i_fiss],
+                              CENTRE=(centres[i_fiss][0],centres[i_fiss][1],cracks_zpos[i_fiss],),
+                              VECT_X=vect_X[i_fiss],
+                              VECT_Y=(0.0, 1.0, 0.0),),
+                           ),);
+
+   Fiss = filter(None,Fiss)
+   l_fiss = tuple(Fiss)
+   
+   # errors evaluation      
+   CHERR[i_raff]=RAFF_XFEM(FISSURE=l_fiss)
+   
+   # mesh concept n+1
+   MA[i_raff+1]=CO('MA_%d' % (i_raff+1))
+    
+    # criterion value of refinement
+   crit = -max(r_raff , h0/(2.**i_raff) )
+   
+   MACR_ADAP_MAIL(ADAPTATION         = 'RAFFINEMENT',
+                  CHAM_GD            = CHERR[i_raff],
+                  CRIT_RAFF_ABS      = crit,
+                  USAGE_CMP          = 'RELATIF', 
+                  MAILLAGE_N         = MA[i_raff],
+                  MAILLAGE_NP1       = MA[i_raff+1],
+                  ELEMENTS_NON_HOMARD= 'IGNORER')
+                  
+   DETRUIRE(CONCEPT=_F(NOM=l_fiss),INFO=1)
+   
+assert(nb_raff == i_raff+1)
+
+   
+MA[nb_raff]=MODI_MAILLAGE(reuse=MA[nb_raff],
+                          MAILLAGE=MA[nb_raff],
+                          ORIE_PEAU_3D=_F(GROUP_MA=('allfaces',),),
+                          );
+
+IMPR_RESU(FORMAT='MED',UNITE=80,RESU=_F(MAILLAGE=MA[nb_raff]))
+
+MOD=AFFE_MODELE(MAILLAGE=MA[nb_raff],
+                AFFE=_F(TOUT='OUI',
+                        PHENOMENE='MECANIQUE',
+                        MODELISATION='3D',),);
+
+Fiss = [None]*6
+
+for i_fiss in range(6):
+       
+   if cracks_len1[i_fiss] > smallest_length[i_fiss]:
+           Fiss[i_fiss] = DEFI_FISS_XFEM(MODELE=MOD,
+                       DEFI_FISS=(
+                           _F(FORM_FISS='ELLIPSE',
+                              DEMI_GRAND_AXE=cracks_len1[i_fiss],
+                              DEMI_PETIT_AXE=cracks_len2[i_fiss],
+                              CENTRE=(centres[i_fiss][0],centres[i_fiss][1],cracks_zpos[i_fiss],),
+                              VECT_X=vect_X[i_fiss],
+                              VECT_Y=(0.0, 1.0, 0.0),),
+                           ),);
+
+Fiss = filter(None,Fiss)
+l_fiss = tuple(Fiss)
+
+MODX=MODI_MODELE_XFEM(MODELE_IN=MOD,
+                      FISSURE=l_fiss)
+
+ACIER=DEFI_MATERIAU(ELAS=_F(E=210000.0,
+						 RHO=7.85E-9,
+                         NU=0.3,),);
+
+MATE=AFFE_MATERIAU(MAILLAGE=MA[nb_raff],
+                   MODELE=MODX,
+                   AFFE=_F(TOUT='OUI',
+                           MATER=ACIER))
+
+
+
+CH1=AFFE_CHAR_MECA(MODELE=MODX,
+		    FORCE_NODALE=(_F(GROUP_NO='z_disp',
+                                 FY=0.01,),),
+                    DDL_IMPO=(_F(GROUP_NO='Embeddin',
+                                 DY=0.0,
+                                 DZ=0.0,),
+                              _F(GROUP_NO='Embeddi2',
+                                 DY=0.0,
+                                 DZ=0.0,),
+                              _F(GROUP_NO='z_disp',
+                                 DZ=0.0, 
+                                 ),
+                              _F(GROUP_NO='xbc',
+                                 DX=0.0,),),);
+
+CHXFEM=AFFE_CHAR_MECA(MODELE=MODX, LIAISON_XFEM='OUI')
+
+
+# CHAMPMA1=ACIER
+MELR=CALC_MATR_ELEM(OPTION='RIGI_MECA',
+                    MODELE=MODX,
+                    CHAM_MATER=MATE,
+                    CHARGE=(CH1,CHXFEM,),);
+
+MELM=CALC_MATR_ELEM(OPTION='MASS_MECA',
+                    MODELE=MODX,
+                    CHAM_MATER=MATE,
+                    CHARGE=(CH1,CHXFEM,),);
+
+
+NUM=NUME_DDL(MATR_RIGI=MELR,
+             METHODE='MULT_FRONT',);
+
+MATR=ASSE_MATRICE(MATR_ELEM=MELR,
+                  NUME_DDL=NUM,);
+
+MATM=ASSE_MATRICE(MATR_ELEM=MELM,
+                  NUME_DDL=NUM,);
+
+
+
+
+
+
+
+L_INS1=DEFI_LIST_REEL(DEBUT=0.0,
+                      INTERVALLE=_F(JUSQU_A=1.0,
+                                    NOMBRE=1,),);
+
+UTOT1=MECA_STATIQUE(MODELE=MODX,
+                   CHAM_MATER=MATE,
+                   EXCIT=(_F(CHARGE=CHXFEM),
+                          _F(CHARGE=CH1),
+                          ),
+                   INFO=1,
+                   ); 
+# CALCUL DES CONTRAINTES ASSOCIEES
+
+CONTR=CREA_CHAMP(TYPE_CHAM='ELGA_SIEF_R',
+                 OPERATION='EXTR',
+                 RESULTAT=UTOT1,
+                 NOM_CHAM='SIEF_ELGA',
+                 NUME_ORDRE=1,);
+
+MELRG=CALC_MATR_ELEM(OPTION='RIGI_GEOM',
+                     MODELE=MODX,
+                     SIEF_ELGA=CONTR,);
+
+MATRG=ASSE_MATRICE(MATR_ELEM=MELRG,
+                   NUME_DDL=NUM,);
+
+MATRC=COMB_MATR_ASSE(COMB_R=(_F(MATR_ASSE=MATR,
+                                COEF_R=1.0,),
+                             _F(MATR_ASSE=MATRG,
+                                COEF_R=1.0,),),);
+
+
+
+
+
+
+#----------------------------------------------
+#                   CALCUL MODAL
+#----------------------------------------------
+
+
+
+MODES=MODE_ITER_SIMULT(MATR_A=MATRC,
+                       MATR_B=MATM,
+                       METHODE='SORENSEN',
+                       VERI_MODE=_F(STOP_ERREUR='NON',),
+                       CALC_FREQ=_F(OPTION='BANDE',
+                                    FREQ=(8e3,5.5e4),),);
+
+
+
+
+#----------------------------------------------
+#                   FRF
+#----------------------------------------------
+
+# DEFINITION OF THE EXCITATION (JUST AN EXAMPLE)
+
+EXCIT=AFFE_CHAR_MECA(MODELE=MODX,
+                     FORCE_NODALE=_F(GROUP_NO='z_disp',
+                                     FX=-0.01,
+                                     FY=-0.01,),);
+
+EXCEL=CALC_VECT_ELEM(OPTION='CHAR_MECA',
+                     CHARGE=EXCIT,);
+
+
+
+EXCASS=ASSE_VECTEUR(VECT_ELEM=EXCEL,
+                    NUME_DDL=NUM,);
+
+#USE OF THE MODES TO REDUCE THE MATRICES AND THE EXCITATION VECTOR (TRANSFORMATION TO THE MODAL SYSTEM)
+
+MACRO_PROJ_BASE(BASE=MODES,
+                MATR_ASSE_GENE=(_F(MATRICE=CO('RIGIPROJ'),
+                                   MATR_ASSE=MATR,),
+                                _F(MATRICE=CO('MASSPROJ'),
+                                   MATR_ASSE=MATM,),),
+                VECT_ASSE_GENE=_F(VECTEUR=CO('EXCPROJ'),
+                                  VECT_ASSE=EXCASS,),);
+
+
+#NUM_GENE = NUME_DDL_GENE(BASE=MODES);
+
+#RIGIPROJ = PROJ_MATR_BASE(BASE=MODES,
+#                                NUME_DDL_GENE=NUM_GENE,
+#                                MATR_ASSE = MATR);
+
+#MASSPROJ = PROJ_MATR_BASE(BASE=MODES,
+#                                NUME_DDL_GENE=NUM_GENE,
+#                                MATR_ASSE = MATM);
+
+#EXCPROJ = PROJ_VECT_BASE(BASE=MODES,
+#                                NUME_DDL_GENE=NUM_GENE,
+#                                VECT_ASSE = EXCASS);
+
+
+
+
+#DEFINITION OF THE FREQUENCIES TO COMPUTE DEBUT->from JUSQU_A->to PAS->interval (stinky french!)
+
+LFREQ=DEFI_LIST_REEL(DEBUT=100.0,
+                     INTERVALLE=_F(JUSQU_A=50000.,
+                                   PAS=50,),);
+
+#FRF COMPUTATION WITH A MODAL DAMPING OF 0.01
+
+RESUGENE=DYNA_LINE_HARM(MATR_MASS=MASSPROJ,
+                        MATR_RIGI=RIGIPROJ,
+			AMOR_MODAL=_F(AMOR_REDUIT=0.01,),
+                        LIST_FREQ=LFREQ,
+                        EXCIT=_F(VECT_ASSE=EXCPROJ,
+                                 COEF_MULT=1.,),);
+#AMOR_REDUIT = damping
+
+#BACK TRANSFORMATION TO THE PHYSICAL SYSTEM
+
+
+RESUPHYS=REST_GENE_PHYS(RESU_GENE=RESUGENE,
+                        NOM_CHAM='ACCE',
+                        GROUP_NO=('out1',),);
+
+
+
+
+ACCX_out=RECU_FONCTION(RESULTAT=RESUPHYS,
+                      NOM_CHAM='ACCE',
+                      NOM_CMP='DX',
+                      GROUP_NO='out1',);
+
+#PRINT OF THE RESULTS IN THE FORM OF A TABLE IN THE .RESU FILE
+
+IMPR_FONCTION(FORMAT='TABLEAU',
+              COURBE=(_F(FONCTION=ACCX_out,),),);
+
+
+
+
+
+
+ACCY_out=RECU_FONCTION(RESULTAT=RESUPHYS,
+                      NOM_CHAM='ACCE',
+                      NOM_CMP='DY',
+                      GROUP_NO='out1',);
+
+#PRINT OF THE RESULTS IN THE FORM OF A TABLE IN THE .RESU FILE
+
+IMPR_FONCTION(FORMAT='TABLEAU',
+              COURBE=(_F(FONCTION=ACCY_out,),),);
+
+
+
+
+
+
+
+
+#----------------------------------------------
+#               VISUALISATION DES MODES
+#----------------------------------------------
+
+MA_XFEM=POST_MAIL_XFEM(MODELE=MODX,
+                       INFO=2,);
+
+MOD_VISU=AFFE_MODELE(MAILLAGE=MA_XFEM,
+                     AFFE=_F(TOUT='OUI',
+                             PHENOMENE='MECANIQUE',
+                             MODELISATION='3D',),);
+
+RES_XFEM=POST_CHAM_XFEM(MODELE_VISU=MOD_VISU,
+                        RESULTAT=MODES,
+                        INFO=1,);
+
+IMPR_RESU(FORMAT='MED',
+          UNITE=80,
+          RESU=_F(RESULTAT=RES_XFEM,
+                  NOM_CMP=('DX','DY','DZ',),),);
+
+
+IMPR_RESU(RESU=_F(RESULTAT=MODES,
+                  NOM_CMP=('DX','DY','DZ',),GROUP_NO='out',),);
+
+
+
+FIN();

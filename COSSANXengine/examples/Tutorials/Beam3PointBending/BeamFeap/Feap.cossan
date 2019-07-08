@@ -1,0 +1,35 @@
+FEAP * * Beam element - linear
+0 0 0 3 6 2 ! 3D - maximum number of unknowns per node - maximum number of nodes per element
+
+MATE 1
+FRAMe
+REFE VECT 0 1 0
+ELAStic ISOTropic <cossan name="youngs" index="1" format="%8.2e" original="2.10E+05" />
+CROSs section .003 <cossan name="inertia" index="1" format="%8.2e" original="2.00E+01" /> 12 11
+
+COORdinates
+include  FeapNode.txt
+
+ELEMents
+include  FeapElement.txt
+
+BOUNdary restraints
+	1 0 1 1
+	100 0 0 0
+
+FORCe
+	51 0 <cossan name="force" index="1" format="%8.2e" original="1.00E+01" /> 0 
+END
+
+BATCh
+	NOPRint
+	TANGent,,-1
+	OUTPut TANG
+	TANG
+	FORM
+	SOLV
+	DISPlacement,51,1
+        DISPlacement,51,2
+END
+
+STOP 

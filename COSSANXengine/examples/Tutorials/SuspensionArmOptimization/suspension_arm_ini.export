@@ -1,0 +1,24 @@
+P follow_output yes
+P actions make_etude
+P version STA10.6
+P nomjob new_case
+P debug nodebug
+P mode interactif
+P ncpus 1
+P memjob 1024000.0
+A memjeveux 125
+P tpsjob 10
+A tpmax 1000
+P serveur localhost
+P aster_root /opt/SALOME-MECA-2012.1-LGPL/aster
+P protocol_exec asrun.plugins.server.SSHServer
+P protocol_copyto asrun.plugins.server.SCPServer
+P protocol_copyfrom asrun.plugins.server.SCPServer
+P proxy_dir /tmp
+P consbtc oui
+P soumbtc oui
+P origine salomemeca_asrun 1.10.0
+F comm ./command_file.comm D 1
+F mmed ./Part_w_hole_ref.med D 20
+F mess ./suspension_arm.mess R 6
+F resu ./suspension_arm.resu R 8

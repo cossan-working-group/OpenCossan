@@ -1,0 +1,42 @@
+FEAP * * Cantilever Beam
+2 1 1 2 3 2
+
+PARA
+hb = 2.000000e-01
+hb = hb*0.5
+
+
+MATErial 1
+	FRAMe
+		SHEAr OFF
+		ELAStic isotropic 2.e11 0.2
+		SECTion LAYEr -hb 0.1 3
+		SECTion LAYEr +hb 0.1 3
+
+COORdinates
+	1 0 0.0 0.0
+    2 0 2.5 0.0
+	3 0 5.0 0.0
+
+ELEMents
+	1 0 1 1 2
+    2 0 1 2 3
+
+BOUNdary restraints
+	1 1 1 1 1
+
+FORCe
+	3 0 0. +10000.
+
+END
+
+BATCh
+	NOPRint
+	TANG
+	FORM
+	SOLV
+	DISPlacement,all
+    REACtions,all
+END
+STOP 
+ 

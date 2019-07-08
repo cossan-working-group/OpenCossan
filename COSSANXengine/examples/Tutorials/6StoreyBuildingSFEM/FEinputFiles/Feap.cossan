@@ -1,0 +1,476 @@
+FEAP * * Stair
+0 0 0 3 6 8
+
+
+MATE 1   ! soil
+  SOLID
+  ELAStic ISOTropic <cossan name="Soil" format="%10.4e" original="0.5000e+10" /> 0.2
+  DENS mass 1800
+  BODY force 0 0 -18000
+  !
+
+MATErial 2   ! concrete plate
+  SHELL
+    ELAStic ISOTropic <cossan name="Ceil" format="%10.4e" original="2.5000e+10" /> 0.2
+    THICK 0.8 0.3
+    DENS mass 2500
+    BODY force 0 0 -25000
+  !
+
+PARAmeter
+ ah = -8.0
+ h = 4.4
+ a = 31.5
+ b = 31.5
+ !
+TRANform
+  1 0 0
+  0 1 0
+  0 0 1
+  -12.0 -19.5 ah
+BLOCK
+  CARTesian,21,21,2,,,1
+  	1 	0 	0 	0
+  	2       a	0	0
+	3	a	b	0
+	4	0	b	0
+  	5 	0 	0 	h
+  	6       a	0	h
+	7	a	b	h
+	8	0	b	h
+	!
+
+PARAmeter
+ ah = -8.0
+ h = 4.4
+ a = 25.5
+ b = 25.5
+ !
+TRANform
+  1 0 0
+  0 1 0
+  0 0 1
+  -9.0 -16.5 ah+h
+BLOCK
+  CARTesian,17,17,,,2
+  	1 	0 	0 	0
+  	2       a	0	0
+	3	a	b	0
+	4	0	b	0
+	!
+
+PARAmeter
+ ah = -3.6
+ h = 3.6
+ a = 22.5
+ b = 22.5
+ !
+TRANform
+  1 0 0
+  0 1 0
+  0 0 1
+  -7.5 -15.0 ah
+BLOCK
+  CARTesian,15,2,,,2
+  	1 	0 	0 	0
+  	2       a	0	0
+	3	a	0	h
+	4	0	0	h
+	!
+TRANform
+  1 0 0
+  0 1 0
+  0 0 1
+  -7.5 7.5 ah
+BLOCK
+  CARTesian,15,2,,,2
+  	1 	0 	0 	0
+  	2       a	0	0
+	3	a	0	h
+	4	0	0	h
+	!
+TRANform
+  1 0 0
+  0 1 0
+  0 0 1
+  -7.5 -15.0 ah
+BLOCK
+  CARTesian,15,2,,,2
+  	1 	0 	0 	0
+  	2       0	b	0
+	3	0	b	h
+	4	0	0	h
+	!
+TRANform
+  1 0 0
+  0 1 0
+  0 0 1
+  15.0 -15.0 ah
+BLOCK
+  CARTesian,15,2,,,2
+  	1 	0 	0 	0
+  	2       0	b	0
+	3	0	b	h
+	4	0	0	h
+	!
+
+
+MATErial 11  ! wall 
+        SHELL
+                ELAStic isotropic  <cossan name="Walls" format="%10.4e" original="3.5000e+10" /> 0.25
+                THICk 0.8 0.2
+                DENSity mass 2500
+                BODY forces 0 0 -25000
+                !
+MATErial 12  ! stairs + platform
+        SHELL
+                ELAStic isotropic <cossan name="Stairs" format="%10.4e" original="3.5000e+10" /> 0.25
+                THICk 0.8 0.16
+                DENSity mass 2500
+                BODY forces 0 0 -25000
+
+PARA
+  d = 0.4
+  !
+Material 13  ! columns
+	FRAME
+		ELASTIC ISOtropic <cossan name="Columns" format="%10.4e" original="3.5000e+10" /> 0.25
+		DENSity mass 2500
+                REFErence vector 1 0 0
+                CROSS section d^2 d^4/12 d^4/12 0
+		BODY forces 0 0 -d^2*25000
+                !
+MATErial 14   ! floor
+        SHELL
+                ELAStic isotropic <cossan name="Floors" format="%10.4e" original="3.5000e+10" /> 0.25
+                THICk 0.8 0.2
+                DENSity mass 2500
+                BODY forces 0 0 -25000
+                !
+
+PARAmeter
+  nf = 6
+  h  = 3.6
+  hb = -h
+  !
+
+LOOP nf
+  TRANsform
+    1,0,0
+    0,1,0
+    0,0,1
+    0,0,hb
+  INCLude stair_b1
+
+  TRANsform
+    1,0,0
+    0,1,0
+    0,0,1
+    3.0,0,hb
+  INCLude stair_b1
+
+  TRANsform
+    1,0,0
+    0,1,0
+    0,0,1
+    0,0,hb
+  INCLude stair_b2
+
+  TRANsform
+    1,0,0
+    0,1,0
+    0,0,1
+    0,0,hb
+  INCLude stair_b3
+
+  TRANsform
+    1,0,0
+    0,1,0
+    0,0,1
+    0,0,hb
+  INCLude stair_b4
+
+  TRANsform
+    1,0,0
+    0,1,0
+    0,0,1
+    0,0,hb
+  INCLude stair_b5
+
+  TRANsform
+    1,0,0
+    0,1,0
+    0,0,1
+    7.5,0,hb
+  INCLude stair_b7
+
+  TRANsform
+    1,0,0
+    0,1,0
+    0,0,1
+    3.0,-4.5,hb
+  INCLude floor1
+
+  TRANsform
+    1,0,0
+    0,1,0
+    0,0,1
+    0,-7.5,hb
+  INCLude floor2
+
+  TRANsform
+    1,0,0
+    0,1,0
+    0,0,1
+    0,-7.5,hb
+  INCLude col1
+
+  TRANsform
+    1,0,0
+    0,1,0
+    0,0,1
+    7.5,-7.5,hb
+  INCLude col1
+
+  TRANsform
+    1,0,0
+    0,1,0
+    0,0,1
+    -7.5,7.5,hb
+  INCLude col1
+
+  TRANsform
+    1,0,0
+    0,1,0
+    0,0,1
+    -7.5,0,hb
+  INCLude col1
+
+  TRANsform
+    1,0,0
+    0,1,0
+    0,0,1
+    -7.5,-7.5,hb
+  INCLude col1
+
+  TRANsform
+    1,0,0
+    0,1,0
+    0,0,1
+    0,7.5,hb
+  INCLude col1
+
+  TRANsform
+    1,0,0
+    0,1,0
+    0,0,1
+    7.5,7.5,hb
+  INCLude col1
+
+  TRANsform
+    1,0,0
+    0,1,0
+    0,0,1
+    7.5,0,hb
+  INCLude col1
+
+  TRANsform
+    1,0,0
+    0,1,0
+    0,0,1
+    7.5,-7.5,hb
+  INCLude col1
+
+  TRANsform
+    1,0,0
+    0,1,0
+    0,0,1
+    15.0,7.5,hb
+  INCLude col1
+
+  TRANsform
+    1,0,0
+    0,1,0
+    0,0,1
+    15.0,0,hb
+  INCLude col1
+
+  TRANsform
+    1,0,0
+    0,1,0
+    0,0,1
+    15.0,-7.5,hb
+  INCLude col1
+
+  TRANsform
+    1,0,0
+    0,1,0
+    0,0,1
+    -7.5,-7.5,hb
+  INCLude col1
+
+  TRANsform
+    1,0,0
+    0,1,0
+    0,0,1
+    -7.5,-15.0,hb
+  INCLude col1
+
+  TRANsform
+    1,0,0
+    0,1,0
+    0,0,1
+    0.0,-15.0,hb
+  INCLude col1
+
+  TRANsform
+    1,0,0
+    0,1,0
+    0,0,1
+    7.5,-15.0,hb
+  INCLude col1
+
+  TRANsform
+    1,0,0
+    0,1,0
+    0,0,1
+    15.0,-15.0,hb
+  INCLude col1
+
+  TRANsform
+    1,0,0
+    0,1,0
+    0,0,1
+    -9.0,-16.5,hb
+  INCLude floor3
+
+  TRANsform
+    1,0,0
+    0,1,0
+    0,0,1
+    7.5,-16.5,hb
+  INCLude floor3
+
+  TRANsform
+    1,0,0
+    0,1,0
+    0,0,1
+    0,-16.5,hb
+  INCLude floor4
+
+  TRANsform
+    1,0,0
+    0,1,0
+    0,0,1
+    0,0,hb
+  INCLude floor4
+
+  PARAmeter
+    hb = hb+h
+    !
+NEXT
+
+LOOP 1
+  TRANsform
+    1,0,0
+    0,1,0
+    0,0,1
+    0,0,hb
+  INCLude stair_b1
+
+  TRANsform
+    1,0,0
+    0,1,0
+    0,0,1
+    3.0,0,hb
+  INCLude stair_b1
+
+  TRANsform
+    1,0,0
+    0,1,0
+    0,0,1
+    0,0,hb
+  INCLude stair_b2
+
+  TRANsform
+    1,0,0
+    0,1,0
+    0,0,1
+    7.5,0,hb
+  INCLude stair_b7
+
+  PARAmeter
+    hb = hb+h
+    !
+  TRANsform
+    1,0,0
+    0,1,0
+    0,0,1
+    0,0,hb
+  INCLude stair_b6
+
+  TRANsform
+    1,0,0
+    0,1,0
+    0,0,1
+    3,0,hb
+  INCLude stair_b8
+NEXT
+
+EBOU
+  3 -8.0 1 1 1 1 1 1
+  !
+END
+TIE
+
+BATCh
+  TANG,,-1
+  outp tang
+  mass
+  outp mass
+  TANG,,1
+  subspace,,16
+  eigv,all,1
+  eigv,all,2
+  eigv,all,3
+  eigv,all,15
+  eigv,all,16
+  plot post
+	PLOT PERS 1
+        PLOT HIDE 1
+	plot edef,0.1
+        plot eigv,1
+	plot axis
+  plot post
+  plot post
+        PLOT HIDE 1
+	plot edef,0.1
+        plot eigv,2
+	plot axis
+  plot post
+  plot post
+        PLOT HIDE 1
+	plot edef,0.1
+        plot eigv,3
+	plot axis
+  plot post
+  plot post
+        PLOT HIDE 1
+	plot edef,0.03
+        plot eigv,15
+	plot axis
+  plot post
+  plot post
+        PLOT HIDE 1
+	plot edef,0.03
+        plot eigv,16
+	plot axis
+  plot post
+END
+0
+100 -800 500
+0 0 1
+
+STOP
+
+

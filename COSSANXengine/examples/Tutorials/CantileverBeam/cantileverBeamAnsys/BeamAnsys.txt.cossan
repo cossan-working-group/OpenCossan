@@ -1,0 +1,53 @@
+/prep7
+/title, Design Optimization
+*set,H,<cossan name="H" format="%10.4e" original="20"/>				! Set an initial height of 20 mm
+*set,W,<cossan name="W" format="%10.4e" original="20"/>				! Set an initial width of 20 mm
+
+K,1,0,0					! Keypoint locations
+K,2,1000,0
+L,1,2					! Create line
+HPTCREATE,LINE,1,0,RATI,.75,		! Create hardpoint 75% from left side
+
+ET,1,BEAM3				! Element type
+R,1,W*H,(W*H**3)/12,H,,,,		! Real consts: area,I (note '**', not '^'),height
+MP,EX,1,200000				! Young's modulus
+MP,PRXY,1,0.3				! Poisson's ratio
+
+ESIZE,100				! Mesh size
+LMESH,ALL				! Mesh line
+
+FINISH
+/SOLU
+
+ANTYPE,0				! Static analysis
+
+DK,1,UX,0				! Pin keypoint 1
+DK,1,UY,0
+DK,2,UY,0				! Support keypoint 2
+
+FK,3,FY,-2000				! Force at hardpoint
+
+SOLVE
+FINISH
+
+/POST1
+ETABLE,EVolume,VOLU,			! Volume of single element
+SSUM					! Sum all volumes
+*GET,Volume,SSUM,,ITEM,EVOLUME		! Create parameter 'Volume' for volume of beam
+
+ETABLE,SMAX_I,NMISC,1			! Create parameter 'SMaxI' for max stress at I node
+ESORT,ETAB,SMAX_I,0,1,,
+*GET,SMAXI,SORT,,MAX
+
+ETABLE,SMAX_J,NMISC,3			! Create parameter 'SMaxJ' for max stress at J node
+ESORT,ETAB,SMAX_J,0,1,,
+*GET,SMAXJ,SORT,,MAX
+
+*SET,SMAX,SMAXI>SMAXJ			! Create parameter 'SMax' as max stress
+
+/OUTPUT,OutputMatlab,txt
+*VWRITE,Volume
+(1PE12.5)
+*VWRITE,SMAX
+(1PE12.5)
+/OUTPUT ! Output back to screen

@@ -1,0 +1,24 @@
+/PREP7			! Preprocessor
+K,1,0,0,0,  		! Keypoint, 1, x, y, z
+K,2,500,0,0,		! Keypoint, 2, x, y, z
+L,1,2  			! Line from keypoint 1 to 2
+!*
+ET,1,PIPE16 		! Element Type = pipe 16
+KEYOPT,1,6,1		! This is the changed option to give the extra force and moment output
+!*  
+R,1,25,2,		! Real Constant, Material 1, Outside Diameter, Wall thickness
+!*  
+MP,EX,1,<cossan name="XEmod" format="%5.0f" original="7E+4" />		! Material Properties, Young's Modulus, Material 1, 70000 MPa
+MP,PRXY,1,0.33   	! Material Properties, Major Poisson's Ratio, Material 1, 0.33
+!*  
+LESIZE,ALL,20           ! Element sizes, all of the lines, 20 mm   
+LMESH,1  		! Mesh the lines
+FINISH                  ! Exit preprocessor
+/SOLU		        ! Solution
+ANTYPE,0                ! The type of analysis (static)
+!*
+DK,1, ,0, ,0,ALL 	! Apply a Displacement to Keypoint 1 to all DOF
+FK,2,FY,-100 		! Apply a Force to Keypoint 2 of -100 N in the y direction 
+/STATUS,SOLU					
+SOLVE   		! Solve the problem
+FINISH  

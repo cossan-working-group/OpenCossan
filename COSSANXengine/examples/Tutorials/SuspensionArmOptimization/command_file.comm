@@ -1,0 +1,70 @@
+
+DEBUT();
+
+MA=DEFI_MATERIAU(ELAS=_F(E=210000.0,
+                         NU=0.3,
+                         RHO=7.85E-9,),);
+
+MAIL=LIRE_MAILLAGE(FORMAT='MED',);
+
+MODE=AFFE_MODELE(MAILLAGE=MAIL,
+                 AFFE=_F(TOUT='OUI',
+                         PHENOMENE='MECANIQUE',
+                         MODELISATION='3D',),);
+
+MATE=AFFE_MATERIAU(MAILLAGE=MAIL,
+                   AFFE=_F(TOUT='OUI',
+                           MATER=MA,),);
+
+CHAR=AFFE_CHAR_MECA(MODELE=MODE,
+                    DDL_IMPO=(_F(GROUP_NO='Embeddin',
+                                 DY=0.0,
+                                 DZ=0.0,),
+                              _F(GROUP_NO='Embeddi2',
+                                 DY=0.0,
+                                 DZ=0.0,),
+                              _F(GROUP_NO='xbc',
+                                 DX=0.0,),
+                              _F(GROUP_NO='Symmetr',
+                                 DZ=0.0,),),
+                    FORCE_FACE=_F(GROUP_MA='LoadFa',
+                                  FX=10,
+                                  FY=-10,),);
+
+RESU=MECA_STATIQUE(MODELE=MODE,
+                   CHAM_MATER=MATE,
+                   EXCIT=_F(CHARGE=CHAR,),);
+
+RESU=CALC_ELEM(reuse =RESU,
+               MODELE=MODE,
+               CHAM_MATER=MATE,
+               RESULTAT=RESU,
+               OPTION=('SIGM_ELNO','SIEQ_ELNO',),
+               EXCIT=_F(CHARGE=CHAR,),);
+
+RESU=CALC_NO(reuse =RESU,
+             RESULTAT=RESU,
+             OPTION=('SIGM_NOEU','SIEQ_NOEU',),);
+
+#IMPR_RESU(FORMAT='MED',
+#          UNITE=80,
+#          RESU=_F(MAILLAGE=MAIL,
+#                  RESULTAT=RESU,
+#                  NOM_CHAM=('SIGM_NOEU','SIEQ_NOEU','DEPL',),),);
+
+IMPR_RESU(RESU=_F(RESULTAT=RESU,
+                  NOM_CHAM='SIEQ_NOEU',
+                  NOM_CMP='VMIS',
+                  TOUT='OUI',
+                  VALE_MAX='OUI',
+                  IMPR_COOR='OUI',),);
+
+po=POST_ELEM(MASS_INER=_F(TOUT='OUI',),
+             MODELE=MODE,
+             CHAM_MATER=MATE,
+             TITRE='test post',);
+
+IMPR_TABLE(TABLE=po,);
+
+FIN();
+#CHECKSUM:3b9cfde98853f8008e4bf8e226d99d74  -:FIN CHECKSUM

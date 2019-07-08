@@ -1,0 +1,40 @@
+FEAP * * Cantilever Beam
+2 1 1 2 3 2
+
+PARA
+hb = <cossan name="Xh" format="%12.6e" original="0.2"/>
+hb = hb*0.5
+
+
+MATErial 1
+	FRAMe
+		SHEAr OFF
+		ELAStic isotropic 2.e11 0.2
+		SECTion LAYEr -hb 0.1 3
+		SECTion LAYEr +hb 0.1 3
+
+COORdinates
+	1 0 0.0 0.0
+    2 0 1.0 0.0
+
+ELEMents
+	1 0 1 1 2
+
+BOUNdary restraints
+	1 1 1 1 1
+
+FORCe
+	2 0 0. <cossan name="XP" format="%12.6e" original="1.e6"/>
+
+END
+
+BATCh
+	NOPRint
+	TANG
+	FORM
+	SOLV
+	DISPlacement,all
+    REACtions,all
+END
+STOP 
+ 

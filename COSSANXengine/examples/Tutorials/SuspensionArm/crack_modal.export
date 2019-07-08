@@ -1,0 +1,28 @@
+P actions make_etude
+P aster_root /usr/software/SALOME-MECA-2012.1-LGPL/aster
+P consbtc oui
+P debug nodebug
+P display pbeaurep-HP-Z800-Workstation:0
+P follow_output yes
+P mclient pbeaurep-HP-Z800-Workstation
+P memjob 131072.0
+P mode interactif
+P ncpus 1
+P nomjob modal-analysis
+P origine salomemeca_asrun 1.10.0
+P protocol_copyfrom asrun.plugins.server.SCPServer
+P protocol_copyto asrun.plugins.server.SCPServer
+P protocol_exec asrun.plugins.server.SSHServer
+P proxy_dir /tmp
+P serveur localhost
+P soumbtc oui
+P tpsjob 2
+P uclient pbeaurep
+P username pbeaurep
+P version STA11.1
+A memjeveux 32.0
+A tpmax 1200
+F comm ./command_file_new.comm D  1
+F mmed ./Part_w_hole.med D  20
+F mess ./crack_modal.mess R  6
+F resu ./crack_modal.resu R  8

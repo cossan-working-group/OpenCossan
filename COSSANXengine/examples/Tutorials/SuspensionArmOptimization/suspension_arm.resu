@@ -1,0 +1,101 @@
+                                         -- CODE_ASTER -- VERSION D'EXPLOITATION 10.06    --
+
+                                                         VERSION SEQUENTIELLE
+
+                                                       PARALLELISME OPENMP ACTIF
+
+                                                    COPYRIGHT  EDF-R&D 1991 - 2011
+
+                                               EXECUTION DU : LU-30-JUIL-2012 16:16:09
+
+                                                    PLATE-FORME : PBEAUREP-HP-Z800
+
+                                                 NB MAX PROC OpenMP:   1             
+
+                                                      SYSTEME : LINUX           
+
+                                                        CPU : X86_64          
+
+   
+   !------------------------------------------------------------------------------------------------------!
+   ! <A> <CALCULEL_26>                                                                                    !
+   !                                                                                                      !
+   ! Les commandes CALC_ELEM et CALC_NO ne doivent pas etre utilisées en "reuse" lorsque                  !
+   ! l'on utilise l'un des mots clés suivants :                                                           !
+   !   * MODELE                                                                                           !
+   !   * CHAM_MATER                                                                                       !
+   !   * CARA_ELEM                                                                                        !
+   !   * EXCIT                                                                                            !
+   !   * GROUP_MA / MAILLE                                                                                !
+   !                                                                                                      !
+   ! Risques & conseils :                                                                                 !
+   !   Si on utilise de tels mots clés, la structure de données enrichie manque de cohérence.             !
+   !   Par exemple, le champ de déplacement DEPL a pu etre calculé avec un champ de matériau,             !
+   !   alors que le champ d'énergie cinétique ECIN_ELEM_DEPL est calculé avec un autre champ de matériau. !
+   !                                                                                                      !
+   !                                                                                                      !
+   ! Ceci est une alarme. Si vous ne comprenez pas le sens de cette                                       !
+   ! alarme, vous pouvez obtenir des résultats inattendus !                                               !
+   !------------------------------------------------------------------------------------------------------!
+   
+
+ --------------------------------------------------------------------------------
+ ASTER 10.06.00 CONCEPT RESU CALCULE LE 30/07/2012 A 16:16:11 DE TYPE EVOL_ELAS  
+
+
+ ======>
+
+ ------>
+ CHAMP AUX NOEUDS DE NOM SYMBOLIQUE  SIEQ_NOEU                                   
+ NUMERO D'ORDRE: 1 INST:  0.00000E+00                                            
+ 
+ LA VALEUR MAXIMALE DE VMIS     EST  5.72226E+02 EN    1 NOEUD(S) : N275    
+#
+#--------------------------------------------------------------------------------
+#
+#test post                                                                       
+ LIEU     ENTITE   MASSE        CDG_X        CDG_Y        CDG_Z        IX_G         IY_G         IZ_G         IXY_G        IXZ_G        IYZ_G        IX_PRIN_G    IY_PRIN_G    IZ_PRIN_G    ALPHA        BETA         GAMMA       
+ MAIL     TOUT      1.29920E-03  1.36293E+02  2.14741E+02  4.18680E+00  1.23487E+01  8.66755E+00  2.09767E+01  7.15247E+00 -3.30657E-02  1.20257E-01  3.12231E+00  1.78904E+01  2.09802E+01  5.22171E+01 -2.39990E-01 -1.78148E+02
+
+
+   !-----------------------------------------------------------------------!
+   !   Liste des alarmes émises lors de l'exécution du calcul.             !
+   !                                                                       !
+   !   Les alarmes que vous avez choisies d'ignorer sont précédées de (*). !
+   !   Nombre d'occurrences pour chacune des alarmes :                     !
+   !          CALCULEL_26          émise    1 fois                         !
+   !-----------------------------------------------------------------------!
+
+ <I> <FIN> FERMETURE DE LA BASE "GLOBALE" EFFECTUEE.
+ <I> <FIN> ARRET NORMAL DANS "FIN" PAR APPEL A "JEFINI".
+  
+ <I> <FIN> MEMOIRE JEVEUX MINIMALE REQUISE POUR L'EXECUTION :                     147.47 Mo
+ <I> <FIN> MAXIMUM DE MEMOIRE UTILISEE PAR LE PROCESSUS LORS DE L'EXECUTION :     680.07 Mo
+
+ ********************************************************************************
+ * COMMAND                  :       USER :     SYSTEM :   USER+SYS :    ELAPSED *
+ ********************************************************************************
+ * init (jdc)               :       1.37 :       0.12 :       1.49 :       1.50 *
+ *  . compile               :       0.00 :       0.00 :       0.00 :       0.01 *
+ *  . exec_compile          :       0.10 :       0.01 :       0.11 :       0.11 *
+ *  . report                :       0.01 :       0.00 :       0.01 :       0.01 *
+ *  . build                 :       0.00 :       0.00 :       0.00 :       0.00 *
+ * DEBUT                    :       0.03 :       0.01 :       0.04 :       0.03 *
+ * DEFI_MATERIAU            :       0.00 :       0.00 :       0.00 :       0.01 *
+ * LIRE_MAILLAGE            :       0.91 :       0.02 :       0.93 :       0.92 *
+ * AFFE_MODELE              :       0.39 :       0.00 :       0.39 :       0.39 *
+ * AFFE_MATERIAU            :       0.00 :       0.00 :       0.00 :       0.01 *
+ * AFFE_CHAR_MECA           :       0.59 :       0.01 :       0.60 :       0.60 *
+ * MECA_STATIQUE            :       9.85 :       0.31 :      10.16 :      10.21 *
+ * CALC_ELEM                :       2.55 :       0.00 :       2.55 :       2.56 *
+ * CALC_NO                  :       1.04 :       0.00 :       1.04 :       1.05 *
+ * IMPR_RESU                :       0.15 :       0.00 :       0.15 :       0.15 *
+ * POST_ELEM                :       0.62 :       0.00 :       0.62 :       0.63 *
+ * IMPR_TABLE               :       0.01 :       0.01 :       0.02 :       0.01 *
+ * FIN                      :       0.03 :       0.16 :       0.19 :       0.19 *
+ *  . part Superviseur      :       1.42 :       0.14 :       1.56 :       1.55 *
+ *  . part Fortran          :      16.13 :       0.50 :      16.63 :      16.73 *
+ ********************************************************************************
+ * TOTAL_JOB                :      17.56 :       0.64 :      18.20 :      18.28 *
+ ********************************************************************************
+

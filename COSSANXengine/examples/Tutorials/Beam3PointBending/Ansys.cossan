@@ -1,0 +1,47 @@
+/BATCH  
+/PREP7  					
+!run cmd: /usr/site/ansys/12.0SP1/i386/v120/ansys/bin/ansys120 -p aa_t_i -i beam.inp -j beam -o <  beam.inp  > xxx.out
+! Keypoint, 1, x, y, z  
+K, 1,0,0,0,    						 
+K, 2,100,0,0,   
+!creation of a line linking the 2 keypoints
+L,       1,       2 				
+!*  
+! elt type: beam in 2D
+ET,1,BEAM3  						
+!*  
+!*  
+!material definition
+MPTEMP,1,0  
+!Young modulus						
+MPDATA,EX,1,, <cossan name="youngs" index="1" format="%10.4e" original="2.1000e+05" /> 	
+!Poisson ratio			
+MPDATA,PRXY,1,,0.3  				
+!* 
+!set elt size to 2.5
+ESIZE,2.5,0,		
+!mesh the line defined above				
+LMESH,       1  					
+!*  
+R,1, <cossan name="area" index="1" format="%10.4e" original="1.0000e+01" /> , <cossan name="inertia" index="1" format="%10.4e" original="8.0000e+01" /> ,0,0,0,0, 
+!*  
+!load: concentrated force on node 11
+F,11,FY, - <cossan name="force" index="1" format="%10.4e" original="1.0000e+01" />		
+!BC: 1 dof blocked for node 41		
+D,41, , , , , ,UY, , , , ,  	
+!BC: 2 dof blocked for node 1	
+D,1, , , , , ,UX,UY, , , ,   		
+!*  
+FINISH              			   
+/SOLU         		
+! The type of analysis (static) 				
+ANTYPE,0                			
+/STATUS,SOLU
+SOLVE     							
+FINISH  
+/POST1  							
+!*  
+!plot all the displacements on y direction
+PRNSOL,U,Y  						
+FINISH  
+! /EXIT,NOSAV 

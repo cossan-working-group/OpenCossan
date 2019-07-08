@@ -1,0 +1,73 @@
+*heading
+ Input file for the pre-buckling analysis.
+*node 
+ *INCLUDE, INPUT=nodes.txt 
+*ngen,line=c,nset=bottom
+ 1,193,1,,0.0,0.0,0.0,0.0,0.0,1.0
+*ncopy,new set=top,old set=bottom,shift,change number=19300
+ 0.0,0.0,0.2023
+ 0.0,0.0,0.0,0.0,0.0,1.0,0.0
+*nfill
+ bottom,top,100,193
+**input the imperfection from file
+ *IMPERFECTION, SYSTEM=c, INPUT=imperfection.dat
+*Element, type=S4R
+ *INCLUDE, INPUT=elements.txt  
+*Elset, elset=CYLINDER, generate
+     1,  19300,      1
+** Region: (Section-1-CYLINDER:CYLINDER)
+** Section: Section-1-CYLINDER
+*Shell Section, elset=CYLINDER, material=MAT_1
+0.00011597,
+*material,name=mat_1
+*elastic
+ 100440000000.0,0.3
+*nset,nset=ends
+ bottom,top
+*nset,nset=node_out
+ 19493,
+** file with the column set definition
+ *INCLUDE, INPUT=nset_definition.txt
+*nset,nset=fixed_node
+ 193
+*transform,type=c,nset=ends
+ 0.0,0.0,0.0,0.0,0.0,1.0
+*boundary
+ ends,1,2
+ NTop193,3
+**
+*step,nlgeom=yes
+*static
+ 1.0,1.0
+ static preload for internal pressure
+ *INCLUDE, INPUT=load_step1.txt
+*monitor,node=19493, dof=3
+*node file,freq=1,nset=top, GLOBAL=NO
+ cf,u,
+*output,field,freq=1
+*node output
+ cf,u,
+*output,history,freq=1
+*node output,nset=node_out
+ cf,u,
+*end step
+**
+*step,nlgeom=yes,inc=25
+ buckling (riks) analysis
+*static,riks
+ 0.1,1.0,,0.05,,19493,3,-0.1
+*monitor,node=19493,dof=3
+*controls,parameter=field,field=global
+ 1.e-5,
+*cload, op=new
+ top,3,-27.5880829016
+ bottom,3,27.5880829016
+*node file,freq=1,nset=top, GLOBAL=NO
+ u,
+*output,field,freq=1
+*node output
+ u,
+*output,history,freq=1
+*node output,nset=node_out
+ u,
+*end step

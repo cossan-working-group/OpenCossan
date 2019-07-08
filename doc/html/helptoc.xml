@@ -1,0 +1,49 @@
+<?xml version='1.0' encoding="utf-8"?>
+<toc version="1.0">
+<!-- First tocitem specifies top level in Help browser Contents pane -->
+<!-- This can be a roadmap page, as shown below, or a content page -->
+
+    <tocitem target="OpenCossanAbout.html">About the OpenCossan Toolbox
+        <!-- Nest tocitems to create hierarchical entries in  Contents-->
+        <!-- To include icons, use the following syntax for tocitems: -->
+        <!-- <tocitem target="foo.html" image="HelpIcon.NAME"> -->
+        <!-- Title-of-Section </tocitem> -->
+        <!-- where NAME is one of the following (use capital letters): -->
+        <!-- FUNCTION, USER_GUIDE, EXAMPLES, BLOCK, GETTING_STARTED, -->
+        <!-- DEMOS, RELEASE_NOTES --> 
+        <!-- Icon images used for these entries are also stored in -->
+        <!-- matlabroot/toolbox/matlab/icons -->
+        <!-- A Getting Started Guide usually comes first -->
+        
+        <tocitem target="https://cossan.co.uk/wiki/OpenCossan_Getting_Started" image="HelpIcon.GETTING_STARTED">
+            Getting Started with the OpenCossan
+        <tocitem target="https://cossan.co.uk/wiki/index.php/System_requirements">System Requirements
+            </tocitem>
+        </tocitem>
+        <!-- User Guide comes next -->
+        <tocitem target="https://cossan.co.uk/wiki/index.php/Category:User_Manual" 
+            image="HelpIcon.USER_GUIDE">User Guide
+        </tocitem>
+         <!-- User Guide comes next -->
+        <tocitem target="https://cossan.co.uk/wiki/index.php/Category:Reference_Manual" 
+            image="HelpIcon.USER_GUIDE">Reference Guide
+        </tocitem>
+         <!-- User Guide comes next -->
+        <tocitem target="https://cossan.co.uk/wiki/index.php/Category:Theory_Manual" 
+            image="HelpIcon.USER_GUIDE">Theory Guide
+        </tocitem>
+        <!-- Optional List of Examples, with hyperlinks to examples in other files -->
+        <tocitem target="https://cossan.co.uk/wiki/index.php/Category:Show_Cases" 
+                 image="HelpIcon.HelpIcon.EXAMPLES">Examples
+        </tocitem>
+        <tocitem target="https://cossan.co.uk/wiki/index.php/Category:Tutorials" 
+                 image="HelpIcon.HelpIcon.DEMOS">Tutorials
+        </tocitem>
+        <!-- Optional link or links to your or other Web sites -->
+        <tocitem target="https://cossan.co.uk/" 
+                 image="$toolbox/matlab/icons/webicon.gif">
+        COSSAN Website 
+        </tocitem>
+    </tocitem>
+</toc>
+

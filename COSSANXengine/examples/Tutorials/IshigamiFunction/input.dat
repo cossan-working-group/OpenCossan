@@ -1,0 +1,12 @@
+; Ishigami function inputs for a single run
+[version]
+version = 0.01
+
+[parameters]          ; Parameters of the Ishigami function
+a =   7.0000e+00              
+b =   5.0000e-02
+
+[inputs]			  ; Random input value
+x1 =   0.0000e+00
+x2 =   0.0000e+00
+x3 =   0.0000e+00    

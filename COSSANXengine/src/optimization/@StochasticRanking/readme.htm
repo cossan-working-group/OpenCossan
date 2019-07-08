@@ -1,0 +1,104 @@
+<html>
+
+<head>
+<title>Stochastic Ranking</title>
+</head>
+
+<body bgcolor="#FFFFFF" text="#000000" link="#9690CC">
+
+<hr align="center" size=4 width="80%">
+
+<font face="Arial" color="#400080">
+<h1 ALIGN=CENTER>Stochastic ranking</h1>
+<h3 ALIGN=CENTER><i>for constrained evolutionary optimization</i></h3>
+</font>
+<hr align="center" size=4 width="80%">
+
+<font face="Arial">
+<p>
+Thomas Philip Runarsson and Xin Yao, Stochastic Ranking for Constrained Evolutionary Optimization,
+<i>IEEE Transactions on Evolutionary Computation</i>, Vol. 4, No. 3, September 2000.
+</p>
+The  <a href="http://www.mathworks.com">MATLAB</a> source code will allow you to re-run all experiments
+presented in the paper. The current release is <b>1.1a</b>.
+</p>
+<hr>
+<blockquote>
+<font color="#400080"><pre>
+Stochastic Ranking with Evolution Strategy for MATLAB
+Copyright &copy by Thomas Philip Runarsson 1999. All rights reserved.
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the <A HREF="http://www.gnu.org/copyleft/gpl.html">GNU General Public License</A> as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.<BR>
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+</pre></font>
+</blockquote>
+<hr>
+
+<!-- begin m-file description -->
+<h3><font color="#400080"><a name="Mfiles">MATLAB file listing</a></font></h3>
+<ul>
+
+<li type=circle> <b>Script files:</b> <br> 
+<dl>
+  <dt> <u>run.m</u>:
+    <dd> run this script file to perform experiments.
+  <dt> <u>mktable.m</u>
+    <dd> when <u>run.m</u> has finished use <u>mktable.m</u> to make a LaTeX table of results.
+</dl>
+
+<li type=circle> <b>Mex files:</b> (Updated for MATLAB 6.0) 
+<BR> The mex files must be compiled from within MATLAB using the commands:<br>
+  <code>
+    >> mex srsort.c<BR>
+    >> mex arithx.c<BR>
+    >> mex g12.c<BR>  
+  </code> 
+  (this package includes pre-compiled MEX binaries in the directory \sres\binaries\)
+<dl>
+  <dt> <u>srsort.c</u>: 
+    <dd> the stochastic ranking procedure.
+  <dt> <u>arithx.c</u>: 
+    <dd> global intermediate recombination for the "mean step sizes".
+  <dt> <u>g12.c</u>: 
+    <dd> test function G12.
+</dl>
+
+<li type=circle> <b>Function:</b> <br> 
+<dl>
+  <dt> <u>sres.m</u>: 
+    <dd> actual ES using stochastic ranking.
+</dl>
+
+<li type=circle> <b>Test function suite:</b> <br> 
+<dl>
+  <dt> <u>g<code>**</code>.m</u>: 
+    <dd> where <code>**</code> denotes the test function number.
+</dl>
+
+<li type=circle> <b>Miscellaneous:</b> <br>
+Joines and Houck experiment was added in the revised version for comparison.
+<dl>
+  <dt> <u>jhes.m</u>: 
+    <dd> the same ES but using Joines and Houck's dynamic penalty method.
+  <dt> <u>runjh.m</u>: 
+    <dd> run this script file to do the Joines and Houck experiment.
+</dl>
+
+</ul>
+<p>
+Use HELP in MATLAB on any of these files or TYPE them for more information.
+</p>
+<hr>
+<address>
+Copyright &copy	Thomas Philip Runarsson. All rights reserved. <BR>
+Last updated April, 2001
+</address>
+</font>
+</body>
+</html>

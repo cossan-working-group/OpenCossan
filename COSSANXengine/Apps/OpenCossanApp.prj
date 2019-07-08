@@ -1,0 +1,87 @@
+<deployment-project plugin="plugin.apptool" plugin-version="1.0">
+  <configuration build-checksum="70023953" file="/home/epatelli/workspace/OpenCossan/branches/stable/COSSANXengine/Apps/OpenCossanApp.prj" location="/home/epatelli/workspace/OpenCossan/branches/stable/COSSANXengine/Apps" name="OpenCossanApp" target="target.mlapps" target-name="Package App">
+    <param.appname>OpenCossanApp</param.appname>
+    <param.authnamewatermark>Edoardo Patelli</param.authnamewatermark>
+    <param.email>info@cossan.co.uk</param.email>
+    <param.company>Cossan Working Group</param.company>
+    <param.icon>${PROJECT_ROOT}/OpenCossanApp_resources/icon_24.png</param.icon>
+    <param.icons>
+      <file>${PROJECT_ROOT}/OpenCossanApp_resources/icon_48.png</file>
+      <file>${PROJECT_ROOT}/OpenCossanApp_resources/icon_24.png</file>
+      <file>${PROJECT_ROOT}/OpenCossanApp_resources/icon_16.png</file>
+    </param.icons>
+    <param.summary>OpenCossan - A general purpose software for uncertainty quantification and management</param.summary>
+    <param.description>&lt;b&gt;OpenCossan&lt;/b&gt; is the core of the COSSAN software. Using this toolbox you can perform Uncertainty Quantification, Simulation-based Reliability Analysis, Sensitivity Analysis, Meta-Modelling, Stochastic Finite Elements Analysis, Robust Design and Reliability-Based Optimization. It is programmed in a Object Oriented style in order to provide &lt;i&gt;flexibility&lt;/i&gt; and &lt;i&gt;extendibility&lt;/i&gt; of the toolbox.  You can modify pre-written solution sequences, explore data, implement new algorithms, and create custom tools, which enable the solution of specialised problems. 
+
+The software offers the most advanced and recent algorithms for the rational quantification and propagation of uncertainties. 
+
+See more at: &lt;a href="www.cossan.co.uk"&gt;Cossan website&lt;/a&gt;</param.description>
+    <param.screenshot>${PROJECT_ROOT}/OpenCossanLogo.WhiteBG.png</param.screenshot>
+    <param.version>1.8.3</param.version>
+    <param.products.name>
+      <item>MATLAB</item>
+      <item>Optimization Toolbox</item>
+      <item>Statistics and Machine Learning Toolbox</item>
+    </param.products.name>
+    <param.products.id>
+      <item>1</item>
+      <item>6</item>
+      <item>19</item>
+    </param.products.id>
+    <param.products.version>
+      <item>9.3</item>
+      <item>8.0</item>
+      <item>11.2</item>
+    </param.products.version>
+    <param.platforms />
+    <param.output>/home/epatelli/workspace/OpenCossan/branches/Archives/stable</param.output>
+    <param.guid>4bb5813a-dfe1-4aec-bf52-54f75f13141e</param.guid>
+    <unset>
+      <param.authnamewatermark />
+      <param.email />
+      <param.platforms />
+    </unset>
+    <fileset.main>
+      <file>${PROJECT_ROOT}/OpenCossanApp.m</file>
+    </fileset.main>
+    <fileset.depfun />
+    <fileset.resources>
+      <file>${PROJECT_ROOT}/OpenCossanApp.fig</file>
+      <file>${PROJECT_ROOT}/OpenCossanLogo.WhiteBG.png</file>
+      <file>${PROJECT_ROOT}/license.html</file>
+      <file>${PROJECT_ROOT}/license_html_42ac92a50ebcb49a.png</file>
+      <file>${PROJECT_ROOT}/logindlg.m</file>
+    </fileset.resources>
+    <fileset.package />
+    <build-deliverables>
+      <file location="/home/epatelli/workspace/OpenCossan/branches/Archives" name="stable" optional="false">/home/epatelli/workspace/OpenCossan/branches/Archives/stable</file>
+    </build-deliverables>
+    <workflow />
+    <matlab>
+      <root>/usr/local/MATLAB/R2017b</root>
+      <toolboxes>
+        <toolbox name="matlabcoder" />
+      </toolboxes>
+      <toolbox>
+        <matlabcoder>
+          <enabled>true</enabled>
+        </matlabcoder>
+      </toolbox>
+    </matlab>
+    <platform>
+      <unix>true</unix>
+      <mac>false</mac>
+      <windows>false</windows>
+      <win2k>false</win2k>
+      <winxp>false</winxp>
+      <vista>false</vista>
+      <linux>true</linux>
+      <solaris>false</solaris>
+      <osver>4.15.8-300.fc27.x86_64</osver>
+      <os32>false</os32>
+      <os64>true</os64>
+      <arch>glnxa64</arch>
+      <matlab>true</matlab>
+    </platform>
+  </configuration>
+</deployment-project>

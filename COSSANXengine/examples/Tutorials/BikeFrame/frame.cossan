@@ -1,0 +1,147 @@
+/batch
+
+/title,3D Bicycle Space Frame
+
+/prep7               ! Enter the pre-processor
+
+! Define Some Parameters
+
+x1 = 500             ! These parameters are not required; i.e. one could 
+x2 = 825             ! directly enter in the coordinates into the keypoint 
+y1 = 325             ! definition below. 
+y2 = 400             ! However, using parameters makes it very easy to
+z1 = 50              ! quickly make changes to your model!
+
+! Define Keypoints
+
+K,1, 0,y1,  0        ! k,key-point number,x-coord,y-coord,z-coord
+K,2, 0,y2,  0
+K,3,x1,y2,  0
+K,4,x1, 0,  0
+K,5,x2, 0, z1t
+K,6,x2, 0,-z1
+
+! Define Lines Linking Keypoints
+
+L,1,2                ! l,keypoint1,keypoint2
+L,2,3
+L,3,4
+L,4,1
+L,4,6
+L,4,5
+L,3,5                ! these last two line are for the rear forks
+L,3,6
+
+! Define Element Type
+
+ET,1,pipe16
+KEYOPT,1,6,1
+
+! Define Real Constants
+
+! (Note: the inside diameter must be positive)
+R,1,25,2.00e+00      ! r,real set number,outside diameter,wall thickness
+R,2,12,1.00e+00      ! second set of real constants - for rear forks
+
+! Define Material Properties
+
+MP,EX,1,<cossan name="E" format="%8.2e" original="7.00e+04" />     ! mp,Young's modulus,material number,value
+MP,PRXY,1,0.33       ! mp,Poisson's ratio,material number,value
+
+! Define the number of elements each line is to be divided into
+LESIZE,ALL,20        ! lesize,line number(all lines),size of element
+
+! Line Meshing
+REAL,1               ! turn on real property set #1
+LMESH,1,6,1          ! mesh those lines which have that property set
+                     ! mesh lines 1 through 6 in steps of 1
+REAL,2               ! activate real property set #2
+LMESH,7,8            ! mesh the rear forks
+
+FINISH               ! Finish pre-processing
+
+/SOLU                ! Enter the solution processor
+
+ANTYPE,0             ! Analysis type,static
+
+! Define Displacement Constraints on Keypoints   (dk command)
+
+DK,1,UX,0,,,UY,UZ    ! dk,keypoint,direction,displacement,,,direction,direction
+DK,5,UY,0,,,UZ
+DK,6,UY,0,,,UZ
+
+! Define Forces on Keypoints  (fk command)
+
+FK,3,FY,-600  !fk,keypoint,direction,force
+FK,4,FY,-200
+
+SOLVE                ! Solve the problem
+
+FINISH               ! Finish the solution processor
+
+SAVE                 ! Save your work to the database
+
+/post1               ! Enter the general post processor
+
+/WIND,ALL,OFF   
+/WIND,1,LTOP
+/WIND,2,RTOP
+/WIND,3,LBOT
+/WIND,4,RBOT
+GPLOT
+
+
+/GCMD,1, PLDISP,2    !Plot the deformed and undeformed edge
+/GCMD,2, PLNSOL,U,SUM,0,1
+
+
+
+! Set up Element Table information
+! Element tables are tables of information regarding the solution data
+! You must tell Ansys what pieces of information you want by using the 
+! etable command:
+!   etable,arbitrary name,item name,data code number
+
+! The arbitrary name is a name that you give the data in the table
+! It serves as a reference name to retrieve the data later
+! Use a name that describes the data and is easily remembered.
+
+! The item name and data code number come off of the tables provided.
+
+! Examples:
+
+! For the VonMises (or equivalent) stresses at angle 0 at both ends of the
+! element (node i and node j);
+
+etable,vonmi0,nmisc,5
+etable,vonmj0,nmisc,45
+
+! For the Axial stresses at angle 0
+
+etable,axii0,ls,1
+etable,axij0,ls,33
+
+! For the Direct axial stress component due to axial load (no bending)
+! Note it is independent of angular location.
+
+etable,diri,smisc,13
+etable,dirj,smisc,15
+
+! ADD OTHERS THAT YOU NEED IN HERE...
+
+! To plot the data, simply type 
+!   plls, name for node i, name for node j
+! for example,
+
+/GCMD,3, PLLS,vonmi0,vonmj0
+/GCMD,4, PLLS,axii0,axij0
+
+/CONT,2,9,0,,0.27
+/CONT,3,9,0,,18
+/CONT,4,9,-18,,18
+
+/FOC,ALL,-0.340000,,,1
+
+/replot
+
+PRNSOL,DOF,

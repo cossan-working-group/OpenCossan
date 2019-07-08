@@ -1,0 +1,44 @@
+FEAP * * 4-Element Patch Test
+9,4,1,2,2,4
+MATErial,1
+SOLId
+PLANe STRAin
+ELAStic ISOTropic 1000.0 0.25
+! Blank termination record
+COORdinates
+1 0 0.0 0.0
+2 0 4.0 0.0
+3 0 10.0 0.0
+4 0 0.0 4.5
+5 0 5.5 5.5
+6 0 10.0 5.0
+7 0 0.0 10.0
+8 0 4.2 10.0
+9 0 10.0 10.0
+! Blank termination record
+ELEMents
+1 1 1 1 2 5 4
+2 1 1 2 3 6 5
+3 1 1 4 5 8 7
+4 1 1 5 6 9 8
+! Blank termination record
+BOUNdary restraints
+1 0 1 1
+4 0 1 0
+7 0 1 0
+! Blank termination record
+FORCes
+3 0 <cossan name="Xforce1" format="%4.2f" original="3"/> 0.0
+6 0 <cossan name="Xforce2" format="%4.2f" original="6"/> 0.0
+9 0 <cossan name="Xforce3" format="%4.2f" original="3"/> 0.0
+! Blank termination record
+END
+Table 2.1: Data for Patch Test
+BATCh
+FORM residual
+TANGent
+SOLVe
+DISPlacement ALL
+STREss ALL
+END
+STOP

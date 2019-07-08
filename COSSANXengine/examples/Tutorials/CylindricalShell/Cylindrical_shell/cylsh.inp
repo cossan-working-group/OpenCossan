@@ -1,0 +1,112 @@
+*heading
+ Input file for the postbuckling analysis.
+*parameter
+#
+#	filenames
+#
+ imperf_file = 'imperfection.dat'
+#
+#  	workaround to allow parametrization of a 
+#  	filename read with *INCLUDE
+#
+ line1 = '*IMPERFECTION, SYSTEM=c, INPUT=' + imperf_file	
+#
+#	geometric/load parameters
+#
+ radius = .1016
+ length = .2023
+ thickness = 0.00011597
+#
+#   define pi
+#
+ pi = 3.141592653589793
+#
+#	elastic material properties
+#
+ young = 1.044e+11
+ poisson=0.3
+#
+#	this is the buckling load of the classic analysis
+#
+ buckl_load =  young*2*pi*thickness**2/sqrt(3*(1-poisson**2))
+#
+#	mesh parameters
+#
+ node_circum = 193
+ node_length = 101
+##
+##	dependent parameters (do not modify)
+##
+ chn = node_circum*node_length-node_circum
+ node_ang = -360.0/float(node_circum)
+ node_tot = node_circum*node_length
+ node_tmp = node_tot-node_circum+1
+ node_int = node_length-1
+ node_circum1 = node_circum+1
+ node_circum2 = node_circum+2
+ node_circum0 = node_circum-1
+ e1 = node_circum*2
+ p = -buckl_load/float(node_circum)
+ pn = buckl_load/float(node_circum)
+#
+#  end of parameter list
+#
+*node,system=c
+ 1,<radius>,0.0,0.0
+ <node_circum>,<radius>,<node_ang>,0.0
+ <node_tmp>,<radius>,0.0,<length>
+ <node_tot>,<radius>,<node_ang>,<length>
+*ngen,line=c,nset=bottom
+ 1,<node_circum>,1,,0.0,0.0,0.0,0.0,0.0,1.0
+*ncopy,new set=top,old set=bottom,shift,change number=<chn>
+ 0.0,0.0,<length>
+ 0.0,0.0,0.0,0.0,0.0,1.0,0.0
+*nfill
+ bottom,top,<node_int>,<node_circum>
+**input the imperfection from file
+ <line1>
+*element,type=s4
+ 1,1,2,<node_circum2>,<node_circum1>
+ <node_circum>,<node_circum>,1,<node_circum1>,<e1>
+*elgen,elset=cylinder
+ 1,<node_circum0>,1,1,<node_int>,<node_circum>,<node_circum>
+ <node_circum>,1,,,<node_int>,<node_circum>,<node_circum>
+*shell section, elset=cylinder, material=mat_1
+ <thickness>,
+*material,name=mat_1
+*elastic
+ <young>,<poisson>
+*nset,nset=ends
+ bottom,top
+*nset,nset=node_out
+ <node_tot>,
+*transform,type=c,nset=ends
+ 0.0,0.0,0.0,0.0,0.0,1.0
+*boundary
+ ends,1,2
+ ends,4,4
+ ends,6,6
+ 1,3
+**
+*step,nlgeom,inc=30
+ postbuckling (riks) analysis
+*static,riks
+ 0.1,1.0,,0.1,,10000,3,-0.1
+*monitor,node=10000,dof=3
+*controls,parameter=field,field=global
+ 1.e-5,
+*cload
+ top,3,<p>
+ bottom,3,<pn>
+*node file,freq=1,nset=top, GLOBAL=NO
+ u
+*output,field,freq=2
+*node output
+ u
+*element output
+ misesmax
+*output,history,freq=2
+*node output,nset=node_out
+ u
+*end step
+

@@ -1,0 +1,221 @@
+'SAMPLE #1 SIMPLE PIPE BLOWDOWN PROBLEM',
+
+'INITIAL CONDITIONS <cossan name="InitialPressure" format="%10.3E" original="7.0" />  7.0 MPa, <cossan name="InitialTemperature" format="%10.3E" original="250" /> C'/
+
+
+'CONTROL PARAMETERS '/
+
+
+'SOLUTION CONTROL'/
+
+0.0,0.5,,1.0E-4,1.0E-4,/
+
+ 
+
+'PRINT CONTROL'/
+
+0.1,0.1,0.1,5,,,.TRUE.,/
+
+ 
+
+'RESTART CONTROL'/
+
+,'sample1.rst',,1/
+
+'PROCESSING OPTION'/
+
+/'PLOT','sample1.ins'/
+
+ 
+
+'END'/
+
+ 
+
+'PIPING NETWORK'/
+
+ 
+
+'PIPE' 4.0 0.000 7.854E-03 0.1000 4.50E-05 0.0 'CIRC' 5 'H2O' /
+
+'ATM'/
+
+ 
+
+ 
+
+'END'/
+
+ 
+
+'COMPONENT CONNECTIONS'/
+
+ 
+
+'L-PIPE'/
+
+'R-PIPE','ATM'/
+
+ 
+
+'END'/
+
+ 
+
+'BOUNDARY CONDITIONS'/
+
+ 
+
+'RESERVOIR B.C.','ATMOS'/
+
+'ATM'/
+
+<cossan name="ReservoirPressure" format="%10.3E" original="1.013E5" />,,,1.0,'HG-BY-SAT','HF-BY-SAT'/
+
+ 
+
+ 
+
+'END'/
+
+ 
+
+ 
+
+'SYSTEM MODELS'/
+
+'DISCHARGE','OUTF'/
+
+'R-PIPE','ATM'/
+
+7.46E-03,,'HENFK-ORIF'/ 95% OPEN AREA
+
+ 
+
+'END'/
+
+ 
+
+'SYSTEM CONTROL'/
+
+'INPUT TABLE','BRAR'/
+
+1,3,/
+
+'TIME','BRAREA'/
+
+0.0,0.0/
+
+3.0E-3,1.0/
+
+9.9E9,1.0/
+
+'TIME VAR.','AREAB'/
+
+'BRAR','BRAREA'/
+
+/
+
+'OUTF','AREABRK',.TRUE./
+
+/
+
+'OUTPUT','P_OUT'/
+
+5,'edwards_press.dat','(2X,F14.7,2X,5(F14.7,2X))',1,,,,'GNUPLOT'/
+
+'PRESS:ATM(1)',1.0E-3/
+
+/
+
+'PRESS:PIPE(99)',1.0E-3/
+
+/
+
+'PRESS:PIPE(5)',1.0E-3/
+
+/
+
+'PRESS:PIPE(1)',1.0E-3/
+
+/
+
+'PRESS:PIPE(5)',1.0E-3/
+
+'PRESS:PIPE(1)',-1.0E-3/
+
+/
+
+'OUTPUT','M_OUT'/
+
+1,'edwards_mdot.dat','(2X,F14.7,2X,F14.7)',1,,,,'GNUPLOT'/
+
+'MFLO:R-PIPE>ATM'/
+
+/
+
+'OUTPUT','V_OUT'/
+
+2,'edwards_void.dat','(2X,F14.7,2X,2(F14.7,2X))',1,,,,'GNUPLOT'/
+
+'VOID:PIPE(5)'/
+
+/
+
+'VOID:PIPE(1)'/
+
+/
+
+'END'/
+
+ 
+
+'HEAT TRANSFER PACKAGE',,,/
+
+ 
+
+'MODEL:(WPIPE)'/
+
+'RADIAL:(1,0.050,10,0.070)','AXIAL:(4.0,5)'/
+
+'BOUNDARY CONDITIONS:(1,1)'/
+
+'INSIDE HYDRAULIC:(PIPE)'/
+
+'TUBE-CIR'/
+
+'OUTSIDE PRESCRIBED:(ROOM)',,,,,'SURFACE OPTION:(1)'/
+
+'SURF-HC,TF:(12.0,25.0)'/
+
+'CARBON STEEL'/
+
+/
+
+'TEMP-0D:(250.0)'/
+
+/ DEFAULT PRINT OPTION
+
+'END'/
+
+ 
+
+'INITIAL CONDITIONS'/
+
+ 
+
+'PIPE','BY-ENDS','HG-BY-SAT','HF-BY-TEMP'/
+
+0.7E+07,,250.0,0.0000E+00,0.0/
+
+0.7E+07,,250.0,0.0000E+00,0.0/
+
+ 
+
+'R-PIPE','ATM'/
+
+0.0/
+
+ 
+
+'END'/ END INITIAL CONDITION

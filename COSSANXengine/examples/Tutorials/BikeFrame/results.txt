@@ -1,0 +1,700 @@
+
+ ANSYS Academic Teaching Introductory              
+
+
+ *-------------------------------------------------------------*
+ |                                                             |
+ |   W E L C O M E   T O   T H E   A N S Y S   P R O G R A M   |
+ |                                                             |
+ *-------------------------------------------------------------*
+
+
+
+
+ ***************************************************************
+ *                  ANSYS 12.0 LEGAL NOTICES                   *
+ ***************************************************************
+ *                                                             *
+ * COPYRIGHT AND TRADEMARK INFORMATION                         *
+ *                                                             *
+ * Copyright 2009 SAS IP, Inc.  All rights reserved.           *
+ * Unauthorized use, distribution or duplication is            *
+ * prohibited.                                                 *
+ *                                                             *
+ * See the ANSYS, Inc. online documentation or the ANSYS, Inc. *
+ * documentation CD for the complete Legal Notice.             *
+ *                                                             *
+ ***************************************************************
+ *                                                             *
+ * DISCLAIMER NOTICE                                           *
+ *                                                             *
+ * THIS ANSYS SOFTWARE PRODUCT AND PROGRAM DOCUMENTATION       *
+ * EMBODY TRADE SECRETS AND CONFIDENTIAL AND PROPRIETARY       *
+ * INFORMATION OF ANSYS, INC., ITS SUBSIDIARIES, OR LICENSORS. *
+ * The software products and documentation are furnished by    *
+ * ANSYS, Inc. or its subsidiaries under a software license    *
+ * agreement that contains provisions concerning               *
+ * non-disclosure, copying, length and nature of use,          *
+ * compliance with exporting laws, warranties, disclaimers,    *
+ * limitations of liability, and remedies, and other           *
+ * provisions.  The software products and documentation may be *
+ * used, disclosed, transferred, or copied only in accordance  *
+ * with the terms and conditions of that software license      *
+ * agreement.                                                  *
+ *                                                             *
+ * ANSYS, Inc. and ANSYS Europe, Ltd. are UL registered        *
+ * ISO 9001:2000 Companies.                                    *
+ *                                                             *
+ ***************************************************************
+ *                                                             *
+ * U.S. GOVERNMENT RIGHTS                                      *
+ *                                                             *
+ * For U.S. Government users, except as specifically granted   *
+ * by the ANSYS, Inc. software license agreement, the use,     *
+ * duplication, or disclosure by the United States Government  *
+ * is subject to restrictions stated in the ANSYS, Inc.        *
+ * software license agreement and FAR 12.212 (for non-DOD      *
+ * licenses).                                                  *
+ *                                                             *
+ ***************************************************************
+
+
+ AFTER YOU HAVE READ, UNDERSTOOD, AND AGREED TO THE PREVIOUS NOTICES,
+ PRESS <CR> OR <ENTER> TO CONTINUE
+
+
+          *****  ANSYS COMMAND LINE ARGUMENTS  *****
+  DESIGNXPLORER REQUESTED
+  Input File Name              = /home/pbeaurepaire/workspace/COSSANXengine/examples/Tutorials/BikeFrame/frame.inp
+  Output File Name             = /home/pbeaurepaire/workspace/COSSANXengine/examples/Tutorials/BikeFrame/frame.out
+
+ 00207526          VERSION=LINUX IA32      RELEASE= 12.0.1   UP20090415
+ CURRENT JOBNAME=file  17:39:29  MAR 15, 2011 CP=      0.240
+
+
+ RUN SETUP PROCEDURE FROM FILE= /usr/site/ansys/12.0SP1/i386/v120/ansys/apdl/start120.ans
+
+ /INPUT FILE= /usr/site/ansys/12.0SP1/i386/v120/ansys/apdl/start120.ans  LINE=       0
+
+ BEGIN:
+
+ TITLE= 
+ 3D Bicycle Space Frame                                                        
+
+1
+
+ ***** ANSYS - ENGINEERING ANALYSIS SYSTEM  RELEASE 12.0.1   *****
+ ANSYS Academic Teaching Introductory              
+ 00207526          VERSION=LINUX IA32    17:39:29  MAR 15, 2011 CP=      0.260
+
+ 3D Bicycle Space Frame                                                        
+
+
+          ***** ANSYS ANALYSIS DEFINITION (PREP7) *****
+
+ PARAMETER X1 =     500.0000000    
+
+ PARAMETER X2 =     825.0000000    
+
+ PARAMETER Y1 =     325.0000000    
+
+ PARAMETER Y2 =     400.0000000    
+
+ PARAMETER Z1 =     50.00000000    
+
+ KEYPOINT      1   X,Y,Z=   0.00000       325.000       0.00000      IN CSYS=  0
+
+ KEYPOINT      2   X,Y,Z=   0.00000       400.000       0.00000      IN CSYS=  0
+
+ KEYPOINT      3   X,Y,Z=   500.000       400.000       0.00000      IN CSYS=  0
+
+ KEYPOINT      4   X,Y,Z=   500.000       0.00000       0.00000      IN CSYS=  0
+
+ *** WARNING ***                         CP =       0.260   TIME= 17:39:29
+ Undefined parameter used for coordinate 3.                              
+  A value of 0.0 will be used.                                           
+
+ KEYPOINT      5   X,Y,Z=   825.000       0.00000       0.00000      IN CSYS=  0
+
+ KEYPOINT      6   X,Y,Z=   825.000       0.00000      -50.0000      IN CSYS=  0
+
+ LINE CONNECTS KEYPOINTS      1     2
+  LINE NO.=     1  KP1=      1  TAN1=    0.0000  -1.0000   0.0000
+                   KP2=      2  TAN2=    0.0000   1.0000   0.0000
+
+ LINE CONNECTS KEYPOINTS      2     3
+  LINE NO.=     2  KP1=      2  TAN1=   -1.0000   0.0000   0.0000
+                   KP2=      3  TAN2=    1.0000   0.0000   0.0000
+
+ LINE CONNECTS KEYPOINTS      3     4
+  LINE NO.=     3  KP1=      3  TAN1=    0.0000   1.0000   0.0000
+                   KP2=      4  TAN2=    0.0000  -1.0000   0.0000
+
+ LINE CONNECTS KEYPOINTS      4     1
+  LINE NO.=     4  KP1=      4  TAN1=    0.8384  -0.5450   0.0000
+                   KP2=      1  TAN2=   -0.8384   0.5450   0.0000
+
+ LINE CONNECTS KEYPOINTS      4     6
+  LINE NO.=     5  KP1=      4  TAN1=   -0.9884   0.0000   0.1521
+                   KP2=      6  TAN2=    0.9884   0.0000  -0.1521
+
+ LINE CONNECTS KEYPOINTS      4     5
+  LINE NO.=     6  KP1=      4  TAN1=   -1.0000   0.0000   0.0000
+                   KP2=      5  TAN2=    1.0000   0.0000   0.0000
+
+ LINE CONNECTS KEYPOINTS      3     5
+  LINE NO.=     7  KP1=      3  TAN1=   -0.6306   0.7761   0.0000
+                   KP2=      5  TAN2=    0.6306  -0.7761   0.0000
+
+ LINE CONNECTS KEYPOINTS      3     6
+  LINE NO.=     8  KP1=      3  TAN1=   -0.6276   0.7725   0.0966
+                   KP2=      6  TAN2=    0.6276  -0.7725  -0.0966
+
+ ELEMENT TYPE      1 IS PIPE16       ELASTIC STRAIGHT PIPE       
+  KEYOPT( 1- 6)=        0      0      0        0      0      0
+  KEYOPT( 7-12)=        0      0      0        0      0      0
+  KEYOPT(13-18)=        0      0      0        0      0      0
+
+ CURRENT NODAL DOF SET IS  UX    UY    UZ    ROTX  ROTY  ROTZ
+  THREE-DIMENSIONAL MODEL
+
+ ELEMENT TYPE      1 IS PIPE16       ELASTIC STRAIGHT PIPE       
+  KEYOPT( 1- 6)=        0      0      0        0      0      1
+  KEYOPT( 7-12)=        0      0      0        0      0      0
+  KEYOPT(13-18)=        0      0      0        0      0      0
+
+ CURRENT NODAL DOF SET IS  UX    UY    UZ    ROTX  ROTY  ROTZ
+  THREE-DIMENSIONAL MODEL
+
+ REAL CONSTANT SET       1  ITEMS   1 TO   6
+    25.000       2.0000       0.0000       0.0000       0.0000       0.0000    
+
+ REAL CONSTANT SET       2  ITEMS   1 TO   6
+    12.000       1.0000       0.0000       0.0000       0.0000       0.0000    
+
+ MATERIAL         1     EX   =   70000.00      
+
+ MATERIAL         1     PRXY =  0.3300000      
+
+ SET DIVISIONS ON ALL SELECTED LINES
+      FOR ELEMENT SIZE =   20.000        SPACING RATIO =     1.0000
+      (KFORCE = 0      PREVIOUS NONZERO VALUES WILL NOT BE ALTERED)
+
+ REAL CONSTANT NUMBER=        1
+
+ GENERATE NODES AND ELEMENTS
+       ON LINES         1  TO      6  IN STEPS OF      1
+
+ NUMBER OF LINES MESHED     =       6
+ MAXIMUM NODE NUMBER        =     113
+ MAXIMUM ELEMENT NUMBER     =     113
+
+ REAL CONSTANT NUMBER=        2
+
+ GENERATE NODES AND ELEMENTS
+       ON LINES         7  TO      8  IN STEPS OF      1
+
+ NUMBER OF LINES MESHED     =       2
+ MAXIMUM NODE NUMBER        =     163
+ MAXIMUM ELEMENT NUMBER     =     165
+
+
+ ***** ROUTINE COMPLETED *****  CP =         0.280
+
+
+
+ *****  ANSYS SOLUTION ROUTINE  *****
+
+
+ PERFORM A STATIC ANALYSIS
+  THIS WILL BE A NEW ANALYSIS
+
+ CONSTRAINT AT KEYPOINT     1
+           LOAD LABELS = UX    UY    UZ  
+      VALUES =      0.0000         0.0000          EXPANSION KEY =  0
+
+ CONSTRAINT AT KEYPOINT     5
+           LOAD LABELS = UY    UZ  
+      VALUES =      0.0000         0.0000          EXPANSION KEY =  0
+
+ CONSTRAINT AT KEYPOINT     6
+           LOAD LABELS = UY    UZ  
+      VALUES =      0.0000         0.0000          EXPANSION KEY =  0
+
+ POINT LOAD ON KEYPOINT     3   LOAD LABEL = FY  
+      VALUES =     -600.00         0.0000    
+
+ POINT LOAD ON KEYPOINT     4   LOAD LABEL = FY  
+      VALUES =     -200.00         0.0000    
+
+ *****  ANSYS SOLVE    COMMAND  *****
+
+ TRANSFER SOLID MODEL BOUNDARY CONDITIONS TO FINITE ELEMENT MODEL
+      CONSTRAINTS    TRANSFERRED FROM KEYPOINTS     =      7
+      FORCES         TRANSFERRED FROM KEYPOINTS     =      2
+1
+
+ ***** ANSYS - ENGINEERING ANALYSIS SYSTEM  RELEASE 12.0.1   *****
+ ANSYS Academic Teaching Introductory              
+ 00207526          VERSION=LINUX IA32    17:39:29  MAR 15, 2011 CP=      0.280
+
+ 3D Bicycle Space Frame                                                        
+
+
+                       S O L U T I O N   O P T I O N S
+
+   PROBLEM DIMENSIONALITY. . . . . . . . . . . . .3-D                  
+   DEGREES OF FREEDOM. . . . . . UX   UY   UZ   ROTX ROTY ROTZ
+   ANALYSIS TYPE . . . . . . . . . . . . . . . . .STATIC (STEADY-STATE)
+   GLOBALLY ASSEMBLED MATRIX . . . . . . . . . . .SYMMETRIC  
+
+ *** NOTE ***                            CP =       0.290   TIME= 17:39:29
+ Present time 0 is less than or equal to the previous time.  Time will   
+ default to 1.                                                           
+
+                      L O A D   S T E P   O P T I O N S
+
+   LOAD STEP NUMBER. . . . . . . . . . . . . . . .     1
+   TIME AT END OF THE LOAD STEP. . . . . . . . . .  1.0000    
+   NUMBER OF SUBSTEPS. . . . . . . . . . . . . . .     1
+   STEP CHANGE BOUNDARY CONDITIONS . . . . . . . .    NO
+   PRINT OUTPUT CONTROLS . . . . . . . . . . . . .NO PRINTOUT
+   DATABASE OUTPUT CONTROLS. . . . . . . . . . . .ALL DATA WRITTEN
+                                                  FOR THE LAST SUBSTEP
+
+
+ SOLUTION MONITORING INFO IS WRITTEN TO FILE= file.mntr                                                                                                                                                                                                                                                           
+
+
+ Range of element maximum matrix coefficients in global coordinates
+ Maximum = 44178017.8 at element 4.                                      
+ Minimum = 3441620.18 at element 165.                                    
+
+   *** ELEMENT MATRIX FORMULATION TIMES
+  TYPE  NUMBER   ENAME      TOTAL CP  AVE CP
+
+     1     165  PIPE16        0.010   0.000061
+ Time at end of element matrix formulation CP = 0.629999987.             
+
+ SPARSE MATRIX DIRECT SOLVER.
+  Number of equations =         971,    Maximum wavefront =     24
+  Memory allocated for solver =                15.259 MB
+  Memory required for in-core =                 0.299 MB
+  Optimal memory required for out-of-core =     0.102 MB
+  Minimum memory required for out-of-core =     0.100 MB
+
+ *** NOTE ***                            CP =       0.670   TIME= 17:39:30
+ The Sparse Matrix solver is currently running in the in-core memory     
+ mode.  This memory mode uses the most amount of memory in order to      
+ avoid using the hard drive as much as possible, which most often        
+ results in the fastest solution time.  This mode is recommended if      
+ enough physical memory is present to accommodate all of the solver      
+ data.                                                                   
+ Sparse solver maximum pivot= 88356035.6 at node 3 ROTZ.                 
+ Sparse solver minimum pivot= 72.5811988 at node 41 UZ.                  
+ Sparse solver minimum pivot in absolute value= 72.5811988 at node 41    
+ UZ.                                                                     
+
+   *** ELEMENT RESULT CALCULATION TIMES
+  TYPE  NUMBER   ENAME      TOTAL CP  AVE CP
+
+     1     165  PIPE16        0.060   0.000364
+
+   *** NODAL LOAD CALCULATION TIMES
+  TYPE  NUMBER   ENAME      TOTAL CP  AVE CP
+
+     1     165  PIPE16        0.000   0.000000
+ *** LOAD STEP     1   SUBSTEP     1  COMPLETED.    CUM ITER =      1
+ *** TIME =   1.00000         TIME INC =   1.00000      NEW TRIANG MATRIX
+
+
+ *** ANSYS BINARY FILE STATISTICS
+  BUFFER SIZE USED= 16384
+        0.312 MB WRITTEN ON ELEMENT MATRIX FILE: file.emat
+        0.188 MB WRITTEN ON ELEMENT SAVED DATA FILE: file.esav
+        0.125 MB WRITTEN ON ASSEMBLED MATRIX FILE: file.full
+        0.875 MB WRITTEN ON RESULTS FILE: file.rst
+
+ FINISH SOLUTION PROCESSING
+
+
+ ***** ROUTINE COMPLETED *****  CP =         0.740
+
+
+
+ ALL CURRENT ANSYS DATA WRITTEN TO FILE NAME= file.db
+  FOR POSSIBLE RESUME FROM THIS POINT
+1
+
+ ***** ANSYS - ENGINEERING ANALYSIS SYSTEM  RELEASE 12.0.1   *****
+ ANSYS Academic Teaching Introductory              
+ 00207526          VERSION=LINUX IA32    17:39:31  MAR 15, 2011 CP=      0.770
+
+ 3D Bicycle Space Frame                                                        
+
+
+          ***** ANSYS RESULTS INTERPRETATION (POST1) *****
+
+ *** NOTE ***                            CP =       0.770   TIME= 17:39:31
+ Reading results into the database (SET command) will update the current 
+ displacement and force boundary conditions in the database with the     
+ values from the results file for that load set.  Note that any          
+ subsequent solutions will use these values unless action is taken to    
+ either SAVE the current values or not overwrite them (/EXIT,NOSAVE).    
+
+ WINDOW  1 DE-ACTIVATED, WINDOW DEFINITION AND SPECIFICATIONS ARE RETAINED
+
+ SCREEN WINDOW FOR WINDOW  1 -1.0000  0.0000    0.0000  1.0000
+
+ SCREEN WINDOW FOR WINDOW  2  0.0000  1.0000    0.0000  1.0000
+
+ SCREEN WINDOW FOR WINDOW  3 -1.0000  0.0000   -1.0000  0.0000
+
+ SCREEN WINDOW FOR WINDOW  4  0.0000  1.0000   -1.0000  0.0000
+
+ *** NOTE *** Display device has not yet been specified with the /SHOW command.  Display commands ignored. 
+
+ Window 1  set to display PLDI,2   ,    ,    ,    ,    
+
+ Window 2  set to display PLNS,U   ,SUM ,0   ,1   ,    
+
+ STORE VONMI0   FROM ITEM=NMIS COMP=   5  FOR ALL SELECTED ELEMENTS
+
+ STORE VONMJ0   FROM ITEM=NMIS COMP=  45  FOR ALL SELECTED ELEMENTS
+
+ STORE AXII0    FROM ITEM=LS   COMP=   1  FOR ALL SELECTED ELEMENTS
+
+ STORE AXIJ0    FROM ITEM=LS   COMP=  33  FOR ALL SELECTED ELEMENTS
+
+ STORE DIRI     FROM ITEM=SMIS COMP=  13  FOR ALL SELECTED ELEMENTS
+
+ STORE DIRJ     FROM ITEM=SMIS COMP=  15  FOR ALL SELECTED ELEMENTS
+
+ Window 3  set to display PLLS,VONM,VONM,    ,    ,    
+
+ Window 4  set to display PLLS,AXII,AXIJ,    ,    ,    
+
+ WINDOW  2 HAS   9 CONTOURS FROM   0.0000     BY  0.30000E-01 TO  0.27000    
+
+ WINDOW  3 HAS   9 CONTOURS FROM   0.0000     BY   2.0000     TO   18.000    
+
+ WINDOW  4 HAS   9 CONTOURS FROM  -18.000     BY   4.0000     TO   18.000    
+
+ TRANSLATE FOCUS POINT FOR WINDOW 1 ALONG SCREEN VECTOR  -0.3  0.0  0.0
+
+ FOCUS POINT FOR WINDOW  1  258.22      200.00     -25.000    
+
+ TRANSLATE FOCUS POINT FOR WINDOW 2 ALONG SCREEN VECTOR  -0.3  0.0  0.0
+
+ FOCUS POINT FOR WINDOW  2  258.22      200.00     -25.000    
+
+ TRANSLATE FOCUS POINT FOR WINDOW 3 ALONG SCREEN VECTOR  -0.3  0.0  0.0
+
+ FOCUS POINT FOR WINDOW  3  258.22      200.00     -25.000    
+
+ TRANSLATE FOCUS POINT FOR WINDOW 4 ALONG SCREEN VECTOR  -0.3  0.0  0.0
+
+ FOCUS POINT FOR WINDOW  4  258.22      200.00     -25.000    
+
+ PRINT DOF  NODAL SOLUTION PER NODE
+1
+
+ ***** ANSYS - ENGINEERING ANALYSIS SYSTEM  RELEASE 12.0.1   *****
+ ANSYS Academic Teaching Introductory              
+ 00207526          VERSION=LINUX IA32    17:39:31  MAR 15, 2011 CP=      0.790
+
+ 3D Bicycle Space Frame                                                        
+
+ 
+  ***** POST1 NODAL DEGREE OF FREEDOM LISTING *****                            
+ 
+  LOAD STEP=     1  SUBSTEP=     1                                             
+   TIME=    1.0000      LOAD CASE=   0                                         
+ 
+  THE FOLLOWING DEGREE OF FREEDOM RESULTS ARE IN THE GLOBAL COORDINATE SYSTEM  
+ 
+    NODE      UX          UY          UZ          ROTX        ROTY        ROTZ  
+       1   0.0000      0.0000      0.0000     0.35531E-02-0.14019E-02 0.21862E-02
+       2 -0.19524    -0.29765E-03 0.26646     0.35527E-02-0.14007E-02 0.21471E-02
+       3 -0.47336E-01-0.74414E-04 0.66619E-01 0.35530E-02-0.14016E-02 0.24561E-02
+       4 -0.97985E-01-0.14883E-03 0.13324     0.35528E-02-0.14013E-02 0.25395E-02
+       5 -0.14845    -0.22324E-03 0.19985     0.35527E-02-0.14010E-02 0.24365E-02
+       6 -0.21290    -0.24700     0.96667     0.35504E-02-0.14028E-02-0.60971E-03
+       7 -0.19594     0.38221E-01 0.29447     0.35526E-02-0.14005E-02 0.17509E-02
+       8 -0.19665     0.69054E-01 0.32248     0.35525E-02-0.14003E-02 0.13786E-02
+       9 -0.19736     0.92678E-01 0.35049     0.35524E-02-0.14001E-02 0.10300E-02
+      10 -0.19806     0.10957     0.37849     0.35523E-02-0.14000E-02 0.70530E-03
+      11 -0.19877     0.12020     0.40649     0.35522E-02-0.13999E-02 0.40441E-03
+      12 -0.19948     0.12506     0.43448     0.35521E-02-0.13998E-02 0.12734E-03
+      13 -0.20018     0.12461     0.46248     0.35520E-02-0.13997E-02-0.12589E-03
+      14 -0.20089     0.11934     0.49047     0.35519E-02-0.13997E-02-0.35530E-03
+      15 -0.20160     0.10971     0.51846     0.35518E-02-0.13996E-02-0.56089E-03
+      16 -0.20230     0.96217E-01 0.54645     0.35517E-02-0.13997E-02-0.74264E-03
+      17 -0.20301     0.79323E-01 0.57445     0.35517E-02-0.13997E-02-0.90057E-03
+      18 -0.20372     0.59509E-01 0.60244     0.35516E-02-0.13997E-02-0.10347E-02
+      19 -0.20442     0.37251E-01 0.63044     0.35515E-02-0.13998E-02-0.11449E-02
+      20 -0.20513     0.13025E-01 0.65843     0.35514E-02-0.13999E-02-0.12314E-02
+      21 -0.20584    -0.12691E-01 0.68643     0.35513E-02-0.14001E-02-0.12940E-02
+      22 -0.20654    -0.39421E-01 0.71444     0.35512E-02-0.14002E-02-0.13328E-02
+      23 -0.20725    -0.66689E-01 0.74244     0.35511E-02-0.14004E-02-0.13478E-02
+      24 -0.20796    -0.94018E-01 0.77045     0.35510E-02-0.14006E-02-0.13389E-02
+      25 -0.20866    -0.12093     0.79847     0.35509E-02-0.14009E-02-0.13062E-02
+      26 -0.20937    -0.14695     0.82648     0.35508E-02-0.14011E-02-0.12497E-02
+      27 -0.21008    -0.17160     0.85451     0.35507E-02-0.14014E-02-0.11694E-02
+      28 -0.21078    -0.19441     0.88254     0.35507E-02-0.14017E-02-0.10652E-02
+      29 -0.21149    -0.21490     0.91058     0.35506E-02-0.14020E-02-0.93719E-03
+      30 -0.21220    -0.23259     0.93862     0.35505E-02-0.14024E-02-0.78536E-03
+      31 -0.12664    -0.24346    -0.45507     0.35663E-02-0.14009E-02 0.83975E-04
+      32 -0.22315    -0.24682     0.89567     0.35501E-02-0.14027E-02-0.44218E-03
+      33 -0.23019    -0.24664     0.82467     0.35499E-02-0.14026E-02-0.28864E-03
+      34 -0.23429    -0.24647     0.75368     0.35498E-02-0.14025E-02-0.14907E-03
+      35 -0.23575    -0.24629     0.68268     0.35498E-02-0.14024E-02-0.23497E-04
+      36 -0.23483    -0.24611     0.61169     0.35500E-02-0.14023E-02 0.88098E-04
+      37 -0.23182    -0.24594     0.54069     0.35502E-02-0.14022E-02 0.18571E-03
+1
+
+ ***** ANSYS - ENGINEERING ANALYSIS SYSTEM  RELEASE 12.0.1   *****
+ ANSYS Academic Teaching Introductory              
+ 00207526          VERSION=LINUX IA32    17:39:31  MAR 15, 2011 CP=      0.790
+
+ 3D Bicycle Space Frame                                                        
+
+ 
+  ***** POST1 NODAL DEGREE OF FREEDOM LISTING *****                            
+ 
+  LOAD STEP=     1  SUBSTEP=     1                                             
+   TIME=    1.0000      LOAD CASE=   0                                         
+ 
+  THE FOLLOWING DEGREE OF FREEDOM RESULTS ARE IN THE GLOBAL COORDINATE SYSTEM  
+ 
+    NODE      UX          UY          UZ          ROTX        ROTY        ROTZ  
+      38 -0.22700    -0.24576     0.46968     0.35506E-02-0.14021E-02 0.26934E-03
+      39 -0.22065    -0.24558     0.39867     0.35511E-02-0.14020E-02 0.33898E-03
+      40 -0.21304    -0.24541     0.32764     0.35518E-02-0.14019E-02 0.39464E-03
+      41 -0.20446    -0.24523     0.25660     0.35525E-02-0.14018E-02 0.43632E-03
+      42 -0.19518    -0.24505     0.18554     0.35534E-02-0.14018E-02 0.46401E-03
+      43 -0.18550    -0.24488     0.11447     0.35543E-02-0.14017E-02 0.47772E-03
+      44 -0.17567    -0.24470     0.43374E-01 0.35554E-02-0.14016E-02 0.47744E-03
+      45 -0.16600    -0.24452    -0.27744E-01 0.35566E-02-0.14015E-02 0.46318E-03
+      46 -0.15674    -0.24435    -0.98888E-01 0.35580E-02-0.14014E-02 0.43494E-03
+      47 -0.14820    -0.24417    -0.17006     0.35594E-02-0.14013E-02 0.39272E-03
+      48 -0.14063    -0.24399    -0.24126     0.35610E-02-0.14012E-02 0.33651E-03
+      49 -0.13433    -0.24382    -0.31249     0.35626E-02-0.14011E-02 0.26631E-03
+      50 -0.12958    -0.24364    -0.38376     0.35644E-02-0.14010E-02 0.18214E-03
+      51 -0.12680    -0.24209    -0.43979     0.35657E-02-0.14012E-02-0.15031E-03
+      52 -0.12454    -0.23698    -0.42452     0.35651E-02-0.14016E-02-0.36361E-03
+      53 -0.12007    -0.22849    -0.40926     0.35645E-02-0.14019E-02-0.55592E-03
+      54 -0.11364    -0.21697    -0.39402     0.35639E-02-0.14021E-02-0.72724E-03
+      55 -0.10547    -0.20278    -0.37878     0.35633E-02-0.14024E-02-0.87757E-03
+      56 -0.95776E-01-0.18625    -0.36356     0.35627E-02-0.14026E-02-0.10069E-02
+      57 -0.84799E-01-0.16774    -0.34835     0.35622E-02-0.14028E-02-0.11152E-02
+      58 -0.72762E-01-0.14760    -0.33314     0.35616E-02-0.14030E-02-0.12026E-02
+      59 -0.59892E-01-0.12618    -0.31795     0.35611E-02-0.14032E-02-0.12690E-02
+      60 -0.46416E-01-0.10383    -0.30276     0.35606E-02-0.14033E-02-0.13143E-02
+      61 -0.32563E-01-0.80893E-01-0.28758     0.35601E-02-0.14035E-02-0.13387E-02
+      62 -0.18560E-01-0.57728E-01-0.27241     0.35596E-02-0.14036E-02-0.13421E-02
+      63 -0.46331E-02-0.34682E-01-0.25724     0.35591E-02-0.14037E-02-0.13245E-02
+      64  0.89892E-02-0.12104E-01-0.24209     0.35586E-02-0.14037E-02-0.12859E-02
+      65  0.22080E-01 0.96565E-02-0.22693     0.35582E-02-0.14038E-02-0.12264E-02
+      66  0.34411E-01 0.30249E-01-0.21178     0.35577E-02-0.14038E-02-0.11458E-02
+      67  0.45756E-01 0.49323E-01-0.19664     0.35573E-02-0.14038E-02-0.10442E-02
+      68  0.55887E-01 0.66530E-01-0.18150     0.35569E-02-0.14038E-02-0.92168E-03
+      69  0.64577E-01 0.81520E-01-0.16637     0.35565E-02-0.14037E-02-0.77814E-03
+      70  0.71598E-01 0.93942E-01-0.15124     0.35561E-02-0.14037E-02-0.61361E-03
+      71  0.76722E-01 0.10345    -0.13611     0.35558E-02-0.14036E-02-0.42809E-03
+      72  0.79724E-01 0.10969    -0.12098     0.35554E-02-0.14035E-02-0.22157E-03
+      73  0.80374E-01 0.11231    -0.10586     0.35551E-02-0.14034E-02 0.59278E-05
+      74  0.78446E-01 0.11096    -0.90736E-01 0.35548E-02-0.14032E-02 0.25442E-03
+1
+
+ ***** ANSYS - ENGINEERING ANALYSIS SYSTEM  RELEASE 12.0.1   *****
+ ANSYS Academic Teaching Introductory              
+ 00207526          VERSION=LINUX IA32    17:39:31  MAR 15, 2011 CP=      0.790
+
+ 3D Bicycle Space Frame                                                        
+
+ 
+  ***** POST1 NODAL DEGREE OF FREEDOM LISTING *****                            
+ 
+  LOAD STEP=     1  SUBSTEP=     1                                             
+   TIME=    1.0000      LOAD CASE=   0                                         
+ 
+  THE FOLLOWING DEGREE OF FREEDOM RESULTS ARE IN THE GLOBAL COORDINATE SYSTEM  
+ 
+    NODE      UX          UY          UZ          ROTX        ROTY        ROTZ  
+      75  0.73713E-01 0.10530    -0.75614E-01 0.35544E-02-0.14031E-02 0.52390E-03
+      76  0.65946E-01 0.94972E-01-0.60493E-01 0.35542E-02-0.14029E-02 0.81438E-03
+      77  0.54919E-01 0.79628E-01-0.45371E-01 0.35539E-02-0.14027E-02 0.11258E-02
+      78  0.40404E-01 0.58918E-01-0.30249E-01 0.35536E-02-0.14024E-02 0.14583E-02
+      79  0.22173E-01 0.32492E-01-0.15125E-01 0.35533E-02-0.14022E-02 0.18117E-02
+      80 -0.56706E-01  0.0000      0.0000     0.35866E-02-0.14016E-02 0.26650E-03
+      81 -0.12253    -0.23117    -0.42829     0.35687E-02-0.14006E-02 0.10210E-03
+      82 -0.11841    -0.21854    -0.40152     0.35709E-02-0.14003E-02 0.11929E-03
+      83 -0.11430    -0.20558    -0.37475     0.35729E-02-0.14001E-02 0.13557E-03
+      84 -0.11019    -0.19231    -0.34798     0.35748E-02-0.13999E-02 0.15092E-03
+      85 -0.10607    -0.17875    -0.32122     0.35766E-02-0.13998E-02 0.16535E-03
+      86 -0.10196    -0.16492    -0.29446     0.35782E-02-0.13997E-02 0.17885E-03
+      87 -0.97849E-01-0.15084    -0.26770     0.35797E-02-0.13997E-02 0.19144E-03
+      88 -0.93736E-01-0.13652    -0.24094     0.35810E-02-0.13997E-02 0.20309E-03
+      89 -0.89624E-01-0.12198    -0.21418     0.35822E-02-0.13997E-02 0.21383E-03
+      90 -0.85511E-01-0.10724    -0.18742     0.35833E-02-0.13998E-02 0.22365E-03
+      91 -0.81398E-01-0.92321E-01-0.16066     0.35842E-02-0.13999E-02 0.23254E-03
+      92 -0.77285E-01-0.77238E-01-0.13390     0.35849E-02-0.14001E-02 0.24051E-03
+      93 -0.73171E-01-0.62009E-01-0.10713     0.35856E-02-0.14003E-02 0.24755E-03
+      94 -0.69056E-01-0.46653E-01-0.80354E-01 0.35860E-02-0.14006E-02 0.25367E-03
+      95 -0.64940E-01-0.31187E-01-0.53576E-01 0.35864E-02-0.14009E-02 0.25887E-03
+      96 -0.60824E-01-0.15630E-01-0.26791E-01 0.35866E-02-0.14012E-02 0.26315E-03
+      97 -0.11434      0.0000      0.0000     0.35653E-02-0.14000E-02 0.10686E-02
+      98 -0.12592    -0.24064    -0.42829     0.35663E-02-0.14008E-02 0.19708E-03
+      99 -0.12520    -0.23572    -0.40151     0.35662E-02-0.14007E-02 0.30329E-03
+     100 -0.12447    -0.22883    -0.37473     0.35662E-02-0.14005E-02 0.40261E-03
+     101 -0.12375    -0.22011    -0.34796     0.35661E-02-0.14004E-02 0.49502E-03
+     102 -0.12302    -0.20969    -0.32119     0.35660E-02-0.14004E-02 0.58053E-03
+     103 -0.12230    -0.19770    -0.29442     0.35660E-02-0.14003E-02 0.65915E-03
+     104 -0.12158    -0.18428    -0.26765     0.35659E-02-0.14002E-02 0.73086E-03
+     105 -0.12085    -0.16954    -0.24088     0.35659E-02-0.14001E-02 0.79568E-03
+     106 -0.12013    -0.15364    -0.21411     0.35658E-02-0.14001E-02 0.85360E-03
+     107 -0.11940    -0.13670    -0.18735     0.35657E-02-0.14000E-02 0.90462E-03
+     108 -0.11868    -0.11884    -0.16058     0.35657E-02-0.14000E-02 0.94874E-03
+     109 -0.11796    -0.10021    -0.13382     0.35656E-02-0.14000E-02 0.98596E-03
+     110 -0.11723    -0.80930E-01-0.10705     0.35655E-02-0.14000E-02 0.10163E-02
+     111 -0.11651    -0.61139E-01-0.80291E-01 0.35655E-02-0.13999E-02 0.10397E-02
+1
+
+ ***** ANSYS - ENGINEERING ANALYSIS SYSTEM  RELEASE 12.0.1   *****
+ ANSYS Academic Teaching Introductory              
+ 00207526          VERSION=LINUX IA32    17:39:31  MAR 15, 2011 CP=      0.800
+
+ 3D Bicycle Space Frame                                                        
+
+ 
+  ***** POST1 NODAL DEGREE OF FREEDOM LISTING *****                            
+ 
+  LOAD STEP=     1  SUBSTEP=     1                                             
+   TIME=    1.0000      LOAD CASE=   0                                         
+ 
+  THE FOLLOWING DEGREE OF FREEDOM RESULTS ARE IN THE GLOBAL COORDINATE SYSTEM  
+ 
+    NODE      UX          UY          UZ          ROTX        ROTY        ROTZ  
+     112 -0.11578    -0.40965E-01-0.53528E-01 0.35654E-02-0.14000E-02 0.10562E-02
+     113 -0.11506    -0.20542E-01-0.26764E-01 0.35654E-02-0.14000E-02 0.10659E-02
+     114 -0.22453    -0.25003     0.92958     0.35506E-02-0.14030E-02-0.49626E-03
+     115 -0.23445    -0.25167     0.89250     0.35509E-02-0.14031E-02-0.38671E-03
+     116 -0.24271    -0.25196     0.85540     0.35512E-02-0.14032E-02-0.28109E-03
+     117 -0.24938    -0.25096     0.81831     0.35515E-02-0.14033E-02-0.17937E-03
+     118 -0.25451    -0.24871     0.78121     0.35518E-02-0.14034E-02-0.81563E-04
+     119 -0.25817    -0.24526     0.74411     0.35522E-02-0.14035E-02 0.12330E-04
+     120 -0.26041    -0.24066     0.70700     0.35526E-02-0.14035E-02 0.10231E-03
+     121 -0.26130    -0.23496     0.66988     0.35530E-02-0.14035E-02 0.18838E-03
+     122 -0.26089    -0.22821     0.63276     0.35535E-02-0.14035E-02 0.27053E-03
+     123 -0.25925    -0.22046     0.59563     0.35540E-02-0.14035E-02 0.34878E-03
+     124 -0.25644    -0.21176     0.55850     0.35545E-02-0.14034E-02 0.42311E-03
+     125 -0.25251    -0.20215     0.52135     0.35550E-02-0.14033E-02 0.49353E-03
+     126 -0.24753    -0.19168     0.48420     0.35556E-02-0.14032E-02 0.56003E-03
+     127 -0.24156    -0.18041     0.44703     0.35561E-02-0.14031E-02 0.62262E-03
+     128 -0.23466    -0.16838     0.40985     0.35568E-02-0.14030E-02 0.68131E-03
+     129 -0.22688    -0.15564     0.37267     0.35574E-02-0.14028E-02 0.73607E-03
+     130 -0.21829    -0.14224     0.33547     0.35581E-02-0.14026E-02 0.78693E-03
+     131 -0.20894    -0.12823     0.29825     0.35588E-02-0.14024E-02 0.83387E-03
+     132 -0.19891    -0.11365     0.26103     0.35595E-02-0.14022E-02 0.87691E-03
+     133 -0.18824    -0.98565E-01 0.22379     0.35602E-02-0.14019E-02 0.91603E-03
+     134 -0.17700    -0.83014E-01 0.18653     0.35610E-02-0.14017E-02 0.95123E-03
+     135 -0.16525    -0.67047E-01 0.14926     0.35618E-02-0.14014E-02 0.98253E-03
+     136 -0.15305    -0.50713E-01 0.11197     0.35626E-02-0.14011E-02 0.10099E-02
+     137 -0.14045    -0.34061E-01 0.74664E-01 0.35635E-02-0.14007E-02 0.10334E-02
+     138 -0.12753    -0.17141E-01 0.37341E-01 0.35644E-02-0.14004E-02 0.10529E-02
+     139 -0.21863    -0.24704     0.92959     0.35552E-02-0.14105E-02-0.49165E-03
+     140 -0.22257    -0.24564     0.89254     0.35598E-02-0.14175E-02-0.38034E-03
+     141 -0.22484    -0.24289     0.85550     0.35641E-02-0.14240E-02-0.27578E-03
+     142 -0.22554    -0.23886     0.81847     0.35682E-02-0.14298E-02-0.17797E-03
+     143 -0.22478    -0.23364     0.78145     0.35719E-02-0.14350E-02-0.86908E-04
+     144 -0.22266    -0.22732     0.74443     0.35754E-02-0.14396E-02-0.25935E-05
+     145 -0.21929    -0.21998     0.70742     0.35786E-02-0.14436E-02 0.74973E-04
+     146 -0.21477    -0.21171     0.67041     0.35815E-02-0.14469E-02 0.14579E-03
+     147 -0.20920    -0.20259     0.63339     0.35842E-02-0.14497E-02 0.20986E-03
+     148 -0.20270    -0.19271     0.59636     0.35865E-02-0.14518E-02 0.26718E-03
+1
+
+ ***** ANSYS - ENGINEERING ANALYSIS SYSTEM  RELEASE 12.0.1   *****
+ ANSYS Academic Teaching Introductory              
+ 00207526          VERSION=LINUX IA32    17:39:31  MAR 15, 2011 CP=      0.800
+
+ 3D Bicycle Space Frame                                                        
+
+ 
+  ***** POST1 NODAL DEGREE OF FREEDOM LISTING *****                            
+ 
+  LOAD STEP=     1  SUBSTEP=     1                                             
+   TIME=    1.0000      LOAD CASE=   0                                         
+ 
+  THE FOLLOWING DEGREE OF FREEDOM RESULTS ARE IN THE GLOBAL COORDINATE SYSTEM  
+ 
+    NODE      UX          UY          UZ          ROTX        ROTY        ROTZ  
+     149 -0.19536    -0.18214     0.55932     0.35886E-02-0.14533E-02 0.31775E-03
+     150 -0.18730    -0.17099     0.52227     0.35904E-02-0.14541E-02 0.36158E-03
+     151 -0.17861    -0.15932     0.48520     0.35920E-02-0.14544E-02 0.39865E-03
+     152 -0.16940    -0.14723     0.44810     0.35932E-02-0.14541E-02 0.42898E-03
+     153 -0.15978    -0.13481     0.41098     0.35942E-02-0.14531E-02 0.45255E-03
+     154 -0.14985    -0.12212     0.37384     0.35949E-02-0.14515E-02 0.46938E-03
+     155 -0.13972    -0.10927     0.33665     0.35953E-02-0.14493E-02 0.47946E-03
+     156 -0.12949    -0.96336E-01 0.29944     0.35955E-02-0.14465E-02 0.48280E-03
+     157 -0.11927    -0.83401E-01 0.26218     0.35953E-02-0.14430E-02 0.47938E-03
+     158 -0.10915    -0.70551E-01 0.22488     0.35949E-02-0.14389E-02 0.46921E-03
+     159 -0.99258E-01-0.57872E-01 0.18754     0.35942E-02-0.14343E-02 0.45230E-03
+     160 -0.89684E-01-0.45447E-01 0.15014     0.35933E-02-0.14290E-02 0.42864E-03
+     161 -0.80537E-01-0.33363E-01 0.11270     0.35920E-02-0.14231E-02 0.39823E-03
+     162 -0.71922E-01-0.21704E-01 0.75192E-01 0.35905E-02-0.14165E-02 0.36107E-03
+     163 -0.63943E-01-0.10555E-01 0.37628E-01 0.35887E-02-0.14094E-02 0.31716E-03
+
+ MAXIMUM ABSOLUTE VALUES
+ NODE        121         116           6         156         151           4
+ VALUE  -0.26130    -0.25196     0.96667     0.35955E-02-0.14544E-02 0.25395E-02
+
+ ***** END OF INPUT ENCOUNTERED *****
+
+
+ NUMBER OF WARNING MESSAGES ENCOUNTERED=          1
+ NUMBER OF ERROR   MESSAGES ENCOUNTERED=          0
+
+
+
+ ***** PROBLEM TERMINATED BY INDICATED ERROR(S) OR BY END OF INPUT DATA *****
+
++--------------------- A N S Y S   S T A T I S T I C S ------------------------+
+
+Release: 12.0.1     UP20090415   Version: LINUX IA32  
+Date Run: 03/15/2011   Time: 17:39
+
+Number of cores:   2 (Shared Memory Parallel)
+
+Job Name: file
+Input File: frame.inp
+Working Directory: /home/pbeaurepaire/workspace/COSSANXengine/examples/Tutorials/BikeFrame
+
+Elapsed time spent pre-processing model (/PREP7)  :      0.0 seconds
+Elapsed time spent solution - preprocessing       :      0.0 seconds
+Elapsed time spent computing solution             :      1.4 seconds
+Elapsed time spent solution - postprocessing      :      0.0 seconds
+Elapsed time spent post-processing model (/POST1) :      0.0 seconds
+
++------------------ E N D   A N S Y S   S T A T I S T I C S -------------------+
+
+
+ *---------------------------------------------------------------------------*
+ |                                                                           |
+ |                            ANSYS RUN COMPLETED                            |
+ |                                                                           |
+ |---------------------------------------------------------------------------|
+ |                                                                           |
+ |            Release 12.0.1         UP20090415         LINUX IA32           |
+ |                                                                           |
+ |---------------------------------------------------------------------------|
+ |                                                                           |
+ |   Maximum Scratch Memory Used       =     5170568 Words       19.724 MB   |
+ |                                                                           |
+ |---------------------------------------------------------------------------|
+ |                                                                           |
+ |        CP Time      (sec) =          0.810       Time  =  17:39:31        |
+ |        Elapsed Time (sec) =          3.000       Date  =  03/15/2011      |
+ |                                                                           |
+ *---------------------------------------------------------------------------*
