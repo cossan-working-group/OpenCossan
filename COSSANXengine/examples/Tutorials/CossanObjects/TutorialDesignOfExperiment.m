@@ -237,13 +237,13 @@ Xin3 = Input('Sdescription','Input Object of our model');
 RV1   = RandomVariable('Sdistribution','normal', 'mean',5, 'std',1); %#ok<SNASGU>
 RV2   = RandomVariable('Sdistribution','normal', 'mean',15,'std',2); 
 Xrvs1 = RandomVariableSet('Cmembers',{'RV1', 'RV2'});
-Xin3   = add(Xin3,Xrvs1);
+Xin3 = Xin3.add('Xmember',Xrvs1,'Sname','Xrvs1');
 
 % Define the DesignVariables
 DV1 = DesignVariable('value',2,'minvalue',1,'maxvalue',6);
 DV2 = DesignVariable('value',3,'Vsupport',1:2:9);
-Xin3 = add(Xin3,DV1);
-Xin3 = add(Xin3,DV2);
+Xin3 = Xin3.add('Xmember',DV1,'Sname','DV1');
+Xin3 = Xin3.add('Xmember',DV2,'Sname','DV2');
 
 %% Define the Model
 

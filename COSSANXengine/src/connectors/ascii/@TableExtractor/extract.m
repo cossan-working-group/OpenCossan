@@ -91,7 +91,13 @@ for n=1:length(Xobj.Coutputnames)
         Tout.(Xobj.Coutputnames{n})=Dataseries('Vdata',table2array(TableData)',...
             'Mcoord',table2array(TableCoord)');
     else
-        Tout.(Xobj.Coutputnames{n})=Dataseries('Vdata',table2array(TableData)');
+        if isvector(table2array(TableData))
+            Tout.(Xobj.Coutputnames{n})=Dataseries('Vdata',table2array(TableData)');
+        else
+             LsuccessfullExtract = false;
+             Tout.(Xobj.Coutputnames{n})=NaN;
+            
+        end
     end
 end
 

@@ -97,6 +97,7 @@ plot(Tout.OutCol5.Mcoord,[Tout.OutCol5.Vdata; Tout.OutCol3.Vdata])
 close(f1)
 
 %% Extract 1 variable spanning multiple columns 
+
 % This should fail! Data can only be stored in a vector form. Coordinates
 % can also be multidimensionals. 
 Xte=TableExtractor('Coutputnames',{'MultiColumns'}, ...
@@ -108,9 +109,9 @@ Xte=TableExtractor('Coutputnames',{'MultiColumns'}, ...
 [Tout, LsuccessfullExtract]=Xte.extract;
 
 disp(LsuccessfullExtract)
-Tout.OutColMultiColumns
+Tout.MultiColumns
 
-assert(LsuccessfullExtract,'OpenCOSSAN:TutorialTableExtractor:WrongFlag',...
+assert(~LsuccessfullExtract,'OpenCOSSAN:TutorialTableExtractor:WrongFlag',...
     'LsuccessfullExtract should be false')
 
 %% Extract 1 variable with coordinate
@@ -139,14 +140,14 @@ Xte=TableExtractor('Coutputnames',{'OutColMultiColumns','OutCol4'}, ...
 
 [Tout, LsuccessfullExtract]=Xte.extract;
 disp(LsuccessfullExtract)
-Tout.OutColMultiColumns.Mdata
-Tout.OutCol4.Mdata
+Tout.OutColMultiColumns.Vdata
+Tout.OutCol4.Vdata
 Tout.OutCol4.Mcoord
 
 %% Example using OpenSees results
 
 %% Extract 1 variable spanning multiple columns and specified lines with coordinate
-SrelativePath=fullfile('Connector','OpenSees');
+SrelativePath=fullfile(fileparts(which('TutorialTableExtractor')),'Connector','OpenSees');
 
 Xte1=TableExtractor('Coutputnames',{'disp_history1','disp_history2','disp_history3'}, ...
     'NcoordinateColumn',1, ... % Define the column containing the coordinate 

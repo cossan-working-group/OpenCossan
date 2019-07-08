@@ -37,24 +37,39 @@ classdef Coordinates < handle
                 
                 % check that the index names are compatible with the dimension
                 % of Mcoord
-                if ~isempty(Xobj.CSindexName) && ~isempty(Xobj.Mcoord)
-                    if OpenCossan.getChecks
-                        assert(length(Xobj.CSindexName)==size(Xobj.Mcoord,1),...
-                            'openCOSSAN:Dataseries:Dataseries',...
-                            ['The no. of elements in CSindexName and no. of rows of Mcoord are not compatible.\n'...
-                            ' no. of elements of SindexName: ' num2str(length(Xobj.CSindexName))...
-                            '\n no. of rows of Mcoord: ' num2str(size(Xobj.Mcoord,1))])
+                if ~isempty(Xobj.Mcoord)
+                    if ~isempty(Xobj.CSindexName)
+                        if OpenCossan.getChecks
+                            assert(length(Xobj.CSindexName)==size(Xobj.Mcoord,1),...
+                                'openCOSSAN:Dataseries:Dataseries',...
+                                ['The no. of elements in CSindexName and no. of rows of Mcoord are not compatible.\n'...
+                                ' no. of elements of SindexName: ' num2str(length(Xobj.CSindexName))...
+                                '\n no. of rows of Mcoord: ' num2str(size(Xobj.Mcoord,1))])
+                        end
+                    else
+                        for i=1:size(Xobj.Mcoord)
+                            Xobj.CSindexName{i} = "";
+                        end
+                    end
+                    if ~isempty(Xobj.CSindexUnit)
+                        if OpenCossan.getChecks
+                            assert(length(Xobj.CSindexUnit)==size(Xobj.Mcoord,1),...
+                                'openCOSSAN:Dataseries:Dataseries',...
+                                ['The no. of elements in CSindexUnit and no. of rows of Mcoord are not compatible.\n'...
+                                ' no. of elements of SindexName: ' num2str(length(Xobj.CSindexUnit))...
+                                '\n no. of rows of Mcoord: ' num2str(size(Xobj.Mcoord,1))])
+                        end
+                    else
+                        for i=1:size(Xobj.Mcoord)
+                            Xobj.CSindexUnit{i} = "";
+                        end
                     end
                 end
-                if ~isempty(Xobj.CSindexUnit) && ~isempty(Xobj.Mcoord)
-                    if OpenCossan.getChecks
-                        assert(length(Xobj.CSindexUnit)==size(Xobj.Mcoord,1),...
-                            'openCOSSAN:Dataseries:Dataseries',...
-                            ['The no. of elements in CSindexUnit and no. of rows of Mcoord are not compatible.\n'...
-                            ' no. of elements of SindexName: ' num2str(length(Xobj.CSindexUnit))...
-                            '\n no. of rows of Mcoord: ' num2str(size(Xobj.Mcoord,1))])
-                    end
-                end
+                
+                
+                
+                
+                
                 
             end
         end

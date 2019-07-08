@@ -1,9 +1,13 @@
 %% TUTORIALUSERDEFRANDOMVARIABLE
 %
 %   This tutorial shows how to create a UserDefRandomVariable object
+%   A user defined random variable is a non-parameteric random variable
+%   which can be created in three ways: 
+%       -> By passing samples
+%       -> By passing a pdf and support
+%       -> By passing a cdf and support
 %
-% See Also: 
-% https://cossan.co.ac.uk/wiki/index.php/@UserDefRandomVariable
+% See Also: TutorialRandomVariable
 %
 % $Copyright~1993-2018,~COSSAN~Working~Group$
 % $Author:~Edoardo Patelli$ 

@@ -31,3 +31,5 @@ octave-workspace
 
 # test results
 tmp/
+
+.DS_Store
