@@ -20,7 +20,7 @@ pipeline {
                     post {
                         success {
                             // archive and track test results
-                            archive "integrationResults.xml"
+                            archiveArtifacts "integrationResults.xml"
                             junit "integrationResults.xml"
                         }
                     }
