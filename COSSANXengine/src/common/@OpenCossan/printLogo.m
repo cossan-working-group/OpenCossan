@@ -29,16 +29,16 @@ disp('');
 disp('  ____                        _____                               ');
 disp(' / __ \                      / ____|                              ');
 disp('| |  | | _ __    ___  _ __  | |      ___   ___  ___   __ _  _ __  ');
-disp('| |  | || ''_ \  / _ \| ''_ \ | |     / _ \ / __|/ __| / _` || ''_ \ ');
+disp('| |  | || ''_ \  / _ \| ''_ \ | |     / _ \ / __|/ __| / _` || ''_  \ ');
 disp('| |__| || |_) ||  __/| | | || |____| (_) |\__ \\__ \| (_| || | | |');
 disp(' \____/ | .__/  \___||_| |_| \_____|\___/ |___/|___/ \__,_||_| |_|');
 disp('        | |                                                       ');
-disp('        |_|                       STABLE Version (February 2019) ');
+disp('        |_|                            STABLE Version (July 2019) ');
 disp('');
 disp('----------------------------------------------------------------------------------------------------------');
 disp('The open general purpose software for numerical analysis, risk and uncertainty quantification');
 disp('(c) Cossan Working Group, Contacts: W:<a href = "https://www.cossan.co.uk">cossan.co.uk</a>; E:<a href ="mailto:info@cossan.co.uk">info@cossan.co.uk</a>');
-disp('Supported by: University of Liverpool (UK) and Leibniz Universit√§t Hannover (DE)');
+disp('Supported by: University of Strathclyde, Glasgow (Scotland), University of Liverpool (England) and Leibniz Universit‰t Hannover (Germany)');
 disp('----------------------------------------------------------------------------------------------------------');
-disp('<a href ="matlab: open OpenCossanAbout.html">Getting started</a> and <a href ="matlab: demo toolbox OpenCossan">OpenCossan Demo</a> are available on these links.' )
+disp('<a href ="matlab: open GettingStarted.mlx">Getting started</a> and <a href ="matlab: demo toolbox OpenCossan">OpenCossan Demo</a> are available on these links.' )
 

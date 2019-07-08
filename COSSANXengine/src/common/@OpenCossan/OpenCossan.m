@@ -1,6 +1,5 @@
 classdef OpenCossan < handle
-    % OpenCossan This class defines the settings and the preferences
-    % required by the COSSANengine
+    % OpenCossan This class initialises OpenCossan toolbox 
     %
     % See also: https://cossan.co.uk/wiki/index.php/@OpenCossan
     %
@@ -87,15 +86,12 @@ classdef OpenCossan < handle
             fullfile('examples','Tutorials','CantileverBeam'), ...
             fullfile('examples','Tutorials','CargoCrane'), ...
             fullfile('examples','Tutorials','CossanObjects'), ...
-            fullfile('examples','Tutorials','CrackGrowth'), ...
             fullfile('examples','Tutorials','CylindricalShell'), ...
-            fullfile('examples','Tutorials','GOCEsatellite'), ...
             fullfile('examples','Tutorials','InfectionDynamicModel'), ...
             fullfile('examples','Tutorials','IshigamiFunction'), ...
             fullfile('examples','Tutorials','ParallelSystem'), ...
             fullfile('examples','Tutorials','SmallSatellite'), ...
-            fullfile('examples','Tutorials','TrussBridgeStructure'),...
-            fullfile('examples','Tutorials','TurbineBlade')};
+            fullfile('examples','Tutorials','TrussBridgeStructure')}
         
         % List of jar files to be included in the path
         CjarFileName={'mysql-connector-java-5.1.18-bin.jar',... % MySQL JDBC
@@ -445,28 +441,7 @@ classdef OpenCossan < handle
                 end
             end
             
-            
-            %% Initialize external toolboxes
-            
-            if ~isdeployed
-                SpathToolbox=fullfile(Xobj.SexternalPath,'src','spinterp_v5.1.1','spinit.m');
-                
-                if exist(SpathToolbox,'file')
-                    run(SpathToolbox);
-                else
-                    warning('openCOSSAN:OpenCossan', ...
-                        'Sparse Grid Toolbox has not been initialized')
-                end
-            else
-                % Check Sparse grid toolbox
-                try
-                    spinit
-                catch ME %#ok<NASGU>
-                    warning('openCOSSAN:OpenCossan', ...
-                        'Sparse Grid Toolbox has not been included in deployed engine')
-                    %rethrow(ME)
-                end
-            end
+         
             
             %% Check if MEX files exists
             
