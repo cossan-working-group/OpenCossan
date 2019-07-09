@@ -41,7 +41,7 @@ classdef KrigingModel < MetaModel
             
             %% Check that the DACE toolbox exist
             if ~isdeployed
-                SpathToolbox=fullfile(OpenCossan.getCossanExternalPath,'src','dace');
+                SpathToolbox=fullfile(OpenCossan.getCossanExternalPath,'src','ooDACE');
                 
                 assert(logical(exist(SpathToolbox,'dir')),'openCOSSAN:Kriging', ...
                     'DACE toolbox not installed')
@@ -52,6 +52,8 @@ classdef KrigingModel < MetaModel
                 % TODO
             end
             
+            Xobj.VlowerCorrelationBound = [-2 -2]; %Change this
+            Xobj.VupperCorrelationBound = [2 2]; %Change this
             
             %%  Set the values of the public properties
             for k=1:2:nargin
@@ -161,12 +163,12 @@ classdef KrigingModel < MetaModel
             
             if isempty(Xobj.VlowerCorrelationBound)
                 [Xobj.TdaceModel, ~]=dacefit(Minputs,Moutputs,...
-                    str2func(Xobj.SregressionType),...
-                    str2func(Xobj.ScorrelationType),Xobj.VcorrelationParameter);
+                    Xobj.SregressionType,...
+                    Xobj.ScorrelationType,Xobj.VcorrelationParameter);
             else
                 [Xobj.TdaceModel, ~]=dacefit(Minputs,Moutputs,...
-                    str2func(Xobj.SregressionType),...
-                    str2func(Xobj.ScorrelationType),Xobj.VcorrelationParameter,...
+                    Xobj.SregressionType,...
+                    Xobj.ScorrelationType,Xobj.VcorrelationParameter,...
                     Xobj.VlowerCorrelationBound, ...
                     Xobj.VupperCorrelationBound);
             end

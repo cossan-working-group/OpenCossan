@@ -92,7 +92,7 @@ MXX2 = repmat(linspace(0.5e6,1.5e6,201),201,1);
 Vx1=MXX1(:); Vx2 = MXX2(:);
 Minput = [Vx1,Vx2];
 Xs = Samples('Xrvset',Xrvset,'MsamplesPhysicalSpace',Minput);
-Xin = Xin.add(Xs);
+Xin = Xin.add('Xmember', Xs, 'Sname', 'Xs');
 %%
 Xoutreal = Xmio.run(Xin);
 Xoutkr = Xkriging.apply(Xin);
