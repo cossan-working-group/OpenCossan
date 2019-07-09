@@ -23,6 +23,8 @@ To clone it to your local machine type in the terminal:
 git clone https://github.com/cossan-working-group/OpenCossan.git
 ```
 
+Then navigate to `OpenCossan\doc\GettingStarted.mlx` in Matlab to view further instructions.
+
 ## Usage
 
 Comprehensive documentation is available in the wiki.
