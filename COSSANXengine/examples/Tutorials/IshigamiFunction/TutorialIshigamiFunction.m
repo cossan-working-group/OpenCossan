@@ -13,11 +13,11 @@
 
 OpenCossan.reset
 Spath = fileparts(which('TutorialIshigamiFunction.m'));
-SsolverPathBinary=fullfile(OpenCossan.getCossanRoot,'examples','Models','IshigamiFunction');
+SsolverBinaryPath=fullfile(OpenCossan.getCossanRoot,'examples','Models','IshigamiFunction');
 if ispc
-    SsolverPathBinary=fullfile(SsolverPathBinary,'ishigamiFunction.exe');
+    SsolverBinaryFile=fullfile(SsolverBinaryPath,'ishigamiFunction.exe');
 else
-    SsolverPathBinary=fullfile(SsolverPathBinary,'ishigamiFunction');
+    SsolverBinaryFile=fullfile(SsolverBinaryPath,'ishigamiFunction');
 end
 
 %% Input Definition
@@ -50,7 +50,8 @@ Xinput = Input('CXmembers',{Xrvset,parameterA,parameterB},...
 % modifiable file connected to cossan input qunatities. Injector is used to
 % insert single scalar values. Dedicated injectors subclasses are available
 % for specilized requirement like the injection of tables. 
-Xinjector = Injector('Sscanfilename','input.dat.cossan',... % file to be scan with the cossan identifiers
+Xinjector = Injector('Sscanfilepath',SsolverBinaryPath,...
+    'Sscanfilename','input.dat.cossan',... % file to be scan with the cossan identifiers
     'Sfile','input.dat'); % file created by injector with the injected data
 %% Extractor
 % The extractor is used to retrieve the quantity of interest from an ASCII
@@ -71,9 +72,9 @@ Xextractor = Extractor('Sfile','result.out','Xresponse',Xresponse);
 % constructed injectors and extractors.
 connector_ishigami = Connector('Sdescription','Connector to test executable ishigami',...
         'Sexecmd','%SsolverBinary %SmainInputFile', ...
-        'SmainInputPath',pwd,...
+        'SmainInputPath',SsolverBinaryPath,...
         'SmainInputFile','input.dat',...
-        'SsolverBinary',SsolverPathBinary,...
+        'SsolverBinary',SsolverBinaryFile,...
         'CXmembers',{Xinjector,Xextractor});
 
 % You can check the connector with the test method
