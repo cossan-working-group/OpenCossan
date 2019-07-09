@@ -102,6 +102,17 @@ Xals1 = AdaptiveLineSampling('Nlines',50);
 [XpfLS1,XoutLS1]=XprobModel.computeFailureProbability(Xals1);
 display(XpfLS1)
 
+%% Post process the results
+% Create Line Data output object
+SperfName=XprobModel.XperformanceFunction.Soutputname;
+XlineData=LineData('Sdescription','My first Line Data object',...
+    'Xals',Xals1,'LdeleteResults',false,...
+    'Sperformancefunctionname',SperfName,...
+    'Xinput',Xinput);
+% plot limit state
+XlineData.plotLimitState('XsimulationData',Xout,'Xmodel',XprobModel);
+XlineData.plotLines
+%%
 % It is possible to specify manually the important direction an the maximum
 % number of allowed direction updating 
 Xals2 = AdaptiveLineSampling('Nlines',60,...
@@ -117,13 +128,3 @@ OpenCossan.resetRandomNumberGenerator(51125)
 [Xpf,Xout]=XprobModel.computeFailureProbability(Xals1);
 display(Xpf)
 
-%% Post process the results
-% Create Line Data output object
-SperfName=XprobModel.XperformanceFunction.Soutputname;
-XlineData=LineData('Sdescription','My first Line Data object',...
-    'Xals',Xals1,'LdeleteResults',false,...
-    'Sperformancefunctionname',SperfName,...
-    'Xinput',Xinput);
-% plot limit state
-XlineData.plotLimitState('XsimulationData',XoutLS2,'Xmodel',XprobModel);
-XlineData.plotLines
