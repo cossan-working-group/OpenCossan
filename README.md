@@ -15,6 +15,8 @@ OpenCossan is being jointly developed at the Institute for Risk and Uncertainty,
 
 https://cossan.co.uk
 
+![](COSSANXengine/Apps/readmetools.png)
+
 ## Getting started
 
 If you are unfamiliar with git the stable version (master) can be downloaded by simply clicking the green Download .ZIP button. However, it is recommended to use the repository with git.
