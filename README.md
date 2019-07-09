@@ -1,4 +1,4 @@
-![](https://cossan.co.uk/images/OpenCossanLogo.png)
+![](COSSANXengine/Apps/OpenCossanLogo.png)
 
 [![Build Status](https://jenkins.cossan.co.uk/buildStatus/icon?job=OpenCossan%2Fmaster)](https://jenkins.cossan.co.uk/job/OpenCossan/job/master/)
 
