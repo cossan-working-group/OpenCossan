@@ -56,7 +56,7 @@ Xe=Extractor('Sdescription','Extractor for plate.f06', ...
 %%  Construct the connector
 
 %  create the connector
-Xc=Connector('SpredefinedType','nastran_x86_64','Sworkingdirectory','/tmp/',...
+Xc=Connector('SpredefinedType','nastran',...
     'Smaininputpath',SfilePath,...
     'Smaininputfile','plate.dat',...
     'LkeepSimulationFiles',false);
@@ -70,7 +70,7 @@ Xc=add(Xc,Xe);
 %% USE  THE CONNECTOR
 % Please note that this example perform a "strange" simulation, since the
 % material identifier is injected (integer random numbers, 1 or 2),
-% creatind a plate where the material of the elements is randomly chosen
+% creating a plate where the material of the elements is randomly chosen
 % between the two avaialable material.
 
 % Create Parameters
@@ -85,19 +85,18 @@ rvset1=RandomVariableSet('Cmembers',{'rv'},'Nrviid',256);
 
 Xinp = Input('CXmembers',{mat1,mat2,rvset1},...
     'CSmembers',{'mat1','mat2','rvset1'});
-Xinp = Xinnp.sample('Nsamples',1);
+Xinp = Xinp.sample('Nsamples',1);
 
 
 %% Run the Analysis
 Xjm = JobManagerInterface('Stype','GridEngine');
 
-Xeval = Evaluator('Xconnector',Xc,'XJobManagerInterface',Xjm,...
-    'CSqueues',{'pizzas64.q'},'Vconcurrent',[4]);
+Xeval = Evaluator('Xconnector',Xc);
 % create Model
 Xm = Model('Xinput',Xinp,'Xevaluator', Xeval);
 % Monte Carlo simulation
 Nsim=8;
-Xmc = Montecarlo('Nsamples',Nsim);
+Xmc = MonteCarlo('Nsamples',Nsim);
 Xoutput = Xmc.apply(Xm);
 %% Plot Results
 Vout_sim= Xoutput.getValues('Sname','OUT1');
