@@ -105,7 +105,7 @@ Xout2.plotLines('Stitle','LineSampling + LocalMonteCarlo');
 
 % Change the important direction (defined in the Gradient object in the
 % field Valpha)
-Xgrad=Sensitivity.gradientFiniteDifferences('Xtarget',Xpm,'Coutputname',{'Vg'});
+Xgrad=LocalSensitivityFiniteDifference('Xtarget',Xpm,'Coutputnames',{'Vg'}).computeGradient;
 Xls=LineSampling('Nlines',20,'Xgradient',Xgrad);
 
 % Change the number of batches and number of lines
