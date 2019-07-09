@@ -110,7 +110,7 @@ XlineData=LineData('Sdescription','My first Line Data object',...
     'Sperformancefunctionname',SperfName,...
     'Xinput',Xinput);
 % plot limit state
-XlineData.plotLimitState('XsimulationData',Xout,'Xmodel',XprobModel);
+XlineData.plotLimitState('XsimulationData',XoutLS1,'Xmodel',XprobModel);
 XlineData.plotLines
 %%
 % It is possible to specify manually the important direction an the maximum
