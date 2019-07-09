@@ -1,5 +1,7 @@
 ![](https://cossan.co.uk/images/OpenCossanLogo.png)
 
+[![Build Status](https://jenkins.cossan.co.uk/buildStatus/icon?job=OpenCossan%2Fmaster)](https://jenkins.cossan.co.uk/job/OpenCossan/job/master/)
+
 OpenCossan is a Matlab-based toolbox for uncertainty quantification and management. The implemented framework includes third-party software integration (e.g. ANSYS), efficient numeric algorithms (e.g. Line Sampling) and parallelization for high performance computing. OpenCossan functionalities can be summarized in:
 
 * Uncertainty Quantification
@@ -11,7 +13,7 @@ OpenCossan is a Matlab-based toolbox for uncertainty quantification and manageme
 
 OpenCossan is being jointly developed at the Institute for Risk and Uncertainty, University of Liverpool, UK and the Institute for Risk and Reliability, Leibniz University Hannover, Germany.
 
-[COSSAN](https://cossan.co.uk)
+https://cossan.co.uk
 
 ## Getting started
 
