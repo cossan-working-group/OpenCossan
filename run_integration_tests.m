@@ -5,32 +5,31 @@ try
     import matlab.unittest.plugins.XMLPlugin;
     import matlab.unittest.plugins.ToFile;
     
-    root = fileparts(mfilename('fullpath'));
-    
     %% Initialize OpenCossan
-    workingDirectory = fullfile(root,'tmp');
+    workingDirectory = fullfile(fileparts(which(mfilename())),'tmp');
     if ~exist(workingDirectory,'dir')
         mkdir(workingDirectory);
     end
     userpath(workingDirectory);
+    import opencossan.OpenCossan;
+    OpenCossan.setVerbosityLevel(0);
     
-    %% Setup
-    addpath(genpath(fullfile(root,'test','integration')));
-    addpath(genpath(fullfile(root,'COSSANXengine','src')));
-    OpenCossan('NverboseLevel',0);
+    %% Add tests folders
+    addpath(genpath(fullfile(OpenCossan.getRoot(),'test','integration')));
+    addpath(genpath(fullfile(OpenCossan.getRoot(),'lib','matlab-code-coverage')));
     
     %% Create TestRunner
     runner = TestRunner.withTextOutput;
     % Add XMLPlugin
     % The XMLPlugin provides a jUnit style file  to interface with Jenkins
-    xmlFile = 'integrationResults.xml';
+    xmlFile = 'integration_test_results.xml';
     if exist(xmlFile,'file')
         delete(xmlFile);
     end
     runner.addPlugin(XMLPlugin.producingJUnitFormat(xmlFile));
     
     %% Create TestSuites
-    suite = TestSuite.fromFolder(fullfile(root,'test','integration'));
+    suite = TestSuite.fromPackage('tutorials');
     
     %% Run and display results
     result = runner.run(suite);

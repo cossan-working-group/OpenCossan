@@ -29,7 +29,13 @@ codegen/
 # Octave session info
 octave-workspace
 
-# test results
+# Test results
 tmp/
+unit_test_results.xml
+integration_test_results.xml
+
+# Code coverage
+coverage/
+cobertura.xml
 
 .DS_Store

@@ -1,0 +1,118 @@
+:root {
+    --primary-red: #C21F39;
+    --primary-green: rgb(77,146,33);
+    --primary-yellow: #F9CD0B;
+
+    --light-red: #FCE1E5;
+    --light-green: rgb(230,245,208);
+    --light-yellow: #FFF4C2;
+}
+body, html {
+  margin:0; padding: 0;
+  height: 100%;
+}
+body {
+    font-family: Helvetica Neue, Helvetica, Arial;
+    font-size: 14px;
+    color:#333;
+}
+a { color:#0074D9; text-decoration:none; }
+a:hover { text-decoration:underline; }
+
+.fl { 
+    float: left;
+    margin: 0 10px 10px 0;
+}
+
+.strong { font-weight: bold; }
+.quiet {
+  color: #7f7f7f;
+  color: rgba(0,0,0,0.5);
+}
+.fraction {
+  font-family: Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+  font-size: 10px;
+  color: #555;
+  background: #E8E8E8;
+  padding: 4px 5px;
+  border-radius: 3px;
+  vertical-align: middle;
+}
+
+.header-line {
+    height: 10px;
+    margin-bottom: 16px;
+}
+.header-line.high {background: var(--primary-green);}
+.header-line.medium {background: var(--primary-yellow);}
+.header-line.low {background: var(--primary-red);}
+
+.source {
+    margin: 0px 0px 0px 64px;
+}
+
+.summary {
+    width: 100%;
+    border-collapse: collapse;
+}
+.summary-head {
+    text-align: left;
+}
+.summary-body {
+    text-align: right;
+}
+.summary th, td {
+    border: 1px solid #ddd;
+    padding: 10px;
+}
+.summary, td.package {
+    text-align: left;
+}
+
+.bar {
+    min-width: 120px !important;
+    text-align: left;
+}
+.bar .high {border: 1px solid var(--primary-green);}
+.bar .medium {border: 1px solid var(--primary-yellow);}
+.bar .low {border: 1px solid var(--primary-red);}
+
+.chart {
+    line-height: 0px;
+    background: white;
+}
+.chart .high{background: var(--primary-green);}
+.chart .medium{background: var(--primary-yellow);}
+.chart .low{background: var(--primary-red);}
+
+.bar-fill{
+  display: inline-block;
+  height: 12px;
+}
+
+.summary td.low{background: var(--light-red);}
+.summary td.medium{background: var(--light-yellow);}
+.summary td.high{background: var(--light-green);}
+
+table.coverage {
+  border: 0;
+  padding: 0 32px 32px 32px;
+}
+
+table.coverage td {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  vertical-align: top;
+}
+table.coverage td.line-count {
+    text-align: right;
+}
+
+table.coverage td span.uncovered {
+    background: var(--light-red);
+}
+
+table.coverage td span.covered {
+    background: var(--light-green);
+}

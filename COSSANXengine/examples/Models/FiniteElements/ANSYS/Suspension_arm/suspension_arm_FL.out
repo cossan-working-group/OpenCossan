@@ -1,7 +1,0 @@
- *** ERROR ***
- Another ANSYS job with the same job name (suspension_arm_FL) is already running in this
- directory or the suspension_arm_FL.lock file has not been deleted from an abnormally
- terminated ANSYS run.  To disable this check, set the ANSYS_LOCK environment
- variable to OFF.
-
- Do you wish to override this lock and continue (y or n)?

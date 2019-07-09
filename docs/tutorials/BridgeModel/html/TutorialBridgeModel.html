@@ -1,0 +1,370 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>TutorialBridgeModel</title><meta name="generator" content="MATLAB 7.11"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2011-05-27"><meta name="DC.source" content="TutorialBridgeModel.m"><style type="text/css">
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">TutorialBridgeModel</a></li><li><a href="#2">Define Input factors</a></li><li><a href="#3">Beams geometry: heights</a></li><li><a href="#4">Beams geometry: E modulus</a></li><li><a href="#5">Beams geometry: length</a></li><li><a href="#6">Supports: stiffness</a></li><li><a href="#7">Supports: rotation stiffness</a></li><li><a href="#8">Supports: damping</a></li><li><a href="#9">Load</a></li><li><a href="#10">Create a Input object</a></li><li><a href="#11">Create the Evaluator</a></li><li><a href="#12">Preparation of the Physical Model</a></li><li><a href="#13">Perform deterministic analysis</a></li><li><a href="#14">Uncertainty Quantification</a></li><li><a href="#15">Global Sensitivity Analysis</a></li></ul></div><h2>TutorialBridgeModel<a name="1"></a></h2><p>In this tutorial the global sensitivity analysis is applied to a practical problem in structural engineering: a mechanical model of a long bridge.</p><p>The conceptual model is sketched below.</p><pre>                                     | L
+                                     |
+   w_1  E_1 h_1   w_2  E_2 h_2        v             w_20  E_20 h_20   w_21
+     @=============@=============@==========@   ....  @================@
+    | |           | |           | |        | |       | |              | |
+k_1 z u c_1       z u           z u        z u       z u         k_21 z u c_21
+    | |           | |           | |        | |       | |              | |
+    --- &lt;-------&gt; --- &lt;-------&gt; ---        ---       --- &lt;----------&gt; ---
+    ///    l_1    ///    l_2    ///        ///       ///     l_20     ///</pre><p>Legend:</p><div><ul><li>w_i = supportRotational stiffness (i=1-21)</li><li>k_i = support stiffness           (i=1-21)</li><li>c_i = support damping             (i=1-21)</li><li>h_i = beam height                 (i=1-20)</li><li>l_i = beam lenth                  (i=1-20)</li><li>E_i = beam E modulus              (i=1-20)</li><li>L = Load</li></ul></div><p>This model is interesting for several reasons, which makes it suitable for an example application of  the total sensitivity analysis and their upper bounds. The conceptual model contains 123 uncertain parameters. All the uncertain parameters are considered to be uncorrelated.</p><p>The bridge is subjected to a harmonic load with a frequency of 10 Hz, applied at the mid point of the 3rd bay. The aim of the analysis is to identify the parameters that affect the variance of the maximum displacement of any points of the bridge as well as the parameters that have negligible effects.</p><p>It is important to note, that in order to avoid unrealistic values of the input parameters during the simulation, truncated normal distributions are used.</p><p>See Also <a href="http://mechanik.uibk.ac.at/wiki/index.php/BridgeModel">http://mechanik.uibk.ac.at/wiki/index.php/BridgeModel</a></p><p><img src="TutorialBridgeModel_eq06293.png" alt="$Copyright~1993-2011,~COSSAN~Working~Group,~University~of~Innsbruck,~Austria$"> <img src="TutorialBridgeModel_eq82982.png" alt="$Author:~Edoardo~Patelli$"></p><pre class="codeinput"><span class="comment">% Reset the random number generator in order to obtain always the same results.</span>
+<span class="comment">% DO NOT CHANGE THE VALUES OF THE SEED</span>
+CossanX.resetRandomNumberGenerator(46354)
+</pre><h2>Define Input factors<a name="2"></a></h2><p>It is necessary to define 124 random variables that are grouped into 3 random variable sets. It is not necessary to group the Random variables in different sets because they are not correlated. However, it is convenient for the definition of  indipendent  identical distributed random variables</p><h2>Beams geometry: heights<a name="3"></a></h2><pre class="codeinput">h=RandomVariable(<span class="string">'Sdistribution'</span>,<span class="string">'normal'</span>,<span class="string">'mean'</span>,0.001,<span class="string">'cov'</span>,0.05,<span class="string">'lowerBound'</span>,0);
+
+hSet=RandomVariableSet(<span class="string">'Xrv'</span>,h,<span class="string">'Nrviid'</span>,20);
+<span class="comment">% Please note that the random variables in the randomvariables set are named h_1</span>
+<span class="comment">% to h_20</span>
+disp(hSet.Cmembers)
+</pre><pre class="codeoutput">  Columns 1 through 11
+
+    'h_1'    'h_2'    'h_3'    'h_4'    'h_5'    'h_6'    'h_7'    'h_8'    'h_9'    'h_10'    'h_11'
+
+  Columns 12 through 20
+
+    'h_12'    'h_13'    'h_14'    'h_15'    'h_16'    'h_17'    'h_18'    'h_19'    'h_20'
+
+</pre><h2>Beams geometry: E modulus<a name="4"></a></h2><pre class="codeinput">E=RandomVariable(<span class="string">'Sdistribution'</span>,<span class="string">'normal'</span>,<span class="string">'mean'</span>,210e9,<span class="string">'cov'</span>,0.03,<span class="string">'lowerBound'</span>,0);
+
+ESet=RandomVariableSet(<span class="string">'Xrv'</span>,E,<span class="string">'Nrviid'</span>,20);
+<span class="comment">% Please note that the random variables in the random variables set are named E_1</span>
+<span class="comment">% to E_20</span>
+disp(ESet.Cmembers)
+</pre><pre class="codeoutput">  Columns 1 through 11
+
+    'E_1'    'E_2'    'E_3'    'E_4'    'E_5'    'E_6'    'E_7'    'E_8'    'E_9'    'E_10'    'E_11'
+
+  Columns 12 through 20
+
+    'E_12'    'E_13'    'E_14'    'E_15'    'E_16'    'E_17'    'E_18'    'E_19'    'E_20'
+
+</pre><h2>Beams geometry: length<a name="5"></a></h2><pre class="codeinput">l=RandomVariable(<span class="string">'Sdistribution'</span>,<span class="string">'normal'</span>,<span class="string">'mean'</span>,0.36,<span class="string">'cov'</span>,0.05,<span class="string">'lowerBound'</span>,0);
+
+lSet=RandomVariableSet(<span class="string">'Xrv'</span>,l,<span class="string">'Nrviid'</span>,20);
+<span class="comment">% Please note that the random variables in the random variables set are named l_1</span>
+<span class="comment">% to l_20</span>
+disp(lSet.Cmembers)
+</pre><pre class="codeoutput">  Columns 1 through 11
+
+    'l_1'    'l_2'    'l_3'    'l_4'    'l_5'    'l_6'    'l_7'    'l_8'    'l_9'    'l_10'    'l_11'
+
+  Columns 12 through 20
+
+    'l_12'    'l_13'    'l_14'    'l_15'    'l_16'    'l_17'    'l_18'    'l_19'    'l_20'
+
+</pre><h2>Supports: stiffness<a name="6"></a></h2><pre class="codeinput">k=RandomVariable(<span class="string">'Sdistribution'</span>,<span class="string">'normal'</span>,<span class="string">'mean'</span>,200,<span class="string">'cov'</span>,0.10,<span class="string">'lowerBound'</span>,0);
+
+kSet=RandomVariableSet(<span class="string">'Xrv'</span>,k,<span class="string">'Nrviid'</span>,21);
+<span class="comment">% Please note that the random variables in the random variables set are named k_1</span>
+<span class="comment">% to k_21</span>
+disp(kSet.Cmembers)
+</pre><pre class="codeoutput">  Columns 1 through 11
+
+    'k_1'    'k_2'    'k_3'    'k_4'    'k_5'    'k_6'    'k_7'    'k_8'    'k_9'    'k_10'    'k_11'
+
+  Columns 12 through 21
+
+    'k_12'    'k_13'    'k_14'    'k_15'    'k_16'    'k_17'    'k_18'    'k_19'    'k_20'    'k_21'
+
+</pre><h2>Supports: rotation stiffness<a name="7"></a></h2><pre class="codeinput">w=RandomVariable(<span class="string">'Sdistribution'</span>,<span class="string">'normal'</span>,<span class="string">'mean'</span>,40,<span class="string">'cov'</span>,0.16,<span class="string">'lowerBound'</span>,0);
+
+wSet=RandomVariableSet(<span class="string">'Xrv'</span>,w,<span class="string">'Nrviid'</span>,21);
+<span class="comment">% Please note that the random variables in the random variables set are named w_1</span>
+<span class="comment">% to w_21</span>
+disp(kSet.Cmembers)
+</pre><pre class="codeoutput">  Columns 1 through 11
+
+    'k_1'    'k_2'    'k_3'    'k_4'    'k_5'    'k_6'    'k_7'    'k_8'    'k_9'    'k_10'    'k_11'
+
+  Columns 12 through 21
+
+    'k_12'    'k_13'    'k_14'    'k_15'    'k_16'    'k_17'    'k_18'    'k_19'    'k_20'    'k_21'
+
+</pre><h2>Supports: damping<a name="8"></a></h2><pre class="codeinput">c=RandomVariable(<span class="string">'Sdistribution'</span>,<span class="string">'normal'</span>,<span class="string">'mean'</span>,0.4,<span class="string">'cov'</span>,0.25,<span class="string">'lowerBound'</span>,0);
+
+cSet=RandomVariableSet(<span class="string">'Xrv'</span>,c,<span class="string">'Nrviid'</span>,21);
+<span class="comment">% Please note that the random variables in the random variables set are named c_1</span>
+<span class="comment">% to c_21</span>
+disp(cSet.Cmembers)
+</pre><pre class="codeoutput">  Columns 1 through 11
+
+    'c_1'    'c_2'    'c_3'    'c_4'    'c_5'    'c_6'    'c_7'    'c_8'    'c_9'    'c_10'    'c_11'
+
+  Columns 12 through 21
+
+    'c_12'    'c_13'    'c_14'    'c_15'    'c_16'    'c_17'    'c_18'    'c_19'    'c_20'    'c_21'
+
+</pre><h2>Load<a name="9"></a></h2><pre class="codeinput">load=Parameter(<span class="string">'Sdescription'</span>,<span class="string">'Harmonic load frequence (Hz)'</span>,<span class="string">'value'</span>,10);
+rho=Parameter(<span class="string">'Sdescription'</span>,<span class="string">'material density'</span>,<span class="string">'value'</span>,7800);
+width=Parameter(<span class="string">'Sdescription'</span>,<span class="string">'BeanWidth'</span>,<span class="string">'value'</span>,0.04);
+</pre><h2>Create a Input object<a name="10"></a></h2><pre class="codeinput">Xinput=Input(<span class="string">'CXmembers'</span>,{hSet lSet ESet kSet wSet cSet load rho width},<span class="keyword">...</span>
+        <span class="string">'CSmembers'</span>,{<span class="string">'hSet'</span> <span class="string">'lSet'</span> <span class="string">'ESet'</span> <span class="string">'kSet'</span> <span class="string">'wSet'</span> <span class="string">'cSet'</span> <span class="string">'load'</span> <span class="string">'rho'</span> <span class="string">'width'</span>},<span class="keyword">...</span>
+        <span class="string">'Sdescription'</span>,<span class="string">'Input object for Bridge Model Tutorial'</span>);
+<span class="comment">% Show the input object</span>
+display(Xinput)
+</pre><pre class="codeoutput">===================================================================
+Input Object  - Description: Input object for Bridge Model Tutorial
+===================================================================
+* 6 Sets of RandomVariables
+** Names: "hSet" "lSet" "ESet" "kSet" "wSet" "cSet" 
+* 3 Parameter object(s)
+** Names: "load" "rho" "width" 
+</pre><h2>Create the Evaluator<a name="11"></a></h2><p>The mathematical model of the bridge is implemented in a matlab function. Hence, an object of type Mio is required to connect the solver with COSSAN-X.</p><pre class="codeinput"><span class="comment">% Use of a matlab script to compute the maximum displacement of the bridge</span>
+Sfolder=fileparts(which(<span class="string">'TutorialBridgeModel.m'</span>));<span class="comment">% returns the current folder</span>
+Xmio=Mio(<span class="string">'Spath'</span>,Sfolder,<span class="string">'Sfile'</span>,<span class="string">'bridgeModel.m'</span>,<span class="keyword">...</span>
+         <span class="string">'Liomatrix'</span>,true, <span class="keyword">...</span><span class="comment">  % This flag specify the type of I/O</span>
+         <span class="string">'Liostructure'</span>,false,<span class="keyword">...</span>
+         <span class="string">'Cinputnames'</span>,Xinput.Cnames, <span class="keyword">...</span>
+         <span class="string">'Coutputnames'</span>,{<span class="string">'maxDisplacement'</span>});
+
+<span class="comment">% Add the MIO object to an Evaluator object</span>
+Xevaluator=Evaluator(<span class="string">'CXmembers'</span>,{Xmio},<span class="string">'CSmembers'</span>,{<span class="string">'Xmio'</span>});
+</pre><h2>Preparation of the Physical Model<a name="12"></a></h2><p>Define the Physical Model</p><pre class="codeinput">XmodelBridge=Model(<span class="string">'Xinput'</span>,Xinput,<span class="string">'Xevaluator'</span>,Xevaluator);
+
+display(XmodelBridge)
+</pre><pre class="codeoutput">===================================================================
+ Model Object  -  Description: 
+===================================================================
+Required Inputs :  h_1; h_2; h_3; h_4; h_5; h_6; h_7; h_8; h_9; h_10; h_11; h_12; h_13; h_14; h_15; h_16; h_17; h_18; h_19; h_20; l_1; l_2; l_3; l_4; l_5; l_6; l_7; l_8; l_9; l_10; l_11; l_12; l_13; l_14; l_15; l_16; l_17; l_18; l_19; l_20; E_1; E_2; E_3; E_4; E_5; E_6; E_7; E_8; E_9; E_10; E_11; E_12; E_13; E_14; E_15; E_16; E_17; E_18; E_19; E_20; k_1; k_2; k_3; k_4; k_5; k_6; k_7; k_8; k_9; k_10; k_11; k_12; k_13; k_14; k_15; k_16; k_17; k_18; k_19; k_20; k_21; w_1; w_2; w_3; w_4; w_5; w_6; w_7; w_8; w_9; w_10; w_11; w_12; w_13; w_14; w_15; w_16; w_17; w_18; w_19; w_20; w_21; c_1; c_2; c_3; c_4; c_5; c_6; c_7; c_8; c_9; c_10; c_11; c_12; c_13; c_14; c_15; c_16; c_17; c_18; c_19; c_20; c_21; load; rho; width;
+Provided Outputs :  maxDisplacement;
+The Model contains 1 solvers
+</pre><h2>Perform deterministic analysis<a name="13"></a></h2><pre class="codeinput">Xout=XmodelBridge.deterministicAnalysis;
+NominalDisplacement=Xout.getValues(<span class="string">'Sname'</span>,<span class="string">'maxDisplacement'</span>);
+
+<span class="comment">% Validate Solution</span>
+assert(abs(NominalDisplacement-4.05230e-03)&lt;1e-6,<span class="keyword">...</span>
+    <span class="string">'CossanX:Tutorials:TutorialBridgeModel'</span>, <span class="keyword">...</span>
+    <span class="string">'Nominal sulution does not match Reference Solution.'</span>)
+</pre><pre class="codeoutput">[Status:Evaluator  ]       * Processing solver 1/1
+[Simulation:exportResults] Writing partial results (SimulationData_Deterministic_Analysis) on the folder: /home/ep/workspace/COSSAN-X_SVN/COSSANXengine/examples/Tutorials/BridgeModel/20110527T195359
+[Simulation:exportResults] Batch #0 written in 0.26169
+[Simulation:exportResults] Results stored in the folder: /home/ep/workspace/COSSAN-X_SVN/COSSANXengine/examples/Tutorials/BridgeModel/20110527T195359/SimulationData_Deterministic_Analysis
+</pre><h2>Uncertainty Quantification<a name="14"></a></h2><p>The reliaility analysis is performed by the following tutorial  See Also: <a href="TutorialBridgeModelUncertaintyQuantification.html">TutorialBridgeModelUncertaintyQuantification.html</a></p><pre class="codeinput"><span class="comment">% echodemo TutorialBridgeModelUncertaintyQuantification</span>
+</pre><h2>Global Sensitivity Analysis<a name="15"></a></h2><p>This tutorial continues with the optimization section See Also:  <a href="TutorialBridgeModelGlobalSensitivityAnalysis.html">TutorialBridgeModelGlobalSensitivityAnalysis.html</a></p><pre class="codeinput"><span class="comment">% echodemo TutorialBridgeModelGlobalSensitivityAnalysis</span>
+</pre><p class="footer"><br>
+      Published with MATLAB&reg; 7.11<br></p></div><!--
+##### SOURCE BEGIN #####
+%% TutorialBridgeModel
+% In this tutorial the global sensitivity analysis is applied to a practical
+% problem in structural engineering: a mechanical model of a long bridge.
+%
+% The conceptual model is sketched below.
+%
+%                                       | L 
+%                                       |
+%     w_1  E_1 h_1   w_2  E_2 h_2        v             w_20  E_20 h_20   w_21
+%       @=============@=============@==========@   ....  @================@
+%      | |           | |           | |        | |       | |              | |
+%  k_1 z u c_1       z u           z u        z u       z u         k_21 z u c_21
+%      | |           | |           | |        | |       | |              | |
+%      REPLACE_WITH_DASH_DASH- <REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-> REPLACE_WITH_DASH_DASH- <REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-> REPLACE_WITH_DASH_DASH-        REPLACE_WITH_DASH_DASH-       REPLACE_WITH_DASH_DASH- <REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH> REPLACE_WITH_DASH_DASH-
+%      ///    l_1    ///    l_2    ///        ///       ///     l_20     ///
+% 
+% Legend:
+%
+% * w_i = supportRotational stiffness (i=1-21)
+% * k_i = support stiffness           (i=1-21)
+% * c_i = support damping             (i=1-21)
+% * h_i = beam height                 (i=1-20)
+% * l_i = beam lenth                  (i=1-20) 
+% * E_i = beam E modulus              (i=1-20) 
+% * L = Load                       
+%
+% This model is interesting for several reasons, which makes it suitable for an
+% example application of  the total sensitivity analysis and their upper bounds. 
+% The conceptual model contains 123 uncertain parameters.
+% All the uncertain parameters are considered to be uncorrelated. 
+%
+% The bridge is subjected to a harmonic load with a frequency of 10 Hz, applied
+% at the mid point of the 3rd bay. The aim of the analysis is to identify the
+% parameters that affect the variance of the maximum displacement of any points
+% of the bridge as well as the parameters that have negligible effects. 
+%
+% It is important to note, that in order to avoid unrealistic values of the
+% input parameters during the simulation, truncated normal distributions are
+% used.  
+%
+% See Also http://mechanik.uibk.ac.at/wiki/index.php/BridgeModel
+%
+% $Copyright~1993-2011,~COSSAN~Working~Group,~University~of~Innsbruck,~Austria$
+% $Author:~Edoardo~Patelli$ 
+
+% Reset the random number generator in order to obtain always the same results.
+% DO NOT CHANGE THE VALUES OF THE SEED
+CossanX.resetRandomNumberGenerator(46354)
+
+%% Define Input factors
+% It is necessary to define 124 random variables that are grouped into 3 random
+% variable sets. It is not necessary to group the Random variables in different
+% sets because they are not correlated. However, it is convenient for the
+% definition of  indipendent  identical distributed random variables
+
+%% Beams geometry: heights
+h=RandomVariable('Sdistribution','normal','mean',0.001,'cov',0.05,'lowerBound',0);
+
+hSet=RandomVariableSet('Xrv',h,'Nrviid',20);
+% Please note that the random variables in the randomvariables set are named h_1
+% to h_20
+disp(hSet.Cmembers)
+
+%% Beams geometry: E modulus
+E=RandomVariable('Sdistribution','normal','mean',210e9,'cov',0.03,'lowerBound',0);
+
+ESet=RandomVariableSet('Xrv',E,'Nrviid',20);
+% Please note that the random variables in the random variables set are named E_1
+% to E_20
+disp(ESet.Cmembers)
+
+%% Beams geometry: length
+l=RandomVariable('Sdistribution','normal','mean',0.36,'cov',0.05,'lowerBound',0);
+
+lSet=RandomVariableSet('Xrv',l,'Nrviid',20);
+% Please note that the random variables in the random variables set are named l_1
+% to l_20
+disp(lSet.Cmembers)
+
+%% Supports: stiffness
+k=RandomVariable('Sdistribution','normal','mean',200,'cov',0.10,'lowerBound',0);
+
+kSet=RandomVariableSet('Xrv',k,'Nrviid',21);
+% Please note that the random variables in the random variables set are named k_1
+% to k_21
+disp(kSet.Cmembers)
+
+%% Supports: rotation stiffness
+w=RandomVariable('Sdistribution','normal','mean',40,'cov',0.16,'lowerBound',0);
+
+wSet=RandomVariableSet('Xrv',w,'Nrviid',21);
+% Please note that the random variables in the random variables set are named w_1
+% to w_21
+disp(kSet.Cmembers)
+
+%% Supports: damping
+c=RandomVariable('Sdistribution','normal','mean',0.4,'cov',0.25,'lowerBound',0);
+
+cSet=RandomVariableSet('Xrv',c,'Nrviid',21);
+% Please note that the random variables in the random variables set are named c_1
+% to c_21
+disp(cSet.Cmembers)
+
+%% Load
+load=Parameter('Sdescription','Harmonic load frequence (Hz)','value',10);
+rho=Parameter('Sdescription','material density','value',7800);
+width=Parameter('Sdescription','BeanWidth','value',0.04);
+
+%% Create a Input object
+Xinput=Input('CXmembers',{hSet lSet ESet kSet wSet cSet load rho width},...
+        'CSmembers',{'hSet' 'lSet' 'ESet' 'kSet' 'wSet' 'cSet' 'load' 'rho' 'width'},...
+        'Sdescription','Input object for Bridge Model Tutorial');
+% Show the input object
+display(Xinput)
+
+%% Create the Evaluator
+% The mathematical model of the bridge is implemented in a matlab function.
+% Hence, an object of type Mio is required to connect the solver with COSSAN-X.
+
+% Use of a matlab script to compute the maximum displacement of the bridge
+Sfolder=fileparts(which('TutorialBridgeModel.m'));% returns the current folder
+Xmio=Mio('Spath',Sfolder,'Sfile','bridgeModel.m',...
+         'Liomatrix',true, ...  % This flag specify the type of I/O
+         'Liostructure',false,...
+         'Cinputnames',Xinput.Cnames, ...
+         'Coutputnames',{'maxDisplacement'});
+
+% Add the MIO object to an Evaluator object
+Xevaluator=Evaluator('CXmembers',{Xmio},'CSmembers',{'Xmio'});
+
+%% Preparation of the Physical Model
+% Define the Physical Model
+XmodelBridge=Model('Xinput',Xinput,'Xevaluator',Xevaluator);
+
+display(XmodelBridge)
+
+%% Perform deterministic analysis
+Xout=XmodelBridge.deterministicAnalysis;
+NominalDisplacement=Xout.getValues('Sname','maxDisplacement');
+
+% Validate Solution
+assert(abs(NominalDisplacement-4.05230e-03)<1e-6,...
+    'CossanX:Tutorials:TutorialBridgeModel', ...
+    'Nominal sulution does not match Reference Solution.')
+
+
+%% Uncertainty Quantification
+% The reliaility analysis is performed by the following tutorial
+%  See Also: <TutorialBridgeModelUncertaintyQuantification.html>
+
+% echodemo TutorialBridgeModelUncertaintyQuantification
+
+
+%% Global Sensitivity Analysis
+% This tutorial continues with the optimization section
+% See Also:  <TutorialBridgeModelGlobalSensitivityAnalysis.html> 
+
+% echodemo TutorialBridgeModelGlobalSensitivityAnalysis
+
+##### SOURCE END #####
+--></body></html>

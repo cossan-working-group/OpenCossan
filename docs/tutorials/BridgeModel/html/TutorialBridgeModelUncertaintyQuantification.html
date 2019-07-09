@@ -1,0 +1,223 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>TutorialBridgeModelUncertaintyQuantification</title><meta name="generator" content="MATLAB 7.11"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2011-05-27"><meta name="DC.source" content="TutorialBridgeModelUncertaintyQuantification.m"><style type="text/css">
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">TutorialBridgeModelUncertaintyQuantification</a></li><li><a href="#2">Requirements</a></li><li><a href="#3">Perform Uncertainty Quantification using a quasi Monte Carlo methods</a></li><li><a href="#4">Use sobol sampling</a></li><li><a href="#5">Scatter plot</a></li><li><a href="#6">Close figures</a></li><li><a href="#7">Global Sensitivity Analysis</a></li></ul></div><h2>TutorialBridgeModelUncertaintyQuantification<a name="1"></a></h2><p>In this tutorial a simple uncertainty quantification of a mechanical model of a long bridge is presented.</p><p>See Also <a href="http://mechanik.uibk.ac.at/wiki/index.php/BridgeModel">http://mechanik.uibk.ac.at/wiki/index.php/BridgeModel</a></p><p><img src="TutorialBridgeModelUncertaintyQuantification_eq06293.png" alt="$Copyright~1993-2011,~COSSAN~Working~Group,~University~of~Innsbruck,~Austria$"> <img src="TutorialBridgeModelUncertaintyQuantification_eq82982.png" alt="$Author:~Edoardo~Patelli$"></p><pre class="codeinput"><span class="comment">% Reset the random number generator in order to obtain always the same results.</span>
+<span class="comment">% DO NOT CHANGE THE VALUES OF THE SEED</span>
+CossanX.resetRandomNumberGenerator(46354)
+</pre><h2>Requirements<a name="2"></a></h2><p>This tutorial needs the mechanical model defined in the tutorial TutorialBridgeModel</p><pre class="codeinput">assert(logical(exist(<span class="string">'XmodelBridge'</span>,<span class="string">'var'</span>)),<span class="string">'COSSANX:Tutorials'</span>, <span class="keyword">...</span>
+    <span class="string">'Please run first the tutorial TutorialBridgeModel\n\n run TutorialBridgeModel'</span>)
+</pre><h2>Perform Uncertainty Quantification using a quasi Monte Carlo methods<a name="3"></a></h2><p>The lating hypercube sampling method is used to generate samples in the multidimensional input space.</p><pre class="codeinput">Xlhs=LatinHypercubeSampling(<span class="string">'Nsamples'</span>,100);
+
+<span class="comment">% Perform simulation</span>
+XoutLHS=Xlhs.apply(XmodelBridge);
+
+<span class="comment">% Plot statistics of the output</span>
+f1=XoutLHS.plotData(<span class="string">'Sname'</span>,<span class="string">'maxDisplacement'</span>,<span class="string">'Stitle'</span>,<span class="string">'Bridge Model UQ (LHS)'</span>,<span class="string">'Nfontsize'</span>,14);
+
+<span class="comment">% Show statistics of the output</span>
+Mstatistics=XoutLHS.getStatistics(<span class="string">'Sname'</span>,<span class="string">'maxDisplacement'</span>);
+
+<span class="comment">% Show Min, Max, Mean, median and std for maxDisplacement</span>
+fprintf(<span class="string">'* Min   : %e\n* Max   : %e\n* Mean  : %e\n* Median: %e\n* Std   : %e\n'</span>,<span class="keyword">...</span>
+    Mstatistics(:))
+
+
+
+<span class="comment">% Validate Solution</span>
+assert(abs(Mstatistics(3)- 4.20537e-03)&lt;1e-6,<span class="keyword">...</span>
+    <span class="string">'CossanX:Tutorials:TutorialBridgeModel'</span>, <span class="keyword">...</span>
+    <span class="string">'Nominal sulution does not match Reference Solution.'</span>)
+</pre><pre class="codeoutput">calling lhsdesign
+* Nsamples: 100
+* Nrv: 123
+* iteration: 5
+* criterion: none
+* smooth: on
+[Status:Evaluator  ]       * Processing solver 1/1
+[Simulation:exportResults] Writing partial results (SimulationData_batch_1_of_1) on the folder: /home/ep/workspace/COSSAN-X_SVN/COSSANXengine/examples/Tutorials/BridgeModel/20110527T195424
+[Simulation:exportResults] Batch #1 written in 0.26487
+[Simulation:exportResults] Results stored in the folder: /home/ep/workspace/COSSAN-X_SVN/COSSANXengine/examples/Tutorials/BridgeModel/20110527T195424/SimulationData_batch_1_of_1
+Maximum no. of samples reached. Samples computed 100; Maximum allowed samples: 100
+* Min   : 3.001865e-03
+* Max   : 6.726050e-03
+* Mean  : 4.205373e-03
+* Median: 4.082637e-03
+* Std   : 7.068503e-04
+</pre><img vspace="5" hspace="5" src="TutorialBridgeModelUncertaintyQuantification_01.png" alt=""> <h2>Use sobol sampling<a name="4"></a></h2><pre class="codeinput">Xss=SobolSampling(<span class="string">'Nsamples'</span>,1000);
+
+<span class="comment">% Perform simulation</span>
+XoutSS=Xss.apply(XmodelBridge);
+
+<span class="comment">% Plot statistics of the output</span>
+f2=XoutSS.plotData(<span class="string">'Sname'</span>,<span class="string">'maxDisplacement'</span>,<span class="string">'Stitle'</span>,<span class="string">'Bridge Model UQ (Sobol sampling)'</span>,<span class="string">'Nfontsize'</span>,14);
+
+Mstatistics=XoutLHS.getStatistics(<span class="string">'Sname'</span>,<span class="string">'maxDisplacement'</span>);
+
+<span class="comment">% Show Min, Max, Mean, median and std for maxDisplacement</span>
+<span class="comment">% Show Min, Max, Mean, median and std for maxDisplacement</span>
+fprintf(<span class="string">'* Min   : %e\n* Max   : %e\n* Mean  : %e\n* Median: %e\n* Std   : %e\n'</span>,<span class="keyword">...</span>
+    Mstatistics(:))
+</pre><pre class="codeoutput">[Status:Evaluator  ]       * Processing solver 1/1
+[Simulation:exportResults] Writing partial results (SimulationData_batch_1_of_1) on the folder: /home/ep/workspace/COSSAN-X_SVN/COSSANXengine/examples/Tutorials/BridgeModel/20110527T195431
+[Simulation:exportResults] Batch #1 written in 0.53664
+[Simulation:exportResults] Results stored in the folder: /home/ep/workspace/COSSAN-X_SVN/COSSANXengine/examples/Tutorials/BridgeModel/20110527T195431/SimulationData_batch_1_of_1
+Maximum no. of samples reached. Samples computed 1000; Maximum allowed samples: 1000
+* Min   : 3.001865e-03
+* Max   : 6.726050e-03
+* Mean  : 4.205373e-03
+* Median: 4.082637e-03
+* Std   : 7.068503e-04
+</pre><img vspace="5" hspace="5" src="TutorialBridgeModelUncertaintyQuantification_02.png" alt=""> <h2>Scatter plot<a name="5"></a></h2><p>From the scatter plots it is possible to see if a correlation between some input factors and the maximum diplacement exist. However, this task can be performed in a more clear way using the Sensitivity methods.</p><pre class="codeinput">Mdata=XoutSS.getValues(<span class="string">'Cnames'</span>,{<span class="string">'k_2'</span>,<span class="string">'maxDisplacement'</span>});
+f3=figure;
+scatterhist(Mdata(:,1),Mdata(:,2))
+xlabel(<span class="string">'k_2'</span>);
+ylabel(<span class="string">'maxDisplacement'</span>);
+</pre><img vspace="5" hspace="5" src="TutorialBridgeModelUncertaintyQuantification_03.png" alt=""> <h2>Close figures<a name="6"></a></h2><pre class="codeinput">close(f1),close(f2),close(f3)
+</pre><h2>Global Sensitivity Analysis<a name="7"></a></h2><p>This tutorial continues with the optimization section See Also:  <a href="TutorialBridgeModelGlobalSensitivityAnalysis.html">TutorialBridgeModelGlobalSensitivityAnalysis.html</a></p><pre class="codeinput"><span class="comment">% echodemo TutorialBridgeModelGlobalSensitivityAnalysis</span>
+</pre><p class="footer"><br>
+      Published with MATLAB&reg; 7.11<br></p></div><!--
+##### SOURCE BEGIN #####
+%% TutorialBridgeModelUncertaintyQuantification
+% In this tutorial a simple uncertainty quantification of a mechanical
+% model of a long bridge is presented.
+%
+% See Also http://mechanik.uibk.ac.at/wiki/index.php/BridgeModel
+%
+% $Copyright~1993-2011,~COSSAN~Working~Group,~University~of~Innsbruck,~Austria$
+% $Author:~Edoardo~Patelli$ 
+
+% Reset the random number generator in order to obtain always the same results.
+% DO NOT CHANGE THE VALUES OF THE SEED
+CossanX.resetRandomNumberGenerator(46354)
+
+%% Requirements
+% This tutorial needs the mechanical model defined in the tutorial
+% TutorialBridgeModel 
+
+assert(logical(exist('XmodelBridge','var')),'COSSANX:Tutorials', ...
+    'Please run first the tutorial TutorialBridgeModel\n\n run TutorialBridgeModel')
+
+%% Perform Uncertainty Quantification using a quasi Monte Carlo methods
+% The lating hypercube sampling method is used to generate samples in the
+% multidimensional input space.
+Xlhs=LatinHypercubeSampling('Nsamples',100);
+
+% Perform simulation
+XoutLHS=Xlhs.apply(XmodelBridge);
+
+% Plot statistics of the output
+f1=XoutLHS.plotData('Sname','maxDisplacement','Stitle','Bridge Model UQ (LHS)','Nfontsize',14);
+
+% Show statistics of the output
+Mstatistics=XoutLHS.getStatistics('Sname','maxDisplacement');
+
+% Show Min, Max, Mean, median and std for maxDisplacement 
+fprintf('* Min   : %e\n* Max   : %e\n* Mean  : %e\n* Median: %e\n* Std   : %e\n',...
+    Mstatistics(:))
+
+
+
+% Validate Solution
+assert(abs(Mstatistics(3)- 4.20537e-03)<1e-6,...
+    'CossanX:Tutorials:TutorialBridgeModel', ...
+    'Nominal sulution does not match Reference Solution.')
+
+%% Use sobol sampling
+Xss=SobolSampling('Nsamples',1000);
+
+% Perform simulation
+XoutSS=Xss.apply(XmodelBridge);
+
+% Plot statistics of the output
+f2=XoutSS.plotData('Sname','maxDisplacement','Stitle','Bridge Model UQ (Sobol sampling)','Nfontsize',14);
+
+Mstatistics=XoutLHS.getStatistics('Sname','maxDisplacement');
+
+% Show Min, Max, Mean, median and std for maxDisplacement 
+% Show Min, Max, Mean, median and std for maxDisplacement 
+fprintf('* Min   : %e\n* Max   : %e\n* Mean  : %e\n* Median: %e\n* Std   : %e\n',...
+    Mstatistics(:))
+
+%% Scatter plot
+% From the scatter plots it is possible to see if a correlation between some
+% input factors and the maximum diplacement exist. However, this task can be
+% performed in a more clear way using the Sensitivity methods.
+
+Mdata=XoutSS.getValues('Cnames',{'k_2','maxDisplacement'});
+f3=figure;
+scatterhist(Mdata(:,1),Mdata(:,2))
+xlabel('k_2');
+ylabel('maxDisplacement');
+
+%% Close figures
+close(f1),close(f2),close(f3)
+
+%% Global Sensitivity Analysis
+% This tutorial continues with the optimization section
+% See Also:  <TutorialBridgeModelGlobalSensitivityAnalysis.html> 
+
+% echodemo TutorialBridgeModelGlobalSensitivityAnalysis
+
+##### SOURCE END #####
+--></body></html>

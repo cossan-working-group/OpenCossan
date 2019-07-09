@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>Code coverage report</title>
+    <link rel="stylesheet" href="./base.css" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body>
+    <h3 style="margin: 16px 0 4px 32px">Sources</h3>
+    {{sources}}
+    {{summary}}
+    <div class="header-line {{class}}"></div>
+    <div style="padding: 0px 32px 32px;">
+        <table class="summary">
+            <thead class="summary-head">
+                <tr>
+                    <th>Packages</th>
+                    <th/>
+                    <th>#Classes</th>
+                    <th>Branches</th>
+                    <th/>
+                    <th>Lines</th>
+                    <th/>
+                    <th>Complexity</th>
+                </tr>
+            </thead>
+            <tbody class="summary-body">
+                {{packages}}
+            </tbody>
+        </table>
+    </div>
+</body>
+
+</html>

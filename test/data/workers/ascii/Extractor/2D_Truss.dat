@@ -1,0 +1,635 @@
+1
+
+   Abaqus Version 6.7-1                                     DATE 02-Nov-2009   TIME 16:03:53
+   For use at EDV Zentrum Uni Innsbruck under license from ABAQUS, Inc.
+
+
+
+                            Abaqus has been developed by:
+ 
+                                  ABAQUS, Inc.
+                                Rising Sun Mills
+                               166 Valley Street
+                         Providence, RI 02909-2499, USA
+ 
+
+
+                   Available for internal use at EDV Zentrum Uni Innsbruck. 
+                   The ABAQUS Online Support System is accessible through
+                   the "My ABAQUS" section of the ABAQUS Home Page at
+                   http://www.abaqus.com.
+
+                   Support policies for academic licenses are described on
+                   the ABAQUS web site at
+                   http://www.abaqus.com/products/products_academic.html.
+ 
+                        On machine c810-cl9 
+                        you are authorized to run
+                        Abaqus/Foundation until 31-Oct-2010
+
+                        Your site id is: 16UINNS 
+
+
+ 
+                    For assistance or any other information you may
+                    obtain contact information for your local office
+                    from the world wide web at:
+
+                      http://www.simulia.com/about/locations.html
+
+ 
+                * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+                *                                                         * 
+                *                   *****************                     * 
+                *                   *  N O T I C E  *                     * 
+                *                   *****************                     * 
+                *                                                         * 
+                *                                                         * 
+                *                 Abaqus Version 6.7-1                    * 
+                *                                                         * 
+                *          BUILD ID: 2007_05_01-12.35.33 79448            * 
+                *                                                         * 
+                *                                                         * 
+                *  Please make sure you are using version 6.7 manuals     * 
+                *  plus the notes accompanying this release.              * 
+                *                                                         * 
+                *                                                         * 
+                *                                                         * 
+                *                                                         * 
+                *                                                         * 
+                *   This program may not be used for commercial purposes  * 
+                *           without payment of a commercial fee.          * 
+                *                                                         * 
+                * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+
+
+ 
+
+
+
+     PROCESSING PART, INSTANCE, AND ASSEMBLY INFORMATION
+   *******************************************************
+
+
+     END PROCESSING PART, INSTANCE, AND ASSEMBLY INFORMATION
+   ***********************************************************
+
+1
+
+   Abaqus Version 6.7-1                                     DATE 02-Nov-2009   TIME 16:03:53
+   For use at EDV Zentrum Uni Innsbruck under license from ABAQUS, Inc.
+
+                                                                                     
+
+                                             A B A Q U S   I N P U T   E C H O
+
+
+                        5   10   15   20   25   30   35   40   45   50   55   60   65   70   75   80
+                    --------------------------------------------------------------------------------
+                    *HEADING
+                    Two-dimensional overhead hoist frame    
+                    SI Units
+                    1-axis horizontal, 2-axis vertical      
+     LINE     5     *PREPRINT, ECHO=YES, MODEL=YES, HISTORY=YES     
+                    *NODE   
+                    101, 0., 0., 0. 
+                    102, 1., 0., 0. 
+                    103, 2., 0., 0. 
+     LINE    10     104, 0.5, 0.866, 0.     
+                    105, 1.5, 0.866, 0.     
+                    *ELEMENT, TYPE=T2D2, ELSET=FRAME
+                    11, 101,102     
+                    12, 102,103     
+     LINE    15     13, 101,104     
+                    14, 102,104     
+                    15, 102,105     
+                    16, 103,105     
+                    17, 104,105     
+     LINE    20     *SOLID SECTION, ELSET=FRAME, MATERIAL=STEEL     
+                    1.963E-5,       
+                    *MATERIAL, NAME=STEEL   
+                    *ELASTIC
+                    2.281E+11       ,    0.261      
+     LINE    25     *STEP, PERTURBATION     
+                    10kN central load       
+                    *STATIC 
+                    *BOUNDARY       
+                    101, ENCASTRE   
+     LINE    30     103, 2  
+                    *CLOAD  
+                    102,2,    1.03188E+04   
+                    *NODE PRINT     
+                    U,      
+     LINE    35     RF,     
+                    *EL PRINT       
+                    S,      
+                    *EL FILE
+                    S,      
+     LINE    40     *NODE FILE      
+                    U, RF   
+                    *END STEP       
+                    --------------------------------------------------------------------------------
+                        5   10   15   20   25   30   35   40   45   50   55   60   65   70   75   80
+                    --------------------------------------------------------------------------------
+
+
+
+     OPTIONS BEING PROCESSED
+   ***************************
+
+
+  *HEADING
+          Two-dimensional overhead hoist frame                                                                                                                                                                                                                            
+  *NODE
+  *ELEMENT, TYPE=T2D2, ELSET=FRAME
+  *MATERIAL, NAME=STEEL
+  *ELASTIC
+  *SOLID SECTION, ELSET=FRAME, MATERIAL=STEEL
+  *BOUNDARY
+  *SOLID SECTION, ELSET=FRAME, MATERIAL=STEEL
+  *STEP, PERTURBATION
+  *STEP, PERTURBATION
+  *STEP, PERTURBATION
+  10kN central load                                                               
+  *STATIC
+  *BOUNDARY
+  *EL PRINT
+  *EL FILE
+  *END STEP
+  *STEP, PERTURBATION
+  *STATIC
+  *BOUNDARY
+  *CLOAD
+  *NODE PRINT
+  *NODE FILE
+  *END STEP
+1
+
+   Abaqus Version 6.7-1                                     DATE 02-Nov-2009   TIME 16:03:53
+   For use at EDV Zentrum Uni Innsbruck under license from ABAQUS, Inc.
+
+     Two-dimensional overhead hoist frame                                            
+
+
+                              E L E M E N T   D E F I N I T I O N S
+
+       NUMBER   TYPE    PROPERTY    NODES FORMING ELEMENT
+                        REFERENCE
+
+         11   T2D2          1        101       102
+         12   T2D2          1        102       103
+         13   T2D2          1        101       104
+         14   T2D2          1        102       104
+         15   T2D2          1        102       105
+         16   T2D2          1        103       105
+         17   T2D2          1        104       105
+
+
+
+
+
+                                S O L I D   S E C T I O N (S)
+
+
+
+
+  PROPERTY NUMBER         1
+
+     MATERIAL NAME                     STEEL                                                                           
+     ATTRIBUTES                         1.96300E-05   0.0000       0.0000    
+
+     HOURGLASS CONTROL STIFFNESS    4.52220E+08
+
+     (USED WITH LOWER ORDER REDUCED INTEGRATED SOLID ELEMENTS LIKE CPS4R,CPE4RH,C3D8R)
+
+
+
+
+
+                         M A T E R I A L   D E S C R I P T I O N
+
+
+
+
+  MATERIAL NAME: STEEL                                                                           
+
+
+     ELASTIC         YOUNG'S    POISSON'S
+                     MODULUS      RATIO
+
+                    2.28100E+11 0.26100    
+
+
+
+
+
+                                 E L E M E N T   S E T S
+
+
+  SET    FRAME                                                                           
+  MEMBERS                   11        12        13        14        15        16        17
+
+
+
+
+
+                                 N O D E   D E F I N I T I O N S
+
+       NODE           COORDINATES                       SINGLE POINT CONSTRAINTS 
+      NUMBER                                              TYPE    PLUS    DOF
+
+        101     0.0000       0.0000       0.0000       ENCASTRE                                                        
+        102     1.0000       0.0000       0.0000                                                                       
+        103     2.0000       0.0000       0.0000                    2                                                  
+        104    0.50000      0.86600       0.0000                                                                       
+        105     1.5000      0.86600       0.0000                                                                       
+1
+
+   Abaqus Version 6.7-1                                     DATE 02-Nov-2009   TIME 16:03:53
+   For use at EDV Zentrum Uni Innsbruck under license from ABAQUS, Inc.
+
+     Two-dimensional overhead hoist frame                                            
+
+
+                        S T E P       1     S T A T I C   A N A L Y S I S
+
+
+          10kN central load                                                               
+
+          FIXED TIME INCREMENTS
+          TIME INCREMENT IS                                    2.220E-16
+          TIME PERIOD IS                                       2.220E-16
+     AUTOMATIC TOLERANCES FOR OVERCLOSURE AND SEPARATION 
+     PRESSURE ARE SUPPRESSED
+     GLOBAL STABILIZATION CONTROL IS NOT USED
+     FRICTION IS INCLUDED IN INCREMENT THAT THE CONTACT POINT CLOSES
+
+     THIS IS A LINEAR PERTURBATION STEP.
+     ALL LOADS ARE DEFINED AS CHANGE IN LOAD TO THE REFERENCE STATE
+
+     EXTRAPOLATION WILL NOT BE USED
+
+     CHARACTERISTIC ELEMENT LENGTH      1.00    
+
+     DETAILED OUTPUT OF DIAGNOSTICS TO DATABASE REQUESTED
+
+     PRINT OF INCREMENT NUMBER, TIME, ETC., TO THE MESSAGE FILE EVERY     1  INCREMENTS
+
+
+
+                              D A T A B A S E   O U T P U T   G R O U P       1
+
+
+  THE FOLLOWING  FIELD   OUTPUT WILL BE WRITTEN EVERY        1 INCREMENT(S)
+
+
+
+   THE FOLLOWING OUTPUT WILL BE WRITTEN FOR ALL ELEMENTS OF TYPE T2D2.  OUTPUT IS AT THE 
+   INTEGRATION POINTS.
+
+            S         E       
+
+
+
+   THE FOLLOWING OUTPUT WILL BE WRITTEN FOR ALL NODES
+
+
+            U         RF        CF      
+
+
+
+  END OF DATABASE OUTPUT GROUP    1
+
+
+
+
+                              D A T A B A S E   O U T P U T   G R O U P       2
+
+
+  THE FOLLOWING HISTORY  OUTPUT WILL BE WRITTEN EVERY        1 INCREMENT(S)
+
+
+
+   THE FOLLOWING ENERGY OUTPUT QUANTITIES WILL BE WRITTEN FOR THE WHOLE MODEL
+
+            ALLKE     ALLSE     ALLWK     ALLPD     ALLCD     ALLVD     ALLKL     ALLAE     ALLQB   
+
+            ALLEE     ALLIE     ETOTAL    ALLFD     ALLJD     ALLSD     ALLDMD  
+
+  END OF DATABASE OUTPUT GROUP    2
+
+
+
+
+
+                                    E L E M E N T   P R I N T
+
+
+
+
+   THE FOLLOWING TABLE IS PRINTED AT EVERY 1 INCREMENT FOR ALL ELEMENTS OF TYPE T2D2.  OUTPUT IS AT 
+   THE INTEGRATION POINTS.
+
+     SUMMARIES WILL BE PRINTED WHERE APPLICABLE
+
+          TABLE     1  S11     
+
+
+
+
+                                 E L E M E N T   F I L E   O U T P U T
+
+
+
+
+   THE FOLLOWING TABLE IS OUTPUT AT EVERY 1 INCREMENT FOR ALL ELEMENTS OF TYPE T2D2.  OUTPUT IS AT 
+   THE INTEGRATION POINTS.
+
+            S       
+
+
+
+
+                                       N O D E   P R I N T
+
+
+
+
+   THE FOLLOWING TABLE IS PRINTED FOR ALL NODES AT EVERY 1 INCREMENT
+
+     SUMMARIES WILL BE PRINTED
+
+          TABLE  1  U1        U2      
+
+
+
+   THE FOLLOWING TABLE IS PRINTED FOR ALL NODES AT EVERY 1 INCREMENT
+
+     SUMMARIES WILL BE PRINTED
+
+          TABLE  2  RF1       RF2     
+
+
+
+
+                                 N O D E   F I L E   O U T P U T
+
+
+
+
+   THE FOLLOWING TABLE IS OUTPUT FOR ALL NODES AT EVERY 1 INCREMENT
+
+                    U         RF      
+
+
+
+
+                              B O U N D A R Y   C O N D I T I O N S
+
+
+      NODE      DOF     AMP.    MAGNITUDE                 NODE      DOF     AMP.    MAGNITUDE
+                        REF.                                                REF.
+
+         103    2     (RAMP)     0.0000               
+
+     - (RAMP) OR (STEP) - INDICATE USE OF DEFAULT AMPLITUDES ASSOCIATED WITH THE STEP
+
+
+
+
+                              B O U N D A R Y   C O N D I T I O N S
+
+
+         NODE     TYPE             NODE     TYPE             NODE     TYPE             NODE     TYPE             NODE     TYPE  
+
+           101   ENCASTRE   
+
+
+
+
+                               C O N C E N T R A T E D   L O A D S
+
+            NODE   DOF     AMP.    AMPLITUDE            NODE   DOF     AMP.    AMPLITUDE            NODE   DOF     AMP.    AMPLITUDE
+                           REF.                                        REF.                                        REF.
+
+             102     2              10319.      
+
+
+
+
+                      C O N S T R A I N T    C H E C K S
+
+            PERFORM CONSTRAINT CHECKS:                        YES
+            AUTOMATIC MODEL CHANGES:                          YES
+            CONSTRAINT CHECKS FREQUENCY:                             1
+            TERMINATE ANALYSIS IF OVERCONSTRAINTS ARE FOUND:  NO             
+
+
+
+                            P R O B L E M   S I Z E
+
+
+          NUMBER OF ELEMENTS IS                                     7
+          NUMBER OF NODES IS                                        5
+          NUMBER OF NODES DEFINED BY THE USER                       5
+          TOTAL NUMBER OF VARIABLES IN THE MODEL                   10
+          (DEGREES OF FREEDOM PLUS ANY LAGRANGE MULTIPLIER VARIABLES)
+
+
+
+                              END OF USER INPUT PROCESSING
+
+
+
+     JOB TIME SUMMARY
+       USER TIME (SEC)      =  0.17000    
+       SYSTEM TIME (SEC)    =  5.00000E-02
+       TOTAL CPU TIME (SEC) =  0.22000    
+       WALLCLOCK TIME (SEC) =          0
+1
+
+   Abaqus Version 6.7-1                                     DATE 02-Nov-2009   TIME 16:03:54
+   For use at EDV Zentrum Uni Innsbruck under license from ABAQUS, Inc.
+
+     Two-dimensional overhead hoist frame                                                      STEP    1  INCREMENT    1
+     10kN central load                                                                    TIME COMPLETED IN THIS STEP   0.00    
+
+
+                        S T E P       1     S T A T I C   A N A L Y S I S
+
+
+          10kN central load                                                               
+
+          FIXED TIME INCREMENTS
+          TIME INCREMENT IS                                    2.220E-16
+          TIME PERIOD IS                                       2.220E-16
+
+     LINEAR EQUATION SOLVER TYPE         DIRECT SPARSE
+
+     THIS IS A LINEAR PERTURBATION STEP.
+     ALL LOADS ARE DEFINED AS CHANGE IN LOAD TO THE REFERENCE STATE
+
+
+
+ STEP     1, INCREMENT          1, TIME INCREMENT=         0.222E-15, TOTAL TIME=         0.222E-15
+ REORDERING OF EQUATIONS TO MINIMIZE WAVEFRONT HAS CHANGED THE MEMORY AND DISK ESTIMATES TO:
+  
+                   M E M O R Y   A N D   D I S K   E S T I M A T E
+  
+           SUMMARY FOR CURRENT NODE ORDERING
+          (NOTE THAT IF NODE ORDERING CHANGES THE SIZE ESTIMATES FOR THE STEPS WILL CHANGE)
+  
+  
+           STEP   MAXIMUM DOF     FLOATING PT    MINIMUM MEMORY      MEMORY TO      REQUIRED DISKSPACE
+                  WAVEFRONT       OPERATIONS       REQUIRED        MINIMIZE I/O
+                                PER ITERATION     (MBYTES)           (MBYTES)          (KBYTES)
+  
+             1           8         2.65E+02          3.02               3.74              1.35
+          ----    ---------      ------------    -------------     -------------      -------------
+           MAX           8         2.65E+02          3.02               3.74              1.35
+  
+  
+          THE TABLE ABOVE PROVIDES A STEP BY STEP SUMMARY OF SOME BASIC SIZING INFORMATION
+          FOR THE PROBLEM. SOME FURTHER DESCRIPTION OF THE PARAMETERS GIVEN FOLLOWS:
+  
+          (1) MAXIMUM DOF WAVEFRONT - SIZE OF THE BIGGEST FRONT IN THE EQUATION SOLVER.
+              PROVIDES A BASIC SIZING OF THE MOST MEMORY INTENSIVE SEGMENT OF SOLVER.
+          (2) FLOATING POINT OPERATIONS PER ITERATION - MEASURE OF THE NUMBER OF FLOATING
+              POINT OPERATIONS REQUIRED FOR A SINGLE SOLVER PASS. ON A GIVEN PLATFORM
+              THE TIME REQUIRED FOR A SOLVER PASS WILL BE ROUGHLY A LINEAR FUNCTION
+              OF THIS VALUE.
+              NOTE - EXCEPT FOR THE FIRST STEP, THE VALUE IN THIS TABLE DOES NOT INCLUDE
+                     ADDITIONAL FLOATING POINT OPERATIONS THAT ARE REQUIRED IN MULTIPLE LOAD
+                     CASE STEPS WHEN CONSTRAINTS CHANGE FROM LOAD CASE TO LOAD CASE.  THIS
+                     SITUATION CAUSES A REORDERING TO BE PERFORMED, AT WHICH TIME AN UPPER
+                     BOUND ON THE NUMBER OF ADDITIONAL FLOATING POINT OPERATIONS WILL BE
+                     CALCULATED AND INCLUDED UNDER THE ESTIMATE SUMMARIES FOR THE RELEVANT
+                     STEPS (SEE NOTE BELOW ON REORDERING).
+          (3) MINIMUM MEMORY REQUIRED - MINIMUM POSSIBLE MEMORY VALUE FOR standard_memory
+              THAT ENABLES Abaqus TO SOLVE THE PROBLEM. USE OF MEMORY WILL BE MINIMIZED BY
+              WRITING AS MUCH INFORMATION AS POSSIBLE TO DISK WHICH WILL INCREASE I/O TIME.
+          (4) MEMORY TO MINIMIZE I/O - VALUE OF standard_memory THAT ALLOWS Abaqus TO KEEP
+              ALL SIGNIFICANT SCRATCH FILES IN MEMORY. THIS WILL MINIMIZE I/O TIME FOR THE USER
+              WITH ACCESS TO A LARGE AMOUNT OF MEMORY.
+          (5) REQUIRED DISKSPACE - AMOUNT OF DISK REQUIRED FOR SCRATCH FILES. THESE WILL BE
+              DELETED AT THE END OF THE ANALYSIS.
+  
+  
+           NOTE - WHENEVER POSSIBLE THE USER SHOULD SET standard_memory TO BE LESS THAN THE
+          PHYSICAL MEMORY ON THE MACHINE. UNLESS NECESSARY USERS SHOULD NOT MAKE USE
+          OF VIRTUAL MEMORY EVEN IN AN ATTEMPT TO KEEP SCRATCH FILES IN MEMORY.
+  
+           NOTE - IF A REORDERING IS PERFORMED (THIS WILL ONLY GENERALLY BE DONE FOR FINITE-
+          SLIDING CONTACT PROBLEMS), THE SIZE ESTIMATES DONE AT THIS TIME WILL NO LONGER 
+          BE VALID. THE ESTIMATES WILL BE REDONE IN THE EVENT OF A REORDERING AND A NEW 
+          SUMMARY WILL BE PRINTED FOR THE REMAINING STEPS.
+  
+  
+  
+           S I Z E   E S T I M A T E S   F O R   C U R R E N T   S T E P
+  
+          NUMBER OF EQUATIONS                        10
+          MAX DOF WAVEFRONT                          8
+          FLOATING POINT OPS PER SOLVER ITERATION    2.65E+02
+          MEMORY USED FOR STEP                     256.00 MBYTES
+  
+  
+           ESTIMATED FILE SIZES
+  
+           FILE            WORDS           KBYTES
+  
+          .fct           376.000            0.367
+          .nck           224.000            0.219
+          .opr           784.000            0.766
+          -------        -------          -------
+           TOTAL         1384.000            1.352
+  
+
+
+                                INCREMENT     1 SUMMARY
+
+
+ TIME INCREMENT COMPLETED  2.220E-16,  FRACTION OF STEP COMPLETED   1.00    
+ STEP TIME COMPLETED       2.220E-16,  TOTAL TIME COMPLETED         0.00    
+
+
+
+                                                  E L E M E N T   O U T P U T
+
+
+
+
+
+   THE FOLLOWING TABLE IS PRINTED FOR ALL ELEMENTS WITH TYPE T2D2 AT THE INTEGRATION POINTS
+
+    ELEMENT  PT FOOT-       S11     
+                NOTE 
+
+          11   1        -1.5175E+08
+          12   1        -1.5175E+08
+          13   1         3.0349E+08
+          14   1        -3.0349E+08
+          15   1        -3.0349E+08
+          16   1         3.0349E+08
+          17   1         3.0350E+08
+
+ MAXIMUM                3.0350E+08                                                                                                
+ ELEMENT                    17                                                                                                 
+
+ MINIMUM               -3.0349E+08                                                                                                
+ ELEMENT                    14                                                                                                 
+
+
+
+
+                                       N O D E   O U T P U T
+
+  
+  
+  
+   THE FOLLOWING TABLE IS PRINTED FOR ALL NODES
+  
+       NODE FOOT-   U1          U2       
+            NOTE
+  
+        102     -6.6528E-04  4.2250E-03 
+        103     -1.3306E-03   0.000     
+        104     -1.3306E-03  2.3046E-03 
+        105       0.000      2.3046E-03 
+
+ MAXIMUM          0.000      4.2250E-03
+ AT NODE               101         102
+
+ MINIMUM        -1.3306E-03   0.000    
+ AT NODE               104         101
+  
+  
+  
+   THE FOLLOWING TABLE IS PRINTED FOR ALL NODES
+  
+       NODE FOOT-   RF1         RF2      
+            NOTE
+  
+        101     -2.2737E-12  -5159.     
+        103       0.000      -5159.     
+
+ MAXIMUM          0.000       0.000    
+ AT NODE               102         102
+
+ MINIMUM        -2.2737E-12  -5159.    
+ AT NODE               101         101
+
+
+          THE ANALYSIS HAS BEEN COMPLETED
+
+
+
+                              ANALYSIS COMPLETE
+
+
+
+     JOB TIME SUMMARY
+       USER TIME (SEC)      =  0.14000    
+       SYSTEM TIME (SEC)    =  5.00000E-02
+       TOTAL CPU TIME (SEC) =  0.19000    
+       WALLCLOCK TIME (SEC) =          0

@@ -1,0 +1,19 @@
+$ FREE FIELD FORMAT
+
+PSHELL, 1, 1, <cossan name="t" format="%5.3f"  original="0.01"/>, 1, , 1
+MAT1, 1, <cossan name="Emod" format="nastran8"  original="2e11"/>, , 0.3,  7800.
+MAT1*, 1, <cossan name="Emod" format="nastran16"  original="2e11"/>, , 0.3,  7800.
+MAT1, 1, <cossan name="Emod" format="%7.1e"  original="2e11"/>, , 0.3,  7800.
+MAT1, 1, <cossan name="Emod" format="nastran8"  original="2e11"/>, , <cossan name="nu" format="%3.1f"  original="0.3"/>,  <cossan name="rho" format="%6.1f"  original="7800."/>
+
+$------------------------------------------------------------------
+$ SMALL FIELD FORMAT (Nastran only)
+
+$<-----><------><------><------><------><------><------>
+PSHELL  1       1       <cossan name="t" format="nastran8"  original="0.01"/>1       1
+
+$------------------------------------------------------------------
+$ LARGE FIELD FORMAT
+
+$<-----><--------------><--------------><--------------><--------------><-------------->
+PSHELL* 1               1               <cossan name="t" format="nastran16"  original="0.01"/>1               1

@@ -13,6 +13,22 @@ pipeline {
     stages {
         stage("Test") {
             parallel {
+                stage("Unit") {
+                    steps {
+                        sh 'matlab -r run_unit_tests'
+                    }
+                    post {
+                        success {
+                            // archive and track test results
+                            archiveArtifacts "unit_test_results.xml"
+                            junit "unit_test_results.xml"
+
+                            // archive code coverage
+                            archiveArtifacts "cobertura.xml"
+                        }
+                    }
+                }
+
                 stage("Integration") {
                     steps {
                         sh 'matlab -r run_integration_tests'
@@ -20,8 +36,8 @@ pipeline {
                     post {
                         success {
                             // archive and track test results
-                            archiveArtifacts "integrationResults.xml"
-                            junit "integrationResults.xml"
+                            archiveArtifacts "integration_test_results.xml"
+                            junit "integration_test_results.xml"
                         }
                     }
                 }
