@@ -38,7 +38,7 @@ At the moment we are migrating from a private repository to GitHub. Some of the 
 
 ## Support
 
-If you encounter any issue working with OpenCossan please do not hesitate to create an issue.
+If you encounter any problem working with OpenCossan please do not hesitate to create an issue.
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
