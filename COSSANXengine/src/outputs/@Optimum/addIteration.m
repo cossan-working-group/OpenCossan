@@ -35,7 +35,7 @@ MvaluesObjectiveFunction=[];
 MvaluesConstraint=[];
 
 if isempty(Xobj.TablesValues)
-    Xobj.TablesValues=initialaseTable(Xobj,varargin{:});
+    Xobj.TablesValues=initializeTable(Xobj,varargin{:});
 else
     
     for k=1:2:length(varargin)

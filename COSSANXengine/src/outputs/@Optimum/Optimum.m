@@ -132,7 +132,7 @@ classdef Optimum
        
             
             if LaddIteration               
-                Xobj.TablesValues=initialaseTable(Xobj,vararginTable{:});                
+                Xobj.TablesValues=initializeTable(Xobj,vararginTable{:});                
             else
                 %% No iterations
                 % Initialise the Optimum object with an empty table
@@ -177,7 +177,7 @@ classdef Optimum
     end     %of methods
     
     methods (Access = private)
-        TablesValues=initialaseTable(Xobj,varargin)
+        TablesValues=initializeTable(Xobj,varargin)
     end        
     
 end     %of classdef

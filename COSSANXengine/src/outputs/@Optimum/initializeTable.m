@@ -1,4 +1,4 @@
-function TablesValues=initialaseTable(Xobj,varargin)
+function TablesValues=initializeTable(Xobj,varargin)
 % INITIALISETABLE assumes that there is one entry for each iteration.
 % In case of stochastic optimization multiple entries for the same
 % iteration number should be used.

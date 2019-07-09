@@ -17,9 +17,12 @@
 %}
 %
 %% TUTORIALINPUT
-% This turorial shows how to create and use an Input object
-% The Input object is uses to generate samples of random variables, collection
-% parameters, function and design variables
+% This tutorial shows how to create and use an Input object.
+% The Input object is used to collect all the defined input quanities used
+% in an analysis, i.e., random variables, multivariate distributions,
+% parameters, function of random variables, and stochastic processes.
+% Additionally, an Input object will also store the generated samples of
+% the random quantities (Random variables, RV sets and stochasti processes)
 %
 % See Also:  https://cossan.co.uk/wiki/index.php/@Input
 % Author:~Pierre~Beaurepaire
