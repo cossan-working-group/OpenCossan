@@ -15,7 +15,8 @@ OpenCossan is being jointly developed at the Institute for Risk and Uncertainty,
 
 https://cossan.co.uk
 
-![](COSSANXengine/Apps/readmetools.png)
+<img align="middle" src="COSSANXengine/Apps/readmetools.png" width="60%">
+
 
 ## Getting started
 

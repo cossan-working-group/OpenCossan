@@ -1,12 +1,20 @@
-%% Tutorial2DOFModelUpdating:
-% This script runs the 2 DOF model updating in the OpenCossan Engine
-% The documentation and the problem description of this example is available on
-% the User Manual -> Tutorials -> ModelUpdating
-% See Also https://cossan.co.uk/wiki/index.php/
+%% Tutorial2DOFModelUpdating
+%
+% This script shows how to perform model updating of a 2 degree of freedom
+% system.
 
-% $Copyright~1993-2018,~COSSAN~Working~Group$
+% We want to identify the parameters of a system k1 and k2 from some
+% measurements affected by noise. The displacement of a 2DOF system is
+% computed by a script called displacement.m
+% We used some generated data from a model called
+% displacementsPerturbation.m where some random noise is added to the
+% response of the system 
+
+
+% See Also: ModelUpdating
+
+% $Copyright~1993-2019,~COSSAN~Working~Group$
 % $Author: Edoardo-Patelli$ %
-
 
 % Reset the random number generator in order to obtain always theme
 % results. using the method 'resetRandomNumberGenerator' from OpenCossan
@@ -14,8 +22,8 @@
 % DO NOT CHANGE THE VALUES OF THE SEED
 OpenCossan.resetRandomNumberGenerator(51125);
 
-%% Preparation of the parameters and random variables
-% Definition of the Parameters using 'Parameter' constructor from OpenCossan
+%% Model inputs
+% The parameters of the model are defined using Parameter class 
 F1=Parameter('value',2.0,'Sdescription','Applied Load in node 1');
 F2=Parameter('value',1.0,'Sdescription','Applied Load in node 2');
 k1real=Parameter('value',1.0,'Sdescription','Stiffness of spring 1');
@@ -25,22 +33,28 @@ k1=Parameter('value',0.5,'Sdescription','Stiffness of spring 1');
 k2=Parameter('value',1.4,'Sdescription','Stiffness of spring 2');
 
 % Definition of the Random Variables to simulate synthetic data using
-% 'RandomVariable' constructor from OpenCossan
-p1=RandomVariable('Sdistribution','normal','mean',0.0,'std',1.0,'Sdescription','randomperturbation for measured displacement 1');
-p2=RandomVariable('Sdistribution','normal','mean',0.0,'std',1.0,'Sdescription','randomperturbation for measured displacement 2');
+% 'RandomVariable' class 
+p1=RandomVariable('Sdistribution','normal','mean',0.0,'std',1.0,...
+    'Sdescription','randomperturbation for measured displacement 1');
+p2=RandomVariable('Sdistribution','normal','mean',0.0,'std',1.0,...
+    'Sdescription','randomperturbation for measured displacement 2');
 % Gathering random data into a single structure set using
-% 'RandomVariableSet' from OpenCossan
+% 'RandomVariableSet' 
 Xrvset=RandomVariableSet('CXrandomVariables',{p1 p2},'CSmembers',{'p1' 'p2'});
 
 %%---------------Simulations to built Synthetic ExperimentalData-----------
 %  ------------------------------------------------------------------------
-% Create a new model to simulate perturbed data, inputs forces, stiffness and randon displacement
-% output values with random noise
-% Create Input values using 'Input' constructor from OpenCossan
-XinputPert=Input('CXmembers',{F1 F2 k1real k2real Xrvset},'CSmembers',{'F1' 'F2' 'k1' 'k2' 'Xrvset'});
-display(XinputPert); %It could also be:  Xinput.display
-Sfolder=fileparts(which('Tutorial2DOFModelUpdatingMatlab.m')); % returns the current folder
-% Prepare the perturbed Model by 'mio' constructor from OpenCossan using a
+% Create a new model to simulate perturbed data, inputs forces, stiffness
+% and random displacement output values with random noise 
+% Create Input values using 'Input' class
+XinputPert=Input('CXmembers',{F1 F2 k1real k2real Xrvset},...
+            'CSmembers',{'F1' 'F2' 'k1' 'k2' 'Xrvset'});
+% Show summary of the Input object        
+display(XinputPert); 
+
+%% Define Model
+Sfolder=fileparts(which('TutorialModelUpdating.m')); % returns the current folder
+% Prepare the perturbed Model by 'mio' class from OpenCossan using a
 % matlab script that is coded to handle the random vector to be added to the output
 % displacements (to simulate synthetic data)
 XmioPert=Mio('Spath',fullfile(Sfolder,'MatlabModel'),...
@@ -48,12 +62,17 @@ XmioPert=Mio('Spath',fullfile(Sfolder,'MatlabModel'),...
     'Cinputnames',{'F1' 'F2' 'k1' 'k2', 'p1','p2'}, ...
     'Coutputnames',{'y1' 'y2'},...
     'Liostructure',true);
-% Add the 'mio' constructor to 'Evaluator' constructor from OpenCOssan
+
+%% Construct Model
+% Add the XmioPert object to an 'Evaluator' 
 XevaluatorPert=Evaluator('CXmembers',{XmioPert},'CSmembers',{'XmioPert'});
 % Defining the Physical Model by the 'Model' constructor from OpenCossan
 XmodelPert=Model('Xinput',XinputPert,'Xevaluator',XevaluatorPert);
-% Prepare 'MonteCarlo' constructor from OpenCossan
+
+%% Monte Carlo simulation
+% Define Monte Carlo simulation
 Xmc=MonteCarlo('Nsamples',100);
+
 % Perform Monte Carlo simulation using 'Apply' method
 XsyntheticData=Xmc.apply(XmodelPert);
 % Display the resulted outputs
@@ -63,9 +82,9 @@ XsyntheticData.getValues('Cnames',{ 'F1' 'F2' 'y1' 'y2' });
 %  ------------------------------------------------------------------------
 % Prepare Input Object using 'Input' constructor from OpenCossan
 % The previously prepared Parameters should be added together to an 'Xinput' Object
-Xinput=Input('CXmembers',{F1 F2 k1real k2real},'CSmembers',{'F1' 'F2' 'k1' 'k2'});
+XinputNoise=Input('CXmembers',{F1 F2 k1real k2real},'CSmembers',{'F1' 'F2' 'k1' 'k2'});
 % Show summary of the Input Object using 'Display' Method from OpenCossan
-display(Xinput); %It could also be :  Xinput.display
+display(XinputNoise); %It could also be :  Xinput.display
 % It will be used a matlab script to compute the the 2DOF displacements
 Sfolder=fileparts(which('Tutorial2DOFModelUpdatingMatlab.m')); % returns the current folder
 % Preparation for the Evaluator defining Input-Output method by 'mio' constructor from OpenCossan
@@ -78,7 +97,7 @@ Xmio=Mio('Spath',fullfile(Sfolder,'MatlabModel'),... %Pass Input/output names to
 Xevaluator=Evaluator('CXmembers',{Xmio},'CSmembers',{'Xmio'});
 %% Preparation of the Physical Model
 % Defining the Physical Model by the 'Model' constructor from OpenCossan
-Xmodel2DOFModelUpdatingMatlab=Model('Xinput',Xinput,'Xevaluator',Xevaluator);
+Xmodel2DOFModelUpdatingMatlab=Model('Xinput',XinputNoise,'Xevaluator',Xevaluator);
 %% Perform deterministic analysis to obtain deterministic values for the
 % displcaments using 'deterministicAnalysis' method from OpenCossan aaplied
 % to the constructed 'Model' knwon as  Xmodel2DOFModelUpdatingMatlab
@@ -87,8 +106,7 @@ Xout=deterministicAnalysis(Xmodel2DOFModelUpdatingMatlab); %It could also be  Xo
 % in Xout)
 ActualDisplacements=Xout.getValues('Cnames',{'y1' 'y2'});
 
-%% ---------------------------Model Updating-------------------------------
-%  ------------------------------------------------------------------------
+%% Define Model
 %Define the Model such as the input values contain the Synthetic data (can
 %be alo experimental ones)
 Xinput=Input('CXmembers',{F1 F2 k1 k2},'CSmembers',{'F1' 'F2' 'k1' 'k2'});
@@ -96,6 +114,9 @@ Xmodel2DOFModel=Model('Xinput',Xinput,'Xevaluator',Xevaluator);
 % Show summary of the Input Object using 'Display' Method from OpenCossan
 display(Xinput); %It could also be :  Xinput.display
 %Defining the 'ModelUpdating' constructor
+
+
+%% ---------------------------Model Updating-------------------------------
 % The model updating analysis requires the definition of parameters of the
 % model that that will be updated 'Cinputnames', the output variables that
 % will be used to mount the error function 'Coutputnames', the

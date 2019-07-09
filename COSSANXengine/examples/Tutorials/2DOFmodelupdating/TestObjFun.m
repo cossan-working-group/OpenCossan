@@ -1,9 +1,0 @@
-% $Copyright~1993-2015,~COSSAN~Working~Group,~University~of~Liverpool,~UK$
-% $Author: Edoardo-Patelli$ 
-
-Xobjfun=ObjectiveFunction('Sdescription','objective function', ...
-                          'Afunction',@(x)evaluateFitness(Xmupd,x),...
-                          'Cinputnames',{'k1'},...
-                          'Coutputnames',{'fitness'},'Lfunction',true,'Liomatrix',true);
-                      
- Xobjfun.run(XsyntheticData.Tvalues)             

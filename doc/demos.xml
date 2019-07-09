@@ -30,24 +30,27 @@
     <type>toolbox</type>
     <icon>HelpIcon.DEMOS</icon>
     <description>
-        <![CDATA[The following demos illustrate the most important features of the OpenCossan toolbox.
+          <![CDATA[The following demos illustrate the most important features of the OpenCossan toolbox.
 <p>
-        <b>IMPORTANT NOTE:</b> The toolbox <b>must be initialized</b> prior to executing these demos by using the command <code>CossanX</code> from the Matlab command line, or by clicking <a href="matlab:CossanX"><code>here</code></a>.]]>
+        <b>IMPORTANT NOTE:</b> The toolbox <b>must be initialized</b> prior to executing these demos by using the command <code>OpenCossan</code> from the Matlab command line, or by clicking <a href="matlab:OpenCossan"><code>here</code></a>.]]>
+
     </description>
     <website>
         <a href="http://cossan.co.uk/wiki/index.php/Category:Tutorials">Tutorials (web)</a>
     </website>
     <!-- First group of demos begins here -->
     <demosection>
-        <label>Examples Demos</label>
-        
+        <label>Examples</label>
+          <description>
+          These tutorials shows how to use OpenCossan to perform different analyses.
+        </description>
         <demoitem>
             <!-- How demo is described in the Contents pane -->
-            <label>1. Cantilever Beam </label>
+            <label>1. Cantilever Beam - (Design of Experiment, Uncertainty Quantification, Sensitivity and Optimisation)</label>
+            <type>M-file</type>
             <!-- Do not add a <type> element if demo is executable -->
             <!-- File to execute for "Run this demo" -->
-            <file>./html/TutorialCantileverBeam.html</file>
-            <callback>echodemo TutorialCantileverBeam</callback>
+            <source>TutorialCantileverBeam</source>
         </demoitem>
         
         <demoitem>
