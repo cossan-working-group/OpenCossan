@@ -4,11 +4,21 @@
 %
 % The solver (ishigamifunction) is a C code and requires an input file
 % input.dat and produce an output file result.out 
-% See example in the subfolder solver
+% The source code is in /examples/Models/IshigamiFunction/ and to compile
+% the solver run in the terminal:
+%
+% gcc ini.c ishigamiFunction.c -lm -o ishigamiFunction
+%
+% This will generate the executable (external solver).
 
 OpenCossan.reset
 Spath = fileparts(which('TutorialIshigamiFunction.m'));
-SsolverPathBinary=fullfile(Spath,'solver','ishigamifunction');
+SsolverPathBinary=fullfile(OpenCossan.getCossanRoot,'examples','Models','IshigamiFunction');
+if ispc
+    SsolverPathBinary=fullfile(SsolverPathBinary,'ishigamiFunction.exe');
+else
+    SsolverPathBinary=fullfile(SsolverPathBinary,'ishigamiFunction');
+end
 
 %% Input Definition
 % In this example, the external solver computes the value of the Ishigami
