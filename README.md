@@ -20,8 +20,10 @@ If you are unfamiliar with git the stable version (master) can be downloaded by 
 To clone it to your local machine type in the terminal:
 
 ```bash
-git clone git@github.com:cossan-working-group/OpenCossan.git
+git clone https://github.com/cossan-working-group/OpenCossan.git
 ```
+
+Then navigate to `OpenCossan\doc\GettingStarted.mlx` in Matlab to view further instructions.
 
 ## Usage
 
