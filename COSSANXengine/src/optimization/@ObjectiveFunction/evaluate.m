@@ -83,7 +83,7 @@ else
 end
 
 %% Prepare input considering perturbations
-if Lgradient   
+if Lgradient
     %checks whether or not the gradient can be retrieved
     assert(~XoptProb.Xinput.LdiscreteDesignVariables,...
         'OpenCossan:ObjectiveFunction:evaluate',...
@@ -191,33 +191,41 @@ MobjectiveFunction  = Mout(1:Ncandidates,:)/scaling;
 %% Update function counter of the Optimisers
 XoptGlobal.NevaluationsObjectiveFunctions = XoptGlobal.NevaluationsObjectiveFunctions+length(Tinput);  % Number of objective function evaluations
 
+% check if you are running "HRLF" (special kind of optimization with no
+% optimizer)
+Tstack = dbstack;
+if isempty(XoptGlobal.XOptimizer) && ismember("HLRF",convertCharsToStrings({Tstack.name}))
+    % if it is HLRF, increase the counter
+    XoptGlobal.Niterations=XoptGlobal.Niterations+1;
+end
+
 switch class(XoptGlobal.XOptimizer)
     case {'Cobyla' 'Bobyqa'}
         %% Update Optimum object
         XoptGlobal.Niterations=XoptGlobal.Niterations+1;
         
         XoptGlobal=XoptGlobal.addIteration('MdesignVariables',Minput,...
-                            'MobjectiveFunction',Mout,...
-                            'Niteration',XoptGlobal.Niterations);
-                
-     case {'CrossEntropy'}
-         
+            'MobjectiveFunction',Mout,...
+            'Niteration',XoptGlobal.Niterations);
+        
+    case {'CrossEntropy'}
+        
         %   XoptGlobal.Niterations=XoptGlobal.Niterations+1;
-           
-           XoptGlobal=XoptGlobal.addIteration('MdesignVariables',Minput,...
-                'MobjectiveFunction',Mout,...
-                'Viterations',repmat(XoptGlobal.Niterations,size(Minput,1),1)); 
-            
+        
+        XoptGlobal=XoptGlobal.addIteration('MdesignVariables',Minput,...
+            'MobjectiveFunction',Mout,...
+            'Viterations',repmat(XoptGlobal.Niterations,size(Minput,1),1));
+        
     case {'EvolutionStrategy'}
-            XoptGlobal=XoptGlobal.addIteration('MdesignVariables',Minput,...
-                'MobjectiveFunction',Mout,...
-                'Viterations',repmat(XoptGlobal.Niterations,size(Minput,1),1));
+        XoptGlobal=XoptGlobal.addIteration('MdesignVariables',Minput,...
+            'MobjectiveFunction',Mout,...
+            'Viterations',repmat(XoptGlobal.Niterations,size(Minput,1),1));
     otherwise
         % Default behaviour
         % Values of the design variables and objective function stored by
-        % the outputFunctionOptimise function  
+        % the outputFunctionOptimise function
         
-       % XoptGlobal.Niterations=XoptGlobal.Niterations+1;
+        % XoptGlobal.Niterations=XoptGlobal.Niterations+1;
         
         XoptGlobal=XoptGlobal.addIteration('MdesignVariables',Minput,...
             'MobjectiveFunction',Mout,...

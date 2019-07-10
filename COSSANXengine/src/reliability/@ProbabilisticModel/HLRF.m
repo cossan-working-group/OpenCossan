@@ -159,20 +159,14 @@ while 1
         sprintf('%e ',VevaluationPoint));
     
     % Evaluate Objective Function
-    [~] = hobjfun(Vphysical);  %Objective function evaluation
-    
-    %% Update Optimum object
-    % Add only the values of the constraints
-     XoptGlobal=XoptGlobal.addIteration('MdesignVariables',MphysicalGradient,...
-                            'VconstraintFunction',Vg,...
-                            'Viterations',repmat(iIteration,size(MphysicalGradient,1),1));
-    
+    [~] = hobjfun(Vu);  %Objective function evaluation
+    % Compute important direction
     Valpha=Xgradient.Valpha;
     
     VB=(VevaluationPoint*Valpha)*Valpha';
     Vu=VB -Vg(1)/norm(Xgradient.Vgradient)* Valpha';
     
-    
+    % Compute safety factor beta
     if iIteration==1
         bet0  = norm(Vu);
     else
@@ -189,6 +183,13 @@ while 1
         
         bet0    = bet;
     end
+        
+    %% Update Optimum object
+    % Add only the values of the constraints
+     XoptGlobal=XoptGlobal.addIteration('MdesignVariables',MphysicalGradient,...
+                            'VconstraintFunction',Vg,...
+                            'Viterations',repmat(iIteration,size(MphysicalGradient,1),1));
+    
 end
 
 Xoptimum=XoptGlobal;
