@@ -11,12 +11,13 @@ OpenCossan is a Matlab-based toolbox for uncertainty quantification and manageme
 * Stochastic Finite Elements Analysis
 * Reliability-Based Optimization
 
+<p align="center">
+  <img align="center" src="COSSANXengine/Apps/readmetools.png" width="60%">
+</p>
+
 OpenCossan is being jointly developed at the Institute for Risk and Uncertainty, University of Liverpool, UK and the Institute for Risk and Reliability, Leibniz University Hannover, Germany.
 
 https://cossan.co.uk
-
-<img align="middle" src="COSSANXengine/Apps/readmetools.png" width="60%">
-
 
 ## Getting started
 
