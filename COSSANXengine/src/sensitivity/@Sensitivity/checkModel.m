@@ -1,10 +1,10 @@
 function [Xinput,perturbation,Coutputname]=checkModel(Xtarget,perturbation,LperformanceFunction,Coutputname)
 % CHECKMODEL This is a private function for the sensitivity methods.
 %
-% See Also: http://cossan.cfd.liv.ac.uk/wiki/index.php/GradientMonteCarlo@Sensitivity
-% See Also: http://cossan.cfd.liv.ac.uk/wiki/index.php/localMonteCarlo@Sensitivity
-% See Also: http://cossan.cfd.liv.ac.uk/wiki/index.php/GradientFiniteDifferences@Sensitivity
-% See Also: http://cossan.cfd.liv.ac.uk/wiki/index.php/localFiniteDifferences@Sensitivity
+% See Also: http://cossan.co.uk/wiki/index.php/GradientMonteCarlo@Sensitivity
+% See Also: http://cossan.co.uk/wiki/index.php/localMonteCarlo@Sensitivity
+% See Also: http://cossan.co.uk/wiki/index.php/GradientFiniteDifferences@Sensitivity
+% See Also: http://cossan.co.uk/wiki/index.php/localFiniteDifferences@Sensitivity
 %
 %
 % $Copyright~1993-2012,~COSSAN~Working~Group,~University~of~Liverpool,~UK$
@@ -93,7 +93,7 @@ switch class(Xtarget)
     case 'Function'
         %% Implement control of the perturbation
         error('openCOSSAN:sensitivity',...
-            'Gradient estimation of a Function not implemented yet');
+            'Gradient estimation of a Function not implemented, yet');
     otherwise
         
         error('openCOSSAN:sensitivity',...

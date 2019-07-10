@@ -5,9 +5,9 @@
 % This class is particolarly useful to crate a multivariate distrution starting
 % from realizations. 
 % 
-% See Also:  http://cossan.cfd.liv.ac.uk/wiki/index.php/@GaussianMixtureRandomVariableSet
+% See Also:  http://cossan.co.uk/wiki/index.php/@GaussianMixtureRandomVariableSet
 %
-% $Copyright~1993-2011,~COSSAN~Working~Group,~University~of~Innsbruck,~Austria$
+% $Copyright~1993-2019,~COSSAN~Working~Group$
 % $Author:~Edoardo~Patelli$ 
 
 

@@ -1,4 +1,4 @@
-function varargout=computeGradientStandardNormalSpace(Xobj,varargin)
+function varargout=computeGradientStandardNormalSpace(Xobj)
 %COMPUTEGRADIENTSTANDARDNORMALSPACE This method computes the gradient of
 %the funtion in the standard normal space. Hence, the perturbation of the
 %input factor is defined in the standard normal space.
@@ -23,21 +23,6 @@ function varargout=computeGradientStandardNormalSpace(Xobj,varargin)
 %  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
 % =====================================================================
 
-%% Check inputs
-OpenCossan.validateCossanInputs(varargin{:})
-% OpenCossan.resetRandomNumberGenerator(357357)
-%% Process inputs
-for k=1:2:length(varargin)
-    switch lower(varargin{k})
-        case {'xtarget','xmodel'}
-            Xobj=Xobj.addModel(varargin{k+1}(1));
-        case {'cxtarget','cxmodel'}
-            Xobj=Xobj.addModel(varargin{k+1}{1});
-        otherwise
-            error('openCOSSAN:LocalSensitivityFiniteDifference:computeGradientStandardNormalSpace:WrontInputArgument',...
-                'The PropertyName %s is not allowed',varargin{k});
-    end
-end
 
 %% Check the input
 assert(Xobj.Xinput.NdesignVariables==0,...

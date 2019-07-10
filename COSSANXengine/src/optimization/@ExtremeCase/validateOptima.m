@@ -2,7 +2,7 @@ function varargout=validateOptima(Xobj,varargin)
 % VALIDATEOPTIMA This method is a common interface for different reliability based
 %optimization approaches. 
 %
-% See also: http://cossan.cfd.liv.ac.uk/wiki/index.php/validateOptima@ExtremeCase
+% See also: http://cossan.co.uk/wiki/index.php/validateOptima@ExtremeCase
 
 for k=1:2:length(varargin),
     switch lower(varargin{k}),
@@ -15,7 +15,9 @@ for k=1:2:length(varargin),
 end
 
 N=size(Mvalues,1);
-for h=1:N
+
+SperfName=Xobj.XprobabilisticModel.XperformanceFunction.Soutputname
+
 % Extract Input from Extreme Case object
 Xinput=Xobj.XinputProbabilistic;
 % Extract Evaluator from ProbabilisticModel object
@@ -23,8 +25,9 @@ Xevaluator=Xobj.XprobabilisticModel.Xmodel.Xevaluator;
 % Extract PerformanceFunction and performance function name
 XperformanceFunction=Xobj.XprobabilisticModel.XperformanceFunction;
 SperfName=XperformanceFunction.Soutputname;
+
+for h=1:N
 % Update Input object
-warning('OFF','OpenCossan:Parameter:set:obsolete')
 Nvariables2map=size(Xobj.CdesignMapping,1);
 for n=1:Nvariables2map
     Xinput=Xinput.set('SobjectName',Xobj.CdesignMapping{n,2},...

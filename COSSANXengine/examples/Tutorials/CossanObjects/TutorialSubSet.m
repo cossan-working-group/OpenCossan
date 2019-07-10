@@ -1,4 +1,4 @@
-%% Tutorial of subset simulation
+%% Tutorial of Subset simulation
 % In this simple tutorial  the probability of having a a variable (distributed
 % according to a normal distribution) less than -3 is estimated using Subset
 % simulation 
@@ -10,6 +10,8 @@
 % $Copyright~1993-2011,~COSSAN~Working~Group,~University~of~Innsbruck,~Austria$
 % $Author:~Edoardo~Patelli$ 
 
+
+OpenCossan.resetRandomNumberGenerator(5194214)
 %% Probalem Definition
 % Definition of Random Variable
 Xrv1    = RandomVariable('Sdistribution','normal','mean',0,'std',1);
@@ -38,8 +40,8 @@ Xpm=ProbabilisticModel('Xmodel',Xmdl,'XPerformanceFunction',Xperfun);
 
 %% Construct a SubSet simulation object
 % Define the simulation object
-Xss=SubSet('Nmaxlevels',10,'target_pf',0.1, ...
-    'Ninitialsamples',100,'Nsamples',10000, ...
+Xss=SubSet('Nmaxlevels',6,'target_pf',0.1, ...
+    'Ninitialsamples',500,'Nsamples',10000, ...
     'Nbatches',1,'Vdeltaxi',[.2 .3 .4 .5 .6 .7]);
 
 % It is not possible to apply the SubSet object to a Model but only the
@@ -70,12 +72,22 @@ Xpf2=Xpm.computeFailureProbability(Xss);
 display(Xpf2)
 
 %% Analytical solutions
-normcdf(-3)
+
 
 %% Check Reference solution
 Xmc=MonteCarlo('Nsamples',100000,'Nbatches',10);
 Xrefsol=computeFailureProbability(Xpm,Xmc);
 display(Xrefsol)    % Show FailureProbability object
+
+
+
+%% Summarize the results
+
+disp('       Methods        |  Samples   | Probability of failure')
+disp('----------------------------------------------------------------------')
+display(sprintf('%20s    %6.2e  %6.2e ','Monte Carlo',Xrefsol.Nsamples,Xrefsol.pfhat))
+display(sprintf('%20s    %6.2e  %6.2e ','Subset simulation',Xpf.Nsamples,Xpf.pfhat))
+display(sprintf('%20s    %6.2e  %6.2e ','Analitical solution',0,normcdf(-3)))
 
 %% Validate Solutions
 assert(abs(Xrefsol.pfhat-Xpf.pfhat)<1e-3,'openCOSSAN:Tutorials','Wrong results')

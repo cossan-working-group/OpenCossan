@@ -10,11 +10,9 @@
 % obect. The script can contains
 % It is obvious that a more complex solution sequence can be define.
 %
+% See Also: http://cossan.co.uk/wiki/index.php/@SolutionSequence
 %
-%
-% See Also: http://cossan.cfd.liv.ac.uk/wiki/index.php/@SolutionSequence
-%
-% $Copyright~1993-2011,~COSSAN~Working~Group,~University~of~Innsbruck,~Austria$
+% $Copyright~1993-2019,~COSSAN~Working~Group$
 % $Author:~Edoardo~Patelli$ 
 
 % Reset the random number generator in order to obtain always the same results.
@@ -39,7 +37,7 @@ RV2=RandomVariable('Sdistribution','normal', 'mean',0,'std',1);  %#ok<SNASGU>
 Xrvs1=RandomVariableSet('Cmembers',{'RV1', 'RV2'}); 
 % Define input object
 Xin = Input('Sdescription','Input satellite_inp');
-Xin = add(Xin,Xrvs1);
+Xin = add(Xin,'Xmember',Xrvs1,'Sname','Xrvs1');
 % Add samples to the input object
 Xin = sample(Xin,'Nsamples',10);
 

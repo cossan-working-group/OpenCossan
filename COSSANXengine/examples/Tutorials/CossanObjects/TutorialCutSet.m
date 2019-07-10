@@ -6,9 +6,9 @@
 % Please refer to the Tutorial of SystemReliability for more details.
 %
 %
-% See Also:  http://cossan.cfd.liv.ac.uk/wiki/index.php/@Constraint
+% See Also:  http://cossan.co.uk/wiki/index.php/@Constraint
 %
-% $Copyright~1993-2011,~COSSAN~Working~Group,~University~of~Innsbruck,~Austria$
+% $Copyright~1993-2019,~COSSAN~Working~Group$
 % $Author: Edoardo~Patelli$ 
 
 %% The CutSet object can be constructed manually by means the constructor

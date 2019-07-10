@@ -3,9 +3,9 @@
 % The tutorial shows how to define a ProbabilisticModel and to exaluate the 
 % failure probability associeted to it.
 %
-% See Also: http://cossan.cfd.liv.ac.uk/wiki/index.php/@ProbabilisticModel
+% See Also: https://cossan.co.uk/wiki/index.php/@ProbabilisticModel
 %
-% $Copyright~1993-2011,~COSSAN~Working~Group,~University~of~Innsbruck,~Austria$
+% $Copyright~1993-2011,~COSSAN~Working~Group$
 % $Author: Edoardo-Patelli~and~Barbara-Goller$ 
 
 % TODO: VERIFY OUTPUT

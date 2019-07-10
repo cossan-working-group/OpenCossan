@@ -109,7 +109,7 @@ classdef Input
         function Xobj=Input(varargin)
             %INPUT Constructor method for the Input object.
             %
-            % See also: http://cossan.cfd.liv.ac.uk/wiki/index.php/@Input
+            % See also: https://cossan.co.uk/wiki/index.php/@Input
             %
             %
             % Copyright 1983-2011 COSSAN Working Group, University of Innsbruck, Austria

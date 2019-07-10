@@ -8,9 +8,8 @@
 % another state (or remain in the same state) according to a 
 % probability distribution. 
 %
-% See Also: http://cossan.cfd.liv.ac.uk/wiki/index.php/@MarkovChain
+% See Also: https://cossan.co.uk/wiki/index.php/@MarkovChain
 %
-% $Copyright~1993-2011,~COSSAN~Working~Group,~University~of~Innsbruck,~Austria$
 % $Author:~Edoardo~Patelli$ 
 
 % Reset the random number generator in order to obtain always the same results.
@@ -148,6 +147,6 @@ Vreference=[-1.824927459254609e-01    -3.499196590359148e-01     1.2905650552726
     -1.168821347135370e+00    -1.081085046923253e+00     1.408520952678413e+00];
 
 % Check solutions
-assert(max(max(Vreference-MX))<1e-15,'openCOSSAN:Tutorial','wrong results')
+assert(max(max(Vreference-MX))<1e-14,'openCOSSAN:Tutorial','wrong results')
 
 disp('Tutorial terminated successfully')

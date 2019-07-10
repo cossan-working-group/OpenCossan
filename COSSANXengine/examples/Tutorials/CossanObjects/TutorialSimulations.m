@@ -1,8 +1,8 @@
 %% Tutorial for the Simulation object
 % 
-% See Also: http://cossan.cfd.liv.ac.uk/wiki/index.php/@Simulation
+% See Also: http://cossan.co.uk/wiki/index.php/@Simulation
 %
-% $Copyright~1993-2011,~COSSAN~Working~Group,~University~of~Innsbruck,~Austria$
+% $Copyright~1993-2019,~COSSAN~Working~Group,~University~of~Innsbruck,~Austria$
 % $Author:~Edoardo~Patelli $ 
 
 %% Simulation Object

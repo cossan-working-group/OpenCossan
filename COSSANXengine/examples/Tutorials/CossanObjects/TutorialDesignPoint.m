@@ -6,7 +6,7 @@
 % The aim here is not to define a realisic model but to show how to compute and
 % use a DesignPoint object.
 %
-% See Also: http://cossan.cfd.liv.ac.uk/wiki/index.php/@DesignPoint
+% See Also: http://cossan.co.uk/wiki/index.php/@DesignPoint
 %
 % $Copyright~1993-2011,~COSSAN~Working~Group,~University~of~Innsbruck,~Austria$
 % $Author: Edoardo-Patelli$ 

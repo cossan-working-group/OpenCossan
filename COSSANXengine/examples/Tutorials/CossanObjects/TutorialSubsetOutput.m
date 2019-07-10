@@ -1,16 +1,9 @@
-%**************************************************************************
+%% Tutorial SubsetOutput
 %
-%   Tutorial SubsetOutput
-%   This tutorial show how to create a SubsetOutput object
-%
-%**************************************************************************
-% =====================================================
-% COSSAN - COmputational Stochastic Structural Analysis
-% IfM, Chair of Engineering Mechanics
-% University of Innsbruck, Innsbruck, Austria, EU
-% URL: http://cossan.cfd.liv.ac.uk
-% =====================================================
+% This tutorial show how to create a SubsetOutput object
 
+% $Copyright~1993-2011,~COSSAN~Working~Group$
+% $Author:~Edoardo~Patelli$ 
 
 %% constructor
 % definition of the constructor
@@ -19,13 +12,14 @@
 % - The intermediary failure probabilities (numeric)
 % - The coefficient of the intermediary failure probabilities (numeric)
 % - The rejection rate (numeric)
-Xsso1 = SubsetOutput('Sperformancefunctionname','Vg','Vpfl',[.1 .2 .3],'VcoVpfl',[.1 .2 .3],'Vrejectionrates',[.1 .2 .3]);
+
+Xsso1 = SubsetOutput('Sperformancefunctionname','Vg','VsubsetFailureProbability',[.1 .2 .3],'Vsubsetcov',[.1 .2 .3],'Vrejectionrates',[.1 .2 .3],'VsubsetThreshold',[1 2 3]);
 
 
 %% Invalid calls to the constructor:
 % the numeric fields must all be vectors
 try
-    Xsso2 = SubsetOutput('Sperformancefunctionname','Vg','Vpfl',[.1 .2 .3 ;.4 .5 .3],'VcoVpfl',[.1 .2 .3],'Vrejectionrates',[.1 .2 .3]);
+    Xsso2 = SubsetOutput('Sperformancefunctionname','Vg','VsubsetFailureProbability',[.1 .2 .3 ;.4 .5 .3],'VcoVpfl',[.1 .2 .3],'Vrejectionrates',[.1 .2 .3]);
     
 catch ME
     OpenCossan.cossanDisp(ME.message)
@@ -33,7 +27,7 @@ end
 
 % the numeric fields must all have the same length
 try
-    Xsso2 = SubsetOutput('Sperformancefunctionname','Vg','Vpfl',[1 2 3 ],'VcoVpfl',[.1 .2 .3],'Vrejectionrates',[1 2 3 4 5 3]);
+    Xsso2 = SubsetOutput('Sperformancefunctionname','Vg','VsubsetFailureProbability',[1 2 3 ],'VcoVpfl',[.1 .2 .3],'Vrejectionrates',[1 2 3 4 5 3]);
 catch ME
     OpenCossan.cossanDisp(ME.message)
 end

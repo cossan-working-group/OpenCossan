@@ -4,9 +4,9 @@
 % The Model object defines the user defined model compoused by an Input
 % object and an Evaluator object.
 %
-% See Also: http://cossan.cfd.liv.ac.uk/wiki/index.php/@Model
+% See Also: https://cossan.co.uk/wiki/index.php/@Model
 %
-% $Copyright~1993-2011,~COSSAN~Working~Group,~University~of~Innsbruck,~Austria$
+% $Copyright~1993-2019,~COSSAN~Working~Group$
 % $Author:~Edoardo~Patelli$ 
 
 % Reset the random number generator in order to obtain always the same results.
@@ -79,7 +79,7 @@ Vreference=[ ...
     -4.184300939342735e-01     6.438032534175224e-01     1.062233347351796e+00];
     
 % Check solution
-assert(max(max(Vreference-MX))<1e-15,'openCOSSAN:Tutorial','wrong results')
+assert(max(max(Vreference-MX))<1e-14,'openCOSSAN:Tutorial','wrong results')
 
 disp('Tutorial terminated successfully')
 

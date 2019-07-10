@@ -1,10 +1,9 @@
 classdef Sensitivity
-    %SENSITIVITY Sensitivity Toolbox for COSSAN-X
+    %SENSITIVITY Sensitivity Toolbox for OpenCossan
     % This is an abstract class for creating sensitivity objects
     % See also: https://cossan.co.uk/wiki/index.php/@Sensitivity
     %
     % Author: Edoardo Patelli
-    % Institute for Risk and Uncertainty, University of Liverpool, UK
     % email address: openengine@cossan.co.uk
     % Website: http://www.cossan.co.uk
     
@@ -42,8 +41,8 @@ classdef Sensitivity
        
     methods (Abstract)
         display(Xobj)                   % Show summary of Sensitivity object
-        varargout=computeIndices(Xobj,varargin)  % Perform Sensitivity on the Target object
-        Xobj=validateSettings(Xobj)     % Perform Sensitivity
+        varargout=computeIndices(Xobj)  % Perform Sensitivity on the Target object
+        Xobj=validateSettings(Xobj)     % Validate settings 
     end
     
     methods (Access=protected)

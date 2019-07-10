@@ -3,7 +3,7 @@
 % and how to use it for approximating of a function
 %
 % See Also: 
-% http://cossan.cfd.liv.ac.uk/wiki/index.php/@PolyharmonicSplines
+% https://cossan.co.uk/wiki/index.php/@PolyharmonicSplines
 %
 % Author: Matteo Broggi & Edoardo Patelli
 % Institute for Risk and Uncertainty, University of Liverpool, UK
@@ -113,15 +113,4 @@ f6 =  figure(6);
 mesh(MXX1,MXX2,reshape(Xoutps1.getValues('Sname','out'),201,201));
 f7 =  figure(7);
 mesh(MXX1,MXX2,reshape(Xoutps2.getValues('Sname','out'),201,201));
-%% Validate solution, close figures and delete simulation files
 
-close(f7)
-close(f6)
-close(f5)
-close(f4)
-close(f3)
-close(f2)
-close(f1)
-
-   
-   

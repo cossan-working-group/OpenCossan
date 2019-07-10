@@ -4,7 +4,7 @@
 % Please refer to the specific tutorials for the other objects available in
 % [COSSANEngine/examples/Tutorials]
 %
-% See Also: http://cossan.cfd.liv.ac.uk/wiki/index.php/@DesignOfExperiment
+% See Also: http://cossan.co.uk/wiki/index.php/@DesignOfExperiment
 %
 %
 % $Copyright~1993-2011,~COSSAN~Working~Group,~University~of~Innsbruck,~Austria$

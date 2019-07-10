@@ -1,16 +1,25 @@
-%% Tutorial for the SystemReliability object
+%% Tutorial for the Importance sampling for system reliability
 %
-% This tutorial shows how to create and use the SystemReliability object in
-% COSSAN-X. Please note that this tutorial presents a very simple and academic
-% example. 
+% This tutorial shows how to perform realiability analysis of parallel
+% system using simulation methods.  High Performance
+% Importance sampling is used to calculate the probability of failure of
+% the system and compared against standard Importance sampling and Monte
+% Carlo simulation. 
 %
-% The reliability system is composed by a physical model with 2 uncorrelated
-% random variables, and a Matlab function and 3 performance functions. 
+% Reference: 
+% Patelli, E.; Pradlwarter, H. J. & Schuëller, G. I.  On
+% Multinormal Integrals by Importance Sampling for Parallel System
+% Reliability, Structural Safety, 2011, 33, 1-7 
+% DOI: https://dx.doi.org/10.1016/j.strusafe.2010.04.002
 %
 %
-% See Also: http://cossan.cfd.liv.ac.uk/wiki/index.php/@SystemReliability
+% Please note that this tutorial presents a very simple and academic
+% example composed by a physical model with 2 uncorrelated
+% random variables and 3 performance functions. 
 %
-% $Copyright~1993-2011,~COSSAN~Working~Group,~University~of~Innsbruck,~Austria$
+% See Also: https://cossan.co.uk/wiki/index.php/@SystemReliability
+%
+% $Copyright~1993-2019,~COSSAN~Working~Group$
 % $Author:~Edoardo~Patelli$ 
 
 %% Definition of the Inputs

@@ -3,7 +3,7 @@
 % A user defined PerformaceFunction can be defined passing a Function
 % object to the constructor of the Performance Function 
 %
-% See Also: http://cossan.cfd.liv.ac.uk/wiki/index.php/@PerformanceFunction
+% See Also: https://cossan.co.uk/wiki/index.php/@PerformanceFunction
 %
 % $Copyright~1993-2011,~COSSAN~Working~Group,~University~of~Innsbruck,~Austria$
 % $Author: Edoardo-Patelli~and~Barbara-Goller$ 

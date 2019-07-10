@@ -61,8 +61,8 @@ Xm2 = Mio('Sscript','Moutput=Minput(:,1) + Minput(:,2);', ...
 Xmdl2   = Model('Xinput',Xin,'Xevaluator',Xev2);
 
 Xmc=MonteCarlo('Nsamples',10000);
-Xgs=GlobalSensitivityRandomBalanceDesign('nharmonics',10,'Nsamples',1000,'CinputNames',{'X1' 'X2'});
-Xsm = Xgs.computeIndices('Xmodel',Xmdl2);
+Xgs=GlobalSensitivityRandomBalanceDesign('nharmonics',10,'Nsamples',1000,'CinputNames',{'X1' 'X2'},'Xmodel',Xmdl2);
+Xsm = Xgs.computeIndices();
 
 % compare with analytical solution
 FirstAnalytical=[4/13;9/13];

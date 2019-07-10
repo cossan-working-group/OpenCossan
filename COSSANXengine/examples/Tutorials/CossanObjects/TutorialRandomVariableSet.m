@@ -1,7 +1,7 @@
 %% TUTORIALRANDOMVARIABLESET
 % This tutorial shows the how to use and create a random variable object
 %
-% See Also:  http://cossan.cfd.liv.ac.uk/wiki/index.php/@RandomVariableSet
+% See Also:  https://cossan.co.uk/wiki/index.php/@RandomVariableSet
 %
 % $Copyright~1993-2011,~COSSAN~Working~Group,~University~of~Innsbruck,~Austria$
 % $Author:~Pierre~Beaurepaire$ 
