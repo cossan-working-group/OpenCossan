@@ -6,7 +6,7 @@ pipeline {
     agent {
         docker {
             image   'friesischscott/gitlab-ci-matlab'
-            args    '-v /opt/MATLAB/R2018b/:/usr/local/MATLAB/from-host -v /home/jenkins/.matlab/R2018b:/.matlab/R2018b --mac-address=2c:60:0c:e3:7e:8c'
+            args    '-v /opt/MATLAB/R2019a/:/usr/local/MATLAB/from-host -v /home/jenkins/.matlab/R2019a:/.matlab/R2019a --mac-address=2c:60:0c:e3:7e:8c'
         }
     }
 
