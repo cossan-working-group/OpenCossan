@@ -40,9 +40,6 @@ function Xobj = addData(Xobj,varargin)
 % assert(size(Xobj,2)==1,'openCOSSAN:Dataseries:addData', ...
 %     'addData method can only be applied to a single Dataseries object or to a Dataseries array');
 
-%% Argument Check
-opencossan.OpenCossan.validateCossanInputs(varargin{:})
-
 %% Process input options
 for k=1:2:length(varargin)
     switch lower(varargin{k}),

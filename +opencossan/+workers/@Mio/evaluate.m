@@ -48,7 +48,7 @@ switch lower(Xmio.Format)
             'Missing Output: %s'], ...
             sprintf(' "%s"; ',Xmio.OutputNames{~isfield(Toutput,Xmio.OutputNames)}))
         % Construct output Table
-        TableOutput=struct2table(Toutput);
+        TableOutput=struct2table(Toutput, 'AsArray', true);
     case 'matrix'
         MinputMIO = table2array(TableInput);
         

@@ -107,7 +107,7 @@ classdef InputTest < matlab.unittest.TestCase
         %% test Xdesignvariable
         
         function testDesignVariableIO(testCase)
-            Xdv1 = opencossan.optimization.DesignVariable('SDescription', 'dummy', 'value', 5);
+            Xdv1 = opencossan.optimization.ContinuousDesignVariable('Description', 'dummy', 'value', 5);
             Xin  = opencossan.common.inputs.Input('DesignVariable', Xdv1);
             testCase.assumeEqual(Xin.DesignVariableNames, {'Xdv1'})
         end
@@ -122,7 +122,7 @@ classdef InputTest < matlab.unittest.TestCase
         end
         
         function addShouldAddDesignVariable(testCase)
-            Xdv = opencossan.optimization.DesignVariable('value', 5);
+            Xdv = opencossan.optimization.ContinuousDesignVariable('Description', 'dummy', 'value', 5);
             Xin = opencossan.common.inputs.Input('Description', 'Description');
             Xin = Xin.add('Member', Xdv, 'Name', 'Xdv');
             testCase.assertLength(Xin.DesignVariables, 1)
@@ -247,7 +247,7 @@ classdef InputTest < matlab.unittest.TestCase
                 'Expression','<&x1&>+<&x2&>');
             Xin  = Xin.add('Member', Xfun1, 'Name', 'Xfun1');
             
-            Xdv1 = opencossan.optimization.DesignVariable('SDescription', 'dummy', 'value', 5);
+            Xdv1 = opencossan.optimization.ContinuousDesignVariable('Description', 'dummy', 'value', 5);
             Xin  = Xin.add('Member', Xdv1, 'Name', 'Xdv1');
             
             SP1  = opencossan.common.inputs.stochasticprocess.KarhunenLoeve(...
@@ -266,7 +266,7 @@ classdef InputTest < matlab.unittest.TestCase
         
         function addShouldIncreaseNinputs(testCase)
             Xpar = opencossan.common.inputs.Parameter('description', 'material 1', 'value', 5E+3);
-            Xdv  = opencossan.optimization.DesignVariable('value', 5);
+            Xdv = opencossan.optimization.ContinuousDesignVariable('Description', 'dummy', 'value', 5);
             Xin  = opencossan.common.inputs.Input('Description', 'Input Description');
             Xin  = Xin.add('Member', Xpar, 'Name', 'Xpar');
             Xin  = Xin.add('Member', Xdv, 'Name', 'Xdv');
@@ -475,7 +475,7 @@ classdef InputTest < matlab.unittest.TestCase
                 'Expression','<&x1&>+<&x2&>');
             Xin   = Xin.add('Member', Xfun1, 'Name', 'Xfun1');
             
-            Xdv1  = opencossan.optimization.DesignVariable('SDescription', 'dummy', 'value', 5);
+            Xdv1 = opencossan.optimization.ContinuousDesignVariable('Description', 'dummy', 'value', 5);
             Xin   = Xin.add('Member', Xdv1, 'Name', 'Xdv1');
             
             SP1   = opencossan.common.inputs.stochasticprocess.KarhunenLoeve(...
@@ -497,7 +497,7 @@ classdef InputTest < matlab.unittest.TestCase
         function getSampleMatrixShouldReturnSamples(testCase)
             Xin  = opencossan.common.inputs.Input;
             Xpar = opencossan.common.inputs.Parameter('value', 5);
-            Xdv  = opencossan.optimization.DesignVariable('value', 5);
+            Xdv = opencossan.optimization.ContinuousDesignVariable('Description', 'dummy', 'value', 5);
             Xrv1 = opencossan.common.inputs.random.NormalRandomVariable('mean',2.763,'std',0.4);
             Xrvs = opencossan.common.inputs.random.RandomVariableSet('Names', "Xrv1", 'Members', Xrv1);
             Xin  = Xin.add('Member', Xrvs, 'Name', 'Xrvs');

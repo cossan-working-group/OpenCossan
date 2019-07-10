@@ -27,10 +27,6 @@ function Xobj = setDesignVariable(Xobj,varargin)
 %  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
 % =====================================================================
 
-import opencossan.common.Samples
-
-opencossan.OpenCossan.validateCossanInputs(varargin{:});
-
 if isempty(varargin)
     error('COSSAN:Input:setDesignVariable',...
         'The set method makes no sense without arguments');
@@ -40,28 +36,26 @@ for k=1:2:length(varargin)
     switch lower(varargin{k})
         case {'csnames'}
             Cnames=varargin{k+1};
-            
-            assert(all(ismember(Cnames,Xobj.CnamesDesignVariable)),...
+            assert(all(ismember(Cnames,Xobj.DesignVariableNames)),...
                 'COSSAN:Input:setDesignVariable',...
                 ['Name of the design variable does not match with the names of the design variable present in the input object\n',...
-                '\nAvailable DesignVariables: ' sprintf('\n* "%s"',Xobj.CnamesDesignVariable{:}), ...
+                '\nAvailable DesignVariables: ' sprintf('\n* "%s"',Xobj.DesignVariableNames{:}), ...
                 '\nRequired DesignVariables: ' sprintf('\n* "%s"',Cnames{:})])
           case {'msamples','mvalues'}
             Msamples=varargin{k+1};
          otherwise
             error('COSSAN:Input:setDesignVariable', ...
                 'The PropertyName %s is not valid',varargin{k});
-            
     end
 end
 
 assert(size(Msamples,2)==length(Cnames),...
       'COSSAN:Input:setDesignVariable',...
       'Number of colums of Msamples is %i, number of Design variable %i ',size(Msamples,2),length(Cnames))
-    
+
 
 %% DO SET
-Xobj.Xsamples=Samples('Xinput',Xobj,'Msamplesdoedesignvariables',Msamples);
+Xobj.Samples=opencossan.common.Samples('Xinput',Xobj,'Msamplesdoedesignvariables',Msamples);
 end
 
 

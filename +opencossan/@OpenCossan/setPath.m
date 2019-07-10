@@ -34,11 +34,11 @@ if ~isdeployed % TODO: We need a way to check and initialise toolboxes in a depl
     
     % Predefined Toolboxes
     for i = 1:size(obj.PredefinedToolboxes,1)
-        if isfile(fullfile(obj.Root, obj.PredefinedToolboxes{i,1}))
-            run(fullfile(obj.Root, obj.PredefinedToolboxes{i,1}));
+        toolbox = obj.PredefinedToolboxes{i,1};
+        if endsWith(toolbox, '.m')
+            run(fullfile(obj.Root, toolbox));
         else
-            warning('OpenCossan:PredefinedToolBooxInitialisationProblem', ...
-                ['Toolbox Initialisation Problem\n' obj.PredefinedToolboxes{i,2} ' has not been initialised\n'])
+            addpath(toolbox);
         end
     end
     

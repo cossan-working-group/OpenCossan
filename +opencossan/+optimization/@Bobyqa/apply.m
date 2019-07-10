@@ -1,4 +1,4 @@
-function [Xoptimum varargout] = apply(Xobj,varargin)
+function [Xoptimum,varargout] = apply(Xobj,varargin)
 %   APPLY   This method applies the algorithm BOBYQA (Bounded
 %           Optimization by Quadratic Approximations) for optimization
 %
@@ -9,13 +9,24 @@ function [Xoptimum varargout] = apply(Xobj,varargin)
 %       lower(x) <= x <= upper(x)
 %
 %
-%   See also: http://cossan.cfd.liv.ac.uk/wiki/index.php/Apply@Bobyqa
-%   http://www.damtp.cam.ac.uk/user/na/NA_papers/NA2009_06.pdf
+%{
+    This file is part of OpenCossan <https://cossan.co.uk>.
+    Copyright (C) 2006-2018 COSSAN WORKING GROUP
 
-% ==================================================================
-% COSSAN-X - The next generation of the computational stochastic analysis
-% University of Innsbruck, Copyright 1993-2011 IfM
-% ==================================================================
+    OpenCossan is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License or,
+    (at your option) any later version.
+    
+    OpenCossan is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU General Public License for more details.
+    
+    You should have received a copy of the GNU General Public License
+    along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
+%}
+
 
 %% Define global variable for the objective function and the constrains
 global XoptGlobal XsimOutGlobal
@@ -24,28 +35,35 @@ global XoptGlobal XsimOutGlobal
 OpenCossan.validateCossanInputs(varargin{:})
 
 %  Check whether or not required arguments have been passed
-for k=1:2:length(varargin),
-    switch lower(varargin{k}),
-        case {'xoptimizationproblem'},   %extract OptimizationProblem
-            if isa(varargin{k+1},'opencossan.optimization.OptimizationProblem'),    %check that arguments is actually an OptimizationProblem object
+for k=1:2:length(varargin)
+    switch lower(varargin{k})
+        case {'xoptimizationproblem'}   %extract OptimizationProblem
+            if isa(varargin{k+1},'OptimizationProblem')    %check that arguments is actually an OptimizationProblem object
                 Xop     = varargin{k+1};
             else
-                error('openCOSSAN:Bobyqa:apply',...
+                error('OpenCossan:Bobyqa:apply',...
                     ['the variable  ' inputname(k) ...
                     ' must be an OptimizationProblem object']);
             end
-        case {'xoptimum'},   %extract OptimizationProblem
-            if isa(varargin{k+1},'output.Optimum'),    %check that arguments is actually an OptimizationProblem object
+         case {'cxoptimizationproblem'}   %extract OptimizationProblem
+            if isa(varargin{k+1}{1},'OptimizationProblem')    %check that arguments is actually an OptimizationProblem object
+                Xop     = varargin{k+1}{1};
+            else
+                error('OpenCossan:Bobyqa:apply',...
+                    ['the variable  ' inputname(k) ' must be an OptimizationProblem object']);
+            end  
+        case {'xoptimum'}   %extract OptimizationProblem
+            if isa(varargin{k+1},'Optimum')    %check that arguments is actually an OptimizationProblem object
                 Xoptimum  = varargin{k+1};
             else
-                error('openCOSSAN:Bobyqa:apply',...
+                error('OpenCossan:Bobyqa:apply',...
                     ['the variable  ' inputname(k) ...
                     ' must be an Optimum object']);
             end
         case 'vinitialsolution'
             VinitialSolution=varargin{k+1};
         otherwise
-            error('openCOSSAN:Bobyqa:apply', ...
+            error('OpenCossan:Bobyqa:apply', ...
                 'The PropertyName %s is not valid',varargin{k});
     end
 end
@@ -53,26 +71,29 @@ end
 
 %% Check Optimization problem
 if ~exist('Xop','var')
-    error('openCOSSAN:optimization:bobyqa:apply',...
+    error('OpenCossan:optimization:bobyqa:apply',...
         'Optimization problem must be defined')
 end
 
 %% Add bounds to the constraints
 Ndv     = Xop.NdesignVariables;  % number of design variables
+
 Vdx     = Xobj.stepSize*ones(1,Ndv);
 
 CnameDV=Xop.Xinput.CnamesDesignVariable;
+
 VxLowerBounds = Xop.VlowerBounds;
 VxUpperBounds = Xop.VupperBounds;
 
-for jdv=1:Ndv    
+for jdv=1:Ndv
+    
     assert(isfinite(VxLowerBounds(jdv)),...
-        'openCOSSAN:optimization:bobyqa:apply',...
+        'OpenCossan:optimization:bobyqa:apply',...
         ['BOBYQA operates with bounded design variables, \n',...
         'please provide a LOWER BOUND for (%n)'],CnameDV{jdv});
     
     assert(isfinite(VxUpperBounds(jdv)),...
-        'openCOSSAN:optimization:bobyqa:apply',...
+        'OpenCossan:optimization:bobyqa:apply',...
         ['BOBYQA operates with bounded design variables, \n',...
         'please provide an UPPER BOUND for (%n)'],CnameDV{jdv});
 end
@@ -82,23 +103,20 @@ if isempty(Xop.VinitialSolution)
     if exist('VinitialSolution','var')
         Xop.VinitialSolution=VinitialSolution;
     else
-        error('openCOSSAN:optimization:bobyqa:apply',...
+        error('OpenCossan:optimization:bobyqa:apply',...
             'Please provide a reference point to start the optimization with');
     end
 end
 %% initialize Optimum
 if ~exist('Xoptimum','var')
-    XoptGlobal=Xop.initializeOptimum('LgradientObjectiveFunction',false, ...
-                                     'LgradientConstraints',false,...
-                                     'Xoptimizer',Xobj);
+    XoptGlobal=Optimum('XoptimizationProblem',Xop,'Xoptimizer',Xobj);
 else
-    %TODO: Check Optimum 
+    %TODO: Check Optimum
     XoptGlobal=Xoptimum;
 end
 
 % initialize global variable
 XsimOutGlobal=[];
-
 
 % Create handle of the objective function
 % This variable is retrieved by mex file by name.
@@ -114,17 +132,19 @@ end
 
 
 %% Perform optimization using Bobyqa
-OpenCossan.setLaptime('description',['BOBYQA:' Xobj.Sdescription]);
+
+OpenCossan.setLaptime('Sdescription',['BOBYQA:' Xobj.Sdescription]);
 
 %[Vopt,Nexitflag,Neval]
-[~,Nexitflag,~]    = bobyqa_matlab(Ndv,Xobj.npt,Xop.VinitialSolution,...
+[XoptGlobal.VoptimalDesign,Nexitflag,~]    = bobyqa_matlab(Ndv,Xobj.npt,Xop.VinitialSolution,...
     VxLowerBounds,VxUpperBounds,Vdx,Xobj.rhoEnd,Xobj.xtolRel,...
     Xobj.minfMax,Xobj.ftolRel,Xobj.ftolAbs,Xobj.maxeval,Xobj.verbose);
 
-OpenCossan.setLaptime('description','End BOBYQA analysis');
+
+OpenCossan.setLaptime('Sdescription','End BOBYQA analysis');
 
 % Prepare string with reason for termination of optimization algorithm
-switch Nexitflag,
+switch Nexitflag
     case{-4}
         Sexitflag   = 'failure';
     case{-1}

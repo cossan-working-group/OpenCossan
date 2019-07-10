@@ -50,8 +50,9 @@ try
     % Create TestSuites
     suite = TestSuite.fromPackage('opencossan','IncludingSubpackages',true);
     % Run test suites with coverage
-    runner.run(suite);
+    runner.run(suite)
 
+    
     OpenCossan.setVerbosityLevel(3);
 catch e
     disp(getReport(e,'extended'));

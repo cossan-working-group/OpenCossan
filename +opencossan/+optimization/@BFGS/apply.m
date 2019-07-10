@@ -1,31 +1,29 @@
 function [Xoptimum,varargout] = apply(Xobj,varargin)
-%APPLY  This method applies the algorithm BFGS for solvind an unconstrained
+%APPLY  This method applies the algorithm BFGS for solving an unconstrained
 %       optimization problem.
 %
-% See also: http://cossan.cfd.liv.ac.uk/wiki/apply@Optimizer
+% See also: https://cossan.co.uk/wiki/apply@Optimizer
 %
 % Author: Edoardo Patelli
-% Institute for Risk and Uncertainty, University of Liverpool, UK
-% email address: openengine@cossan.co.uk
-% Website: http://www.cossan.co.uk
+% Website: https://www.cossan.co.uk
 
-% =====================================================================
-% This file is part of openCOSSAN.  The open general purpose matlab
-% toolbox for numerical analysis, risk and uncertainty quantification.
-%
-% openCOSSAN is free software: you can redistribute it and/or modify
-% it under the terms of the GNU General Public License as published by
-% the Free Software Foundation, either version 3 of the License.
-%
-% openCOSSAN is distributed in the hope that it will be useful,
-% but WITHOUT ANY WARRANTY; without even the implied warranty of
-% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-% GNU General Public License for more details.
-%
-%  You should have received a copy of the GNU General Public License
-%  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
-% =====================================================================
+%{
+    This file is part of OpenCossan <https://cossan.co.uk>.
+    Copyright (C) 2006-2018 COSSAN WORKING GROUP
 
+    OpenCossan is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License or,
+    (at your option) any later version.
+    
+    OpenCossan is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU General Public License for more details.
+    
+    You should have received a copy of the GNU General Public License
+    along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
+%}
 
 %% Define global variable for the objective function and the constrains
 global XoptGlobal XsimOutGlobal
@@ -33,30 +31,39 @@ global XoptGlobal XsimOutGlobal
 OpenCossan.validateCossanInputs(varargin{:});
 
 %  Check whether or not required arguments have been passed
-for k=1:2:length(varargin),
-    switch lower(varargin{k}),
-        case {'xoptimizationproblem'},   %extract OptimizationProblem
-            assert(isa(varargin{k+1},'opencossan.optimization.OptimizationProblem'),...
-                'openCOSSAN:BFGS:apply:wrongOptimizationProblem',...
-                 'the object of class %s is not valid! Expected class optimization.OptimizationProblem',...
-                 class(varargin{k+1}) );
+for k=1:2:length(varargin)
+    switch lower(varargin{k})
+        case {'xoptimizationproblem'}   %extract OptimizationProblem
+            if isa(varargin{k+1},'OptimizationProblem')    %check that arguments is actually an OptimizationProblem object
                 Xop     = varargin{k+1};
-        case {'xoptimum'},   %extract OptimizationProblem
-             assert(isa(varargin{k+1},'output.Optimum'),...
-                'openCOSSAN:BFGS:apply:wrongOptimum',...
-                 'the object of class %s is not valid! Expected class output.Optimum',...
-                 class(varargin{k+1}) );
-             Xoptimum  = varargin{k+1};
+            else
+                error('OpenCossan:BFGS:apply',...
+                    ['the variable  ' inputname(k) ' must be an OptimizationProblem object']);
+            end
+        case {'cxoptimizationproblem'}   %extract OptimizationProblem
+            if isa(varargin{k+1}{1},'OptimizationProblem')    %check that arguments is actually an OptimizationProblem object
+                Xop     = varargin{k+1}{1};
+            else
+                error('OpenCossan:BFGS:apply',...
+                    ['the variable  ' inputname(k) ' must be an OptimizationProblem object']);
+            end  
+        case {'xoptimum'}   %extract OptimizationProblem
+            if isa(varargin{k+1},'Optimum')    %check that arguments is actually an OptimizationProblem object
+                Xoptimum  = varargin{k+1};
+            else
+                error('openCOSSAN:BFGS:apply',...
+                    ['the variable  ' inputname(k) ' must be an Optimum object']);
+            end
         case {'vinitialsolution'}
             VinitialSolution=varargin{k+1};
         otherwise
-            error('openCOSSAN:BFGS:apply:wrongArgument', ...
+            error('OpenCossan:BFGS:PropertyNameNotValid', ...
                 'The PropertyName %s is not valid',varargin{k});
     end
 end
 
 %% Check Optimization problem
-assert(logical(exist('Xop','var')), 'openCOSSAN:BFGS:apply:noOptimizationProblem',...
+assert(logical(exist('Xop','var')), 'OpenCossan:BFGS:apply',...
     'Optimization problem must be defined')
 
 % Check inputs and initialize variables
@@ -68,11 +75,11 @@ if exist('VinitialSolution','var')
 end
 
 assert(size(Xop.VinitialSolution,1)==1, ...
-    'openCOSSAN::apply',...
+    'OpenCossan::apply',...
     'Only 1 initial setting point is allowed')
 
 assert(logical(isempty(Xop.Xconstraint)), ...
-    'openCOSSAN:BFGS:apply',...
+    'OpenCossan:BFGS:apply',...
     'BFGS is an UNconstrained Nonlinear Optimization.')
 
 %% initialise Global Variables
@@ -80,9 +87,7 @@ assert(logical(isempty(Xop.Xconstraint)), ...
 %XsimOutGlobal=[];
 % initialise Optimum object
 if ~exist('Xoptimum','var')
-    XoptGlobal=Xop.initializeOptimum('LgradientObjectiveFunction',true,...
-        'LgradientConstraints',false,...
-        'Xoptimizer',Xobj);
+    XoptGlobal=Optimum('XoptimizationProblem',Xop,'Xoptimizer',Xobj);
 else
     %TODO: Check Optimum
     XoptGlobal=Xoptimum;
@@ -91,19 +96,29 @@ end
 
 %%  Perform optimization
 %   Set matlab options
-Toptions            = optimset('fminunc');  %Default optimization options
+Xoptions = optimoptions('fminunc');  %Default optimization options
 
-Toptions.Display    = 'iter-detailed';   %Turns on intermediate information about optimization procedure
-Toptions.LargeScale = 'on';             %Turns off Large-Scale optimization features
-Toptions.GradObj    = 'on';              %Gradient of objective function is on
-Toptions.MaxFunEvals   = Xobj.Nmax;              %Maximum number of function evaluations that is allowed
-Toptions.MaxIter       = Xobj.NmaxIterations;          %Maximum number of iterations that is allowed
-Toptions.DerivativeCheck = 'off';
-Toptions.TolFun        = Xobj.toleranceObjectiveFunction;     %Termination tolerance on the value of the objective function
-Toptions.TolX          = Xobj.toleranceDesignVariables;       %Termination tolerance on the design variable vector
-Toptions.FinDiffType   = Xobj.SfiniteDifferenceType; % Finite differences, used to estimate gradients
-Toptions.DerivativeCheck = 'off';
-Toptions.OutputFcn = @Xobj.outputFunctionOptimiser;
+% According to Matlab documentation: if the objective function includes a
+% gradient, use 'Algorithm' = 'trust-region', and set the
+% SpecifyObjectiveGradient option to true. Otherwise, use 'Algorithm' =
+% 'quasi-newton'. 
+if Xop.XobjectiveFunction.Lgradient
+    Xoptions.Algorithm    = 'trust-region';   %Turns on intermediate information about optimization procedure
+    Xoptions.SpecifyObjectiveGradient=true;
+else
+    Xoptions.Algorithm    = 'quasi-newton';   %Turns on intermediate information about optimization procedure
+end
+
+Xoptions.Display    = 'iter-detailed';   %Turns on intermediate information about optimization procedure
+Xoptions.GradObj    = 'on';              %Gradient of objective function is on
+Xoptions.MaxFunEvals   = Xobj.Nmax;              %Maximum number of function evaluations that is allowed
+Xoptions.MaxIter       = Xobj.NmaxIterations;          %Maximum number of iterations that is allowed
+Xoptions.DerivativeCheck = 'off';
+Xoptions.TolFun        = Xobj.toleranceObjectiveFunction;     %Termination tolerance on the value of the objective function
+Xoptions.TolX          = Xobj.toleranceDesignVariables;       %Termination tolerance on the design variable vector
+Xoptions.FinDiffType   = Xobj.SfiniteDifferenceType; % Finite differences, used to estimate gradients
+Xoptions.DerivativeCheck = 'off';
+Xoptions.OutputFcn = @Xobj.outputFunctionOptimiser;
 
 if isempty(Xop.Xmodel)
     % Create handle of the objective function
@@ -120,7 +135,8 @@ else
 end
 
 %% Perform Real optimization
-[~,~,Nexitflag]  = fminunc(hobjfun,Xop.VinitialSolution,Toptions);
+[XoptGlobal.VoptimalDesign,XoptGlobal.VoptimalScores,Nexitflag] = ...
+                            fminunc(hobjfun,Xop.VinitialSolution,Xoptions);
 
 %% Output
 % All the quantities of interest are automatically stored in the Optimum
@@ -170,4 +186,4 @@ varargout{1}    = XsimOutGlobal;
 clear global XoptGlobal XsimOutGlobal
 
 %% Record Time
-OpenCossan.setLaptime('description',['End apply@' class(Xobj)]);
+OpenCossan.setLaptime('Sdescription',['End apply@' class(Xobj)]);

@@ -1,4 +1,4 @@
-classdef StochasticRanking < opencossan.optimization.Optimizer
+classdef StochasticRanking < Optimizer
     %   Stochastic Ranking Evolution Strategies is a gradient-free     
     %   optimization algorithm that performs a stochastic search in the
     %   space of the design variables, subject to non-linear inequality

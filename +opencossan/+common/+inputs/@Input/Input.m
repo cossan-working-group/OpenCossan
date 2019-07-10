@@ -136,7 +136,7 @@ classdef Input < opencossan.common.CossanObject
             p.addParameter('GaussianMixtureRandomVariableSet',GaussianMixtureRandomVariableSet)
             p.addParameter('StochasticProcess',StochasticProcess)
             p.addParameter('Parameter',Parameter)
-            p.addParameter('DesignVariable',DesignVariable)
+            p.addParameter('DesignVariable',[])
             p.addParameter('Samples',Samples)
             p.addParameter('Members',{})
             p.addParameter('MembersNames',"")
@@ -209,7 +209,8 @@ classdef Input < opencossan.common.CossanObject
                             Xobj.StochasticProcesses.(CSmembers{iobj})= CXobjects{iobj};
                         case 'opencossan.common.inputs.Parameter'
                             Xobj.Parameters.(CSmembers{iobj})= CXobjects{iobj};
-                        case 'opencossan.optimization.DesignVariable'
+                        case {'opencossan.optimization.ContinuousDesignVariable', ...
+                              'opencossan.optimization.DiscreteDesignVariable' }
                             Xobj.DesignVariables.(CSmembers{iobj})= CXobjects{iobj};
 %                         case 'opencossan.intervals.BoundedSet'
 %                             Xobj.Xbset.(CSmembers{iobj})= CXobjects{iobj};
@@ -401,7 +402,8 @@ classdef Input < opencossan.common.CossanObject
             AreDesignVariablesDiscrete=false;
             CDVNames=Xobj.DesignVariableNames;
             for n=1:length(CDVNames)
-                if ~isempty(Xobj.XdesignVariable.(CDVNames{n}).Vsupport)
+                if isa(Xobj.DesignVariables(CDVNames{n}), ...
+                    'opencossan.optimization.DiscreteDesignVariable')
                     AreDesignVariablesDiscrete=true;
                     break
                 end

@@ -1,4 +1,4 @@
-function [Xoptimum, varargout] = apply(Xobj,varargin)
+function [Xoptimum,varargout] = apply(Xobj,varargin)
 %   APPLY   This method applies the algorithm COBYLA (Costrained
 %           Optimization by Linear Approximations) for optimization
 %
@@ -12,60 +12,65 @@ function [Xoptimum, varargout] = apply(Xobj,varargin)
 %       cineq(x)    <= 0
 %
 %
-%   See also: http://cossan.cfd.liv.ac.uk/wiki/index.php/Apply@Cobyla 
-%             http://www.damtp.cam.ac.uk/user/na/NA_papers/NA1998_04.ps.gz
+%   See also: https://cossan.co.uk/wiki/index.php/Apply@Cobyla 
+% http://www.damtp.cam.ac.uk/user/na/NA_papers/NA1998_04.ps.gz
 %
 % Author: Edoardo Patelli
-% Institute for Risk and Uncertainty, University of Liverpool, UK
-% email address: openengine@cossan.co.uk
-% Website: http://www.cossan.co.uk
 
-% =====================================================================
-% This file is part of openCOSSAN.  The open general purpose matlab
-% toolbox for numerical analysis, risk and uncertainty quantification.
-%
-% openCOSSAN is free software: you can redistribute it and/or modify
-% it under the terms of the GNU General Public License as published by
-% the Free Software Foundation, either version 3 of the License.
-%
-% openCOSSAN is distributed in the hope that it will be useful,
-% but WITHOUT ANY WARRANTY; without even the implied warranty of
-% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-% GNU General Public License for more details.
-%
-%  You should have received a copy of the GNU General Public License
-%  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
-% =====================================================================
+    %{
+    This file is part of OpenCossan <https://cossan.co.uk>.
+    Copyright (C) 2006-2019 COSSAN WORKING GROUP
 
-import opencossan.optimization.*
+    OpenCossan is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License or,
+    (at your option) any later version.
+
+    OpenCossan is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
+    %}
 
 %% Define global variable for the objective function and the constrains
 global XoptGlobal XsimOutGlobal
 
 %%   Argument Check
-OpenCossan.validateCossanInputs(varargin{:})
+opencossan.OpenCossan.validateCossanInputs(varargin{:})
 
 %  Check whether or not required arguments have been passed
-for k=1:2:length(varargin),
-    switch lower(varargin{k}),
-        case {'xoptimizationproblem'},   %extract OptimizationProblem
-            assert(isa(varargin{k+1},'opencossan.optimization.OptimizationProblem'),...
-                'openCOSSAN:Cobyla:apply:wrongOptimizationProblem',...
-                ['The variable %s must be an opencossan.optimization.OptimizationProblem\n',...
-                'Provided class: %s'],inputname(k),class(varargin{k+1}))
-            % Load OptimizationProblem
-            Xop     = varargin{k+1};
-        case {'xoptimum'},   %extract OptimizationProblem
-            %check that arguments is actually an OptimizationProblem object
-            assert(isa(varargin{k+1},'opencossan.optimization.Optimum'),...
-                'openCOSSAN:Cobyla:apply:wrongOptimum',...
-                ['The variable %s must be an opencossan.optimization.Optimum\n',...
-                'Provided class: %s'],inputname(k),class(varargin{k+1}))
-            Xoptimum  = varargin{k+1};
+for k=1:2:length(varargin)
+    switch lower(varargin{k})
+        case {'xoptimizationproblem'}   %extract OptimizationProblem
+            if isa(varargin{k+1},'opencossan.optimization.OptimizationProblem')    %check that arguments is actually an OptimizationProblem object
+                Xop     = varargin{k+1};
+            else
+                error('OpenCossan:Cobyla:apply',...
+                    ['the variable  ' inputname(k) ...
+                    ' must be an OptimizationProblem object']);
+            end
+        case {'cxoptimizationproblem'}   %extract OptimizationProblem
+            if isa(varargin{k+1}{1},'OptimizationProblem')    %check that arguments is actually an OptimizationProblem object
+                Xop     = varargin{k+1}{1};
+            else
+                error('OpenCossan:Cobyla:apply',...
+                    ['the variable  ' inputname(k) ' must be an OptimizationProblem object']);
+            end  
+       case {'xoptimum'}   %extract OptimizationProblem
+            if isa(varargin{k+1},'Optimum')    %check that arguments is actually an OptimizationProblem object
+                Xoptimum  = varargin{k+1};
+            else
+                error('OpenCossan:Cobyla:apply',...
+                    ['the variable  ' inputname(k) ...
+                    ' must be an Optimum object']);
+            end
         case 'vinitialsolution'
             VinitialSolution=varargin{k+1};
         otherwise
-            error('openCOSSAN:Cobyla:apply:wrongArgument', ...
+            error('OpenCossan:Cobyla:apply:wrongInputArgument', ...
                 'The PropertyName %s is not valid',varargin{k});
     end
 end
@@ -73,44 +78,44 @@ end
 
 %% Check Optimization problem
 if ~exist('Xop','var')
-    error('openCOSSAN:optimization:cobyla:apply',...
+    error('OpenCossan:Cobyla:apply:NoOptimizationProblemDefined',...
         'Optimization problem must be defined')
 end
 
 %% Add bounds to the constraints
-CnameDV=Xop.Xinput.CnamesDesignVariable;
+CnameDV=Xop.Xinput.DesignVariableNames;
 
 for ndv=1:Xop.Xinput.NdesignVariables
     
-    if isfinite(Xop.Xinput.XdesignVariable.(CnameDV{ndv}).lowerBound)
+    if isfinite(Xop.Xinput.DesignVariables.(CnameDV{ndv}).LowerBound)
         SdesignVariableName=[CnameDV{ndv} '_lowerBound'];
         
-        OpenCossan.cossanDisp(['DesignVariable ' SdesignVariableName ' added to constraint object!'],3)
+        opencossan.OpenCossan.cossanDisp(['DesignVariable ' SdesignVariableName ' added to constraint object!'],3)
         
-        Sscript=['for n=1:height(TableInput), TableOutput.' SdesignVariableName '(n) = ' ...
-            num2str(Xop.Xinput.XdesignVariable.(CnameDV{ndv}).lowerBound) ...
-            ' - TableInput.' CnameDV{ndv} '(n); end'];
+        Sscript=['for n=1:length(Tinput), Toutput(n).' SdesignVariableName ' = ' ...
+            num2str(Xop.Xinput.DesignVariables.(CnameDV{ndv}).LowerBound) ...
+            ' - Tinput(n).' CnameDV{ndv} '; end'];
         
-         XconstraintDV= Constraint('Sdescription',['lower bound - current value of ' CnameDV{ndv}], ...
-        'Sscript',Sscript, 'SoutputName',SdesignVariableName,...
-        'CinputNames',CnameDV(ndv),'Linequality',true); 
+         XconstraintDV = opencossan.optimization.Constraint('Description',['lower bound - current value of ' CnameDV{ndv}], ...
+        'Script',Sscript, 'OutputNames',{SdesignVariableName},...
+        'InputNames',CnameDV(ndv),'inequality',true,'Format','structure'); 
         
         Xop=Xop.addConstraint(XconstraintDV); 
 
     end
     
-    if isfinite(Xop.Xinput.XdesignVariable.(CnameDV{ndv}).upperBound)
+    if isfinite(Xop.Xinput.DesignVariables.(CnameDV{ndv}).UpperBound)
         SdesignVariableName=[CnameDV{ndv} '_upperBound'];
         
-        OpenCossan.cossanDisp(['DesignVariable ' SdesignVariableName ' added to constraint object!'],3)
+        opencossan.OpenCossan.cossanDisp(['DesignVariable ' SdesignVariableName ' added to constraint object!'],3)
         
-        Sscript=['for n=1:height(TableInput), TableOutput.' SdesignVariableName '(n) = ' ...
-            ' + TableInput.' CnameDV{ndv} '(n) - ' ...
-            num2str(Xop.Xinput.XdesignVariable.(CnameDV{ndv}).upperBound) '; end'];
+        Sscript=['for n=1:length(Tinput), Toutput(n).' SdesignVariableName ' = ' ...
+            ' + Tinput(n).' CnameDV{ndv} '- ' ...
+            num2str(Xop.Xinput.DesignVariables.(CnameDV{ndv}).UpperBound) '; end'];
         
-        XconstraintDV= Constraint('Sdescription',['current value of ' CnameDV{ndv} ' - upper bound'], ...
-        'Sscript',Sscript, 'SoutputName',SdesignVariableName,...
-        'CinputNames',CnameDV(ndv),'Linequality',true); 
+        XconstraintDV = opencossan.optimization.Constraint('Description',['current value of ' CnameDV{ndv} ' - upper bound'], ...
+        'Script',Sscript, 'OutputNames',{SdesignVariableName},...
+        'InputNames',CnameDV(ndv),'inequality',true,'format','structure'); 
         
         Xop=Xop.addConstraint(XconstraintDV); 
 
@@ -118,7 +123,7 @@ for ndv=1:Xop.Xinput.NdesignVariables
 end
 
 assert(~isempty(Xop.Xconstraint),...
-    'openCOSSAN:optimization:cobyla:apply',...
+    'OpenCossan:cobyla:apply',...
     'It is not possible to apply COBYLA to solve UNCONSTRAINED problem')
 
 Ndv     = Xop.NdesignVariables;  % number of design variables
@@ -131,11 +136,9 @@ end
 
 %% initialize Optimum
 if ~exist('Xoptimum','var')
-    XoptGlobal=Xop.initializeOptimum('LgradientObjectiveFunction',false, ...
-                                     'LgradientConstraints',false,...
-                                     'Xoptimizer',Xobj);
+    XoptGlobal=opencossan.optimization.Optimum('XoptimizationProblem',Xop,'Xoptimizer',Xobj);
 else
-    %TODO: Check Optimum 
+    %TODO: Check Optimum
     XoptGlobal=Xoptimum;
 end
 
@@ -146,30 +149,39 @@ XsimOutGlobal=[];
 % This variable is retrieved by mex file by name.
 if isempty(Xop.Xmodel)
     objective_function_cobyla=@(x)evaluate(Xop.XobjectiveFunction,'Xoptimizationproblem',Xop,...
-    'MreferencePoints',x','Lgradient',false,...
-    'scaling',Xobj.scalingFactor); %#ok<NASGU>
+    'MreferencePoints',x,...
+    'scaling',Xobj.ObjectiveFunctionScalingFactor); %#ok<NASGU>
 else
     objective_function_cobyla=@(x)evaluate(Xop.XobjectiveFunction,'Xoptimizationproblem',Xop,...
-    'MreferencePoints',x','Lgradient',false,'Xmodel',Xop.Xmodel,...
-    'scaling',Xobj.scalingFactor); %#ok<NASGU>
+    'MreferencePoints',x,'Xmodel',Xop.Xmodel,...
+    'scaling',Xobj.ObjectiveFunctionScalingFactor); %#ok<NASGU>
 end
 
 % Create handle for the constrains
-constraint_cobyla=@(x)evaluate(Xop.Xconstraint,'Xoptimizationproblem',Xop,...
-    'MreferencePoints',x','Lgradient',false,...
-    'scaling',Xobj.scalingFactorConstraints); %#ok<NASGU>
+constraint_cobyla=@(x)evaluate(Xop.Xconstraint,'optimizationproblem',Xop,...
+    'referencepoints',x,...
+    'scaling',Xobj.ConstraintScalingFactor); %#ok<NASGU>
 
 %% Perform optimization using Cobyla
 
-OpenCossan.setLaptime('description',['COBYLA:' Xobj.Sdescription]);
+opencossan.OpenCossan.getTimer().lap('Description',['COBYLA:' Xobj.Description]);
 
-[~,Nexitflag,~]    = cobyla_matlab(Xobj,...
-    Xop.VinitialSolution,Xobj.Nmax,Xobj.rho_ini,Xobj.rho_end,Ndv,N_ineq);
+[VoptimalDesign,Nexitflag,XoptGlobal.VoptimalScores] = cobyla_matlab(Xobj,...
+    Xop.VinitialSolution,Xobj.MaxIterations,Xobj.rho_ini,Xobj.rho_end,Ndv,N_ineq);
 
-OpenCossan.setLaptime('description','End COBYLA analysis');
+XoptGlobal.VoptimalDesign=VoptimalDesign';
+
+% Retrieve values of constraints from the Optimum
+VoptimalConstraint=XoptGlobal.TablesValues.Constraints ...
+    (all(XoptGlobal.TablesValues.DesignVariables==VoptimalDesign,2),:);
+
+% Remove NaN
+XoptGlobal.VoptimalConstraints=VoptimalConstraint(~isnan(VoptimalConstraint))';
+
+opencossan.OpenCossan.getTimer().lap('Description','End of the COBYLA analysis');
 
 %6.3.   Prepare string with reason for termination of optimization algorithm
-switch Nexitflag,
+switch Nexitflag
     case{-2}
         Sexitflag   = 'No. optimization variables <0 or No. constraints <0';
     case{-1}
@@ -184,7 +196,6 @@ switch Nexitflag,
         Sexitflag   = 'User requested end of minimization';
 end
 
-
 % Assign outputs
 Xoptimum=XoptGlobal;
 Xoptimum.Sexitflag=Sexitflag;
@@ -196,7 +207,7 @@ if ~isdeployed
     % add entries in simulation and analysis database at the end of the
     % computation when not deployed. The deployed version does this with
     % the finalize command
-    XdbDriver = OpenCossan.getDatabaseDriver;
+    XdbDriver = opencossan.OpenCossan.getDatabaseDriver;
     if ~isempty(XdbDriver)
         XdbDriver.insertRecord('StableType','Result',...
         'Nid',getNextPrimaryID(OpenCossan.getDatabaseDriver,'Result'),...
@@ -208,5 +219,5 @@ end
 clear global XoptGlobal XsimOutGlobal 
 
 %% Record Time
-OpenCossan.setLaptime('description',['End apply@' class(Xobj)]);
+opencossan.OpenCossan.getTimer().lap('Description',['End apply@' class(Xobj)]);
 

@@ -3,29 +3,28 @@ function [Xoptimum,varargout] = apply(Xobj,varargin)
 %           MiniMax for multi-objective optimization
 %
 %
-% See Also: http://cossan.cfd.liv.ac.uk/wiki/apply@MiniMax
+% See Also: https://cossan.co.uk/wiki/apply@MiniMax
 %
 % Author: Edoardo Patelli
-% Institute for Risk and Uncertainty, University of Liverpool, UK
-% email address: openengine@cossan.co.uk
-% Website: http://www.cossan.co.uk
+% Website: https://www.cossan.co.uk
 
-% =====================================================================
-% This file is part of openCOSSAN.  The open general purpose matlab
-% toolbox for numerical analysis, risk and uncertainty quantification.
-%
-% openCOSSAN is free software: you can redistribute it and/or modify
-% it under the terms of the GNU General Public License as published by
-% the Free Software Foundation, either version 3 of the License.
-%
-% openCOSSAN is distributed in the hope that it will be useful,
-% but WITHOUT ANY WARRANTY; without even the implied warranty of
-% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-% GNU General Public License for more details.
-%
-%  You should have received a copy of the GNU General Public License
-%  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
-% =====================================================================
+%{
+    This file is part of OpenCossan <https://cossan.co.uk>.
+    Copyright (C) 2006-2018 COSSAN WORKING GROUP
+
+    OpenCossan is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License or,
+    (at your option) any later version.
+    
+    OpenCossan is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU General Public License for more details.
+    
+    You should have received a copy of the GNU General Public License
+    along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
+%}
 
 %% Define global variable for the objective function and the constrains
 global XoptGlobal XsimOutGlobal 
@@ -35,31 +34,38 @@ global XoptGlobal XsimOutGlobal
 OpenCossan.validateCossanInputs(varargin{:});
 
 %  Check whether or not required arguments have been passed
-for k=1:2:length(varargin),
-    switch lower(varargin{k}),
-        case {'xoptimizationproblem'},   %extract OptimizationProblem
-            if isa(varargin{k+1},'opencossan.optimization.OptimizationProblem'),    %check that arguments is actually an OptimizationProblem object
+for k=1:2:length(varargin)
+    switch lower(varargin{k})
+        case {'xoptimizationproblem'}   %extract OptimizationProblem
+            if isa(varargin{k+1},'OptimizationProblem')    %check that arguments is actually an OptimizationProblem object
                 Xop     = varargin{k+1};
             else
-                error('openCOSSAN:MinMax:apply',...
+                error('OpenCossan:MinMax:apply',...
                     ['the variable  ' inputname(k) ' must be an OptimizationProblem object']);
             end
-        case {'xoptimum'},   %extract OptimizationProblem
-            if isa(varargin{k+1},'opencossan.optimization.Optimum'),    %check that arguments is actually an OptimizationProblem object
+        case {'cxoptimizationproblem'}   %extract OptimizationProblem
+            if isa(varargin{k+1}{1},'OptimizationProblem')    %check that arguments is actually an OptimizationProblem object
+                Xop     = varargin{k+1}{1};
+            else
+                error('OpenCossan:MinMax:apply',...
+                    ['the variable  ' inputname(k) ' must be an OptimizationProblem object']);
+            end  
+        case {'xoptimum'}   %extract OptimizationProblem
+            if isa(varargin{k+1},'Optimum')    %check that arguments is actually an OptimizationProblem object
                 Xoptimum  = varargin{k+1};
             else
-                error('openCOSSAN:MinMax:apply',...
+                error('OpenCossan:MinMax:apply',...
                     ['the variable  ' inputname(k) ' must be an Optimum object']);
             end
         case 'vinitialsolution'
             VinitialSolution=varargin{k+1};
         otherwise
-            error('openCOSSAN:MinMax:apply','PropertyName %s is not valid',varargin{k});
+            error('OpenCossan:MinMax:apply','PropertyName %s is not valid',varargin{k});
     end
 end
 
 %% Check Optimization problem
-assert(logical(exist('Xop','var')), 'openCOSSAN:MinMax:apply',...
+assert(logical(exist('Xop','var')), 'OpenCossan:MinMax:apply',...
     'Optimization problem must be defined')
 
 % Check inputs and initialize variables
@@ -71,13 +77,12 @@ if exist('VinitialSolution','var')
 end
 
 assert(size(Xop.VinitialSolution,1)==1, ...
-    'openCOSSAN:MinMax:apply',...
+    'OpenCossan:MinMax:apply',...
     'Only 1 initial setting point is allowed')
 
 %% initialize Optimum
 if ~exist('Xoptimum','var')
-    XoptGlobal=Xop.initializeOptimum('LgradientObjectiveFunction',true,'LgradientConstraints',true,...
-                                     'Xoptimizer',Xobj);
+    XoptGlobal=Optimum('XoptimizationProblem',Xop,'Xoptimizer',Xobj);
 else
     %TODO: Check Optimum
     XoptGlobal=Xoptimum;
@@ -121,7 +126,8 @@ end
 
 if isempty(Xop.Xconstraint)
     %% Perform Real optimization
-    [~,~,~,Nexitflag]  = fminimax(hobjfun,... % ObjectiveFunction
+    [XoptGlobal.VoptimalDesign,XoptGlobal.VoptimalScores,~,Nexitflag]  = ...
+        fminimax(hobjfun,... % ObjectiveFunction
         Xop.VinitialSolution,[],[],[],[],...
         Xop.VlowerBounds,Xop.VupperBounds,... % Bounds
         [],... % Contrains
@@ -142,7 +148,8 @@ else
     
     
     %% Perform Real optimization
-    [~,~,~,Nexitflag]  = fminimax(hobjfun,... % ObjectiveFunction
+    [XoptGlobal.VoptimalDesign,XoptGlobal.VoptimalScores,~,Nexitflag]  = ...
+        fminimax(hobjfun,... % ObjectiveFunction
         Xop.VinitialSolution,[],[],[],[],...
         Xop.VlowerBounds,Xop.VupperBounds,... % Bounds
         hconstrains,... % Contrains
@@ -192,4 +199,4 @@ end
 clear global XoptGlobal XsimOutGlobal
 
 %% Record Time
-OpenCossan.setLaptime('description','End apply@MinMax');
+OpenCossan.setLaptime('Sdescription','End apply@MinMax');

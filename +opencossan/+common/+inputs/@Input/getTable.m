@@ -58,7 +58,7 @@ if isempty(CdesignVariable)
 else
     if isempty(Xobj.Xsamples) || isempty(Xobj.Xsamples.MdoeDesignVariables)
         
-        TdesignVariable=get(Xobj,'designVariableValue');
+        TdesignVariable=get(Xobj,'DesignVariableValues');
         
         % Create a cell array with the values
         % don´t forget to preallocate memory
@@ -70,7 +70,7 @@ else
             end
         end
     else
-        CdesignVariableValue   = num2cell(Xobj.Xsamples.MdoeDesignVariables);
+        CdesignVariableValue = num2cell(Xobj.Samples.MdoeDesignVariables);
     end
 end
 

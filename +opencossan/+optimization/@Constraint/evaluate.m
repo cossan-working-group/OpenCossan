@@ -1,217 +1,107 @@
-function [Vin,Veq,MinGrad,MeqGrad] =evaluate(Xobj,varargin)
-% EVALUATE This method evaluate the non linear inequality constraint and
+function [in, eq] = evaluate(obj, varargin)
+% EVALUATE This method evaluates the non linear inequality constraint and
 % the linear equality constraint
-%
-% The candidate solutions (i.e. Design Variables) are stored in the matrix
-% MX(Ncandidates,NdesignVariable)
-%
-% The constraint functions are stored in Mconstraints(Ncandidates,Nconstraints)
-% The gradients of the contraint functions are store in MconstraintsGradient(NdesignVariable,NobjectiveFunctions)
-%
-% See Also: http://cossan.cfd.liv.ac.uk/wiki/evaluate@Constraint
-%
-% Author: Edoardo Patelli
-% Institute for Risk and Uncertainty, University of Liverpool, UK
-% email address: openengine@cossan.co.uk
-% Website: http://www.cossan.co.uk
 
-% =====================================================================
-% This file is part of openCOSSAN.  The open general purpose matlab
-% toolbox for numerical analysis, risk and uncertainty quantification.
-%
-% openCOSSAN is free software: you can redistribute it and/or modify
-% it under the terms of the GNU General Public License as published by
-% the Free Software Foundation, either version 3 of the License.
-%
-% openCOSSAN is distributed in the hope that it will be useful,
-% but WITHOUT ANY WARRANTY; without even the implied warranty of
-% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-% GNU General Public License for more details.
-%
-%  You should have received a copy of the GNU General Public License
-%  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
-% =====================================================================
+%{
+This file is part of OpenCossan <https://cossan.co.uk>. Copyright (C)
+2006-2019 COSSAN WORKING GROUP
+
+OpenCossan is free software: you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free
+Software Foundation, either version 3 of the License or, (at your option)
+any later version.
+
+OpenCossan is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+more details.
+
+You should have received a copy of the GNU General Public License along
+with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
+%}
 
 % Define global variable to store the optimum
 
-import opencossan.workers.Evaluator
-
 global XoptGlobal XsimOutGlobal
 
-OpenCossan.validateCossanInputs(varargin{:})
-Lgradient=false;
-scaling=1;
-perturbation=1;
+[required, varargin] = opencossan.common.utilities.parseRequiredNameValuePairs(...
+    ["optimizationproblem", "referencepoints"], varargin{:});
 
-for k=1:2:length(varargin)
-    switch lower(varargin{k})
-        case 'xmodel'
-            Xmodel=varargin{k+1};
-        case 'xoptimizationproblem'
-            XoptProb=varargin{k+1};
-        case 'xoptimum'
-            XoptGlobal=varargin{k+1};
-        case 'lgradient'
-            Lgradient=varargin{k+1};
-        case 'mreferencepoints'
-            Mx=varargin{k+1};
-        case 'finitedifferenceperturbation'
-            perturbation=varargin{k+1};
-        case 'scaling'
-            scaling=varargin{k+1};
-        otherwise
-            error('openCOSSAN:constraint:Evaluate',...
-                'PropertyName %s is not a valid input',varargin{k});
-    end
-end
- 
+optional = opencossan.common.utilities.parseOptionalNameValuePairs(...
+    ["model", "scaling"], {[], 1}, varargin{:});
 
-assert(logical(exist('XoptProb','var')), ...
-    'openCOSSAN:optimization:constraint:evaluate',...
+assert(isa(required.optimizationproblem, 'opencossan.optimization.OptimizationProblem'), ...
+    'OpenCossan:optimization:constraint:evaluate',...
     'An OptimizationProblem must be passed using the PropertyName XoptimizationProblem');
 
-assert(~isempty(XoptGlobal), ...
-    'openCOSSAN:optimization:constraint:evaluate:emptyOptimum',...
-    'It is necessary to initialize a Optimum object before evaluating the Constraint');
+% destructure inputs
+optProb = required.optimizationproblem;
+x = required.referencepoints;
 
-% Collect quantities
+model = optional.model;
+scaling = optional.scaling;
 
-Linequality=Xobj(1).Linequality;
-Coutputnames=Xobj(1).Coutputnames;
+NdesignVariables = size(x,2); %number of design variables
+Ncandidates = size(x,1); % Number of candidate solutions
 
-for n=2:length(Xobj)
-    Linequality=[Linequality; Xobj(n).Linequality]; %#ok<AGROW>
-    Coutputnames=[Coutputnames Xobj(n).Coutputnames]; %#ok<AGROW>
-end
-
-
-assert(logical(exist('Mx','var')),'cossanx:optimization:constraint:evaluate',...
-    'Evaluation points (Design Variables) not defined');
-
-NdesignVariables = size(Mx,2); %number of design variables
-Ncandidates=size(Mx,1); % Number of candidate solutions
-
-assert(XoptProb.NdesignVariables==NdesignVariables, ...
-    'openCOSSAN:optimization:constraint:evaluate',...
+assert(optProb.NdesignVariables == NdesignVariables, ...
+    'OpenCossan:optimization:constraint:evaluate',...
     'Number of design Variables not correct');
 
-if ~exist('XoptProb','var')
-    error('openCOSSAN:Constraint:evaluate',...
-        'An optimizationProblem object must be defined');
-end
+% Prepare input object
+Xinput = optProb.Xinput.setDesignVariable('CSnames',optProb.CnamesDesignVariables,'Mvalues',x);
+Tinput = Xinput.getTable;
 
-%% Prepare input values
-if ~exist('Tinput','var')
-    Xinput=XoptProb.Xinput.setDesignVariable('CSnames',XoptProb.CnamesDesignVariables,'Mvalues',Mx);
-    TableInput=Xinput.getTable;
-else
-    % Copy the candidate solution into the input structure
-    % TODO: this procedure will not work anymore beause we use tables now!
-    warning('openCOSSAN:Constraint:evaluate','EXPERIMENTAL procedure, not tested')
-    for nsol=1:Ncandidates
-        for n=1:NdesignVariables
-            Tinput(nsol).(XoptProb.CnamesDesignVariables{n}) = Mx(nsol,n);     %prepare Input object with design "x"
-        end
-        % Add values of all the other quantities (i.e. Parameters etc)
-    end
-end
-
-%% Prepare input considering perturbations
-if Lgradient    %checks whether or not gradient can be retrieved
-    
-    assert(~XoptProb.Xinput.LdiscreteDesignVariables,...
-        'openCOSSAN:Constraint:evaluate',...
-        'It is not possible to use gradient based optimization method with discrete DesignVariable');
-    
-    
-    assert(Ncandidates==1, ...
-        'openCOSSAN:Constraint:evaluate',...
-        'Evaluation of the Constraints gradients is available only with 1 candidate solution');
-    
-    MxPerturbation=repmat(Mx,NdesignVariables,1)+diag(perturbation*Mx);
-    Xinput=XoptProb.Xinput.setDesignVariable('CSnames',XoptProb.CnamesDesignVariables,'Mvalues',[Mx; MxPerturbation]);
-    TableInput=Xinput.getTable;
-end
-
-% Extract required information from the SimulationData object (evaluated in the Objective Function)
+% Extract required information from the SimulationData object (evaluated in
+% the Objective Function) if available
 
 % Evaluate the model if required by the constraints
-if exist('Xmodel','var')
-    XsimOutGlobal = apply(Xmodel,TableInput);
-    
+if ~isempty(model)
+    XsimOutGlobal = apply(model,Tinput);
     % Update counter
-    XoptGlobal.NevaluationsModel=XoptGlobal.NevaluationsModel+height(TableInput);
+    XoptGlobal.NevaluationsModel = XoptGlobal.NevaluationsModel+height(Tinput);
 end
 
-for icon=1:length(Xobj)
-    TableInputSolver=Evaluator.addField2Table(Xobj(icon),XsimOutGlobal,TableInput);
+constraintValues = zeros(size(x));
+for i = 1:numel(obj)
+    TableInputSolver = opencossan.workers.Evaluator.addField2Table(obj(i),XsimOutGlobal,Tinput);
     
     %% Evaluate function
-    TableOutConstrains = evaluate@opencossan.workers.Mio(Xobj(icon),TableInputSolver);
+    TableOutConstrains = evaluate@opencossan.workers.Mio(obj(i),TableInputSolver);
     
-    % keep only the variables defined in the Coutputnames
-    Vkeep = ismember(TableOutConstrains.Properties.VariableNames,Xobj(icon).Coutputnames);
-    
-    % Collect perturbation values
-    MoutConstrain=table2array(TableOutConstrains(:,Vkeep));
-    
-    % Store results in a global variables
-    if icon==1
-        % XoutConstrainsGlobal=XoutConstrains;
-        Mout=MoutConstrain;
-    else
-        % XoutConstrainsGlobal=XoutConstrainsGlobal.merge(XoutConstrains);
-        Mout=[Mout MoutConstrain]; %#ok<AGROW>
-    end
-end
-
-%% Process data - gradient of the constrains
-if Lgradient
-    
-    Vdfcon=zeros(NdesignVariables,length(Coutputnames));
-    for n=2:height(TableInput)
-        Vdfcon(n-1,:)  =(Mout(n,:)-Mout(1,:))/(perturbation*Mx(n-1));    %compute gradient
-    end
-    
-    Mgradient  = Vdfcon/scaling;
-    MinGrad=Mgradient(:,Linequality);
-    MeqGrad=Mgradient(:,~Linequality);
-    
-    Mout=Mout(1,:);
-else
-    Mgradient = [];
+    constraintValues(:,i) = TableOutConstrains.(obj(i).OutputNames{1});
 end
 
 %%   Apply scaling constant
-Mout  = Mout/scaling;
+constraintValues = constraintValues(1:Ncandidates,:)/scaling;
 
 % Assign output to the inequality and equality constrains
-Vin=Mout(:,Linequality);
-Veq=Mout(:,~Linequality);
+in = constraintValues(:,[obj.IsInequality]);
+eq = constraintValues(:,~[obj.IsInequality]);
 
 %% Update function counter of the Optimiser
-XoptGlobal.NevaluationsConstraints = XoptGlobal.NevaluationsConstraints+height(TableInput);  % Number of objective function evaluations
+XoptGlobal.NevaluationsConstraints = XoptGlobal.NevaluationsConstraints+height(Tinput);  % Number of objective function evaluations
 
 switch class(XoptGlobal.XOptimizer)
     case 'opencossan.optimization.Cobyla'
         %% Update Optimum object
         % Remove the sign changing for the constraints
-        XoptGlobal=XoptGlobal.addIteration('MconstraintFunction',-Mout);
+        XoptGlobal=XoptGlobal.addIteration('MconstraintFunction',constraintValues,...
+            'Niteration',XoptGlobal.Niterations,'Mdesignvariables',x);
     case 'opencossan.optimization.GeneticAlgorithms'
-        if size(Mout,1)==XoptGlobal.XOptimizer.NPopulationSize
-            XoptGlobal=XoptGlobal.addIteration('MconstraintFunction',Mout);
+        %        XoptGlobal.Niterations=XoptGlobal.Niterations+1;
+        if size(constraintValues,1)==XoptGlobal.XOptimizer.NPopulationSize
+            XoptGlobal=XoptGlobal.addIteration('MconstraintFunction',constraintValues,...
+                'Mdesignvariables',x,...
+                'Viterations',repmat(max(0,XoptGlobal.Niterations),size(x,1),1));
         end
     case 'opencossan.optimization.StochasticRanking'
-        if size(Mout,1)==XoptGlobal.XOptimizer.Nlambda
-            XoptGlobal=XoptGlobal.addIteration('MconstraintFunction',Mout);
-        end
-     case {'opencossan.optimization.SequentialQuadraticProgramming'} 
-         XoptGlobal=XoptGlobal.addIteration('Niteration',XoptGlobal.Niterations+1,...
-             'MconstraintFunction',Mout,...
-             'MconstraintFunctiongradient',Mgradient);
+        if size(constraintValues,1)==XoptGlobal.XOptimizer.Nlambda
+            XoptGlobal=XoptGlobal.addIteration('MconstraintFunction',MoutConstrains,...
+                'Mdesignvariables',Minput,...
+                'Viterations',repmat(max(0,XoptGlobal.Niterations),size(Minput,1),1));
+        end        
 end
-
-
 
 end
 

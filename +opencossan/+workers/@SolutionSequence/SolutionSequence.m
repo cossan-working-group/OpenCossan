@@ -59,39 +59,19 @@ classdef SolutionSequence < opencossan.workers.Worker
             % Institute for Risk and Uncertainty, University of Liverpool, UK
             % email address: openengine@cossan.co.uk
             % Website: http://www.cossan.co.uk
-            
-            % =====================================================================
-            % This file is part of openCOSSAN.  The open general purpose matlab
-            % toolbox for numerical analysis, risk and uncertainty quantification.
-            %
-            % openCOSSAN is free software: you can redistribute it and/or modify
-            % it under the terms of the GNU General Public License as published by
-            % the Free Software Foundation, either version 3 of the License.
-            %
-            % openCOSSAN is distributed in the hope that it will be useful,
-            % but WITHOUT ANY WARRANTY; without even the implied warranty of
-            % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-            % GNU General Public License for more details.
-            %
-            %  You should have received a copy of the GNU General Public License
-            %  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
-            % =====================================================================
-            
+
             if isempty(varargin)
                 % Construct an empty object used by the subclasses
                 % Please DO NOT REMOVE this
                 return
             end
-            
-            % Argument Check
-            opencossan.OpenCossan.validateCossanInputs(varargin{:})
-            
+
             % Set Default values
             Shostname='';
             Nconcurrent=Inf;
-            
+
             % Set parameters defined by the user
-            for k=1:2:length(varargin),
+            for k=1:2:length(varargin)
                 switch lower(varargin{k})
                     case 'sdescription'
                         Xobj.Sdescription = varargin{k+1};
@@ -100,9 +80,9 @@ classdef SolutionSequence < opencossan.workers.Worker
                     case 'sfile'
                         Xobj.Sfile = varargin{k+1};
                     case 'coutputnames'
-                        Xobj.Coutputnames = varargin{k+1};
+                        Xobj.OutputNames = varargin{k+1};
                     case 'cinputnames'
-                        Xobj.Cinputnames = varargin{k+1};
+                        Xobj.InputNames = varargin{k+1};
                     case 'sscript'
                         Xobj.Sscript = varargin{k+1};
                     case 'cprovidedobjecttypes'
@@ -115,7 +95,6 @@ classdef SolutionSequence < opencossan.workers.Worker
                         Xobj.CglobalObjects=varargin{k+1};
                     case {'cobjectsnames' 'cobjectnames'}
                         Xobj.CobjectsNames = varargin{k+1};
-                        
                         CreservedNames={'XobjSolutionSequence','varargin','varargout'};
                         assert(~any(ismember(Xobj.CobjectsNames,CreservedNames)),...
                             'openCOSSAN:SolutionSequence', ...
@@ -191,16 +170,16 @@ classdef SolutionSequence < opencossan.workers.Worker
             
             
             
-            assert(~isempty(Xobj.Coutputnames),'openCOSSAN:SolutionSequence', ...
+            assert(~isempty(Xobj.OutputNames),'openCOSSAN:SolutionSequence', ...
                 'Mandatory input Coutputnames cannot be empty.')
             
             if isempty(Xobj.CprovidedObjectTypes)
-                Xobj.CprovidedObjectTypes=cell(length(Xobj.Coutputnames),1);
+                Xobj.CprovidedObjectTypes=cell(length(Xobj.OutputNames),1);
             else
-                assert(length(Xobj.CprovidedObjectTypes)==length(Xobj.Coutputnames), ...
+                assert(length(Xobj.CprovidedObjectTypes)==length(Xobj.OutputNames), ...
                     'openCOSSAN:SolutionSequence', ...
                     'Length of the CprovidedObjectTypes (%i) must be equal to the length of Coutputnames (%i)', ...
-                    length(Xobj.CprovidedObjectTypes),length(Xobj.Coutputnames))
+                    length(Xobj.CprovidedObjectTypes),length(Xobj.OutputNames))
             end
             
             

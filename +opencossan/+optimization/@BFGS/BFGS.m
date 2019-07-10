@@ -1,4 +1,4 @@
-classdef BFGS < opencossan.optimization.Optimizer
+classdef BFGS < Optimizer
     % BFFS class is intended for solving unconstrained nonlinear optimization
     % problem using gradients
     
@@ -67,12 +67,14 @@ classdef BFGS < opencossan.optimization.Optimizer
                               'Value %s not valid\nValid SfiniteDifferenceType are: ''%s'' and ''%s'' ', ...
                               varargin{k+1},CallowedValues{1},CallowedValues{2})
                         Xobj.SfiniteDifferenceType=varargin{k+1};
+                    case  'timeout'
+                        Xobj.timeout=varargin{k+1};
                     case  'toleranceobjectivefunction'
                         Xobj.toleranceObjectiveFunction=varargin{k+1};
                     case  'tolerancedesignvariables'
                         Xobj.toleranceDesignVariables=varargin{k+1};
                     otherwise
-                        warning('openCOSSAN:BFGS',...
+                        warning('OpenCossan:BFGS',...
                             'PropertyName %s  not valid ',varargin{k});
                 end
             end % input check

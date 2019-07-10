@@ -1,4 +1,4 @@
-classdef RBOProblem < opencossan.optimization.OptimizationProblem
+classdef RBOProblem < OptimizationProblem
     %RBOProblem This is class used to define the ReliabilityBasedOptimization
     %Problem. It exends the class OptimizationProblem,
     %
@@ -36,6 +36,7 @@ classdef RBOProblem < opencossan.optimization.OptimizationProblem
         NmaxLocalRBOIteration   % maximum number of iteration for local RBO
         SmetamodelType          % Type of metamodel used for solving the RBOproblem
         CmetamodelProperties    % Cell that contains the properties of the MetaModel
+        CSinnerLoopOutputNames  % Names associated to the quantity of interest
     end
     
     
@@ -95,21 +96,21 @@ classdef RBOProblem < opencossan.optimization.OptimizationProblem
             OpenCossan.validateCossanInputs(varargin{:})
             
             %% Process inputs arguments
-            for k=1:2:length(varargin),
-                switch lower(varargin{k}),
+            for k=1:2:length(varargin)
+                switch lower(varargin{k})
                     %2.1.   Description of the object
                     case 'sdescription'
                         Xobj.Sdescription   = varargin{k+1};
                     case 'xobjectivefunction'
-                        assert(isa(varargin{k+1},'opencossan.optimization.ObjectiveFunction'),...
+                        assert(isa(varargin{k+1},'ObjectiveFunction'),...
                             'openCOSSAN:RBOproblem',...
                                  '%s must  be an ObjectiveFunction ',inputname(k+1))
                         Xobj.XobjectiveFunction  = varargin{k+1};
                     case 'cxobjectivefunctions'
                         for n=1:length(varargin{k+1})
-                            assert(isa(varargin{k+1}{n},'opencossan.optimization.ObjectiveFunction'), ...
+                            assert(isa(varargin{k+1}{n},'ObjectiveFunction'), ...
                                 'openCOSSAN:RBOproblem',...
-                                'CXobjectivefunctions must contains only optimization.ObjectiveFunction Objects ');
+                                'CXobjectivefunctions must contains only ObjectiveFunction Objects ');
                             if n==1
                                 Xobj.XobjectiveFunction= varargin{k+1}{n};
                             else
@@ -119,9 +120,9 @@ classdef RBOProblem < opencossan.optimization.OptimizationProblem
                         
                     case 'ccxobjectivefunctions'
                         for n=1:length(varargin{k+1})
-                            assert(isa(varargin{k+1}{n}{:},'opencossan.optimization.ObjectiveFunction'), ...
+                            assert(isa(varargin{k+1}{n}{:},'ObjectiveFunction'), ...
                                 'openCOSSAN:RBOproblem',...
-                                'CXobjectivefunctions must contains only optimization.ObjectiveFunction Objects ');
+                                'CXobjectivefunctions must contains only ObjectiveFunction Objects ');
                             if n==1
                                 Xobj.XobjectiveFunction= varargin{k+1}{n}{:};
                             else
@@ -136,9 +137,9 @@ classdef RBOProblem < opencossan.optimization.OptimizationProblem
                             Xobj.Xconstraint  = varargin{k+1};
                     case 'cxconstraint'
                         for n=1:length(varargin{k+1})
-                            assert(isa(varargin{k+1}{n},'opencossan.optimization.Constraint'), ...
+                            assert(isa(varargin{k+1}{n},'Constraint'), ...
                                 'openCOSSAN:RBOproblem',...
-                                'CXconstraint must contains only optimization.Constraint Object ');
+                                'CXconstraint must contains only Constraint Object ');
                             if n==1
                                 Xobj.Xconstraint= varargin{k+1}{n};
                             else
@@ -147,9 +148,9 @@ classdef RBOProblem < opencossan.optimization.OptimizationProblem
                         end
                     case {'ccxconstraints' 'ccxconstraint'}
                         for n=1:length(varargin{k+1})
-                            assert(isa(varargin{k+1}{n}{:},'opencossan.optimization.Constraint'), ...
+                            assert(isa(varargin{k+1}{n}{:},'Constraint'), ...
                                 'openCOSSAN:RBOproblem',...
-                                'CXconstrains must contains only optimization.Constraint Objects ');
+                                'CXconstrains must contains only Constraint Objects ');
                             if n==1
                                 Xobj.Xconstraint= varargin{k+1}{n}{:};
                             else
@@ -167,23 +168,23 @@ classdef RBOProblem < opencossan.optimization.OptimizationProblem
                     case 'xsimulator'
                         % Getting the metadata of the Object
                         XmetaData=metaclass(varargin{k+1});
-                        assert(strcmp(XmetaData.SuperClasses{1}.Name,'opencossan.simulations.Simulations'), ...
+                        assert(strcmp(XmetaData.SuperClasses{1}.Name,'Simulations'), ...
                             'openCOSSAN:RBOproblem',...
                             'The object provided after the PropertyName Xsimulator has a superclass %s, (it must be of superclass Simulations) ',XmetaData.SuperClasses{1}.Name);
                         Xobj.Xsimulator=varargin{k+1};
                     case 'cxsimulator'
                         XmetaData=metaclass(varargin{k+1}{1});
-                        assert(strcmp(XmetaData.SuperClasses{1}.Name,'opencossan.simulations.Simulations'), ...
+                        assert(strcmp(XmetaData.SuperClasses{1}.Name,'Simulations'), ...
                             'openCOSSAN:RBOproblem',...
                             'The object provided after the PropertyName CXsimulator has a superclass %s, (it must be of superclass Simulations) ',XmetaData.SuperClasses{1}.Name);
                         Xobj.Xsimulator=varargin{k+1}{1};
                     case {'xprobabilisticmodel' 'xmodel'}
-                        assert(isa(varargin{k+1},'opencossan.reliability.ProbabilisticModel'), ...
+                        assert(isa(varargin{k+1},'ProbabilisticModel'), ...
                             'openCOSSAN:RBOproblem',...
                             'The object provided after the PropertyName Xprobabilisticmodel is of class %s',class(varargin{k+1}));
                         Xobj.XprobabilisticModel=varargin{k+1};
                     case {'cxprobabilisticmodel' 'cxmodel'}
-                        assert(isa(varargin{k+1}{1},'opencossan.reliability.ProbabilisticModel'), ...
+                        assert(isa(varargin{k+1}{1},'ProbabilisticModel'), ...
                             'openCOSSAN:RBOproblem',...
                             'The object provided after the PropertyName CXprobabilisticmodel is of class %s',class(varargin{k+1}{1}));
                         Xobj.XprobabilisticModel=varargin{k+1}{1};
@@ -199,6 +200,8 @@ classdef RBOProblem < opencossan.optimization.OptimizationProblem
                         Xobj.NmaxLocalRBOIteration=varargin{k+1};
                     case 'vperturbation'
                         Xobj.VperturbationSize=varargin{k+1};
+                    case 'csinnerloopoutputnames'
+                        Xobj.CSinnerLoopOutputNames=varargin{k+1};
                     otherwise
                         % The validity of the metamodelProperties is not checked
                         % during the definition of the RBOproblem but only when

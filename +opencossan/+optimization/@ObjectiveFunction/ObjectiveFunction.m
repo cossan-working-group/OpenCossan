@@ -10,7 +10,7 @@ classdef ObjectiveFunction < opencossan.workers.Mio
     end
     
     methods
-        function Xobj= ObjectiveFunction(varargin)
+        function obj = ObjectiveFunction(varargin)
             % ObjectiveFunction constructor.  This method create an object used to compute the
             % objective function for the optiumization toolbox.
             % It requires the same input arguments of a MIO object. The only
@@ -46,7 +46,7 @@ classdef ObjectiveFunction < opencossan.workers.Mio
             CpropertyNames={'lgradient','perturbation','scaling','lmaximise'};
             
             Vindex=true(length(varargin),1);
-            for k=1:2:length(varargin),
+            for k=1:2:length(varargin)
                 if ismember(lower(varargin{k}),CpropertyNames)
                     Vindex(k:k+1)=false;
                 end
@@ -55,7 +55,7 @@ classdef ObjectiveFunction < opencossan.workers.Mio
             CmioArguments=varargin(Vindex);
             CobjArguments=varargin(~Vindex);
             %% Reuse the Mio constructor
-            Xobj=Xobj@opencossan.workers.Mio(CmioArguments{:});
+            obj@opencossan.workers.Mio(CmioArguments{:});
             
             if nargin==0
                 return % allow to create an empty object
@@ -63,14 +63,14 @@ classdef ObjectiveFunction < opencossan.workers.Mio
             %% PostProcessing
             
             % Set parameters defined by the user
-            for k=1:2:length(CobjArguments),
+            for k=1:2:length(CobjArguments)
                 switch lower(CobjArguments{k})
                     case {'lgradient'}
-                        Xobj.Lgradient=CobjArguments{k+1};
+                        obj.Lgradient=CobjArguments{k+1};
                     case {'perturbation'}
-                        Xobj.perturbation=CobjArguments{k+1};
+                        obj.perturbation=CobjArguments{k+1};
                     case {'scaling'}
-                        Xobj.scaling=CobjArguments{k+1};
+                        obj.scaling=CobjArguments{k+1};
                     otherwise
                         error('openCOSSAN:optimization:ObjectiveFunction',...
                             'The Field name (%s) is not allowed',CobjArguments{k});
@@ -78,9 +78,9 @@ classdef ObjectiveFunction < opencossan.workers.Mio
             end
             
             % The objective function must have a single output
-            assert(length(Xobj.OutputNames)==1,...
+            assert(length(obj.OutputNames)==1,...
                 'openCOSSAN:optimization:ObjectiveFunction',...
-                'A single output (OutputNames) must be defined');
+                'A single output (Coutputnames) must be defined');
             
             
         end % constructor

@@ -34,7 +34,7 @@ switch lower(PropertyName)
         if ~Xobj.NdesignVariables == 0
             Cdesvar    = (Xobj.DesignVariableNames);
             for idv=1:length(Cdesvar)
-                Out.(Cdesvar{idv})     = Xobj.DesignVariables.(Cdesvar{idv}).value;
+                Out.(Cdesvar{idv}) = Xobj.DesignVariables.(Cdesvar{idv}).Value;
             end
             varargout{2}=[];
         else
@@ -66,7 +66,7 @@ switch lower(PropertyName)
         end
         
         for i=1:length(CnamesDesignVariable)
-            Vdsvalue(i) =  Xobj.DesignVariables.(CnamesDesignVariable{i}).value;
+            Vdsvalue(i) = Xobj.DesignVariables.(CnamesDesignVariable{i}).Value;
         end
         
         %            Niv=0;

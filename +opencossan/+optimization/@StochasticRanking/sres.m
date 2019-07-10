@@ -1,4 +1,4 @@
-function [SexitFlag,xb,Statistics,Gm] = sres(Xobj,objfun,cons,mm,lu,lambda,G,mu,pf,varphi)
+function [xb,Statistics,Gm] = sres(Xobj,objfun,cons,mm,lu,lambda,G,mu,pf,varphi)
 % SRES Evolution Strategy using Stochastic Ranking
 % usage:
 %        [xb,Stats,Gm] = sres(objfun,cons,mm,lu,lambda,G,mu,pf,varphi) ;
@@ -31,7 +31,7 @@ function [SexitFlag,xb,Statistics,Gm] = sres(Xobj,objfun,cons,mm,lu,lambda,G,mu,
 
 % Modified by MB  & EP to be used with COSSAN
 % =========================================================================
-% COSSAN-X - The next generation of the computational stochastic analysis
+% COSSAN - The next generation of the computational stochastic analysis
 % University of Liverpool, Copyright 1993-2013 
 % =========================================================================
 
@@ -84,7 +84,7 @@ while ~Lstop
     Feasible = find((sum((phi>0),2)<=0)) ;
     
     % Performance / statistics
-    if ~isempty(Feasible),
+    if ~isempty(Feasible)
         [Min(g),MinInd] = min(f(Feasible)) ;
         MinInd = Feasible(MinInd) ;
         Mean(g) = mean(f(Feasible)) ;
@@ -99,7 +99,8 @@ while ~Lstop
     Tstatus.MobjFun=f;
     Tstatus.Mconstraints=phi;
     Tstatus.Vfeasible=NrFeas;
-    Tstatus.Niteration=g-1; % Start from zero (To be consistent with Matlab optimizers)
+    %Tstatus.Niteration=g-1; % Start from zero (To be consistent with Matlab optimizers)
+    Tstatus.iteration=g-1;
     
     % Keep best individual found
     if (Min(g)<BestMin) && ~isempty(Feasible)
@@ -121,7 +122,7 @@ while ~Lstop
     eta = eta.*exp(tau_*randn(lambda,1)*ones(1,n)+tau*randn(lambda,n)) ;
     
     % Upper bound on eta (used?)
-    for i=1:n,
+    for i=1:n
         I = find(eta(:,i)>eta_u(i)) ;
         eta(I,i) = eta_u(i)*ones(size(I)) ;
     end
@@ -140,24 +141,25 @@ while ~Lstop
         retry = retry + 1 ;
     end
     % ignore failures
-    if ~isempty(I),
+    if ~isempty(I)
         x(I) = x_(I) ;
     end
     
     % Export results and check termination criteria
     Tstatus.deltaDV=sum(sum(abs(x-x_)));
     Tstatus.deltaObjFun=abs(Mean(g)-Mean(max(g-1,1)));
-    
-    [Lstop,SexitFlag]=Xobj.outputFunction(Tstatus);
+        
+    Lstop=Xobj.outputFunctionOptimiser([],Tstatus,'iter');
     
 end
 % Check Output
-if isempty(xb),
+if isempty(xb)
     [~,MinInd] = min(phi) ;
     xb = x(MinInd,:) ;
     Gm = g ;
     disp('warning: solution is infeasible') ;
 end
-if nargout > 1,
-    Statistics = [mm*[Min' Mean'] NrFeas'] ;
+
+if nargout > 1
+    Statistics = [mm*[Min Mean] NrFeas] ;
 end

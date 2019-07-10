@@ -1,33 +1,36 @@
 function Xoptimum=initializeOptimum(Xobj,varargin)
 %INITIALIZEOPTIMUM
-% This function is used to inizialize an Optimum object for OptimizationProblem
+% This function is used to inizialize an Optimum object for the
+% OptimizationProblem object.
 %
-% See Also: http://cossan.cfd.liv.ac.uk/wiki/initializeOptimum@OptimizationProblem
+% The results of the optimisation are stored in a Optimum object that
+% contains the values of the design variable(s), objective function(s),
+% constraint(s) and the values of the gradient(s).
 %
-% Author: Edoardo Patelli and Matteo Broggi
-% Institute for Risk and Uncertainty, University of Liverpool, UK
-% email address: openengine@cossan.co.uk
-% Website: http://www.cossan.co.uk
+% All the variables are stored in a field TablesValues of the Optimim
+% object
+% 
+% See Also: TutorialOptimum TutorialOptimizer
+%
+% Author: Edoardo Patelli
 
-% =====================================================================
-% This file is part of openCOSSAN.  The open general purpose matlab
-% toolbox for numerical analysis, risk and uncertainty quantification.
-%
-% openCOSSAN is free software: you can redistribute it and/or modify
-% it under the terms of the GNU General Public License as published by
-% the Free Software Foundation, either version 3 of the License.
-%
-% openCOSSAN is distributed in the hope that it will be useful,
-% but WITHOUT ANY WARRANTY; without even the implied warranty of
-% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-% GNU General Public License for more details.
-%
-%  You should have received a copy of the GNU General Public License
-%  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
-% =====================================================================
+%{
+    This file is part of OpenCossan <https://cossan.co.uk>.
+    Copyright (C) 2006-2018 COSSAN WORKING GROUP
 
-import opencossan.common.Dataseries
-import opencossan.optimization.Optimum
+    OpenCossan is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License or,
+    (at your option) any later version.
+    
+    OpenCossan is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU General Public License for more details.
+    
+    You should have received a copy of the GNU General Public License
+    along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
+%}
 
 OpenCossan.validateCossanInputs(varargin{:});
 
@@ -36,22 +39,22 @@ LgradientObjFun=false;
 LgradientConstraints=false;
 
 %  Check whether or not required arguments have been passed
-for k=1:2:length(varargin),
+for k=1:2:length(varargin)
     switch lower(varargin{k})
-        case {'lgradientobjectivefunction'},
+        case {'lgradientobjectivefunction'}
             LgradientObjFun=varargin{k+1};
-        case {'lgradientconstraints'},
+        case {'lgradientconstraints'}
             LgradientConstraints=varargin{k+1};
-        case {'xoptimizer'},
+        case {'xoptimizer'}
             Xoptimizer=varargin{k+1};
         otherwise
-            error('openCOSSAN:OptimizationProblem:initializeOptimum',...
-                'PropertyName %s is not valid',varargin{k});
+            error('OptimizationProblem:initializeOptimum',...
+                'PropertyName %s is not a valid property name ', varargin{k});
     end
 end
 
 % Get population size
-if exist('Xoptimizer','var')    
+if exist('Xoptimizer','var')
     OpenCossan.setAnalysisID;
     if ~isdeployed && isempty(OpenCossan.getAnalysisName)
         OpenCossan.setAnalysisName(class(Xoptimizer))
@@ -60,89 +63,35 @@ if exist('Xoptimizer','var')
     if ~isempty(OpenCossan.getDatabaseDriver)
         insertRecord(OpenCossan.getDatabaseDriver,'StableType','Analysis',...
             'Nid',OpenCossan.getAnalysisID);
-    end    
-end
-
-for idv=1:Xobj.NdesignVariables;
-    XdesignVariable(idv) = Dataseries('SindexName',['Design variable #' num2str(idv)],...
-        'SindexUnit','iteration'); %#ok<AGROW>
-end
-
-for iobj=1:Xobj.NobjectiveFunctions;
-    XdsObjFunction(iobj) = Dataseries('SindexName',['Objective Function #' num2str(iobj)],...
-        'SindexUnit','iteration'); %#ok<AGROW>
-    if LgradientObjFun
-        XdsObjFunctionGradient(iobj) = Dataseries('SindexName',['Gradient of the Objective Function #' num2str(iobj)],...
-            'SindexUnit','iteration'); %#ok<AGROW>
     end
-    
 end
 
-if ~isempty(Xobj.Xconstraint)
-    for icon=1:Xobj.Nconstraints
-        XdsConstraint(icon) = Dataseries('SindexName',['Constraint #' num2str(icon)],...
-            'SindexUnit','iteration'); %#ok<AGROW>
-        if LgradientConstraints
-            XdsConstraintGradient(icon) = ...
-                Dataseries('SindexName',['Gradient of the Constraint #' num2str(icon)],...
-                'SindexUnit','iteration'); %#ok<AGROW>
-        end
+%  Dataseries is used to stored the values of the design variables
+for n=1:Xobj.NdesignVariables
+
+    if LgradientObjFun
+
     end
     
     if LgradientConstraints
-        if LgradientObjFun
-            % Full Optimum
-            Xoptimum=Optimum('Xoptimizationproblem',Xobj,...
-                'CdesignVariableNames',Xobj.CnamesDesignVariables, ...
-                'XdesignVariableDataseries',XdesignVariable,...
-                'XobjectiveFunctionDataseries',XdsObjFunction, ...
-                'XobjectiveFunctionGradientDataseries',XdsObjFunctionGradient, ...
-                'Xconstrainsdataseries',XdsConstraint, ...
-                'Xconstrainsgradientdataseries',XdsConstraintGradient);
-        else
-            % No Gradient ObjFun
-            Xoptimum=Optimum('Xoptimizationproblem',Xobj,...
-                'CdesignVariableNames',Xobj.CnamesDesignVariables, ...
-                'XdesignVariableDataseries',XdesignVariable,...
-                'XobjectiveFunctionDataseries',XdsObjFunction, ...
-                'Xconstrainsdataseries',XdsConstraint, ...
-                'Xconstrainsgradientdataseries',XdsConstraintGradient);
-        end
-    else % No gradient constraints
-        if LgradientObjFun
-            % Full Optimum
-            Xoptimum=Optimum('Xoptimizationproblem',Xobj,...
-                'CdesignVariableNames',Xobj.CnamesDesignVariables, ...
-                'XdesignVariableDataseries',XdesignVariable,...
-                'XobjectiveFunctionDataseries',XdsObjFunction, ...
-                'XobjectiveFunctionGradientDataseries',XdsObjFunctionGradient, ...
-                'Xconstrainsdataseries',XdsConstraint);
-        else
-            % No Gradient ObjFun & No gradient Contraints
-            Xoptimum=Optimum('Xoptimizationproblem',Xobj,...
-                'CdesignVariableNames',Xobj.CnamesDesignVariables, ...
-                'XdesignVariableDataseries',XdesignVariable,...
-                'XobjectiveFunctionDataseries',XdsObjFunction, ...
-                'Xconstrainsdataseries',XdsConstraint);
-        end
-        
-    end
-else
-    if LgradientObjFun
-        % with ObjFun gradient and no Constraints
-        Xoptimum=Optimum('Xoptimizationproblem',Xobj,...
-            'CdesignVariableNames',Xobj.CnamesDesignVariables, ...
-            'XdesignVariableDataseries',XdesignVariable,...
-            'XobjectiveFunctionDataseries',XdsObjFunction, ...
-            'XobjectiveFunctionGradientDataseries',XdsObjFunctionGradient);
-    else
-        % No ObjFun gradient and no Constraints
-        Xoptimum=Optimum('Xoptimizationproblem',Xobj,...
-            'CdesignVariableNames',Xobj.CnamesDesignVariables, ...
-            'XdesignVariableDataseries',XdesignVariable,...
-            'Xobjectivefunctiondataseries',XdsObjFunction);
+        Xobj.CconstraintsNames
     end
 end
+
+Viterations=[1  2 3 3 3 4 4 4]';
+% MvaluesDesignVariables=             [1  5 2 3 4 3 1 1; ...
+%                                      7  5 7 6 5 1 0 1]';
+% MvaluesObjectiveFunction=           [10 5 2 3 5 1 5 0]';
+% 
+% MvaluesObjectiveFunctionGradient=   [2  5 5 1 2 3 4 5;...
+%                                      1  4 2 0 4 5 2 1]';
+%                                  
+% Xoptimum=Optimum('XoptimizationProblem',Xop,...
+%     'Mdesignvariable',MvaluesDesignVariables,...
+%     'Vobjectivefunction',MvaluesObjectiveFunction,...
+%     'Viterations',Viterations,...
+%     'MobjectiveFunctionGradient',MvaluesObjectiveFunctionGradient);
+
 
 %% Add the optimizer
 if exist('Xoptimizer','var')

@@ -1,4 +1,4 @@
-function [Xoptimum,varargout]= apply(Xobj,varargin)
+function [Xoptimum, varargout]= apply(Xobj,varargin)
 %   APPLY   This method applies the algorithm
 %           CrossEntropy for optimization
 %
@@ -10,30 +10,27 @@ function [Xoptimum,varargout]= apply(Xobj,varargin)
 %           min f_obj(x)
 %                x in R^n
 %
-% See Also: http://cossan.cfd.liv.ac.uk/wiki/apply@CrossEntropy
+% See Also: https://cossan.co.uk/wiki/@CrossEntropy
 %
 % Author: Edoardo Patelli
-% Institute for Risk and Uncertainty, University of Liverpool, UK
-% email address: openengine@cossan.co.uk
-% Website: http://www.cossan.co.uk
 
-% =====================================================================
-% This file is part of openCOSSAN.  The open general purpose matlab
-% toolbox for numerical analysis, risk and uncertainty quantification.
-%
-% openCOSSAN is free software: you can redistribute it and/or modify
-% it under the terms of the GNU General Public License as published by
-% the Free Software Foundation, either version 3 of the License.
-%
-% openCOSSAN is distributed in the hope that it will be useful,
-% but WITHOUT ANY WARRANTY; without even the implied warranty of
-% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-% GNU General Public License for more details.
-%
-%  You should have received a copy of the GNU General Public License
-%  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
-% =====================================================================
+%{
+    This file is part of OpenCossan <https://cossan.co.uk>.
+    Copyright (C) 2006-2018 COSSAN WORKING GROUP
 
+    OpenCossan is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License or,
+    (at your option) any later version.
+    
+    OpenCossan is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU General Public License for more details.
+    
+    You should have received a copy of the GNU General Public License
+    along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
+%}
 
 %% Define global variable for the objective function and the constrains
 global XoptGlobal XsimOutGlobal
@@ -41,39 +38,45 @@ global XoptGlobal XsimOutGlobal
 OpenCossan.validateCossanInputs(varargin{:});
 
 %  Check whether or not required arguments have been passed
-for k=1:2:length(varargin),
-    switch lower(varargin{k}),
-        case {'xoptimizationproblem'},   %extract OptimizationProblem
-            assert(isa(varargin{k+1},'opencossan.optimization.OptimizationProblem'),...
-                'openCOSSAN:Cobyla:apply:wrongOptimizationProblem',...
-                ['The variable %s must be an opencossan.optimization.OptimizationProblem\n',...
-                'Provided class: %s'],inputname(k),class(varargin{k+1}))
-            % Load OptimizationProblem
-            Xop     = varargin{k+1};
-        case {'xoptimum'},   %extract OptimizationProblem
-            %check that arguments is actually an OptimizationProblem object
-            assert(isa(varargin{k+1},'opencossan.optimization.Optimum'),...
-                'openCOSSAN:Cobyla:apply:wrongOptimum',...
-                ['The variable %s must be an opencossan.optimization.Optimum\n',...
-                'Provided class: %s'],inputname(k),class(varargin{k+1}))
-            Xoptimum  = varargin{k+1};
+for k=1:2:length(varargin)
+    switch lower(varargin{k})
+        case {'xoptimizationproblem'}   %extract OptimizationProblem
+            if isa(varargin{k+1},'OptimizationProblem')   %check that arguments is actually an OptimizationProblem object
+                Xop     = varargin{k+1};
+            else
+                error('OpenCossan:CrossEntropy:apply',...
+                    'the variable %s must be an OptimizationProblem object',...
+                    inputname(k));
+            end
+         case {'cxoptimizationproblem'}   %extract OptimizationProblem
+            if isa(varargin{k+1}{1},'OptimizationProblem')    %check that arguments is actually an OptimizationProblem object
+                Xop     = varargin{k+1}{1};
+            else
+                error('OpenCossan:CrossEntropy:apply',...
+                    ['the variable  ' inputname(k) ' must be an OptimizationProblem object']);
+            end  
+        case {'xoptimum'}   %extract OptimizationProblem
+            if isa(varargin{k+1},'Optimum')    %check that arguments is actually an OptimizationProblem object
+                Xoptimum  = varargin{k+1};
+            else
+                error('OpenCossan:CrossEntropy:apply',...
+                    ['the variable  ' inputname(k) ' must be an Optimum object']);
+            end
         case 'minitialsolutions'
             MinitialSolution=varargin{k+1};
         otherwise
-            error('openCOSSAN:CrossEntropy:apply',['the field ' varargin{k} ...
+            error('OpenCossan:CrossEntropy:apply',['the field ' varargin{k} ...
                 ' is not valid']);
     end
 end
 
 %% Check Optimization problem
-assert(logical(exist('Xop','var')), 'openCOSSAN:CrossEntropy:apply',...
+assert(logical(exist('Xop','var')), 'OpenCossan:CrossEntropy:apply',...
     'Optimization problem must be defined')
 
-assert(isempty(Xop.Xconstraint),'openCOSSAN:CrossEntropy:apply:contraintsNotAllowed',...
+assert(isempty(Xop.Xconstraint),'OpenCossan:CrossEntropy:apply:contraintsNotAllowed',...
         'CrossEntropy method is an unconstrint optimization method. It is not possible to be used to solve a constrained problem')
 
-% Check inputs and initialize variables
-Xobj = initializeOptimizer(Xobj);
 
 %% Check initial solution
 if exist('MinitialSolution','var')
@@ -96,9 +99,7 @@ end
 
 %% initialize Optimum
 if ~exist('Xoptimum','var')
-    XoptGlobal=Xop.initializeOptimum('LgradientObjectiveFunction',false, ...
-        'LgradientConstraints',false,...
-        'Xoptimizer',Xobj);
+    XoptGlobal=Optimum('XoptimizationProblem',Xop,'Xoptimizer',Xobj);
 else
     %TODO: Check Optimum
     XoptGlobal=Xoptimum;
@@ -117,18 +118,17 @@ end
 
 %% Evaluation of initial population
 Msamples=[Xop.VinitialSolution; MinitialSolution];
-assert(size(Msamples,1)>=Xobj.NUpdate, 'openCOSSAN:CrossEntropy:apply',...
+assert(size(Msamples,1)>=Xobj.NUpdate, 'OpenCossan:CrossEntropy:apply',...
     'At least %i initial solutions are required\nProvided initial solution %i',...
     Xobj.NUpdate,size(Msamples,1))
 
 %% Here we go
 Lstop=false;
 
+%% Initialise optimiser
+Xobj = initializeOptimizer(Xobj);
+
 while ~Lstop   
-   % XoptGlobal.Ngenerations = XoptGlobal.Ngenerations+1; %increase counter
-%     OpenCossan.cossanDisp(['[Status] Iteration #' num2str(Xobj.iIterations)],2)
-%     OpenCossan.setLaptime('description',[' Iteration #' num2str(Xobj.iIterations)]);
-    
     %  Evaluate objective function
     VF_obj_iter     = hobjfun(Msamples);  %Objective function evaluation
     
@@ -146,7 +146,7 @@ while ~Lstop
     
     
     if isempty(SexitFlag)
-        if max(Vsigma)<Xobj.tolSigma,  %in case convergence criterion has been achieved
+        if max(Vsigma)<Xobj.tolSigma  %in case convergence criterion has been achieved
             SexitFlag    = 'Standard deviation of associated stochastic problem smaller than tolerance';
             Lstop=true;
         end
@@ -168,6 +168,8 @@ end
 OpenCossan.cossanDisp(['Exit Flag: ' SexitFlag],2)
 
 % Assign outputs
+XoptGlobal.VoptimalDesign=Msamples(F_obj_sort(1),:);
+XoptGlobal.VoptimalScores=VF_obj_iter(F_obj_sort(1));
 Xoptimum=XoptGlobal;
 Xoptimum.Sexitflag=SexitFlag;
 
@@ -190,4 +192,4 @@ end
 clear global XoptGlobal XsimOutGlobal
 
 %% Record Time
-OpenCossan.setLaptime('description',['End apply@' class(Xobj)]);
+OpenCossan.setLaptime('Sdescription',['End apply@' class(Xobj)]);

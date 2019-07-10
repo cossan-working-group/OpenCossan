@@ -1,101 +1,54 @@
 classdef SequentialQuadraticProgramming < opencossan.optimization.Optimizer
-    %               SequentialQuadraticProgrammingis intended
-    %               for solving an optimization problem using gradients of the
-    %               objective function and constraints.
-    %% 1.   Properties of the object
-    properties % Public access
-        finiteDifferencePerturbation    = 0.001 %Perturbation for performing finite differences (required for gradient estimation)
-        SfiniteDifferenceType = 'forward' % Finite differences, used to estimate gradients,
+    %SEQUENTIALQUADRATICPROGRAMMING is a class for optimization of problems
+    % using gradients of the objective function and constraints.
+    %
+    % SequentialQuadraticProgramming is intended for solving the following
+    % class of problems
+    %   min	f_obj(x)
+    %   subject to
+    %   	ceq(x)   =  0
+    %   	cineq(x) <= 0
+    %   	lb <= x <= ub
+    
+    %{
+    This file is part of OpenCossan <https://cossan.co.uk>.
+    Copyright (C) 2006-2019 COSSAN WORKING GROUP
+
+    OpenCossan is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the
+    Free Software Foundation, either version 3 of the License or, (at your
+    option) any later version.
+
+    OpenCossan is distributed in the hope that it will be useful, but
+    WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+    General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along
+    with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
+    %}
+    
+    properties
+        FiniteDifferenceStepSize(1,1) = sqrt(eps);
+        FiniteDifferenceType {mustBeMember(FiniteDifferenceType, {'forward', 'central'})} = 'forward';
     end
     
-    %%  Methods 
+    properties (Access = private, Hidden)
+        ExitReasons = containers.Map([1, 0, -1, -2, -3],[
+            "First-order optimality measure was less than options.OptimalityTolerance, and maximum constraint violation was less than options.ConstraintTolerance.", ...
+            "Number of iterations exceeded options.MaxIterations or number of function evaluations exceeded options.MaxFunctionEvaluations.", ...
+            "Stopped by an output function or plot function.", ...
+            "No feasible point was found.", ...
+            "Objective function at current iteration went below options.ObjectiveLimit and maximum constraint violation was less than options.ConstraintTolerance."]);
+    end
+    
     methods
-        varargout    = apply(Xobj,varargin)  %This method perform the simulation adopting the Xobj
+        function obj = SequentialQuadraticProgramming(varargin)
+            %SEQUENTIALQUADRATICPROGRAMMING
+            
+            obj@opencossan.optimization.Optimizer(varargin{:});
+        end
         
-        function Xobj   = SequentialQuadraticProgramming(varargin)
-            %SEQUENTIALQUADRATICPROGRAMMING    Constructor function for class
-            %                                   SequentialQuadraticProgramming
-            %
-            %   SequentialQuadraticProgramming
-            %               This is the contructor for class
-            %               SequentialQuadraticProgramming; it is intended
-            %               for solving an optimization problem using gradients of the
-            %               objective function and constraints. When generating the
-            %               constructor, it is possible to select the parameters of
-            %               the optimization algorithm. It should be noted that default
-            %               parameters are provided for the algorithm; nonetheless,
-            %               the user should always check whether or not a particular
-            %               set of parameters is appropriate for the problem at hand. A
-            %               poor selection on these parameters may prevent finding the
-            %               correct solution.
-            %
-            %               SequentialQuadraticProgramming is   intended for solving
-            %               the following class of problems
-            %
-            %                       min     f_obj(x)
-            %                       subject to
-            %                               ceq(x)      =  0
-            %                               cineq(x)    <= 0
-            %                               lb <= x <= ub
-            
-            % =========================================================================
-            %% COSSAN-X - The next generation of the computational stochastic analysis
-            % University of Innsbruck, Copyright 1993-2011 IfM
-            % =========================================================================
-            
-            % Argument Check
-            OpenCossan.validateCossanInputs(varargin{:})
-            
-            % Set predefined values
-            Xobj.Sdescription   = 'SequentialQuadraticProgramming object';
-            Xobj.Nmax           = 1e3;
-            
-            % Process input arguments
-            for k=1:2:length(varargin)
-                switch lower(varargin{k})
-                    case 'sdescription'
-                        Xobj.Sdescription=varargin{k+1};
-                    case  {'nmax','nmaxmodelevaluations'}
-                        Xobj.Nmax=varargin{k+1};
-                    case 'lintermediateresults'
-                        Xobj.Lintermediateresults=varargin{k+1};
-                    case  'scalingfactor'
-                        Xobj.scalingFactor=varargin{k+1};
-                    case  'xjobmanager'
-                        Xobj.XjobManager=varargin{k+1};
-                    case  'nmaxiterations'
-                        Xobj.NmaxIterations=varargin{k+1};
-                    case {'nseedrandomnumbergenerator'}
-                        Nseed       = varargin{k+1};
-                        Xobj.RandomNumberGenerator = ...
-                            RandStream('mt19937ar','Seed',Nseed);
-                    case {'xrandomnumbergenerator'}
-                        if isa(varargin{k+1},'RandStream'),
-                            Xobj.XrandomNumberGenerator  = varargin{k+1};    
-                        else
-                            error('openCOSSAN:SequentialQuadraticProgramming',...
-                              ['argument associated with (' varargin{k} ') is not a RandStream object']);
-                        end  
-                    case 'finitedifferenceperturbation'
-                        Xobj.finiteDifferencePerturbation=varargin{k+1};
-                     case 'sfinitedifferencetype'
-                        CallowedValues={'forward','central'};
-                        assert(ismember(varargin{k+1},CallowedValues),...
-                              'openCOSSAN:SequentialQuadraticProgramming',...
-                              'Value %s not valid\nValid SfiniteDifferenceType are: ''%s'' and ''%s'' ', ...
-                              varargin{k+1},CallowedValues{1},CallowedValues{2})
-                        Xobj.SfiniteDifferenceType=varargin{k+1};
-                    case  'toleranceobjectivefunction'
-                        Xobj.toleranceObjectiveFunction=varargin{k+1};
-                    case  'toleranceconstraint'
-                        Xobj.toleranceConstraint=varargin{k+1};
-                    case  'tolerancedesignvariables'
-                        Xobj.toleranceDesignVariables=varargin{k+1};
-                    otherwise
-                        warning('openCOSSAN:SequentialQuadraticProgramming',...
-                            ['PropertyName ' varargin{k} ' not valid ']);
-                end
-            end % input check
-        end % constructor
-    end % methods
-end % classdef
+        varargout = apply(obj, varargin)
+    end
+end

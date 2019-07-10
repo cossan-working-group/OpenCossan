@@ -1,4 +1,4 @@
-classdef EvolutionStrategy < opencossan.optimization.Optimizer
+classdef EvolutionStrategy < Optimizer
     %   Evolution Strategies is a gradient-free optimization algorithm that
     %   performs a stochastic search in the space of the design variables.
     
@@ -82,7 +82,7 @@ classdef EvolutionStrategy < opencossan.optimization.Optimizer
                         Xobj.RandomNumberGenerator = ...
                             RandStream('mt19937ar','Seed',Nseed);
                     case {'xrandomnumbergenerator'}
-                        if isa(varargin{k+1},'RandStream'),
+                        if isa(varargin{k+1},'RandStream')
                             Xobj.XrandomNumberGenerator  = varargin{k+1};    
                         else
                             error('openCOSSAN:EvolutionStrategy',...

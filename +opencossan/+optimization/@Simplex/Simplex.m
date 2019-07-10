@@ -1,4 +1,4 @@
-classdef Simplex < opencossan.optimization.Optimizer
+classdef Simplex < Optimizer
     %SIMPLEX The simplex class define the optimizator SIMPLEX to solve
     % unconstrained nonlinear problems  using a gradients free method 
     
@@ -11,7 +11,7 @@ classdef Simplex < opencossan.optimization.Optimizer
         function Xobj   = Simplex(varargin)
             %SIMPLEX    Constructor function for class Simplex
             %
-            %   
+            %   SequentialQuadraticProgramming
             %
             %   Simplex method is intended for solving unconstrained nonlinear
             %   problem  using a gradinet free method. 

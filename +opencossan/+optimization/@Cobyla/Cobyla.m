@@ -51,12 +51,12 @@ classdef Cobyla < opencossan.optimization.Optimizer
             % ==================================================================
             
             % Argument Check
-            OpenCossan.validateCossanInputs(varargin{:})
+            opencossan.OpenCossan.validateCossanInputs(varargin{:})
             
             % Set predefined values
-            Xobj.Sdescription   = 'Cobyla object';
-            Xobj.Nmax           = 1e3;
-            Xobj.scalingFactorConstraints  = -1; % Must be negative 
+            Xobj.Description   = 'Cobyla object';
+            Xobj.MaxFunctionEvaluations           = 1e3;
+            Xobj.ConstraintScalingFactor  = -1; % Must be negative 
             
             % Process input arguments
             for k=1:2:length(varargin)
@@ -91,10 +91,10 @@ classdef Cobyla < opencossan.optimization.Optimizer
                 'should be smaller than the initial trust region rho_ini (' num2str(Xobj.rho_ini) ' )']);
             
             
-            assert(Xobj.scalingFactorConstraints<0,...
+            assert(Xobj.ConstraintScalingFactor < 0,...
                 'openCOSSAN:Cobyla:wrongScalingFactor',...
                 ['COBYLA will try to make all the values of the constraints positive.' ...
-                'So the scaling factor must be negative.\n Defined value: %f'],Xobj.scalingFactor);
+                'So the scaling factor must be negative.\n Defined value: %f'], Xobj.ConstraintScalingFactor);
             
         end
         

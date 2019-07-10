@@ -46,29 +46,6 @@ classdef OptimizationProblem
             % Copyright 1993-2011, COSSAN Working Group, University of Innsbruck, Austria
             % Author: Edoardo-Patelli
             
-            % Author: Edoardo Patelli
-            % Institute for Risk and Uncertainty, University of Liverpool, UK
-            % email address: openengine@cossan.co.uk
-            % Website: http://www.cossan.co.uk
-            
-            % =====================================================================
-            % This file is part of openCOSSAN.  The open general purpose matlab
-            % toolbox for numerical analysis, risk and uncertainty quantification.
-            %
-            % openCOSSAN is free software: you can redistribute it and/or modify
-            % it under the terms of the GNU General Public License as published by
-            % the Free Software Foundation, either version 3 of the License.
-            %
-            % openCOSSAN is distributed in the hope that it will be useful,
-            % but WITHOUT ANY WARRANTY; without even the implied warranty of
-            % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-            % GNU General Public License for more details.
-            %
-            %  You should have received a copy of the GNU General Public License
-            %  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
-            % =====================================================================
-            
-            import opencossan.optimization.*
             
             %% Construct empty object
             if nargin==0
@@ -76,11 +53,11 @@ classdef OptimizationProblem
             end
             
             %% Validate Inputs
-            opencossan.OpenCossan.validateCossanInputs(varargin{:});
+            % opencossan.OpenCossan.validateCossanInputs(varargin{:});
             
             %% Process inputs arguments
-            for k=1:2:length(varargin),
-                switch lower(varargin{k}),
+            for k=1:2:length(varargin)
+                switch lower(varargin{k})
                     %2.1.   Description of the object
                     case 'sdescription'
                         Xobj.Sdescription   = varargin{k+1};
@@ -91,9 +68,9 @@ classdef OptimizationProblem
                             error('openCOSSAN:OptimizationProblem',...
                                 [ inputname(k+1) ' must  be an ObjectiveFunction ']);
                         end
-                    case 'cxobjectivefunctions'
+                    case {'cxobjectivefunctions','cxobjectivefunction'}
                         for n=1:length(varargin{k+1})
-                            assert(isa(varargin{k+1}{n},'opencossan.optimization.ObjectiveFunction'), ...
+                            assert(isa(varargin{k+1}{n},'ObjectiveFunction'), ...
                                 'openCOSSAN:OptimizationProblem',...
                                 'CXobjectivefunctions must contains only ObjectiveFunction Objects ');
                             if n==1
@@ -105,7 +82,7 @@ classdef OptimizationProblem
                         
                     case 'ccxobjectivefunctions'
                         for n=1:length(varargin{k+1})
-                            assert(isa(varargin{k+1}{n}{:},'opencossan.optimization.ObjectiveFunction'), ...
+                            assert(isa(varargin{k+1}{n}{:},'ObjectiveFunction'), ...
                                 'openCOSSAN:OptimizationProblem',...
                                 'CXobjectivefunctions must contains only ObjectiveFunction Objects ');
                             if n==1
@@ -120,13 +97,13 @@ classdef OptimizationProblem
                             Xobj.Xconstraint  = varargin{k+1};
                         else
                             error('openCOSSAN:OptimizationProblem',...
-                                [ inputname(k+1) ' must  be a optimization.Constrains Object ']);
+                                [ inputname(k+1) ' must  be a Constrains Object ']);
                         end
                     case 'cxconstraint'
                         for n=1:length(varargin{k+1})
                             assert(isa(varargin{k+1}{n},'opencossan.optimization.Constraint'), ...
                                 'openCOSSAN:OptimizationProblem',...
-                                'CXconstraint must contains only optimization.Constraint Object ');
+                                'CXconstraint must contains only Constraint Object ');
                             if n==1
                                 Xobj.Xconstraint= varargin{k+1}{n};
                             else
@@ -135,9 +112,9 @@ classdef OptimizationProblem
                         end
                     case {'ccxconstraints' 'ccxconstraint'}
                         for n=1:length(varargin{k+1})
-                            assert(isa(varargin{k+1}{n}{:},'opencossan.optimization.Constraint'), ...
+                            assert(isa(varargin{k+1}{n}{:},'Constraint'), ...
                                 'openCOSSAN:OptimizationProblem',...
-                                'CXconstrains must contains only optimization.Constraint Objects ');
+                                'CXconstrains must contains only Constraint Objects ');
                             if n==1
                                 Xobj.Xconstraint= varargin{k+1}{n}{:};
                             else
@@ -158,13 +135,13 @@ classdef OptimizationProblem
                         Xobj.Xinput   = varargin{k+1}{1};
                     otherwise
                         error('openCOSSAN:OptimizationProblem',...
-                            'Field name %s is not valid',varargin{k});
+                            ['Field name (' varargin{k} ') is not valid']);
                 end
             end
             
             
             assert(~isempty(Xobj.XobjectiveFunction),...
-                'openCOSSAN:OptimizationProblem:noObjectiveFunction', ...
+                'openCOSSAN:OptimizationProblem', ...
                 'An objective function is required to define an OptimizationProblem')
             
             %% Check Input and Model
@@ -172,47 +149,43 @@ classdef OptimizationProblem
             if isempty(Xobj.Xinput)
                 % Only Model object is provided
                 assert(~isempty(Xobj.Xmodel),...
-                    'openCOSSAN:OptimizationProblem:noModel', ...
+                    'openCOSSAN:OptimizationProblem', ...
                     'A Model or an Input object is required to define an OptimizationProblem')
                 
                 switch class(Xobj.Xmodel)
                     case 'opencossan.common.Model'
-                        Xobj.Xinput=Xobj.Xmodel.Xinput;
+                        Xobj.Xinput=Xobj.Xmodel.Input;
                     case 'opencossan.reliability.ProbabilisticModel'
                         Xobj.Xinput=Xobj.Xmodel.Xmodel.Xinput;
+                    case {'opencossan.metamodels.ResponseSurface' 'opencossan.metamodels.NeuralNetwork'}
+                        Xobj.Xinput=Xobj.Xmodel.XFullmodel.Xinput;
                     otherwise
-                        if strcmp(superclasses(Xobj.Xmodel),'opencossan.metamodels.MetaModels')
-                            Xobj.Xinput=Xobj.Xmodel.XFullmodel.Xinput;
-                        else
-                            error('openCOSSAN:OptimizationProblem',...
-                                'Object of type %s not supported, yet!', class(Xobj.Xmodel))
-                        end
+                        error('openCOSSAN:OptimizationProblem',...
+                            'Models type %s not supported, yet!', class(Xobj.Xmodel))
                 end
                 
             elseif ~isempty(Xobj.Xmodel)
                 
                 switch class(Xobj.Xmodel)
-                    case 'opencossan.common.Model'
+                    case 'Model'
                         %% Merge the input of Model with the input containing the DesignVariables
                         Xobj.Xinput=Xobj.Xinput.merge(Xobj.Xmodel.Xinput);
-                    case 'opencossan.reliability.ProbabilisticModel'
+                    case 'ProbabilisticModel'
                         %% Merge the input of Model with the input containing the DesignVariables
                         Xobj.Xinput=Xobj.Xinput.merge(Xobj.Xmodel.Xmodel.Xinput);
-                    case {'opencossan.workers.SolutionSequence'}
+                    case {'ResponseSurface' 'NeuralNetwork' 'PolyharmonicSplines'}
+                        %% Merge the input of Model with the input containing the DesignVariables
+                        % only if the full model is available
+                        if ~isempty(Xobj.Xmodel.XFullmodel)
+                            Xobj.Xinput=Xobj.Xinput.merge(Xobj.Xmodel.XFullmodel.Xinput);
+                        else
+                            Xobj.Xinput=Xobj.Xinput.merge(Xobj.Xmodel.XcalibrationInput);
+                        end
+                    case {'SolutionSequence'}
                         % Do nothing
                     otherwise
-                        if strcmp(superclasses(Xobj.Xmodel),'opencossan.metamodels.MetaModel')
-                            %% Merge the input of Model with the input containing the DesignVariables
-                            % only if the full model is available
-                            if ~isempty(Xobj.Xmodel.XFullmodel)
-                                Xobj.Xinput=Xobj.Xinput.merge(Xobj.Xmodel.XFullmodel.Xinput);
-                            else
-                                Xobj.Xinput=Xobj.Xinput.merge(Xobj.Xmodel.XcalibrationInput);
-                            end
-                        else
-                            error('openCOSSAN:OptimizationProblem',...
-                                'Models type %s not supported, yet!', class(Xobj.Xmodel))
-                        end
+                        error('openCOSSAN:OptimizationProblem',...
+                            'Models type %s not supported, yet!', class(Xobj.Xmodel))
                 end
             else
                 % Only Input object provided
@@ -231,7 +204,7 @@ classdef OptimizationProblem
             
             
             %% Validate Constructor
-            assert(~isempty(Xobj.Xinput.CnamesDesignVariable), ...
+            assert(~isempty(Xobj.Xinput.DesignVariableNames), ...
                 'openCOSSAN:OptimizationProblem',...
                 'The input object must contains at least 1 design variable')
             
@@ -256,7 +229,7 @@ classdef OptimizationProblem
             if isempty(Xobj.VinitialSolution)
                 CdefaultValues=Xobj.Xinput.getDefaultValuesCell;
                 Xobj.VinitialSolution= cell2mat(CdefaultValues( ...
-                    ismember(Xobj.Xinput.Cnames,Xobj.CnamesDesignVariables)))';
+                    ismember(Xobj.Xinput.Names,Xobj.CnamesDesignVariables)))';
             else
                 assert(length(Xobj.Xinput.CnamesDesignVariable)==size(Xobj.VinitialSolution,2), ...
                     'openCOSSAN:OptimizationProblem',...
@@ -267,9 +240,9 @@ classdef OptimizationProblem
             
             %% Check if the input object contains all the variables required by the optimization and contrains
             
-            CprovidedInputs=Xobj.Xinput.Cnames;
+            CprovidedInputs=Xobj.Xinput.Names;
             if ~isempty(Xobj.Xmodel)
-                CprovidedInputs=[CprovidedInputs Xobj.Xmodel.Coutputnames];
+                CprovidedInputs=[CprovidedInputs Xobj.Xmodel.OutputNames];
             end
             
             assert(all(ismember(Xobj.Cinputnames,CprovidedInputs)), ...
@@ -288,7 +261,7 @@ classdef OptimizationProblem
         function Xobj=addConstraint(Xobj,Xconstraint) % add a new Constraint
             assert(isa(Xconstraint,'opencossan.optimization.Constraint'), ...
                 'openCOSSAN:OptimizationProblem:addConstraint',...
-                'The object of type %s can not be used here, required a optimization.Constraint object',class(Xconstraint))
+                'The object of type %s can not be used here, required a Constraint object',class(Xconstraint))
             if isempty(Xobj.Xconstraint)
                 Xobj.Xconstraint=Xconstraint;
             else
@@ -297,9 +270,9 @@ classdef OptimizationProblem
         end
         
         function Xobj=addObjectiveFunction(Xobj,XobjectiveFunction) % add a new Objective Function
-            assert(isa(XobjectiveFunction,'optimization.ObjectiveFunction'), ...
+            assert(isa(XobjectiveFunction,'ObjectiveFunction'), ...
                 'openCOSSAN:OptimizationProblem:addObjectiveFunction',...
-                'The object of type %s can not be used here, required an optimization.ObjectiveFunction object',class(XobjectiveFunction))
+                'The object of type %s can not be used here, required an ObjectiveFunction object',class(XobjectiveFunction))
             
             Xobj.XobjectiveFunction(end+1)=XobjectiveFunction;
         end
@@ -310,7 +283,7 @@ classdef OptimizationProblem
             
             assert(~isempty(varargin),'openCOSSAN:OptimizationProblem:optimize',...
                 'Missing input argument!');
-            OpenCossan.validateCossanInputs(varargin{:})
+            opencossan.OpenCossan.validateCossanInputs(varargin{:})
             for k=1:2:length(varargin)
                 switch lower(varargin{k})
                     case 'xoptimizer'
@@ -328,7 +301,7 @@ classdef OptimizationProblem
             varargin=varargin([1:npos-1 npos+2:end]);
             
             % This method call the apply method of the Optimizer object
-            [Xopt, XSimOutput]  = Xoptimizer.apply('XOptimizationProblem',Xobj,varargin{:});
+            [Xopt, XSimOutput] = Xoptimizer.apply('XOptimizationProblem',Xobj,varargin{:});
             if nargout>1
                 varargout{1}=XSimOutput;
             end
@@ -355,22 +328,25 @@ classdef OptimizationProblem
         end
         
         function CnamesDesignVariables = get.CnamesDesignVariables(Xobj)
-            CnamesDesignVariables  = Xobj.Xinput.CnamesDesignVariable;
+            CnamesDesignVariables={};
+            if ~isempty(Xobj.Xinput)
+                CnamesDesignVariables  = Xobj.Xinput.DesignVariableNames;
+            end
         end
         
         function Cinputnames = get.Cinputnames(Xobj)
             Cinputnames={};
             % Collect inputs required by the Objective function(s)
             for n=1:length(Xobj.XobjectiveFunction)
-                Cinputnames=[Cinputnames Xobj.XobjectiveFunction(n).Cinputnames]; %#ok<AGROW>
+                Cinputnames=[Cinputnames Xobj.XobjectiveFunction(n).InputNames]; %#ok<AGROW>
             end
             % Collect inputs required by the Constraint(s)
             for n=1:length(Xobj.Xconstraint)
-                Cinputnames=[Cinputnames Xobj.Xconstraint(n).Cinputnames]; %#ok<AGROW>
+                Cinputnames=[Cinputnames Xobj.Xconstraint(n).InputNames]; %#ok<AGROW>
             end
             % Collect Inputs required by the model
             if ~isempty(Xobj.Xmodel)
-                Cinputnames=[Cinputnames Xobj.Xmodel.Cinputnames];
+                Cinputnames=[Cinputnames Xobj.Xmodel.InputNames];
             end
             % Remove duplicates
             Cinputnames= unique(Cinputnames);
@@ -388,7 +364,7 @@ classdef OptimizationProblem
             
             CobjectiveFunctionNames={};
             for n=1:length(Xobj.XobjectiveFunction)
-                CobjectiveFunctionNames  = [CobjectiveFunctionNames Xobj.XobjectiveFunction(n).Coutputnames]; %#ok<AGROW>
+                CobjectiveFunctionNames  = [CobjectiveFunctionNames Xobj.XobjectiveFunction(n).OutputNames]; %#ok<AGROW>
             end
         end
         
@@ -396,7 +372,7 @@ classdef OptimizationProblem
             
             CconstraintsNames={};
             for n=1:length(Xobj.Xconstraint)
-                CconstraintsNames  = [CconstraintsNames Xobj.Xconstraint(n).Coutputnames;]; %#ok<AGROW>
+                CconstraintsNames  = [CconstraintsNames Xobj.Xconstraint(n).OutputNames]; %#ok<AGROW>
             end
         end
         
@@ -404,7 +380,7 @@ classdef OptimizationProblem
             CnamesDesignVariables=Xobj.CnamesDesignVariables;
             VlowerBounds=zeros(length(CnamesDesignVariables),1);
             for n=1:length(CnamesDesignVariables)
-                VlowerBounds(n)=Xobj.Xinput.XdesignVariable.(CnamesDesignVariables{n}).lowerBound;
+                VlowerBounds(n)=Xobj.Xinput.DesignVariables.(CnamesDesignVariables{n}).LowerBound;
             end
         end
         
@@ -412,7 +388,7 @@ classdef OptimizationProblem
             CnamesDesignVariables=Xobj.CnamesDesignVariables;
             VupperBounds=zeros(length(CnamesDesignVariables),1);
             for n=1:length(CnamesDesignVariables)
-                VupperBounds(n)=Xobj.Xinput.XdesignVariable.(CnamesDesignVariables{n}).upperBound;
+                VupperBounds(n)=Xobj.Xinput.DesignVariables.(CnamesDesignVariables{n}).UpperBound;
             end
         end
         

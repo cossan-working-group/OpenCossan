@@ -2,10 +2,28 @@ function [Xopt, varargout]= optimizeLocalMetaModel(Xobj,varargin)
 % OPTIMIZELOCALMETAMODEL This function is used to perform optimization using
 % local MetaModel 
 %
-% See ALso: http://cossan.cfd.liv.ac.uk/wiki/index.php/OptimizeLocalMetaModel@RBOproblem
+% See ALso: https://cossan.co.uk/wiki/index.php/OptimizeLocalMetaModel@RBOproblem
 %
-% Copyright  1993-2011 University of Innsbruck,
+% Copyright  1993-2018 Cossan Working Group
 % Author: Edoardo Patelli
+
+%{
+    This file is part of OpenCossan <https://cossan.co.uk>.
+    Copyright (C) 2006-2018 COSSAN WORKING GROUP
+
+    OpenCossan is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License or,
+    (at your option) any later version.
+    
+    OpenCossan is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU General Public License for more details.
+    
+    You should have received a copy of the GNU General Public License
+    along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
+%}
 
 %% Default values
 CargumentsOptimizer{1}='XOptimizationProblem';
@@ -55,11 +73,11 @@ XinputRBO=Xobj.Xinput;
 XevaluatorRBO=Xobj.Xmodel.Xevaluator;
 
 assert(logical(~isempty(Xobj.VperturbationSize)),...
-    'openCOSSAN:RBOproblem:optimizeLocalMetaModel',...
-    'The perturbation size is mandatory')
+    'OpenCossan:RBOproblem:optimizeLocalMetaModel:noPerturbationParameter',...
+    'The perturbation parameter is required by RBO using local metamodel')
 
 assert(length(Xobj.VperturbationSize)==Ndv,...
-    'openCOSSAN:RBOproblem:optimize',...
+    'OpenCossan:RBOproblem:optimize',...
     'The length of VperturbationSize (%i) must be equal to the number of design variables (%i)', ...
     length(Xobj.VperturbationSize),Ndv)
 
@@ -77,7 +95,7 @@ Mbounds=zeros(2,Ndv);
 
 %% Start optimization
 for n=1:Xobj.NmaxLocalRBOIteration
-    OpenCossan.cossanDisp(sprintf('RBO iteration # %i',n),2)
+    OpenCossan.cossanDisp(sprintf('* ReliabilityBasedOptimisation iteration # %i',n),2)
     %% Define local subdomain
     % create initial bounds of the Design Variable  in order to train the
     % meta-model and perform optimization in this restricted domain
@@ -130,8 +148,8 @@ for n=1:Xobj.NmaxLocalRBOIteration
     %% Check results
     if n>1
          % optimum does not change
-         currentValueObjFun=XoptTmp.XobjectiveFunction(end,end).Vdata;
-         bestValueObjFun=Xopt.XobjectiveFunction(end,end).Vdata;
+         currentValueObjFun=XoptTmp.VoptimalScores;
+         bestValueObjFun=Xopt.VoptimalScores;
         if abs(currentValueObjFun(end)-bestValueObjFun(end))<Xoptimizer.toleranceObjectiveFunction
             % Merge Optimum
             Xopt=Xopt.merge(XoptTmp);
@@ -150,9 +168,9 @@ for n=1:Xobj.NmaxLocalRBOIteration
     % Set default value of the DesignVariable to the current optimum
     
     %% Set Artifical bounds for the DesignVariable
-    VcurrentOpt=Xopt.XdesignVariable(:,end).Vdata;
+    VcurrentOpt=Xopt.VoptimalDesign;
     if OpenCossan.getVerbosityLevel>2
-        sprintf('RBO current optimum: %e',VcurrentOpt)
+        fprintf('ReliabilityBasedOptimisation current optimum: %e',VcurrentOpt);
     end
 end
 

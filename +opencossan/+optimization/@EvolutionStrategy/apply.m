@@ -11,29 +11,27 @@ function [Xoptimum,varargout] = apply(Xobj,varargin)
 %
 %   [Xoutput_ES]   = apply(Xobj,'OptimizationProblem'Xop)
 %
-% See also: http://cossan.co.uk/wiki/index.php/Apply@EvolutionStrategy
+% See also: https://cossan.co.uk/wiki/index.php/Apply@EvolutionStrategy
 %
 % Author: Edoardo Patelli
-% Institute for Risk and Uncertainty, University of Liverpool, UK
-% email address: openengine@cossan.co.uk
-% Website: http://www.cossan.co.uk
 
-% =====================================================================
-% This file is part of openCOSSAN.  The open general purpose matlab
-% toolbox for numerical analysis, risk and uncertainty quantification.
-%
-% openCOSSAN is free software: you can redistribute it and/or modify
-% it under the terms of the GNU General Public License as published by
-% the Free Software Foundation, either version 3 of the License.
-%
-% openCOSSAN is distributed in the hope that it will be useful,
-% but WITHOUT ANY WARRANTY; without even the implied warranty of
-% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-% GNU General Public License for more details.
-%
-%  You should have received a copy of the GNU General Public License
-%  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
-% =====================================================================
+%{
+    This file is part of OpenCossan <https://cossan.co.uk>.
+    Copyright (C) 2006-2018 COSSAN WORKING GROUP
+
+    OpenCossan is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License or,
+    (at your option) any later version.
+    
+    OpenCossan is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU General Public License for more details.
+    
+    You should have received a copy of the GNU General Public License
+    along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
+%}
 
 %% Define global variable for the objective function and the constrains
 global XoptGlobal XsimOutGlobal
@@ -41,37 +39,44 @@ global XoptGlobal XsimOutGlobal
 OpenCossan.validateCossanInputs(varargin{:});
 
 %  Check whether or not required arguments have been passed
-for k=1:2:length(varargin),
-    switch lower(varargin{k}),
-        case {'xoptimizationproblem'},   %extract OptimizationProblem
-            assert(isa(varargin{k+1},'opencossan.optimization.OptimizationProblem'),...
-                'openCOSSAN:Cobyla:apply:wrongOptimizationProblem',...
-                ['The variable %s must be an opencossan.optimization.OptimizationProblem\n',...
-                'Provided class: %s'],inputname(k),class(varargin{k+1}))
-            % Load OptimizationProblem
-            Xop     = varargin{k+1};
-        case {'xoptimum'},   %extract OptimizationProblem
-            %check that arguments is actually an OptimizationProblem object
-            assert(isa(varargin{k+1},'opencossan.optimization.Optimum'),...
-                'openCOSSAN:Cobyla:apply:wrongOptimum',...
-                ['The variable %s must be an opencossan.optimization.Optimum\n',...
-                'Provided class: %s'],inputname(k),class(varargin{k+1}))
-            Xoptimum  = varargin{k+1};
+for k=1:2:length(varargin)
+    switch lower(varargin{k})
+        case {'xoptimizationproblem'}  %extract OptimizationProblem
+            if isa(varargin{k+1},'OptimizationProblem')    %check that arguments is actually an OptimizationProblem object
+                Xop     = varargin{k+1};
+            else
+                error('OpenCossan:EvolutionStrategy:apply',...
+                    ['the variable  ' inputname(k) ' must be an OptimizationProblem object']);
+            end
+        case {'cxoptimizationproblem'}   %extract OptimizationProblem
+            if isa(varargin{k+1}{1},'OptimizationProblem')    %check that arguments is actually an OptimizationProblem object
+                Xop     = varargin{k+1}{1};
+            else
+                error('OpenCossan:EvolutionStrategy:apply',...
+                    ['the variable  ' inputname(k) ' must be an OptimizationProblem object']);
+            end  
+        case {'xoptimum'}   %extract OptimizationProblem
+            if isa(varargin{k+1},'Optimum')    %check that arguments is actually an OptimizationProblem object
+                Xoptimum  = varargin{k+1};
+            else
+                error('OpenCossan:EvolutionStrategy:apply',...
+                    ['the variable  ' inputname(k) ' must be an Optimum object']);
+            end
         case 'minitialsolutions'
             MinitialSolution=varargin{k+1};
         case 'vsigma'
             Xobj.Vsigma=varargin{k+1};
         otherwise
-            error('openCOSSAN:EvolutionStrategy:apply',...
+            error('OpenCossan:EvolutionStrategy:apply',...
                 'the Property Name %s is not valid',varargin{k});
     end
 end
 
 %% Check Optimization problem
-assert(logical(exist('Xop','var')), 'openCOSSAN:EvolutionStrategy:apply',...
+assert(logical(exist('Xop','var')), 'OpenCossan:EvolutionStrategy:apply',...
     'Optimization problem must be defined')
 
-assert(isempty(Xop.Xconstraint),'openCOSSAN:EvolutionStrategy:apply:contraintsNotAllowed',...
+assert(isempty(Xop.Xconstraint),'OpenCossan:EvolutionStrategy:apply:contraintsNotAllowed',...
         'EvolutionStrategy method is an unconstrint optimization method. It is not possible to be used to solve a constrained problem')
 
 
@@ -81,7 +86,7 @@ NdesignVariable=length(Xop.CnamesDesignVariables);
 
 %% Check initial solution
 if exist('MinitialSolution','var')
-    assert(size(MinitialSolution,1)==Xobj.Nmu,'openCOSSAN:EvolutionStrategy:apply',...
+    assert(size(MinitialSolution,1)==Xobj.Nmu,'OpenCossan:EvolutionStrategy:apply',...
         ['EvolutionStrategy requires ' num2str(Xobj.Nmu) ' initial solutions'])
 else
     if size(Xop.VinitialSolution,1)==Xobj.Nmu
@@ -106,9 +111,7 @@ end
 
 %% initialize Optimum
 if ~exist('Xoptimum','var')
-    XoptGlobal=Xop.initializeOptimum('LgradientObjectiveFunction',false, ...
-        'LgradientConstraints',false,...
-        'Xoptimizer',Xobj);
+    XoptGlobal=Optimum('XoptimizationProblem',Xop,'Xoptimizer',Xobj);
 else
     %TODO: Check Optimum
     XoptGlobal=Xoptimum;
@@ -135,9 +138,11 @@ Mparents=Xop.VinitialSolution;
 
 if isempty(Xobj.Vsigma)
     Msigma=ones(Xobj.Nlambda,NdesignVariable);
+elseif length(Xobj.Vsigma)==1
+    Msigma  = repmat(Xobj.Vsigma,Xobj.Nmu,NdesignVariable);
 else
     assert(length(Xobj.Vsigma)==NdesignVariable,...
-        'openCOSSAN:EvolutionStrategy:apply',...
+        'OpenCossan:EvolutionStrategy:apply',...
         ['Vsigma must be of length ' num2str(NdesignVariable)])
     Msigma  = repmat(Xobj.Vsigma(:)',Xobj.Nmu,1);
 end
@@ -155,11 +160,6 @@ Vfitness_parents    = hobjfun(Mparents);       %Objective function evaluation
 mean_fitness_new    = mean(Vfitness_parents);  %calculates mean fitness
 % Prepare values for iteration MV coding style
 Mfullparents         = [Mparents,Msigma,Vfitness_parents];    %creates matrix containing parents, vector of std. deviation and fitnesses
-
-Mx=vertcat(Mparents,NaN(Xobj.Nlambda-Xobj.Nmu,NdesignVariable));
-MobjectiveFunction=vertcat(Vfitness_parents,NaN(Xobj.Nlambda-Xobj.Nmu,size(Vfitness_parents,2)));
-
-XoptGlobal=XoptGlobal.addIteration('MdesignVariables',Mx,'MobjectiveFunction',MobjectiveFunction);
 
 Lstop=false;
 while ~Lstop
@@ -207,6 +207,11 @@ end
 %OpenCossan.cossanDisp(['Exit Flag: ' SexitFlag],2)
 
 % Assign outputs
+
+
+%XoptGlobal.TabblesValues.
+[XoptGlobal.VoptimalScores,pos]=min(XoptGlobal.TablesValues.ObjectiveFnc);
+XoptGlobal.VoptimalDesign=XoptGlobal.TablesValues.DesignVariables(pos,:);
 Xoptimum=XoptGlobal;
 Xoptimum.Sexitflag=SexitFlag;
 
@@ -229,4 +234,4 @@ end
 clear global XoptGlobal XsimOutGlobal
 
 %% Record Time
-OpenCossan.setLaptime('description',['End apply@' class(Xobj)]);
+OpenCossan.setLaptime('Sdescription',['End apply@' class(Xobj)]);

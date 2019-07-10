@@ -2,29 +2,29 @@ function [Xoptimum, varargout] = apply(Xobj,varargin)
 %   APPLY   This method applies the algorithm
 %           Simplex for solving unconstrained problems
 %
-% See also: http://cossan.cfd.liv.ac.uk/wiki/index.php/Apply@Simplex
+%
+% See Also: https://cossan.co.uk/wiki/apply@Simplex
 %
 % Author: Edoardo Patelli
-% Institute for Risk and Uncertainty, University of Liverpool, UK
-% email address: openengine@cossan.co.uk
 % Website: http://www.cossan.co.uk
 
-% =====================================================================
-% This file is part of openCOSSAN.  The open general purpose matlab
-% toolbox for numerical analysis, risk and uncertainty quantification.
-%
-% openCOSSAN is free software: you can redistribute it and/or modify
-% it under the terms of the GNU General Public License as published by
-% the Free Software Foundation, either version 3 of the License.
-%
-% openCOSSAN is distributed in the hope that it will be useful,
-% but WITHOUT ANY WARRANTY; without even the implied warranty of
-% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-% GNU General Public License for more details.
-%
-%  You should have received a copy of the GNU General Public License
-%  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
-% =====================================================================
+%{
+    This file is part of OpenCossan <https://cossan.co.uk>.
+    Copyright (C) 2006-2018 COSSAN WORKING GROUP
+
+    OpenCossan is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License or,
+    (at your option) any later version.
+    
+    OpenCossan is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU General Public License for more details.
+    
+    You should have received a copy of the GNU General Public License
+    along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
+%}
 
 %% Define global variable for the objective function and the constrains
 global XoptGlobal XsimOutGlobal
@@ -32,32 +32,42 @@ global XoptGlobal XsimOutGlobal
 OpenCossan.validateCossanInputs(varargin{:});
 
 %  Check whether or not required arguments have been passed
-for k=1:2:length(varargin),
-    switch lower(varargin{k}),
-        case {'xoptimizationproblem'},   %extract OptimizationProblem
-            assert(isa(varargin{k+1},'opencossan.optimization.OptimizationProblem'),...
-                'openCOSSAN:Cobyla:apply:wrongOptimizationProblem',...
-                ['The variable %s must be an opencossan.optimization.OptimizationProblem\n',...
-                'Provided class: %s'],inputname(k),class(varargin{k+1}))
-            % Load OptimizationProblem
-            Xop     = varargin{k+1};
-        case {'xoptimum'},   %extract OptimizationProblem
+for k=1:2:length(varargin)
+    switch lower(varargin{k})
+        case {'xoptimizationproblem'}   
             %check that arguments is actually an OptimizationProblem object
-            assert(isa(varargin{k+1},'opencossan.optimization.Optimum'),...
-                'openCOSSAN:Cobyla:apply:wrongOptimum',...
-                ['The variable %s must be an opencossan.optimization.Optimum\n',...
-                'Provided class: %s'],inputname(k),class(varargin{k+1}))
-            Xoptimum  = varargin{k+1};
+            if isa(varargin{k+1},'OptimizationProblem')    
+                Xop     = varargin{k+1};
+            else
+                error('OpenCossan:Simplex:apply',...
+                    'The variable %s must be an OptimizationProblem object, provided object of type %s',...
+                    inputname(k),class(varargin{k+1}));
+            end
+        case {'cxoptimizationproblem'}   %extract OptimizationProblem
+            if isa(varargin{k+1}{1},'OptimizationProblem')    %check that arguments is actually an OptimizationProblem object
+                Xop     = varargin{k+1}{1};
+            else
+                error('OpenCossan:Simplex:apply',...
+                     ['the variable  ' inputname(k) ' must be an OptimizationProblem object']);
+            end  
+        case {'xoptimum'}   %extract OptimizationProblem
+            if isa(varargin{k+1},'Optimum')    %check that arguments is actually an OptimizationProblem object
+                Xoptimum  = varargin{k+1};
+            else
+                error('OpenCossan:Simplex:apply',...
+                    'The variable %s must be an Optimum, provided object of type %s',...
+                    inputname(k),class(varargin{k+1}));
+            end
         case 'vinitialsolution'
             VinitialSolution=varargin{k+1};
         otherwise
-            error('openCOSSAN:Simplex:apply:wrongArgument',...
-                'the input argument %s is not valid. ',varargin{k});
+            error('OpenCossan:Simplex:apply',['the field ' varargin{k} ...
+                ' is not valid']);
     end
 end
 
 %% Check Optimization problem
-assert(logical(exist('Xop','var')), 'openCOSSAN:Simplex:apply',...
+assert(logical(exist('Xop','var')), 'OpenCossan:Simplex:apply:NoOptimizationObject',...
     'Optimization problem must be defined')
 
 % Check inputs and initialize variables
@@ -69,18 +79,16 @@ if exist('VinitialSolution','var')
 end
 
 assert(size(Xop.VinitialSolution,1)==1, ...
-    'openCOSSAN:Simplex:apply',...
+    'OpenCossan:Simplex:apply',...
     'Only 1 initial setting point is allowed')
 
 %% initialize Optimum
 if ~exist('Xoptimum','var')
-    XoptGlobal=Xop.initializeOptimum('LgradientObjectiveFunction',false,'LgradientConstraints',false,...
-        'Xoptimizer',Xobj);
+    XoptGlobal=Optimum('XoptimizationProblem',Xop,'Xoptimizer',Xobj);
 else
     %TODO: Check Optimum
     XoptGlobal=Xoptimum;
 end
-
 
 %%  Perform optimization
 %   Set matlab options
@@ -98,7 +106,7 @@ XsimOutGlobal=[];
 if isempty(Xop.Xmodel)
     % Create handle of the objective function
     hobjfun=@(x)evaluate(Xop.XobjectiveFunction,'Xoptimizationproblem',Xop,...
-        'MreferencePoints',x,'Lgradient',false,...
+        'MreferencePoints',x,'Lgradient',false,...        
         'scaling',Xobj.scalingFactor);
 else
     % Create handle of the objective function
@@ -109,8 +117,8 @@ end
 
 
 assert(logical(isempty(Xop.Xconstraint)), ...
-    'openCOSSAN:Simplex:apply',...
-    'Simplex is an UNconstrained Nonlinear Optimization.')
+    'OpenCossan:Simplex:apply',...
+    'Simplex is an Unconstrained Nonlinear Optimization. It can not be used to solved constrained problems')
 
 
 % The function that computes the nonlinear inequality constraints c(x)≤ 0
@@ -120,13 +128,14 @@ assert(logical(isempty(Xop.Xconstraint)), ...
 % that contains the nonlinear equalities evaluated at x.  hconstrains is
 % a function handle such as function
 
-OpenCossan.setLaptime('description',['SIMPLEX:' Xobj.Sdescription]);
+OpenCossan.setLaptime('Sdescription',['SIMPLEX:' Xobj.Sdescription]);
 
 
 %% Perform Real optimization
-[~,~,Nexitflag]  = fminsearch(hobjfun,Xop.VinitialSolution,Toptions);
+[XoptGlobal.VoptimalDesign,XoptGlobal.VoptimalScores,Nexitflag]  = ...
+    fminsearch(hobjfun,Xop.VinitialSolution,Toptions);
 
-OpenCossan.setLaptime('description','End Simplex optimization');
+OpenCossan.setLaptime('Sdescription','End Simplex optimization');
 
 %% Output
 % All the quantities of interest are automatically stored in the Optimum
@@ -148,7 +157,7 @@ XoptGlobal.Sexitflag=Sexitflag;
 Xoptimum=XoptGlobal;
 
 % Export Simulation Output
-varargout{1}    = XsimOutGlobal;
+varargout{1}    = XsimOutGlobal; 
 
 if ~isdeployed
     % add entries in simulation and analysis database at the end of the
@@ -163,12 +172,12 @@ if ~isdeployed
     end
 end
 %% Delete global variables
-clear global XoptGlobal XsimOutGlobal
+clear global XoptGlobal XsimOutGlobal 
 
 %%  Set random number generator to state prior to running simulation
-if exist('XRandomNumberGenerator','var'),
+if exist('XRandomNumberGenerator','var')
     Simulations.restoreRandomNumberGenerator(XRandomNumberGenerator)
 end
 
 %% Record Time
-OpenCossan.setLaptime('description','End apply@Simplex');
+OpenCossan.setLaptime('Sdescription','End apply@Simplex');

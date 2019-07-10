@@ -1,4 +1,4 @@
-classdef SimulatedAnnealing < opencossan.optimization.Optimizer
+classdef SimulatedAnnealing < Optimizer
     %   SimulatedAnnealing (SA) is a gradient-free optimization method. SA can
     %   be used to find a MINIMUM of a function.
     %% Properties of the object
@@ -78,10 +78,10 @@ classdef SimulatedAnnealing < opencossan.optimization.Optimizer
                         Xobj.RandomNumberGenerator = ...
                             RandStream('mt19937ar','Seed',Nseed);
                     case {'xrandomnumbergenerator'}
-                        if isa(varargin{k+1},'RandStream'),
+                        if isa(varargin{k+1},'RandStream')
                             Xobj.XrandomNumberGenerator  = varargin{k+1};
                         else
-                            error('openCOSSAN:optimization:CrossEntropy',...
+                            error('openCOSSAN:optimization:SimulatedAnnealing',...
                                 ['argument associated with (' varargin{k} ') is not a RandStream object']);
                         end
                         % Simulated Annealing properties
@@ -111,7 +111,7 @@ classdef SimulatedAnnealing < opencossan.optimization.Optimizer
                     case  'nmaxmoves'
                         Xobj.Nmaxmoves=varargin{k+1};
                     otherwise
-                        error('openCOSSAN:SimulatedAnnealing',...
+                        error('OpenCossan:SimulatedAnnealing',...
                             'PropertyName %s  not valid ',varargin{k});
                 end
                 
