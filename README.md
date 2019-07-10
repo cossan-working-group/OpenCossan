@@ -33,7 +33,7 @@ Then navigate to `OpenCossan\doc\GettingStarted.mlx` in Matlab to view further i
 
 ## Usage
 
-Comprehensive documentation is available in the wiki.
+Comprehensive documentation is available in the wiki available at https://cossan.co.uk/wiki
 
 ### Documentation
 
@@ -57,21 +57,21 @@ Please make sure to update tests as appropriate.
 
 The following packages are used by OpenCossan and are required for some functionalities:
 
-1. #1
-2. #2
+1. Statistical and Machine learning toolbox
+2. Optimization toolbox
 
 ## How to cite
 
 If you use this software, please read and cite these open-access articles:
 
-1. Patelli, E., 2017. COSSAN: a multidisciplinary software suite for uncertainty quantification and risk management. Handbook of uncertainty quantification, pp.1909-1977.
+1. Patelli, E., 2017. COSSAN: a multidisciplinary software suite for uncertainty quantification and risk management. Handbook of uncertainty quantification, pp.1909-1977. DOI: https://dx.doi.org/10.1007/978-3-319-11259-6_59-1
 
 ## Publications
 
 The following publications have used OpenCossan:
 
-1. #1
-2. #2
+1. Edoardo Patelli and Diego A. Alvarez and Matteo Broggi and Marco de Angelis 2015 Uncertainty management in multidisciplinary design of critical safety systems Journal of Aerospace Information Systems, 12, 140-169 https://doi.org/10.2514/1.I010273
+2. Silvia Tolo and Edoardo Patelli and Michael Beer 2018 An open toolbox for the reduction, inference computation and sensitivity analysis of Credal Networks, Advances in Engineering Software, 115, 126-148 https://doi.org/10.1016/j.advengsoft.2017.09.003
 
 ## License
 [LGPLv3](https://www.gnu.org/licenses/lgpl-3.0.en.html)
