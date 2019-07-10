@@ -1,7 +1,7 @@
-function varargout=computeGradientStandardNormalSpace(Xobj,varargin)
+function varargout=computeGradientStandardNormalSpace(Xobj)
 %COMPUTEGRADIENT This method does the Sensitivity analysis 
 %
-% $Copyright~1993-2017,~COSSAN~Working~Group,~University~of~Liverpool,~UK$
+% $Copyright~1993-2019,~COSSAN~Working~Group$
 % $Author: Edoardo-Patelli$
 
 % =====================================================================
@@ -21,22 +21,6 @@ function varargout=computeGradientStandardNormalSpace(Xobj,varargin)
 %  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
 % =====================================================================
 
-
-%% Check inputs
-OpenCossan.validateCossanInputs(varargin{:})
-% OpenCossan.resetRandomNumberGenerator(357357)
-%% Process inputs
-for k=1:2:length(varargin)
-    switch lower(varargin{k})
-        case {'xtarget','xmodel'}
-            Xobj=Xobj.addModel(varargin{k+1}(1));
-        case {'cxtarget','cxmodel'}
-            Xobj=Xobj.addModel(varargin{k+1}{1});
-        otherwise
-            error('openCOSSAN:LocalSensitivityMonteCarlo:computeGradientStandardNormalSpace:WrontInputArgument',...
-                'The PropertyName %s is not allowed',varargin{k});
-    end
-end
 
 % Set the analysis name when not deployed
 if ~isdeployed

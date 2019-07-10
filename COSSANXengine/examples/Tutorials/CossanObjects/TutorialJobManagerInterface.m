@@ -7,7 +7,7 @@
 % tutorial of Connector "TutorialConnectorABAQUS.m".
 % Please refer to this tutorial for additional instructions.
 % 
-% See Also: http://cossan.cfd.liv.ac.uk/wiki/index.php/@JobManagerInterface
+% See Also: http://cossan.co.uk/wiki/index.php/@JobManagerInterface
 %
 % $Copyright~1993-2011,~COSSAN~Working~Group,~University~of~Innsbruck,~Austria$
 % $Author: $ 

@@ -45,9 +45,9 @@ title(gca(figHandle),Stitle);
 
 if exist('SfigureName','var')
     if exist('Sexportformat','var')
-        exportFigure('figureHandle',figHandle,'SfigureName',SfigureName,'SexportFormat',Sexportformat)
+        exportFigure('HfigureHandle',figHandle,'SfigureName',SfigureName,'SexportFormat',Sexportformat)
     else
-        exportFigure('figureHandle',figHandle,'SfigureName',SfigureName)
+        exportFigure('HfigureHandle',figHandle,'SfigureName',SfigureName)
     end
 end
 

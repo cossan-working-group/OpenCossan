@@ -5,7 +5,7 @@
 % See Also: https://cossan.co.uk/wiki/index.php/Infection_Dynamic_Model
 % 
 %
-% $Copyright~1993-2017,~COSSAN~Working~Group$
+% $Copyright~1993-2019,~COSSAN~Working~Group$
 % $Author: Edoardo-Patelli$ 
 
 

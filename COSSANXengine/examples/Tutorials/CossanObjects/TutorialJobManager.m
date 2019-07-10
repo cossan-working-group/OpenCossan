@@ -22,7 +22,7 @@ Xjm = JobManagerInterface('Stype','GridEngine');
     %% Run a model
     
     
-    RV1=RandomVariable('Sdistribution','normal', 'mean',0,'std',1);  %#ok<SNASGU>
+RV1=RandomVariable('Sdistribution','normal', 'mean',0,'std',1);  %#ok<SNASGU>
 RV2=RandomVariable('Sdistribution','normal', 'mean',0,'std',1);  %#ok<SNASGU>
 % Define the RVset
 Xrvs1=RandomVariableSet('Cmembers',{'RV1', 'RV2'}); 

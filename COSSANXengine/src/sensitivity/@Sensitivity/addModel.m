@@ -2,7 +2,7 @@ function Xobj=addModel(Xobj,Xmodel)
 %ADDMODEL This is a function used to add the Model to the Sensitivity Object
 %
 %
-% $Copyright~1993-2012,~COSSAN~Working~Group,~University~of~Liverpool,~UK$
+% $Copyright~1993-2012,~COSSAN~Working~Group$
 % $Author: Edoardo-Patelli$
 
 % =====================================================================

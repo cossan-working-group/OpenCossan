@@ -8,9 +8,9 @@
 %   $y=2+x_1^2+5*x_2^2+0.01*x_4^2$ 
 % where x1, x2, x3, x4 are modelled as random variables (RV1,...,RV4)
 % 
-% See Also: http://cossan.cfd.liv.ac.uk/wiki/index.php/@Gradient
+% See Also: Gradient TutorialLocalSensitivityFiniteDifference
 %
-% $Copyright~1993-2014,~COSSAN~Working~Group,~University~of~Liverpool,~UK$
+% $Copyright~1993-2019,~COSSAN~Working~Group$
 % $Author: Edoardo-Patelli$ 
 
 
@@ -24,8 +24,7 @@ RV4=RandomVariable('Sdistribution','normal', 'mean',1,'std',1);  %#ok<SNASGU>
 % Define the RVset
 Xrvs1=RandomVariableSet('Cmembers',{'RV1', 'RV2', 'RV3', 'RV4'}); 
 % Define Xinput
-Xin = Input('Sdescription','Gradient Tutorial Input');
-Xin = add(Xin,Xrvs1);
+Xin = Input('Sdescription','Gradient Tutorial Input','Xrandomvariableset',Xrvs1);
 
 % Construct a Mio object that defines the model
 Xm=Mio('Sdescription', 'Performance function', ...
@@ -45,49 +44,48 @@ Xmdl=Model('CXmembers',{Xin,Xeval1});
 display(Xmdl)
 
 %% Compute the Gradient of the model 
-% Around the origin in standard normal space
+% Define a LocalSensitivity object to calculate the gradient. 
 
-% In order compute the gradient the static method gradient of the
-% Sensitivity toolbox must be invoked
-% 
-Xg=Sensitivity.gradientMonteCarlo('Xtarget',Xmdl);
-display(Xg)
+XlsFD=LocalSensitivityFiniteDifference('Xmodel',Xmdl);
+display(XlsFD)
 
-% The Xtarget object must contain the quantity of interest
-% If Xtarget provides more then 1 output the optional parameter Coutputname 
-% can be used to define the quantity of interest.
+% If the reference point is not provided the gradient is calculared around
+% the mean values of the random variables (as returned by the method
+% getDefaultValuesStructure of the Input class.
 
-Xg=Sensitivity.gradientMonteCarlo('Xtarget',Xmdl,'Coutputname',{'out1'});
+TreferencePoint=Xin.getDefaultValuesStructure;
 
-% If teh simulation at the reference point is available the gradient can be computed reusing
-% this sample.
-% An Samples object containing the samples and the corresponding value of
-% the quantity of interest have to be passed as optional arguments.
+% The LocalSensitivityFiniteDifference computes the gradient invoking the
+% method computeGradient
 
-Xg=Sensitivity.gradientFiniteDifferences('Xtarget',Xmdl,'perturbation',1e-8);
-display(Xg)
+% Compute the LocalSensitivityMeasure
+Xgrad = XlsFD.computeGradient;
+display(Xgrad)
 
-% Use reference point defined in the Samples Object
-Xin=Xin.sample('Nsamples',1);
-Xs=Xin.Xsamples;
-Xout=Xmdl.apply(Xs);
+XlsFD=LocalSensitivityFiniteDifference('Xmodel',Xmdl,'VreferencePoint',[1 2 3 4]);
+display(XlsFD)
 
-Xg=Sensitivity.gradientFiniteDifferences('Xtarget',Xmdl,'Xsamples',Xs,'FunctionValue',Xout.Tvalues.out1);
-% The gradient output contains 
-display(Xg)
+Xgrad2 = XlsFD.computeGradient;
+display(Xgrad2)
 
-Xg=Sensitivity.gradientMonteCarlo('Xtarget',Xmdl,'Xsamples',Xs);
-% The gradient output contains 
-display(Xg)
+%% Show results
+% The Gradient class provides methods to display the results
 
-Xg2=Sensitivity.gradientFiniteDifferences('Xtarget',Xmdl);
-display(Xg2)
+Xgrad.plotComponents;
 
-% Add components to the same figure
-h1=Xg2.plotComponents('Stitle','my title','Scolor','m','Nmaxcomponents',3);
+% Custumize the plot. 
+Xgrad.plotComponents('Nmaxcomponents',2,'Stitle','Finite difference custum title');
 
-% Close figure
-close(h1)
+
+Xgrad.plotPie;
+
+% To save a picture as PDF pass the name of the figure
+Xgrad.plotPie('Sfigurename','PieGradient','Sexportformat','pdf')
+
+% The figure is saved in the current working path setted by OpenCossan
+
+% Show current working path
+OpenCossan.getCossanWorkingPath
 
 
 

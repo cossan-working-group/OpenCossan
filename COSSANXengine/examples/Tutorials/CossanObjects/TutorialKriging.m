@@ -10,10 +10,8 @@
 %
 % Prepared by IM
 %
-%  Copyright 1993-2012, 
-%
 % See Also: 
-% http://cossan.cfd.liv.ac.uk/wiki/index.php/@Kriging
+% http://cossan.co.uk/wiki/index.php/@Kriging
 
 % Reset the random number generator in order to always obtain the same results.
 % DO NOT CHANGE THE VALUES OF THE SEED

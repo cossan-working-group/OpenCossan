@@ -6,9 +6,9 @@
 % contains all the results of a simuations.
 %
 %
-% See Also: http://cossan.co.uk/wiki/index.php/@SimulationData
+% See Also: https://cossan.co.uk/wiki/index.php/@SimulationData
 %
-% $Copyright~2006-2017,~COSSAN~Working~Group,$
+% $Copyright~2006-2019,~COSSAN~Working~Group,$
 % $Author: Edoardo-Patelli~and~Barbara-Goller$ 
 
 % Reset the random number generator in order to always obtain the same results.

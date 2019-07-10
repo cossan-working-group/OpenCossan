@@ -127,8 +127,8 @@ classdef LocalSensitivityMonteCarlo < Sensitivity
     end
     
     methods                 
-        varargout=computeGradient(Xobj,varargin) % Perform Local Sensitivity (returning gradient)        
-        varargout=computeGradientStandardNormalSpace(Xobj,varargin) % Compute the Local Sensitivity in the standard normal space (returning gradient)    
+        varargout=computeGradient(Xobj) % Perform Local Sensitivity (returning gradient)        
+        varargout=computeGradientStandardNormalSpace(Xobj) % Compute the Local Sensitivity in the standard normal space (returning gradient)    
     end
     
     methods (Access=protected)

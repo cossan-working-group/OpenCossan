@@ -81,7 +81,7 @@ classdef LocalSensitivityFiniteDifference < Sensitivity
                     case {'cxtarget','cxmodel'}
                         Xmodel=varargin{k+1}{1};
                     case {'vreferencepoint'}
-                        % Reference Point in PhysicalSpace
+                        % Reference Point is in PhysicalSpace
                         assert(all([~isnan(varargin{k+1}) ~isinf(varargin{k+1})]), ...
                             'openCOSSAN:sensitivity:coreFiniteDifferences',...
                             'The reference point can not contain NaN or Inf values\nProvided values: %s',...
@@ -103,8 +103,8 @@ classdef LocalSensitivityFiniteDifference < Sensitivity
     end
     
     methods (Access=public)
-        varargout=computeGradient(Xobj,varargin) % Perform Local Sensitivity (returning gradient)
-        varargout=computeGradientStandardNormalSpace(Xobj,varargin) % Perform Local Sensitivity (returning gradient)
+        varargout=computeGradient(Xobj) % Perform Local Sensitivity (returning gradient)
+        varargout=computeGradientStandardNormalSpace(Xobj) % Perform Local Sensitivity (returning gradient)
     end
     
     methods (Access=protected)

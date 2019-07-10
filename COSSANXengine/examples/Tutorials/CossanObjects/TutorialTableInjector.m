@@ -74,7 +74,7 @@ Xin.inject(Tinput)
 
 %% Use TableInjector with stochastic process
 % This part of the tutorial shows how to use a TableInjector Object to
-% write the realization of a StochasticProcess in a ASCII file and in
+% write realizations of  StochasticProcess in a ASCII file and in
 % tabular format 
 
 % define Input

@@ -1,9 +1,9 @@
 %% Tutorial for the HBextractor
 % The object HBEtractor is use to ...
 % 
-% See Also: http://cossan.cfd.liv.ac.uk/wiki/index.php/@Timer
+% See Also: Extractor
 %
-% $Copyright~1993-2011,~COSSAN~Working~Group,~University~of~Innsbruck,~Austria$
+% $Copyright~1993-2019,~COSSAN~Working~Group$
 % $Author: $ 
 
 error('TO DO')

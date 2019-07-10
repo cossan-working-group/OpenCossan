@@ -1,40 +1,34 @@
-%**************************************************************************
-%
-%   Tutorial 01 - Samples object
-%
-%   Creation of an object of the class samples and setting values
-%
-%**************************************************************************
+%% TutorialSamples
+% This tutorials explains how to use the class Samples. 
+% Samples class is used to store realisations from Input object. 
 
-%% 1.   Create random variables
+%% Create Input
+% Define RandomVariables
 Xrv1    = RandomVariable('Sdistribution','exponential','par1',1);
 Xrv2    = RandomVariable('Sdistribution','normal','mean',3,'std',1);
 Xrv3    = RandomVariable('Sdistribution','lognormal','mean',3,'std',1);
-
 Xrv4    = RandomVariable('Sdistribution','lognormal','mean',3,'std',1);
-
-%% 2.   Create random variable set
+%Create random variable set
 Mcorr   = [1.0,0.5,0.2;...
     0.5,1.0,0.1;...
     0.2,0.1,1.0];
 Xrvs1   = RandomVariableSet('Cmembers',{'Xrv1','Xrv2','Xrv3'},...
     'Mcorrelation',Mcorr);
-
 Xrvs2   = RandomVariableSet('Cmembers',{'Xrv4'});
-%% 3.   Create input object
-Xin     = Input;
-Xin     = add(Xin,Xrvs1);
+%   Create input object
+Xin     = Input('Xrandomvariableset',Xrvs1);
+Xin2     = Xin.add('Xmember',Xrvs2);
 
-Xin2     = Input;
-Xin2     = add(Xin2,Xrvs1);
-Xin2     = add(Xin2,Xrvs2);
-%% 4.   Generate samples
+%% Generate samples
 newStream = RandStream('mt19937ar','Seed',0);
 RandStream.setGlobalStream(newStream);
 
-%4.2.   Generate samples
+% Generate samples
 Xin     = Xin.sample('Nsamples',1e3);
-%4.3.   Extract samples - matrix
+% Display samples
+display(Xin.Xsamples)
+
+% Extract samples - matrix
 MX      = getSampleMatrix (Xin);
 MX=Xin.Xsamples.MsamplesPhysicalSpace;
 MU=Xin.Xsamples.MsamplesStandardNormalSpace;
@@ -51,7 +45,7 @@ for i=1:size(MX,1),...
 end %#ok<SAGROW>
 
 
-%% 5.   Construct object Samples
+%% Construct object Samples
 % There are many different approaches for constructing an object of the 
 % class Samples. 8 of these approaches are shown below. It should be noted
 % that other combinations aside these 8 approaches are also valid
@@ -74,13 +68,9 @@ display(Xsamp5)
 Xsamp6  = Xrvs1.sample(10);
 display(Xsamp6)
 
-%% 6. Samples object with Dataseries
+%% Samples object with Dataseries
 Xds1=Dataseries('Mcoord',1:10,'Mdata',rand(4,10),'Sindexname','index','Sindexunit','myUnits');
 Xds2=Dataseries('Mcoord',1:10,'Mdata',rand(4,10),'Sindexname','index','Sindexunit','myUnits');
-
-% No names defined
-Xsamp7  = Samples('Xdataseries',[Xds1 Xds2]);
-display(Xsamp7)
 
 % Define names
 Xsamp7  = Samples('Xdataseries',[Xds1 Xds2],'CnamesStochasticProcess',{'SP1' 'SP2'});

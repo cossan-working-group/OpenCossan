@@ -9,18 +9,22 @@ function Xinput = add(Xinput,varargin)
 %% Process inputs
 OpenCossan.validateCossanInputs(varargin{:});
 
-if strcmpi(inputname(2),'')
-    for k=1:2:length(varargin)
+Sname='';
+
+for k=1:2:length(varargin)
         switch lower(varargin{k})
             case {'xmember'} 
                 XaddObject = varargin{k+1};
             case {'sname'} 
                 Sname = varargin{k+1};
             otherwise
-                error('openCOSSAN:Input:add:wronginput',...
+                error('OpenCossan:Input:add:wronginput',...
                     'Argument name %s not valid',varargin{k})
         end
-    end
+end
+
+if isempty(Sname)
+    Sname=inputname(3);
 end
 
 %% Processing Inputs

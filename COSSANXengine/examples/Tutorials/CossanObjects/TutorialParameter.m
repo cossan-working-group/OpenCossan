@@ -2,9 +2,9 @@
 % This tutorial shows the basics on how to define an object of the class
 %   Parameter
 %
-% See Also:  http://cossan.cfd.liv.ac.uk/wiki/index.php/@Input
+% See Also:  https://cossan.co.uk/wiki/index.php/@Input
 %
-% $Copyright~1993-2011,~COSSAN~Working~Group,~University~of~Innsbruck,~Austria$
+% $Copyright~1993-2011,~COSSAN~Working~Group$
 % $Author:~Pierre~Beaurepaire$ 
 
 

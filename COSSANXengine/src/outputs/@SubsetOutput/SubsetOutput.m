@@ -132,6 +132,9 @@ classdef SubsetOutput < SimulationData
                         Xobj.MchainIndices=varargin{k+1};
                     case {'nmarkovchains'}    
                         Xobj.Nmarkovchains = varargin{k+1};
+                    otherwise
+                        error('OpenCossan:SubsetOutput:wrongArgument',...
+                             'PropertyName %s is not valid ', varargin{k});
                 end
             end 
 

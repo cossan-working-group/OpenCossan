@@ -9,8 +9,15 @@
 %
 % See Also: http://cossan.cfd.liv.ac.uk/wiki/index.php/Parallel_System
 %
-% $Copyright~1993-2011,~COSSAN~Working~Group,~University~of~Innsbruck,~Austria$
+% $Copyright~1993-2011,~COSSAN~Working~Group$
 % $Author:~Edoardo~Patelli$ 
+%
+% Reference: 
+% Patelli, E.; Pradlwarter, H. J. & Schuëller, G. I.  On
+% Multinormal Integrals by Importance Sampling for Parallel System
+% Reliability, Structural Safety, 2011, 33, 1-7 
+% DOI: https://dx.doi.org/10.1016/j.strusafe.2010.04.002
+%
 
 %% Definition of the Inputs
 % In this section the basic objects required to define a SystemReliability

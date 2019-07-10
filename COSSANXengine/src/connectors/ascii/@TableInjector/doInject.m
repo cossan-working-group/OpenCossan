@@ -50,7 +50,7 @@ for nvar=1:Xobj.Nvariable
             end
             
             if nvar==1 && Xobj.LinjectCoordinates
-                Mdata=Xdata.Mcoord(Vindx);
+                Mdata(:,1)=Xdata.Mcoord(Vindx);
             end
             
             assert(size(Mdata,1)==size(VdataInject,1),...

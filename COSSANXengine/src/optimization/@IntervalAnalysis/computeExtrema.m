@@ -93,26 +93,18 @@ if strcmpi(superclasses(Xobj.Xsolver),'Optimizer')
     else
         %% Minimum
         XoptimumMIN=CXresults{1};
-        VoutValues=XoptimumMIN.XobjectiveFunction.Vdata;
-        MINIMUM=VoutValues(end);
+        MINIMUM=XoptimumMIN.VoptimalDesign;       
         Niv=length(Xobj.CnamesIntervalVariables);
-        Niterations=length(VoutValues);
-        Mdata=zeros(Niterations,Niv);
-        for n=1:length(Xobj.CnamesIntervalVariables)
-            Mdata(:,n)=XoptimumMIN.XdesignVariable(n).Vdata';
-        end
+        Niterations=XoptimumMIN.Niterations;
+        Mdata=XoptimumMIN.TablesValues.DesignVariables;
         VargMINIMUM=Mdata(end,:);
         NevaluationsMIN=Niterations;
         %% Maximum
         XoptimumMAX=CXresults{2};
-        VoutValues=XoptimumMAX.XobjectiveFunction.Vdata;
-        MAXIMUM=-VoutValues(end);
+        MAXIMUM=-XoptimumMIN.VoptimalDesign;
         Niv=length(Xobj.CnamesIntervalVariables);
-        Niterations=length(VoutValues);
-        Mdata=zeros(Niterations,Niv);
-        for n=1:length(Xobj.CnamesIntervalVariables)
-            Mdata(:,n)=XoptimumMAX.XdesignVariable(n).Vdata';
-        end
+        Niterations=XoptimumMIN.Niterations;
+        Mdata=XoptimumMIN.TablesValues.DesignVariables;
         VargMAXIMUM=Mdata(end,:);
         NevaluationsMAX=Niterations;
         Nevaluations=NevaluationsMIN+NevaluationsMAX;

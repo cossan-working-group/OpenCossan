@@ -13,11 +13,6 @@ if ~isempty(Xobj.VcoordColumn)
     % the Dataseries, only one row of data should be available to populate
     % Vdata
     
-    if ~isinf(Xobj.Nrows) 
-    
-%     assert(Xobj.Nrows-length(Xobj.VcoordColumn)==1,'OpenCossan:Response:createDataseries',...
-%         'When the indeces to be used as coordinates are specified, only one index can be used for the data.')
-    end
     Mcoord = Moutput(:,Xobj.VcoordColumn);
     Vdata = Moutput;
     Vdata(:,Xobj.VcoordColumn)=[];
@@ -29,11 +24,6 @@ elseif ~isempty(Xobj.VcoordRow)
     % the Dataseries, only one row of data should be available to populate
     % Vdata
     
-    if ~isinf(Xobj.Nrows) 
-    
-    assert(Xobj.Nrows-length(Xobj.VcoordIndex)==1,'OpenCossan:Response:createDataseries',...
-        'When the indeces to be used as coordinates are specified, only one index can be used for the data.')
-    end
     Mcoord = Moutput(Xobj.VcoordRow,:);
     Vdata = Moutput;
     Vdata(Xobj.VcoordRow,:)=[];

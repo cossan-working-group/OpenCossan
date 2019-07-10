@@ -3,9 +3,9 @@ T%% Tutorial for the HaltonSampling class
 % This tutorial is focus on the use and definition of the
 % HaltonSampling class.
 %
-% See Also: http://cossan.cfd.liv.ac.uk/wiki/index.php/@DesignOfExperiment
+% See Also: http://cossan.co.uk/wiki/index.php/@DesignOfExperiment
 %
-% $Copyright~1993-2011,~COSSAN~Working~Group,~University~of~Innsbruck,~Austria$
+% $Copyright~1993-2019,~COSSAN~Working~Group$
 % $Author: Edoardo-Patelli$ 
 
 %% Problem Definition

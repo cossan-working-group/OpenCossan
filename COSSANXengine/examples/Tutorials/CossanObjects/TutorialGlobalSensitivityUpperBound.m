@@ -5,7 +5,7 @@
 %
 % In this tutorial a very simplified model is considered.  
 % 
-% See Also: http://cossan.cfd.liv.ac.uk/wiki/index.php/Infection_Dynamic_Model
+% See Also: http://cossan.co.uk/wiki/index.php/Infection_Dynamic_Model
 % 
 %
 % $Copyright~1993-2011,~COSSAN~Working~Group,~University~of~Innsbruck,~Austria$

@@ -7,7 +7,7 @@
 %
 % The performance function of the model is $-3X_1+X_2$
 %
-% See Also: http://cossan.cfd.liv.ac.uk/wiki/index.php/HLRF@ProbabilisticModel
+% See Also: http://cossan.co/wiki/index.php/HLRF@ProbabilisticModel
 %
 % $Copyright~1993-2014,~COSSAN~Working~Group,~University~of~Liverpool,~UK$
 % $Author: Edoardo-Patelli$ 

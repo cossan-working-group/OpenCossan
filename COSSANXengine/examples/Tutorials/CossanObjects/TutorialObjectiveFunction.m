@@ -5,9 +5,9 @@
 % Please refer to the Mio tutorial and Optimization tutorial  for more
 % examples of objective function
 %
-% See Also: http://cossan.co.uk/wiki/index.php/@ObjectiveFunction
+% See Also: https://cossan.co.uk/wiki/index.php/@ObjectiveFunction
 %
-% $Copyright~1993-2011,~COSSAN~Working~Group,~University~of~Innsbruck,~Austria$
+% $Copyright~1993-2019,~COSSAN~Working~Group$
 % $Author:~Edoardo~Patelli$ 
 
 %% Constructor
