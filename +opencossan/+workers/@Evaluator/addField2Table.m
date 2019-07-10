@@ -30,7 +30,7 @@ function TableExported=addField2Table(Xsolver,XsimData,TableInput)
 %  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
 
 % Retrieve names of inputs required by the solver
-CrequiredVariables=Xsolver.Cinputnames;
+CrequiredVariables=Xsolver.InputNames;
 
 if isempty(XsimData)
     TableExported=TableInput;

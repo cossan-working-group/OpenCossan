@@ -20,11 +20,11 @@ classdef OptimizationProblem
     end
     
     properties (Dependent = true, SetAccess = protected)
-        Coutputnames            % Names of the generated outputs
-        Cinputnames             % Names of the required inputs
-        CconstraintsNames       % Names of the constraint outputs
-        CobjectiveFunctionNames % Names of the objectiveFunction outputs
-        CnamesDesignVariables    % names of the DesignVariable
+        OutputNames            % Names of the generated outputs
+        InputNames             % Names of the required inputs
+        ConstraintsNames       % Names of the constraint outputs
+        ObjectiveFunctionNames % Names of the objectiveFunction outputs
+        DesignVariableNames    % names of the DesignVariable
         NdesignVariables        % Total number of DesignVariable
         NobjectiveFunctions     % Total number of ObjectiveFunction
         Nconstraints            % Total number of Constraints
@@ -51,7 +51,7 @@ classdef OptimizationProblem
             % email address: openengine@cossan.co.uk
             % Website: http://www.cossan.co.uk
             
-            % =====================================================================
+            % 
             % This file is part of openCOSSAN.  The open general purpose matlab
             % toolbox for numerical analysis, risk and uncertainty quantification.
             %
@@ -66,7 +66,7 @@ classdef OptimizationProblem
             %
             %  You should have received a copy of the GNU General Public License
             %  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
-            % =====================================================================
+            %
             
             import opencossan.optimization.*
             
@@ -231,12 +231,12 @@ classdef OptimizationProblem
             
             
             %% Validate Constructor
-            assert(~isempty(Xobj.Xinput.CnamesDesignVariable), ...
+            assert(~isempty(Xobj.Xinput.DesignVariableNames), ...
                 'openCOSSAN:OptimizationProblem',...
                 'The input object must contains at least 1 design variable')
             
             % Check if the output names are unique
-            Cout=Xobj.CobjectiveFunctionNames;
+            Cout=Xobj.ObjectiveFunctionNames;
             
             assert(length(Cout)==length(unique(Cout)),...
                 'openCOSSAN:OptimizationProblem', ...
@@ -244,7 +244,7 @@ classdef OptimizationProblem
                 sprintf('\n* "%s"',Cout{:}))
             
             % Check if the output names are unique
-            Cout=Xobj.CconstraintsNames;
+            Cout=Xobj.ConstraintsNames;
             
             assert(length(Cout)==length(unique(Cout)),...
                 'openCOSSAN:OptimizationProblem', ...
@@ -256,27 +256,27 @@ classdef OptimizationProblem
             if isempty(Xobj.VinitialSolution)
                 CdefaultValues=Xobj.Xinput.getDefaultValuesCell;
                 Xobj.VinitialSolution= cell2mat(CdefaultValues( ...
-                    ismember(Xobj.Xinput.Cnames,Xobj.CnamesDesignVariables)))';
+                    ismember(Xobj.Xinput.Names,Xobj.DesignVariableNames)))';
             else
-                assert(length(Xobj.Xinput.CnamesDesignVariable)==size(Xobj.VinitialSolution,2), ...
+                assert(length(Xobj.Xinput.DesignVariableNames)==size(Xobj.VinitialSolution,2), ...
                     'openCOSSAN:OptimizationProblem',...
                     ['The length of VinitialSolution (' num2str(size(Xobj.VinitialSolution,2)) ...
                     ') must be equal to the number of design variables (' ...
-                    num2str(length(Xobj.Xinput.CnamesDesignVariable)) ')' ] )
+                    num2str(length(Xobj.Xinput.DesignVariableNames)) ')' ] )
             end
             
             %% Check if the input object contains all the variables required by the optimization and contrains
             
-            CprovidedInputs=Xobj.Xinput.Cnames;
+            CprovidedInputs=Xobj.Xinput.Names;
             if ~isempty(Xobj.Xmodel)
-                CprovidedInputs=[CprovidedInputs Xobj.Xmodel.Coutputnames];
+                CprovidedInputs=[CprovidedInputs Xobj.Xmodel.OutputNames];
             end
             
-            assert(all(ismember(Xobj.Cinputnames,CprovidedInputs)), ...
+            assert(all(ismember(Xobj.InputNames,CprovidedInputs)), ...
                 'openCOSSAN:OptimizationProblem',...
                 ['The input object does not contain all the required inputs to ' ...
                 'evaluate objective function and constraints. ' ...
-                '\nRequired inputs: ' sprintf('\n* "%s"',Xobj.Cinputnames{:}) ...
+                '\nRequired inputs: ' sprintf('\n* "%s"',Xobj.InputNames{:}) ...
                 '\nDefined inputs: ' sprintf('\n* "%s"',CprovidedInputs{:}) ])
             
         end     %of constructor
@@ -336,7 +336,7 @@ classdef OptimizationProblem
         
         %% Dependent Fields
         function NdesignVariables = get.NdesignVariables(Xobj)
-            NdesignVariables  = length(Xobj.CnamesDesignVariables);
+            NdesignVariables  = length(Xobj.DesignVariableNames);
         end
         
         function Nconstraints = get.Nconstraints(Xobj)
@@ -354,65 +354,65 @@ classdef OptimizationProblem
             end
         end
         
-        function CnamesDesignVariables = get.CnamesDesignVariables(Xobj)
-            CnamesDesignVariables  = Xobj.Xinput.CnamesDesignVariable;
+        function DesignVariableNamess = get.DesignVariableNames(Xobj)
+            DesignVariableNamess  = Xobj.Xinput.DesignVariableNames;
         end
         
-        function Cinputnames = get.Cinputnames(Xobj)
+        function Cinputnames = get.InputNames(Xobj)
             Cinputnames={};
             % Collect inputs required by the Objective function(s)
             for n=1:length(Xobj.XobjectiveFunction)
-                Cinputnames=[Cinputnames Xobj.XobjectiveFunction(n).Cinputnames]; %#ok<AGROW>
+                Cinputnames=[Cinputnames Xobj.XobjectiveFunction(n).InputNames]; %#ok<AGROW>
             end
             % Collect inputs required by the Constraint(s)
             for n=1:length(Xobj.Xconstraint)
-                Cinputnames=[Cinputnames Xobj.Xconstraint(n).Cinputnames]; %#ok<AGROW>
+                Cinputnames=[Cinputnames Xobj.Xconstraint(n).InputNames]; %#ok<AGROW>
             end
             % Collect Inputs required by the model
             if ~isempty(Xobj.Xmodel)
-                Cinputnames=[Cinputnames Xobj.Xmodel.Cinputnames];
+                Cinputnames=[Cinputnames Xobj.Xmodel.InputNames];
             end
             % Remove duplicates
             Cinputnames= unique(Cinputnames);
             
         end
         
-        function Coutputnames = get.Coutputnames(Xobj)
-            Coutputnames=[Xobj.CobjectiveFunctionNames Xobj.CconstraintsNames];
+        function Coutputnames = get.OutputNames(Xobj)
+            Coutputnames=[Xobj.ObjectiveFunctionNames Xobj.ConstraintsNames];
             if ~isempty(Xobj.Xmodel)
                 Coutputnames=[Coutputnames Xobj.Xmodel.Coutputnames];
             end
         end
         
-        function CobjectiveFunctionNames = get.CobjectiveFunctionNames(Xobj)
+        function CobjectiveFunctionNames = get.ObjectiveFunctionNames(Xobj)
             
             CobjectiveFunctionNames={};
             for n=1:length(Xobj.XobjectiveFunction)
-                CobjectiveFunctionNames  = [CobjectiveFunctionNames Xobj.XobjectiveFunction(n).Coutputnames]; %#ok<AGROW>
+                CobjectiveFunctionNames  = [CobjectiveFunctionNames Xobj.XobjectiveFunction(n).OutputNames]; %#ok<AGROW>
             end
         end
         
-        function CconstraintsNames = get.CconstraintsNames(Xobj)
+        function CconstraintsNames = get.ConstraintsNames(Xobj)
             
             CconstraintsNames={};
             for n=1:length(Xobj.Xconstraint)
-                CconstraintsNames  = [CconstraintsNames Xobj.Xconstraint(n).Coutputnames;]; %#ok<AGROW>
+                CconstraintsNames  = [CconstraintsNames Xobj.Xconstraint(n).OutputNames;]; %#ok<AGROW>
             end
         end
         
         function VlowerBounds = get.VlowerBounds(Xobj)
-            CnamesDesignVariables=Xobj.CnamesDesignVariables;
-            VlowerBounds=zeros(length(CnamesDesignVariables),1);
-            for n=1:length(CnamesDesignVariables)
-                VlowerBounds(n)=Xobj.Xinput.XdesignVariable.(CnamesDesignVariables{n}).lowerBound;
+            DesignVariableNamess=Xobj.DesignVariableNames;
+            VlowerBounds=zeros(length(DesignVariableNamess),1);
+            for n=1:length(DesignVariableNamess)
+                VlowerBounds(n)=Xobj.Xinput.XdesignVariable.(DesignVariableNamess{n}).lowerBound;
             end
         end
         
         function VupperBounds = get.VupperBounds(Xobj)
-            CnamesDesignVariables=Xobj.CnamesDesignVariables;
-            VupperBounds=zeros(length(CnamesDesignVariables),1);
-            for n=1:length(CnamesDesignVariables)
-                VupperBounds(n)=Xobj.Xinput.XdesignVariable.(CnamesDesignVariables{n}).upperBound;
+            DesignVariableNamess=Xobj.DesignVariableNamess;
+            VupperBounds=zeros(length(DesignVariableNamess),1);
+            for n=1:length(DesignVariableNamess)
+                VupperBounds(n)=Xobj.Xinput.XdesignVariable.(DesignVariableNamess{n}).upperBound;
             end
         end
         

@@ -28,7 +28,7 @@ if isempty(Xobj.VDesignPointPhysical),
 end
 
 %% 3.   Check length of design point
-if length(Xobj.Xinput.CnamesRandomVariable) ~= length(Xobj.VDesignPointPhysical)
+if length(Xobj.Xinput.RandomVariableNames) ~= length(Xobj.VDesignPointPhysical)
     error('openCOSSAN:outputs:DesignPoint',...
         'length of defined design point and number of random variables in associated performance function do not match');
 end

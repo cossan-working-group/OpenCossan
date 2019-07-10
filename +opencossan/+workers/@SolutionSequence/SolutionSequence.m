@@ -84,7 +84,6 @@ classdef SolutionSequence < opencossan.workers.Worker
             end
             
             % Argument Check
-            opencossan.OpenCossan.validateCossanInputs(varargin{:})
             
             % Set Default values
             Shostname='';
@@ -94,15 +93,15 @@ classdef SolutionSequence < opencossan.workers.Worker
             for k=1:2:length(varargin),
                 switch lower(varargin{k})
                     case 'sdescription'
-                        Xobj.Sdescription = varargin{k+1};
+                        Xobj.Description = varargin{k+1};
                     case 'spath'
                         Xobj.Spath = varargin{k+1};
                     case 'sfile'
                         Xobj.Sfile = varargin{k+1};
-                    case 'coutputnames'
-                        Xobj.Coutputnames = varargin{k+1};
-                    case 'cinputnames'
-                        Xobj.Cinputnames = varargin{k+1};
+                    case 'outputnames'
+                        Xobj.OutputNames = varargin{k+1};
+                    case 'inputnames'
+                        Xobj.InputNames = varargin{k+1};
                     case 'sscript'
                         Xobj.Sscript = varargin{k+1};
                     case 'cprovidedobjecttypes'
@@ -191,16 +190,16 @@ classdef SolutionSequence < opencossan.workers.Worker
             
             
             
-            assert(~isempty(Xobj.Coutputnames),'openCOSSAN:SolutionSequence', ...
-                'Mandatory input Coutputnames cannot be empty.')
+            assert(~isempty(Xobj.OutputNames),'openCOSSAN:SolutionSequence', ...
+                'Mandatory input OutputNames cannot be empty.')
             
             if isempty(Xobj.CprovidedObjectTypes)
-                Xobj.CprovidedObjectTypes=cell(length(Xobj.Coutputnames),1);
+                Xobj.CprovidedObjectTypes=cell(length(Xobj.OutputNames),1);
             else
-                assert(length(Xobj.CprovidedObjectTypes)==length(Xobj.Coutputnames), ...
+                assert(length(Xobj.CprovidedObjectTypes)==length(Xobj.OutputNames), ...
                     'openCOSSAN:SolutionSequence', ...
-                    'Length of the CprovidedObjectTypes (%i) must be equal to the length of Coutputnames (%i)', ...
-                    length(Xobj.CprovidedObjectTypes),length(Xobj.Coutputnames))
+                    'Length of the CprovidedObjectTypes (%i) must be equal to the length of OutputNames (%i)', ...
+                    length(Xobj.CprovidedObjectTypes),length(Xobj.OutputNames))
             end
             
             

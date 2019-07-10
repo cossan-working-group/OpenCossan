@@ -59,7 +59,7 @@ classdef Constraint < opencossan.workers.Mio
             CobjArguments=varargin(~Vindex);
             %% Reuse the Mio constructor
             Xobj=Xobj@opencossan.workers.Mio(CmioArguments{:});
-            
+            %TODO: change parser
             if nargin==0
                 return % allow to create an empty object
             else
@@ -85,7 +85,7 @@ classdef Constraint < opencossan.workers.Mio
                 %% Add values of the flag for the inequality
                 
                 % The constraint must have a single output
-                assert(length(Xobj.Coutputnames)==1,...
+                assert(length(Xobj.OutputNames)==1,...
                     'openCOSSAN:optimization:Constraint',...
                     'A single output (Coutputnames) must be defined');
             end

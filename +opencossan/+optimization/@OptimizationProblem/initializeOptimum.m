@@ -29,8 +29,6 @@ function Xoptimum=initializeOptimum(Xobj,varargin)
 import opencossan.common.Dataseries
 import opencossan.optimization.Optimum
 
-OpenCossan.validateCossanInputs(varargin{:});
-
 %set default values
 LgradientObjFun=false;
 LgradientConstraints=false;

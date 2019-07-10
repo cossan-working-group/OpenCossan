@@ -24,7 +24,7 @@ function varargout=computeGradientStandardNormalSpace(Xobj,varargin)
 % =====================================================================
 
 %% Check inputs
-OpenCossan.validateCossanInputs(varargin{:})
+opencossan.OpenCossan.validateCossanInputs(varargin{:})
 % OpenCossan.resetRandomNumberGenerator(357357)
 %% Process inputs
 for k=1:2:length(varargin)
@@ -44,7 +44,7 @@ assert(Xobj.Xinput.NdesignVariables==0,...
     'OpenCOSSAN:computeGradientStandardNormalSpace:NoDV',...
     strcat('The method computeGradientStandardNormalSpace can only be used with a pure probabilistic model\n',...
     'No design variable permitted.',...
-    '\n DesignVariable: %s'),Xobj.Xinput.CnamesDesignVariable)
+    '\n DesignVariable: %s'),Xobj.Xinput.DesignVariableNames)
 
 % Initialize variables
 NfunctionEvaluation=0;
@@ -53,14 +53,14 @@ Ninputs=length(Xobj.Cinputnames);       % Number of required inputs
 
 % Set the analysis name when not deployed
 if ~isdeployed
-    OpenCossan.setAnalysisName(class(Xobj));
+    opencossan.OpenCossan.setAnalysisName(class(Xobj));
 end
 % set the analyis ID 
-OpenCossan.setAnalysisID;
+opencossan.OpenCossan.setAnalysisId(1); %TODO: set id should get the next available ID from the database
 % insert entry in Analysis DB
-if ~isempty(OpenCossan.getDatabaseDriver)
-    insertRecord(OpenCossan.getDatabaseDriver,'StableType','Analysis',...
-        'Nid',OpenCossan.getAnalysisID);
+if ~isempty(opencossan.OpenCossan.getDatabaseDriver)
+    insertRecord(opencossan.OpenCossan.getDatabaseDriver,'StableType','Analysis',...
+        'Nid',opencossan.OpenCossan.getAnalysisID);
 end
 
 %% Define the pertubation
@@ -79,16 +79,16 @@ if isempty(Xobj.Xsamples0)
         ' the sum of the number of random variables (%i)'), ...
         length(Xobj.VreferencePoint),Nrv)
     
-    Xobj.Xsamples0=Samples('MsamplesPhysicalSpace',Xobj.VreferencePoint,'Xinput',Xobj.Xinput);    
+    Xobj.Xsamples0=opencossan.common.Samples('MsamplesPhysicalSpace',Xobj.VreferencePoint,'Xinput',Xobj.Xinput);    
 else
     Xobj.VreferencePoint=Xobj.Xsamples0.MsamplesStandardNormalSpace;
 end
 
 if isempty(Xobj.fx0)
     Xout0=Xobj.Xtarget.apply(Xobj.Xsamples0);
-    if ~isempty(OpenCossan.getDatabaseDriver)
-        insertRecord(OpenCossan.getDatabaseDriver,'StableType','Simulation', ...
-            'Nid',getNextPrimaryID(OpenCossan.getDatabaseDriver,'Simulation'),...
+    if ~isempty(opencossan.OpenCossan.getDatabaseDriver)
+        insertRecord(opencossan.OpenCossan.getDatabaseDriver,'StableType','Simulation', ...
+            'Nid',getNextPrimaryID(opencossan.OpenCossan.getDatabaseDriver,'Simulation'),...
             'XsimulationData',Xout0,'Nbatchnumber',0) 
     end  
     NfunctionEvaluation=NfunctionEvaluation+Xout0.Nsamples;
@@ -110,13 +110,13 @@ Mperturbation=Xobj.perturbation*eye(Nrv);
 MsamplesSNS=MsamplesSNS+Mperturbation;
 
 % Define a Samples object with the perturbated values
-Xsmli=Samples('MsamplesStandardNormalSpace',MsamplesSNS,'Xinput',Xobj.Xinput);
+Xsmli=opencossan.common.Samples('MsamplesStandardNormalSpace',MsamplesSNS,'Xinput',Xobj.Xinput);
 
 % Evaluate the model
 Xdeltai     = Xobj.Xtarget.apply(Xsmli);
-if ~isempty(OpenCossan.getDatabaseDriver)
-    insertRecord(OpenCossan.getDatabaseDriver,'StableType','Simulation', ...
-        'Nid',getNextPrimaryID(OpenCossan.getDatabaseDriver,'Simulation'),...
+if ~isempty(opencossan.OpenCossan.getDatabaseDriver)
+    insertRecord(opencossan.OpenCossan.getDatabaseDriver,'StableType','Simulation', ...
+        'Nid',getNextPrimaryID(opencossan.OpenCossan.getDatabaseDriver,'Simulation'),...
         'XsimulationData',Xdeltai,'Nbatchnumber',0) 
 end  
 NfunctionEvaluation     = NfunctionEvaluation+Xdeltai.Nsamples;
@@ -140,7 +140,7 @@ XsimData=Xout0.merge(Xdeltai); % Export SimulationData
 varargout{2}=XsimData;
 
 for n=1:length(Xobj.Coutputnames)
-        varargout{1}(n)=Gradient('Sdescription',...
+        varargout{1}(n)=opencossan.sensitivity.Gradient('Sdescription',...
             ['Finite Difference Gradient estimation of ' Xobj.Coutputnames{n} ' computed in standard normal space'], ...
             'Cnames',Xobj.Cinputnames, ...
             'LstandardNormalSpace',true, ...
@@ -153,10 +153,10 @@ if ~isdeployed
     % add entries in simulation and analysis database at the end of the
     % computation when not deployed. The deployed version does this with
     % the finalize command
-    XdbDriver = OpenCossan.getDatabaseDriver;
+    XdbDriver = opencossan.OpenCossan.getDatabaseDriver;
     if ~isempty(XdbDriver)
         XdbDriver.insertRecord('StableType','Result',...
-            'Nid',getNextPrimaryID(OpenCossan.getDatabaseDriver,'Result'),...
+            'Nid',getNextPrimaryID(opencossan.OpenCossan.getDatabaseDriver,'Result'),...
             'CcossanObjects',varargout(1),...
             'CcossanObjectsNames',{'Xgradient'});
     end

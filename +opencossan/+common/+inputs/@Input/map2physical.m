@@ -11,7 +11,7 @@ MU=[];
 MHS=[];
 if length(varargin)==1 % only RVs
     MU=varargin{1};
-    if not(or(size(MU,2)==length(Xin.CnamesRandomVariable),size(MU,1)==length(Xin.CnamesRandomVariable)))
+    if not(or(size(MU,2)==length(Xin.RandomVariableNames),size(MU,1)==length(Xin.RandomVariableNames)))
         error('openCOSSAN:Input:map2physical', ...
             'Number of columns of MU must be equal to the total number of rv''s in Input object');
     end
@@ -24,11 +24,11 @@ else
         switch lower(varargin{k})
             case {'msamplestandardnormalspace','msns'}
                 MU=varargin{k+1};
-                if not(or(size(MU,2)==length(Xin.CnamesRandomVariable),size(MU,1)==length(Xin.CnamesRandomVariable)))
+                if not(or(size(MU,2)==length(Xin.RandomVariableNames),size(MU,1)==length(Xin.RandomVariableNames)))
                     error('openCOSSAN:Input:map2physical', ...
                         'Number of columns of MU must be equal to the total number of rv''s in Input object');
                 end
-                if size(MU,1)==(length(Xin.CnamesRandomVariable))
+                if size(MU,1)==(length(Xin.RandomVariableNames))
                     MU=transpose(MU);
                 end
             case {'msampleshypersphere','mhs'}
@@ -59,20 +59,20 @@ else
     MX=zeros(size(MU,1),size(MU,2)+size(MHS,2));
 end
         
-Crvsetname=Xin.CnamesRandomVariableSet;
-Cbsetname=Xin.CnamesBoundedSet;
+Crvsetname=Xin.RandomVariableSetNames;
+%Cbsetname=Xin.CnamesBoundedSet;
 %% Main part : MAP!
 ivar=0;
 int=0;
 for irvs=1:length(Crvsetname)
-	NRvs=length(get(Xin.Xrvset.(Crvsetname{irvs}),'Cmembers'));
-	MX(:,(1:NRvs)+ivar)=map2physical(Xin.Xrvset.(Crvsetname{irvs}),MU(:,(1:NRvs)+ivar));
+	NRvs=Xin.RandomVariableSets.(Crvsetname{irvs}).Nrv;
+	MX(:,(1:NRvs)+ivar)=map2physical(Xin.RandomVariableSets.(Crvsetname{irvs}),MU(:,(1:NRvs)+ivar));
 	ivar=NRvs+ivar;
 end
 
-for ics=1:length(Cbsetname)
-	NInt=length(get(Xin.Xbset.(Cbsetname{ics}),'Cmembers'));
-	MX(:,Xin.NrandomVariables+(1:NInt)+int)=map2physical(Xin.Xbset.(Cbsetname{ics}),'msampleshypersphere',MHS(:,(1:NInt)+int));
-	int=NInt+ivar;
-end
+% for ics=1:length(Cbsetname)
+% 	NInt=length(get(Xin.Xbset.(Cbsetname{ics}),'Cmembers'));
+% 	MX(:,Xin.NrandomVariables+(1:NInt)+int)=map2physical(Xin.Xbset.(Cbsetname{ics}),'msampleshypersphere',MHS(:,(1:NInt)+int));
+% 	int=NInt+ivar;
+% end
 

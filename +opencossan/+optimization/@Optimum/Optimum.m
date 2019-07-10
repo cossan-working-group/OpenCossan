@@ -2,29 +2,27 @@ classdef Optimum
     %OPTIMUM   Constructor of Optimum object; this object contains the
     %solutions of an optimization problem.
     %
-    % See Also: http://cossan.cfd.liv.ac.uk/wiki/index.php/@Optimum
+    % See Also: TutorialOptimum OptimisationProblem
     %
-    % Author: Edoardo Patelli and Matteo Broggi and Marco de Angelis
-    % Institute for Risk and Uncertainty, University of Liverpool, UK
-    % email address: openengine@cossan.co.uk
-    % Website: http://www.cossan.co.uk
+    % Author: Edoardo Patelli
     
-    % =====================================================================
-    % This file is part of openCOSSAN.  The open general purpose matlab
-    % toolbox for numerical analysis, risk and uncertainty quantification.
-    %
-    % openCOSSAN is free software: you can redistribute it and/or modify
-    % it under the terms of the GNU General Public License as published by
-    % the Free Software Foundation, either version 3 of the License.
-    %
-    % openCOSSAN is distributed in the hope that it will be useful,
-    % but WITHOUT ANY WARRANTY; without even the implied warranty of
-    % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    % GNU General Public License for more details.
-    %
-    %  You should have received a copy of the GNU General Public License
-    %  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
-    % =====================================================================
+    %{
+    This file is part of OpenCossan <https://cossan.co.uk>.
+    Copyright (C) 2006-2018 COSSAN WORKING GROUP
+
+    OpenCossan is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License or,
+    (at your option) any later version.
+    
+    OpenCossan is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU General Public License for more details.
+    
+    You should have received a copy of the GNU General Public License
+    along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
+    %}
     
     
     %% Properties of the object
@@ -32,31 +30,31 @@ classdef Optimum
         Sdescription                    % Description of the object
         Sexitflag                       % exit flag of optimization algorithm
         totalTime                       % time required to solve problem
-        CdesignVariableNames            % names of the Design Variables
-        XdesignVariable                 % values design variables
-        XobjectiveFunction              % values of the ObjectiveFunction
-        XobjectiveFunctionGradient      % values of the Gradient of the ObjectiveFunction
-        Xconstrains                     % values of the constraints
-        XconstrainsGradient             % values of the constrains'gradient
         XOptimizationProblem            % assosiated optimization problem
         XOptimizer                      % optimizer used to solve the problem
+        Niterations=-1;                 % number of iteration/generation
+        VoptimalDesign=[];               % design variables values at the optimal solution
+        VoptimalScores=[];               % objective function values at the optimal solution
+        VoptimalConstraints=[];         % constraint values at the optimal solution
+        TablesValues                    % tables containing all the values
+        % creared during the optimisation process
         NevaluationsModel=0             % number of model evaluations 
         NevaluationsObjectiveFunctions=0  % number of evaluations of the objective function
         NevaluationsConstraints=0         % number of evaluations of the constraints
-        Niterations=-1;                  % number of iteration/generation
-        VoptimalDesign=[];               % design variables values at the optimal solution
-        VoptimalScores=[];               % objective function values at the optimal solution
+        NcandidateSolutions=0            % number of candidate solutions
     end
     
     properties (Dependent=true)
-        NcandidateSolutions           % Number of candidate solutions
         CconstraintsNames             % Names of the constraints
         CobjectiveFunctionNames       % Names of the objectiveFunctions
+        CdesignVariableNames           % names of the Design Variables
     end
     
     %% Methods of the class
     methods
-        display(Xobj)  % shows the summary of the Optimum object
+        disp(Xobj)  % shows the summary of the Optimum object
+        
+        varargout=plotOptimum(Xobj,varargin); % Main function used to plot values stored in the Optimum object
         
         varargout=plotObjectiveFunction(Xobj,varargin) % Display the evolution of the
         % ObjectiveFunction
@@ -67,6 +65,8 @@ classdef Optimum
         % DesignVariables
         
         Xobj=merge(Xobj,Xoptimum) % Merge 2 Optimum objects
+        
+        Xobj=compactTable(Xobj,varargin) % Remove duplicate entry in the table
         
         function Xobj  = Optimum(varargin)
             %% Constructor
@@ -85,7 +85,9 @@ classdef Optimum
             % Author: Edoardo Patelli
             
             %% Validate input arguments
-            OpenCossan.validateCossanInputs(varargin{:})
+            opencossan.OpenCossan.validateCossanInputs(varargin{:})
+            vararginTable={};
+            LaddIteration=false;
             
             %%  Set values passed by the user
             for k=1:2:length(varargin)
@@ -96,78 +98,69 @@ classdef Optimum
                         Xobj.totalTime=varargin{k+1};
                     case 'sexitflag'
                         Xobj.Sexitflag=varargin{k+1};
-                    case 'cdesignvariablenames'
-                        Xobj.CdesignVariableNames=varargin{k+1};
-                    case 'xdesignvariabledataseries'
-                        Xobj.XdesignVariable=varargin{k+1};
-                    case 'xobjectivefunctiondataseries'
-                        Xobj.XobjectiveFunction=varargin{k+1};
-                    case 'xobjectivefunctiongradientdataseries'
-                        Xobj.XobjectiveFunctionGradient=varargin{k+1};
-                    case {'xconstrainsdataseries' 'xconstraintdataseries'}
-                        Xobj.Xconstrains=varargin{k+1};
-                    case {'xconstrainsgradientdataseries' 'xconstraintgradientdataseries'}
-                        Xobj.XconstrainsGradient=varargin{k+1};
+                    case {'vdesignvariable', 'mdesignvariable','mdesignvariables' ...
+                          'vobjectivefunction','mobjectivefunction', 'mobjectivefunctions',...
+                          'vobjectivefunctiongradient','mobjectivefunctiongradient', ...
+                          'vconstraintgradient', 'mconstraintgradient', ...
+                          'vvaluesconstraint','viterations','niteration'}
+                        vararginTable{end+1}=varargin{k};   %#ok<AGROW>
+                        vararginTable{end+1}=varargin{k+1}; %#ok<AGROW>
+                        LaddIteration=true;
                     case 'xoptimizationproblem'
                         assert(ismember(class(varargin{k+1}),...
-                            {'opencossan.optimization.OptimizationProblem',...
-                            'opencossan.optimization.RBOProblem',...
-                            'opencossan.optimization.RobustDesign',...
-                            'opencossan.intervals.ExtremeCase'}), ...
-                            'openCOSSAN:Optimum:Optimum', ...
+                            {'opencossan.optimization.OptimizationProblem','opencossan.optimization.RBOProblem','opencossan.optimization.RobustDesign','ExtremeCase'}), ...
+                            'OpenCossan:Optimum:Optimum', ...
                             'A object of type %s is not valid after the PropertyName %s',...
                             class(varargin{k+1}),varargin{k});
                         Xobj.XOptimizationProblem=varargin{k+1};
                     case 'xoptimizer'
                         mc=metaclass(varargin{k+1});
                         if isempty(mc.SuperClasses)
-                            error('openCOSSAN:Optimum:Optimum', ...
-                                ['A OptimizarionProblem is expected after the PropertyName ' varargin{k}]);
+                            error('OpenCossan:Optimum:wrongOptimizer', ...
+                                ['An Optimizer is expected after the PropertyName ' varargin{k}]);
                         else
                             assert(strcmp(mc.SuperClasses{1}.Name,'Optimizer'),...
-                                'openCOSSAN:Optimum:Optimum', ...
-                                ['A OptimizarionProblem is expected after the PropertyName ' varargin{k}]);
+                                'OpenCossan:Optimum:wrongOptimizer', ...
+                                ['An Optimizer is expected after the PropertyName ' varargin{k}]);
                         end
                         Xobj.XOptimizer=varargin{k+1};
                     otherwise
-                        error('openCOSSAN:Optimum:Optimum', ...
-                            ['The PropertyName ' varargin{k} ' is not valid']);
+                        error('OpenCossan:Optimum:wrongPropertyName', ...
+                            'The PropertyName %s is not valid. ', varargin{k});
+                end
+                
+                
+                if LaddIteration               
+                    Xobj.TablesValues=initializeTable(Xobj,vararginTable{:});                
+                else
+                    %% No iterations
+                    % Initialise the Optimum object with an empty table
+                    Xobj.TablesValues=table;
                 end
             end
             
             
         end     %of constructor
         
-        
-%         function NevaluationsObjectiveFunction=get.NevaluationsObjectiveFunction(Xobj)
-%             if isempty(Xobj.XobjectiveFunction)
-%                 NevaluationsObjectiveFunction=0;
-%             elseif isempty(Xobj.XobjectiveFunctionGradient)
-%                 NevaluationsObjectiveFunction=Xobj.XobjectiveFunction(1).VdataLength*size(Xobj.XobjectiveFunction,2);
-%             else
-%                 NevaluationsObjectiveFunction=Xobj.XobjectiveFunction(1).VdataLength*(Xobj.XobjectiveFunctionGradient(1).Nsamples+1);
-%             end
-%         end
-        
-%         function NevaluationsConstraints=get.NevaluationsConstraints(Xobj)       % number of evaluations of the constraints
-%               if isempty(Xobj.Xconstrains)
-%                 NevaluationsConstraints=0;
-%               elseif isempty(Xobj.XconstrainsGradient)
-%                   NevaluationsConstraints=Xobj.Xconstrains(1).VdataLength*size(Xobj.Xconstrains,2);
-%               else
-%                   NevaluationsConstraints=Xobj.Xconstrains(1).VdataLength*(Xobj.XconstrainsGradient(1).Nsamples+1);
-%               end
-%         end
-        
         function NcandidateSolutions=get.NcandidateSolutions(Xobj)       % number of evaluations of the constraints
             NcandidateSolutions=Xobj.XdesignVariable(1).VdataLength;
         end
+        
+        % Ger names of the design variables
+        function CdesignVariableNames=get.CdesignVariableNames(Xobj)
+            if isempty(Xobj.XOptimizationProblem)
+                CdesignVariableNames={};
+            else
+                CdesignVariableNames=Xobj.XOptimizationProblem.CnamesDesignVariables;
+            end
+        end
+        
         
         function CconstraintsNames=get.CconstraintsNames(Xobj)       % number of evaluations of the constraints
             if isempty(Xobj.XOptimizationProblem)
                 CconstraintsNames={};
             else
-                CconstraintsNames=Xobj.XOptimizationProblem.CconstraintsNames;
+                CconstraintsNames=Xobj.XOptimizationProblem.ConstraintsNames;
             end
         end
         
@@ -175,38 +168,7 @@ classdef Optimum
             if isempty(Xobj.XOptimizationProblem)
                 CobjectiveFunctionNames={};
             else
-                CobjectiveFunctionNames=Xobj.XOptimizationProblem.CobjectiveFunctionNames;
-            end
-        end
-        
-        % Values of the design variable at the optimum
-        function VdesignVariables=getOptimalDesign(Xobj)
-            VdesignVariables=[];
-            for n=1:size(Xobj.XdesignVariable,2)
-                Xds = Xobj.XdesignVariable(n);
-                Mdata = cell2mat({Xds.Vdata}');
-                VdesignVariables(n)=Mdata(1,end); %#ok<AGROW>
-            end
-        end
-        
-        % Values of the objective function at the optimum
-        function Vobjective=getOptimalObjective(Xobj)
-            Vobjective=[];
-            for n=1:size(Xobj.XobjectiveFunction,2)
-                Xds = Xobj.XobjectiveFunction(n);
-                Mdata = cell2mat({Xds.Vdata}');
-                Vobjective(n)=Mdata(1,end); %#ok<AGROW>
-            end
-        end
-        
-        % Values of the constraints at the optimum
-        function Vconstraint=getOptimalConstraint(Xobj)
-            Vconstraint=[];
-            for n=1:size(Xobj.Xconstrains,2)
-                Mdata = Xobj.Xconstrains(n).Vdata;
-                if ~isempty(Mdata)
-                Vconstraint(n)=Mdata(1,end); %#ok<AGROW>
-                end
+                CobjectiveFunctionNames=Xobj.XOptimizationProblem.ObjectiveFunctionNames;
             end
         end
         
@@ -214,6 +176,8 @@ classdef Optimum
         
     end     %of methods
     
-    
+    methods (Access = private)
+        TablesValues=initializeTable(Xobj,varargin)
+    end        
     
 end     %of classdef

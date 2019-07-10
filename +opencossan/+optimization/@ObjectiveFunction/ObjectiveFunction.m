@@ -61,7 +61,7 @@ classdef ObjectiveFunction < opencossan.workers.Mio
                 return % allow to create an empty object
             end
             %% PostProcessing
-            
+            %TODO: Change parse
             % Set parameters defined by the user
             for k=1:2:length(CobjArguments),
                 switch lower(CobjArguments{k})

@@ -10,18 +10,30 @@ function Xobj = merge(Xobj,Xobj2)
 %   USAGE
 %   Xobj = Xobj.merge(Xobj2)
 %
-% See Also http://cossan.cfd.liv.ac.uk/wiki/index.php/Merge@Optimum
-
-% ==================================================================
-% COSSAN-X - The next generation of the computational stochastic analysis
-% University of Innsbruck, Copyright 1993-2011 IfM
-% ==================================================================
+% See Also https://cossan.co.uk/wiki/index.php/Merge@Optimum
 % Author: Edoardo Patelli
 
+%{
+    This file is part of OpenCossan <https://cossan.co.uk>.
+    Copyright (C) 2006-2018 COSSAN WORKING GROUP
+
+    OpenCossan is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License or,
+    (at your option) any later version.
+    
+    OpenCossan is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU General Public License for more details.
+    
+    You should have received a copy of the GNU General Public License
+    along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
+%}
 
 %%    Argument Check
 assert(isa(Xobj2,'Optimum'), ...
-    'openCOSSAN:Optimum:merge',...
+    'OpenCossan:Optimum:merge',...
     ' The object passed to this function is of type %s\nRequired type Optimum.', class(Xobj2));
 
 
@@ -36,43 +48,6 @@ assert(all(ismember(Xobj.CdesignVariableNames,Xobj2.CdesignVariableNames)),...
         '\nObj1: Design Variable name %s\nObj1: Design Variable name %s'), ...
         sprintf(Xobj.CdesignVariableNames{:}),sprintf(Xobj2.CdesignVariableNames{:}))
     
-    
-% names of the Design Variables
-for n=1:size(Xobj.XdesignVariable,2) 
-Xobj.XdesignVariable(n)=Xobj.XdesignVariable(n).addData('Mdata',Xobj2.XdesignVariable(n).Vdata,...
-    'Mcoord',Xobj2.XdesignVariable(n).Mcoord); % values design variables
-end
-
-for n=1:size(Xobj.XobjectiveFunction,2)
-    Xobj.XobjectiveFunction(n)=Xobj.XobjectiveFunction(n).addData ...
-         ('Mdata',Xobj2.XobjectiveFunction(n).Vdata,'Mcoord',Xobj2.XobjectiveFunction(n).Mcoord); 
-end
-
-for n=1:size(Xobj.XobjectiveFunctionGradient,2) 
-    Xobj.XobjectiveFunctionGradient(n)=Xobj.XobjectiveFunctionGradient(n).addData ...
-         ('Mdata',Xobj2.XobjectiveFunctionGradient(n).Vdata,...
-         'Mcoord',Xobj2.XobjectiveFunctionGradient(n).Mcoord); 
-end
-
-for n=1:size(Xobj.Xconstrains,2) 
-    Xobj.Xconstrains(n)=Xobj.Xconstrains(n).addData ...
-         ('Mdata',Xobj2.Xconstrains(n).Vdata,...
-         'Mcoord',Xobj2.Xconstrains(n).Mcoord); 
-end
-
-for n=1:size(Xobj.XconstrainsGradient,2) 
-    Xobj.XconstrainsGradient(n)=Xobj.XconstrainsGradient(n).addData ...
-         ('Mdata',Xobj2.XconstrainsGradient(n).Vdata,...
-          'Mcoord',Xobj2.XconstrainsGradient(n).Mcoord); 
-end
-
-
-
-
-
-
-
-
-
-
-
+ 
+% DO MERGE    
+Xobj.TablesValues=outerjoin(Xobj.TablesValues,Xobj2.TablesValues,'MergeKeys',true);

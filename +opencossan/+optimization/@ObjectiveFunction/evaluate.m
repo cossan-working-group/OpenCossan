@@ -72,9 +72,9 @@ for k=1:2:length(varargin)
 end
 
 % Collect quantities
-Coutputnames=Xobj(1).Coutputnames;
+Coutputnames=Xobj(1).OutputNames;
 for n=2:length(Xobj)
-    Coutputnames=[Coutputnames Xobj(n).Coutputnames]; %#ok<AGROW>
+    Coutputnames=[Coutputnames Xobj(n).OutputNames]; %#ok<AGROW>
 end
 
 
@@ -97,14 +97,14 @@ end
 
 %% Prepare input values
 if ~exist('Tinput','var')
-    Xinput=XoptProb.Xinput.setDesignVariable('CSnames',XoptProb.CnamesDesignVariables,'Mvalues',Mx);
+    Xinput=XoptProb.Xinput.setDesignVariable('CSnames',XoptProb.DesignVariableNames,'Mvalues',Mx);
     TableInput=Xinput.getTable;
 else
     % Copy the candidate solution into the input structure
     % TODO: is this code still valid???
     for nsol=1:Ncandidates
         for n=1:NdesignVariables
-            Tinput(nsol).(XoptProb.CnamesDesignVariables{n}) = Mx(nsol,n);     %prepare Input object with design "x"
+            Tinput(nsol).(XoptProb.DesignVariableNames{n}) = Mx(nsol,n);     %prepare Input object with design "x"
         end
         % Add values of all the other quantities (i.e. Parameters etc)
     end
@@ -192,7 +192,7 @@ for iobj=1:length(Xobj)
     TableOutObjective = evaluate@opencossan.workers.Mio(Xobj(iobj),TableInputSolver);
     
     % keep only the variables defined in the Coutputnames
-    MobjectiveFunction(:,iobj)=TableOutObjective.(Xobj(iobj).Coutputnames{1});
+    MobjectiveFunction(:,iobj)=TableOutObjective.(Xobj(iobj).OutputNames{1});
 end
 
 %% Process data - gradient of objective function
