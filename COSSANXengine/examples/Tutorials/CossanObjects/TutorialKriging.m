@@ -2,6 +2,12 @@
 % In this tutorial it is shown how to construct a Kriging object and
 % how to use it for approximating the response computed by a FE-analysis
 %
+% To run this tutorial you need the ooDACE toolbox 
+% (http://www.sumo.intec.ugent.be/ooDACE)
+% You need to include its files into /OpenSourceSoftware/src/ooDACE/, but
+% also add it to the path as an external folder, so the Optimizer classes
+% from OpenCossan and ooDACE don't conflict with each other.
+%
 % Prepared by IM
 %
 %  Copyright 1993-2012, 
