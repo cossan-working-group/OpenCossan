@@ -50,12 +50,10 @@ classdef Cobyla < opencossan.optimization.Optimizer
             % University of Innsbruck, Copyright 1993-2011 IfM
             % ==================================================================
             
-            % Argument Check
-            opencossan.OpenCossan.validateCossanInputs(varargin{:})
             
             % Set predefined values
             Xobj.Description   = 'Cobyla object';
-            Xobj.MaxFunctionEvaluations           = 1e3;
+            Xobj.MaxFunctionEvaluations = 1e3;
             Xobj.ConstraintScalingFactor  = -1; % Must be negative 
             
             % Process input arguments
@@ -64,7 +62,7 @@ classdef Cobyla < opencossan.optimization.Optimizer
                     case 'sdescription'
                         Xobj.Sdescription=varargin{k+1};
                     case  {'nmax','nmaxmodelevaluations','nmaxiterations'}
-                        Xobj.Nmax=varargin{k+1};
+                        Xobj.MaxFunctionEvaluations=varargin{k+1};
                     case  'nevaluationsperbatch'
                         Xobj.NEvaluationsPerBatch=varargin{k+1};
                     case  'scalingfactor'

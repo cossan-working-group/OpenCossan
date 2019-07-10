@@ -51,6 +51,11 @@ switch Sflag
         opencossan.OpenCossan.cossanDisp(['Iteration #' num2str(Tstate.Generation)],3)
        % OpenCossan.setLaptime('Sdescription',['Iteration #' num2str(ToptimValues.iteration)]);
         %XOptimizer.Niterations=0;
+        if (Tstate.Generation > 0)
+            XoptGlobal = XoptGlobal.recordObjectiveFunction(...
+                'iteration',Tstate.Generation,...
+                'objectivefunction',Tstate.Best(Tstate.Generation));
+        end
         % Concatenate current point and objective function
     case 'done'        
         opencossan.OpenCossan.getTimer().lap('Description','End optimization');
@@ -86,7 +91,7 @@ if XoptGlobal.XOptimizationProblem.Nconstraints>0
 end
 
 % Do not validate the entry since it will be done by the Optimum object
-XoptGlobal=addIteration(XoptGlobal,varargIteration{:});
+% XoptGlobal=addIteration(XoptGlobal,varargIteration{:});
 
 %% Check Optimizer Termination criteria
 [Tstate.Lstop,XoptGlobal.Sexitflag]=XOptimizer.checkTermination(XoptGlobal);

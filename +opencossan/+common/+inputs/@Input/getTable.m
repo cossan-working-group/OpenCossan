@@ -56,7 +56,7 @@ end
 if isempty(CdesignVariable)
     CdesignVariableValue={};
 else
-    if isempty(Xobj.Xsamples) || isempty(Xobj.Xsamples.MdoeDesignVariables)
+    if isempty(Xobj.Samples) || isempty(Xobj.Samples.MdoeDesignVariables)
         
         TdesignVariable=get(Xobj,'DesignVariableValues');
         

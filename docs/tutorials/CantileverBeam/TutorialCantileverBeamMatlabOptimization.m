@@ -159,7 +159,6 @@ Xoptimum3 = Xop.optimize('Xoptimizer',Xga);
 % Show results of the optimization
 display(Xoptimum3)
 
-
 %% Compare Optimization results
 % Show results in a table
 SQP = [Xoptimum1.NevaluationsObjectiveFunctions;

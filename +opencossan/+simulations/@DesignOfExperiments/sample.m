@@ -225,10 +225,10 @@ else
                 Vnonzeroindices = find(Xobj.MdoeFactors(:,idv+Nrv));
                 % First map the zeros to the current values of the DVs
                 MdoePhysicalSpaceDV(Vzeroindices,idv) = ...
-                    Xinput.XdesignVariable.(Xinput.DesignVariables{idv}).Value;
+                    Xinput.DesignVariables.(Xinput.DesignVariableNames{idv}).Value;
                 % For CONTINOUS DVs
-                if isa(Xinput.DesignVariables.(Xinput.DesignVariable{idv}), 'opencossan.optimization.ContinuousDesignVariable')
-                    interval = Xinput.DesignVariables.(Xinput.DesignVariablesNames{idv}).UpperBound - ...
+                if isa(Xinput.DesignVariables.(Xinput.DesignVariableNames{idv}), 'opencossan.optimization.ContinuousDesignVariable')
+                    interval = Xinput.DesignVariables.(Xinput.DesignVariableNames{idv}).UpperBound - ...
                         Xinput.DesignVariables.(Xinput.DesignVariableNames{idv}).LowerBound;
                     MdoePhysicalSpaceDV(Vnonzeroindices,idv) = ...
                         Xinput.DesignVariables.(Xinput.DesignVariableNames{idv}).LowerBound + ...
@@ -273,7 +273,7 @@ end
 
 Sarguments='Samples(''Xinput'',Xinput';
 %% Create the Samples object for the generated input values
-CspNames=Xinput.CnamesStochasticProcess;
+CspNames=Xinput.StochasticProcessNames;
 
 if ~isempty(CspNames)
     Nsamples=size(Xobj.MdoeFactors,1);

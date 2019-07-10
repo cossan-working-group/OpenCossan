@@ -36,7 +36,7 @@ classdef Optimum
         VoptimalDesign=[];              % design variables values at the optimal solution
         VoptimalScores=[];              % objective function values at the optimal solution
         VoptimalConstraints=[];         % constraint values at the optimal solution
-        TablesValues                    % tables containing all the values
+        TablesValues = table();                 % tables containing all the values
         % creared during the optimisation process
         NevaluationsModel=0              % number of model evaluations
         NevaluationsObjectiveFunctions=0 % number of evaluations of the objective function
@@ -176,7 +176,7 @@ classdef Optimum
         end
         
         Xobj=addIteration(Xobj,varargin);
-        
+        obj = recordObjectiveFunction(obj, varargin);
     end     %of methods
     
     methods (Access = private)

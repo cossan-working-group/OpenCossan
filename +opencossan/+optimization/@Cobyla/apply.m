@@ -38,9 +38,6 @@ function [Xoptimum,varargout] = apply(Xobj,varargin)
 %% Define global variable for the objective function and the constrains
 global XoptGlobal XsimOutGlobal
 
-%%   Argument Check
-opencossan.OpenCossan.validateCossanInputs(varargin{:})
-
 %  Check whether or not required arguments have been passed
 for k=1:2:length(varargin)
     switch lower(varargin{k})
@@ -167,9 +164,9 @@ constraint_cobyla=@(x)evaluate(Xop.Xconstraint,'optimizationproblem',Xop,...
 opencossan.OpenCossan.getTimer().lap('Description',['COBYLA:' Xobj.Description]);
 
 [VoptimalDesign,Nexitflag,XoptGlobal.VoptimalScores] = cobyla_matlab(Xobj,...
-    Xop.VinitialSolution,Xobj.MaxIterations,Xobj.rho_ini,Xobj.rho_end,Ndv,N_ineq);
+    Xop.VinitialSolution,Xobj.MaxFunctionEvaluations,Xobj.rho_ini,Xobj.rho_end,Ndv,N_ineq);
 
-XoptGlobal.VoptimalDesign=VoptimalDesign';
+XoptGlobal.VoptimalDesign=VoptimalDesign;
 
 % Retrieve values of constraints from the Optimum
 VoptimalConstraint=XoptGlobal.TablesValues.Constraints ...

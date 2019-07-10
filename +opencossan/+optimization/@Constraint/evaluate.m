@@ -41,6 +41,11 @@ x = required.referencepoints;
 model = optional.model;
 scaling = optional.scaling;
 
+if isa(XoptGlobal.XOptimizer, 'opencossan.optimization.Cobyla')
+    % cobyla passes the variables as a column vector
+    x = x';
+end
+
 NdesignVariables = size(x,2); %number of design variables
 Ncandidates = size(x,1); % Number of candidate solutions
 
@@ -84,16 +89,15 @@ XoptGlobal.NevaluationsConstraints = XoptGlobal.NevaluationsConstraints+height(T
 
 switch class(XoptGlobal.XOptimizer)
     case 'opencossan.optimization.Cobyla'
-        %% Update Optimum object
-        % Remove the sign changing for the constraints
-        XoptGlobal=XoptGlobal.addIteration('MconstraintFunction',constraintValues,...
-            'Niteration',XoptGlobal.Niterations,'Mdesignvariables',x);
+        XoptGlobal = XoptGlobal.recordConstraints(...
+        'iteration',XoptGlobal.Niterations,...
+        'constraints', constraintValues);
     case 'opencossan.optimization.GeneticAlgorithms'
         %        XoptGlobal.Niterations=XoptGlobal.Niterations+1;
         if size(constraintValues,1)==XoptGlobal.XOptimizer.NPopulationSize
-            XoptGlobal=XoptGlobal.addIteration('MconstraintFunction',constraintValues,...
-                'Mdesignvariables',x,...
-                'Viterations',repmat(max(0,XoptGlobal.Niterations),size(x,1),1));
+%             XoptGlobal=XoptGlobal.addIteration('MconstraintFunction',constraintValues,...
+%                 'Mdesignvariables',x,...
+%                 'Viterations',repmat(max(0,XoptGlobal.Niterations),size(x,1),1));
         end
     case 'opencossan.optimization.StochasticRanking'
         if size(constraintValues,1)==XoptGlobal.XOptimizer.Nlambda
