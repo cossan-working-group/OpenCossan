@@ -231,11 +231,11 @@ classdef IntervalPredictorModel < opencossan.metamodels.MetaModel
                     ' NaN values.'],(sum(sum(isnan(Moutputs)))))
                 
                 obj.PLower=MIPMParameters(1:end/2);
-                obj.PUpper=MIPMParameters(end/2+1:end);                
+                obj.PUpper=MIPMParameters(end/2+1:end);
             end
             
             function [ constraints,eq,gradc,gradeq ] = nonlincons( x,A,b,tol )
-                %Chance Constrainted Optimisation Constraints (required for IPMs)               
+                %Chance Constrainted Optimisation Constraints (required for IPMs)
                 constraints=A*x-b;
                 
                 positiveConstraints=constraints>0;
@@ -250,7 +250,7 @@ classdef IntervalPredictorModel < opencossan.metamodels.MetaModel
                 gradc=[];
                 
                 eq=[];
-                gradeq=[];                
+                gradeq=[];
             end
         end
         
@@ -261,7 +261,7 @@ classdef IntervalPredictorModel < opencossan.metamodels.MetaModel
             for i = 1:length(epsilon)
                 if i > 1
                     %Define precision for speed increase here
-                    if beta(i-1) > 0.001 
+                    if beta(i-1) > 0.001
                         beta(i) = getReliability(obj,epsilon(i));
                     else
                         beta(i:length(epsilon)) = 0;
@@ -285,30 +285,23 @@ classdef IntervalPredictorModel < opencossan.metamodels.MetaModel
             end
         end
         
-        function reliab=getReliability(Xobj,epsilon)
-            nDataPoints=length(Xobj.McalibrationTarget);
-            Nterms=size(Xobj.Exponents,1);
-            d=2*Nterms;
+        function reliability = getReliability(obj, epsilon)
+            nDataPoints = length(obj.McalibrationTarget);
+            Nterms = size(obj.Exponents, 1);
+            d = 2 * Nterms;
             
-            if epsilon<0||epsilon>1
-                error('openCOSSAN:IntervalPredictorModel:calibrate',...
-                    'Invalid value of reliability - this reliability is impossible');
-            else
-                if ~(Xobj.k<nDataPoints-d)
-                    error('openCOSSAN:IntervalPredictorModel:calibrate',...
-                        'k<N-d is not satisfied - Reliability information is invalid')
-                else
-                    reliab=0;
-                    if epsilon>=0&&epsilon<=1
-                        reliab=binocdf(Xobj.k+d-1,nDataPoints,epsilon);
-                    else
-                        error('Epsilon should be between 0 and 1')
-                    end
-                    reliab=reliab*nchoosek(Xobj.k+d-1,Xobj.k);
-                    if (reliab>1)
-                        reliab=1;
-                    end
-                end
+            assert(epsilon >= 0 && epsilon <=1,...
+                'openCOSSAN:IntervalPredictorModel:getReliability',...
+                'Invalid value of reliability: %d', epsilon);
+            
+            assert(obj.k < nDataPoints - d,...
+                'openCOSSAN:IntervalPredictorModel:getReliability',...
+                'Reliability information is invalid: k<N-d is not satisfied.');
+            
+            reliability = binocdf(obj.k + d - 1, nDataPoints, epsilon);
+            reliability = reliability * nchoosek(obj.k + d - 1, obj.k);
+            if reliability > 1
+                reliability = 1;
             end
         end
     end
