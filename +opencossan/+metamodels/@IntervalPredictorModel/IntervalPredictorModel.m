@@ -254,30 +254,37 @@ classdef IntervalPredictorModel < opencossan.metamodels.MetaModel
             end
         end
         
-        function reliabilityPlot(Xobj)
-            epsilon=[[0:0.001:0.1],[0.1:0.01:1]];
-            beta=[[0:0.001:0.1],[0.1:0.01:1]];
+        function varargout = reliabilityPlot(obj)
+            epsilon = [0:0.001:0.1, 0.11:0.01:1];
+            beta = [0:0.001:0.1, 0.11:0.01:1];
             
-            for i=1:length(epsilon)
-                if i>1
-                    if beta(i-1)>0.001 %Define precision for speed increase here
-                        beta(i)=getReliability(Xobj,epsilon(i));
+            for i = 1:length(epsilon)
+                if i > 1
+                    %Define precision for speed increase here
+                    if beta(i-1) > 0.001 
+                        beta(i) = getReliability(obj,epsilon(i));
                     else
-                        beta(i:length(epsilon))=0;
+                        beta(i:length(epsilon)) = 0;
                         break;
                     end
                 else
-                    beta(i)=1;
+                    beta(i) = 1;
                 end
             end
             
+            h = figure;
+            hold on;
             plot(1-beta,1-epsilon)
-            hold
-            xlabel('confidence') % x-axis label
-            ylabel('model reliability') % y-axis label
-            axis([0 1 0 1])
-            hold off
+            xlabel('Confidence');
+            ylabel('Model Reliability');
+            axis([0 1 0 1]);
+            hold off;
+            
+            if nargout == 1
+                varargout{1} = h;
+            end
         end
+        
         function reliab=getReliability(Xobj,epsilon)
             nDataPoints=length(Xobj.McalibrationTarget);
             Nterms=size(Xobj.Exponents,1);
