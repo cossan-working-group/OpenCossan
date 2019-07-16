@@ -11,17 +11,18 @@ classdef IntervalPredictorModel < opencossan.metamodels.MetaModel
     % University~of~Liverpool, United Kingdom
     
     properties
-        NmaximumExponent
-        Mexponents
-        Bound='Lower'
-        chanceConstraint=1 %Enclose all input data
+        MaximumExponent {mustBeInteger} = [];
+        Exponents {mustBeInteger} = [];
+        Bound(1,1) string {mustBeMember(Bound,{'Lower','lower','upper','Upper'})} = 'Lower';
+        ChanceConstraint(1,1) {mustBePositive, ...
+            mustBeLessThanOrEqual(ChanceConstraint,1)} = 1;
     end
     
     properties (SetAccess = protected, GetAccess = public)
         PUpper %The IPM Parameters
         PLower
-        rescaleInputs
-        k=0
+        RescaleInputs
+        k {mustBeInteger} = 0
     end
     
     methods
@@ -29,8 +30,7 @@ classdef IntervalPredictorModel < opencossan.metamodels.MetaModel
         XSimDataOutput  = evaluate(Xobj,Pinput)
         [Xobj,varargout] = validate(Xobj,varargin)
         
-        %% constructor
-        function Xobj=IntervalPredictorModel(varargin)
+        function obj = IntervalPredictorModel(varargin)
             %IntervalPredictorModel
             %
             %   This method is the constructor of the class IntervalPredictorModel. It is
@@ -48,78 +48,76 @@ classdef IntervalPredictorModel < opencossan.metamodels.MetaModel
                 return
             end
             
-            %OpenCossan.validateCossanInputs(varargin{:})
-            
             %%  Set the values of the public properties
             for k=1:2:nargin
-                switch lower(varargin{k}),
+                switch lower(varargin{k})
                     % Description of the object
                     case{'chanceconstraint'}
-                        Xobj.chanceConstraint=varargin{k+1};
+                        obj.ChanceConstraint=varargin{k+1};
                     case {'description'}
-                        Xobj.Description   = varargin{k+1};
+                        obj.Description   = varargin{k+1};
                     case {'sbound'}
-                        Xobj.Bound   = lower(varargin{k+1});
+                        obj.Bound   = lower(varargin{k+1});
                     case {'nmaximumexponent','nexponent'}
-                        Xobj.NmaximumExponent = varargin{k+1};
+                        obj.MaximumExponent = varargin{k+1};
                     case {'mexponents'}
-                        Xobj.Mexponents = varargin{k+1};
+                        obj.Exponents = varargin{k+1};
                     case {'outputnames'}
                         % Response of interst
-                        Xobj.OutputNames  = varargin{k+1};
-                    case {'inputnames'},
+                        obj.OutputNames  = varargin{k+1};
+                    case {'inputnames'}
                         % Subset of inputs used to define the metamodel
-                        Xobj.InputNames  = varargin{k+1};
+                        obj.InputNames  = varargin{k+1};
                         % Full model associated with IntervalPredictorModel
-                    case{'xfullmodel','cxfullmodel'},
-                        if isa(varargin{k+1},'cell'),
-                            Xobj.XFullmodel     = varargin{k+1}{1};
+                    case{'xfullmodel','cxfullmodel'}
+                        if isa(varargin{k+1},'cell')
+                            obj.XFullmodel     = varargin{k+1}{1};
                         else
-                            Xobj.XFullmodel     = varargin{k+1};
+                            obj.XFullmodel     = varargin{k+1};
                         end
                         % Input Object for calibrating ResponseSruface
-                    case{'xcalibrationinput','cxcalibrationinput'},
+                    case{'xcalibrationinput','cxcalibrationinput'}
                         
                         if isa(varargin{k+1},'cell')
-                            Xobj.XcalibrationInput  = varargin{k+1}{1};
+                            obj.XcalibrationInput  = varargin{k+1}{1};
                         else
-                            Xobj.XcalibrationInput  = varargin{k+1};
+                            obj.XcalibrationInput  = varargin{k+1};
                         end
                         
-                        assert(isa(Xobj.XcalibrationInput,'Input'), ...
+                        assert(isa(obj.XcalibrationInput,'Input'), ...
                             'openCOSSAN:IntervalPredictorModel',...
                             'PropertyName %s must be an object of type Input',varargin{k});
                         
                     case{'xcalibrationoutput','cxcalibrationoutput'}
                         if isa(varargin{k+1},'cell')
-                            Xobj.XcalibrationOutput  = varargin{k+1}{1};
+                            obj.XcalibrationOutput  = varargin{k+1}{1};
                         else
-                            Xobj.XcalibrationOutput  = varargin{k+1};
+                            obj.XcalibrationOutput  = varargin{k+1};
                         end
                         
-                        assert(isa(Xobj.XcalibrationOutput,'SimulationData'), ...
+                        assert(isa(obj.XcalibrationOutput,'SimulationData'), ...
                             'openCOSSAN:IntervalPredictorModel',...
                             'PropertyName %s must be an object of type SimulationData',varargin{k});
-                    case{'xvalidationinput','cxvalidationinput'},
+                    case{'xvalidationinput','cxvalidationinput'}
                         
                         if isa(varargin{k+1},'cell')
-                            Xobj.XvalidationInput  = varargin{k+1}{1};
+                            obj.XvalidationInput  = varargin{k+1}{1};
                         else
-                            Xobj.XvalidationInput  = varargin{k+1};
+                            obj.XvalidationInput  = varargin{k+1};
                         end
                         
-                        assert(isa(Xobj.XvalidationInput,'Input'), ...
+                        assert(isa(obj.XvalidationInput,'Input'), ...
                             'openCOSSAN:IntervalPredictorModel',...
                             'PropertyName %s must be an object of type Input',varargin{k});
                         
                     case{'xvalidationoutput','cxvalidationoutput'}
                         if isa(varargin{k+1},'cell')
-                            Xobj.XvalidationOutput  = varargin{k+1}{1};
+                            obj.XvalidationOutput  = varargin{k+1}{1};
                         else
-                            Xobj.XvalidationOutput  = varargin{k+1};
+                            obj.XvalidationOutput  = varargin{k+1};
                         end
                         
-                        assert(isa(Xobj.XvalidationOutput,'SimulationData'), ...
+                        assert(isa(obj.XvalidationOutput,'SimulationData'), ...
                             'openCOSSAN:IntervalPredictorModel',...
                             'PropertyName %s must be an object of type SimulationData',varargin{k});
                         % Other cases
@@ -129,46 +127,18 @@ classdef IntervalPredictorModel < opencossan.metamodels.MetaModel
                 end
             end
             
-            % Validate the constructor of the metamodel
-%            Xobj=validateConstructor(Xobj);
-            
-            
-            if ~isempty(Xobj.NmaximumExponent)
-                assert(~mod(Xobj.NmaximumExponent,1),...
-                    'openCOSSAN:IntervalPredictorModel',...
-                    'The maximum exponent must be an integer.')
-            elseif ~isempty(Xobj.Mexponents)
-                assert(~any(mod(Xobj.Mexponents,1)),...
-                    'openCOSSAN:IntervalPredictorModel',...
-                    'The model matrix must contain only integers')
-            end
-            
-            % check that either the maximum exponent or the custom model
-            % has been passed when Stype is custom
-            if isempty(Xobj.NmaximumExponent) && isempty(Xobj.Mexponents)
-                error('openCOSSAN:IntervalPredictorModel',...
-                    ['Either the maximum exponent or the matrix of expoents'...
-                    ' is required to define a custom model.'])
-            end
-            if ~isempty(Xobj.NmaximumExponent) && ~isempty(Xobj.Mexponents)
-                error('openCOSSAN:IntervalPredictorModel',...
-                    ['Only require NmaximumExponent or Mexponent'])
-            end
-            
-            assert(Xobj.chanceConstraint>0&&Xobj.chanceConstraint<=1,...
+            % Check that either the maximum exponent or the matrix of
+            % exponents is passed but not both (xor!).
+            assert(xor(isempty(obj.MaximumExponent),isempty(obj.Exponents)),...
                 'openCOSSAN:IntervalPredictorModel',...
-                'The fraction of contained input data must be between 0 and 1')
-            assert(length(Xobj.chanceConstraint)==1,...
+                'Must pass either maximum exponent or the matrix of exponents.');
+            
+            assert(length(obj.OutputNames) == 1,...
                 'openCOSSAN:IntervalPredictorModel',...
-                'The fraction of contained input data must be a scalar quantity')
-            assert(length(Xobj.OutputNames)==1,'openCOSSAN:IntervalPredictorModel',...
-                'Currently only one output name is supported')
-            assert((strcmpi(Xobj.Bound,'lower')||strcmpi(Xobj.Bound,'upper')),...
-                'openCOSSAN:IntervalPredictorModel',...
-                'can create either upper or lower bound')
-        end     %end of constructor
+                'Currently only one output name is supported');
+        end
         
-        function Xobj = train(Xobj,Minputs,Moutputs)
+        function obj = train(obj,Minputs,Moutputs)
             %% train
             %
             % train method receive the matrix with inputs and vector with
@@ -176,46 +146,46 @@ classdef IntervalPredictorModel < opencossan.metamodels.MetaModel
             %
             
             Nvar = size(Minputs,2);
-            NDataPoints=length(Xobj.McalibrationTarget);
-            Xobj.MboundsInput = zeros(2,Nvar);
+            NDataPoints=length(obj.McalibrationTarget);
+            obj.MboundsInput = zeros(2,Nvar);
             for j=1:Nvar
-                Xobj.MboundsInput(:,j) = [min(Minputs(:,j)); max(Minputs(:,j)) ];
+                obj.MboundsInput(:,j) = [min(Minputs(:,j)); max(Minputs(:,j)) ];
             end
             
             for iresponse=1:size(Moutputs,2)
                 
-                if isempty(Xobj.Mexponents)
+                if isempty(obj.Exponents)
                     % create a full polynomial model of maximum
                     % power NmaximumExponent.
                     % These two lines get all the possible
                     % combination of the exponents (got it from
                     % http://groups.google.com/group/comp.soft-sys.matlab/browse_thread/thread/878717e082473f68)
-                    Xobj.Mexponents = fullfact((Xobj.NmaximumExponent+1)*ones(1,Nvar))-1;
-                    Xobj.Mexponents(sum(Xobj.Mexponents,2)>Xobj.NmaximumExponent,:) = [];
+                    obj.Exponents = fullfact((obj.MaximumExponent+1)*ones(1,Nvar))-1;
+                    obj.Exponents(sum(obj.Exponents,2)>obj.MaximumExponent,:) = [];
                     % then, the exponents are sorted in a nice way,
                     % e.g., fist the zeros, then all the linear
                     % terms, then exponents that sums to 2 with
                     % precedence to interaction terms, and so on...
-                    [~,isort]=sort(prod((Xobj.NmaximumExponent-1).^(Xobj.Mexponents),2)...
-                        +sum((Xobj.NmaximumExponent-1).^(Xobj.Mexponents),2));
-                    Xobj.Mexponents=Xobj.Mexponents(isort,:);
+                    [~,isort]=sort(prod((obj.MaximumExponent-1).^(obj.Exponents),2)...
+                        +sum((obj.MaximumExponent-1).^(obj.Exponents),2));
+                    obj.Exponents=obj.Exponents(isort,:);
                 else
                     % check that the custom model has the right
                     % number of inputs
-                    assert(size(Xobj.Mexponents,2)==Nvar,...
+                    assert(size(obj.Exponents,2)==Nvar,...
                         'openCOSSAN:IntervalPredictorModel:calibrate',...
                         ['The training data has %d inputs, while '...
                         'the user defined model has %d inputs.'],...
-                        Nvar,size(Xobj.Mexponents,2))
+                        Nvar,size(obj.Exponents,2))
                 end
-                Nterms=size(Xobj.Mexponents,1);
+                Nterms=size(obj.Exponents,1);
                 
-                Xobj.rescaleInputs=mean(abs(Minputs));
-                Minputs=Minputs./Xobj.rescaleInputs;
+                obj.RescaleInputs=mean(abs(Minputs));
+                Minputs=Minputs./obj.RescaleInputs;
                 
                 % call regstats with the custom model to train
                 % the response surface
-                MD = x2fx(Minputs,Xobj.Mexponents);
+                MD = x2fx(Minputs,obj.Exponents);
                 MDSum=(mean(abs(MD)));
                 objective=[-MDSum,MDSum];
                 
@@ -238,15 +208,15 @@ classdef IntervalPredictorModel < opencossan.metamodels.MetaModel
                     'Algorithm','sqp');
                 
                 [MIPMParameters]=linprog(objective,Mconstraint,b,Aeq,beq,lb,ub);
-                if Xobj.chanceConstraint~=1
+                if obj.ChanceConstraint~=1
                     %we can solve quickly with linprog if all inputs are
                     %enclosed, otherwise need to use fmincon
-                    nonlinconstraint=@(x) nonlincons(x,Mconstraint(1:2*NDataPoints,1:Nterms*2),b(1:2*NDataPoints),Xobj.chanceConstraint);
+                    nonlinconstraint=@(x) nonlincons(x,Mconstraint(1:2*NDataPoints,1:Nterms*2),b(1:2*NDataPoints),obj.ChanceConstraint);
                     
                     [MIPMParameters]=fmincon(@(x) objective*x, MIPMParameters,Mconstraint(2*NDataPoints+1:end,1:Nterms*2),b(2*NDataPoints+1:end),[],[],[],[],nonlinconstraint,options);
                     
                     tolerance=10^-12;
-                    Xobj.k=sum(tolerance<=Mconstraint(1:2*NDataPoints,1:Nterms*2)*MIPMParameters-b(1:2*NDataPoints));
+                    obj.k=sum(tolerance<=Mconstraint(1:2*NDataPoints,1:Nterms*2)*MIPMParameters-b(1:2*NDataPoints));
                 end
                 
                 assert(size(MD,2)<=size(Minputs,1),...
@@ -260,8 +230,8 @@ classdef IntervalPredictorModel < opencossan.metamodels.MetaModel
                     ['Object not calibrated: the output variable contains %d' ...
                     ' NaN values.'],(sum(sum(isnan(Moutputs)))))
                 
-                Xobj.PLower=MIPMParameters(1:end/2);
-                Xobj.PUpper=MIPMParameters(end/2+1:end);                
+                obj.PLower=MIPMParameters(1:end/2);
+                obj.PUpper=MIPMParameters(end/2+1:end);                
             end
             
             function [ constraints,eq,gradc,gradeq ] = nonlincons( x,A,b,tol )
@@ -282,7 +252,6 @@ classdef IntervalPredictorModel < opencossan.metamodels.MetaModel
                 eq=[];
                 gradeq=[];                
             end
-            
         end
         
         function reliabilityPlot(Xobj)
@@ -311,7 +280,7 @@ classdef IntervalPredictorModel < opencossan.metamodels.MetaModel
         end
         function reliab=getReliability(Xobj,epsilon)
             nDataPoints=length(Xobj.McalibrationTarget);
-            Nterms=size(Xobj.Mexponents,1);
+            Nterms=size(Xobj.Exponents,1);
             d=2*Nterms;
             
             if epsilon<0||epsilon>1

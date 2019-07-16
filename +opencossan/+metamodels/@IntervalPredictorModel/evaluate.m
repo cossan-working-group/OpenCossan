@@ -15,8 +15,8 @@ import opencossan.common.outputs.SimulationData
 %%  Evaluate response surface
 Minputs=table2array(Minputs);
 
-Minputs=Minputs./Xobj.rescaleInputs;
-MD      = x2fx(Minputs,Xobj.Mexponents);
+Minputs=Minputs./Xobj.RescaleInputs;
+MD      = x2fx(Minputs,Xobj.Exponents);
 
 Mrs=zeros(size(Minputs,1),length(Xobj.OutputNames));
 
