@@ -235,9 +235,6 @@ classdef IntervalPredictorModel < opencossan.metamodels.MetaModel
                 b=[-Moutputs;Moutputs;zeros(Nterms,1)];
                 
                 options = optimoptions('fmincon','MaxIter',1000000,...
-                    'SpecifyObjectiveGradient',logical(1),...
-                    'SpecifyConstraintGradient',logical(0),...
-                    'CheckGradients',logical(0),...
                     'Algorithm','sqp');
                 
                 [MIPMParameters]=linprog(objective,Mconstraint,b,Aeq,beq,lb,ub);
@@ -246,7 +243,7 @@ classdef IntervalPredictorModel < opencossan.metamodels.MetaModel
                     %enclosed, otherwise need to use fmincon
                     nonlinconstraint=@(x) nonlincons(x,Mconstraint(1:2*NDataPoints,1:Nterms*2),b(1:2*NDataPoints),Xobj.chanceConstraint);
                     
-                    [MIPMParameters]=fmincon(@(x)myObjective(x),MIPMParameters,Mconstraint(2*NDataPoints+1:end,1:Nterms*2),b(2*NDataPoints+1:end),[],[],[],[],nonlinconstraint,options);
+                    [MIPMParameters]=fmincon(@(x) objective*x, MIPMParameters,Mconstraint(2*NDataPoints+1:end,1:Nterms*2),b(2*NDataPoints+1:end),[],[],[],[],nonlinconstraint,options);
                     
                     tolerance=10^-12;
                     Xobj.k=sum(tolerance<=Mconstraint(1:2*NDataPoints,1:Nterms*2)*MIPMParameters-b(1:2*NDataPoints));
@@ -266,10 +263,7 @@ classdef IntervalPredictorModel < opencossan.metamodels.MetaModel
                 Xobj.PLower=MIPMParameters(1:end/2);
                 Xobj.PUpper=MIPMParameters(end/2+1:end);                
             end
-            function [f,g] = myObjective(x)
-                f = objective*x;
-                g=objective;
-            end
+            
             function [ constraints,eq,gradc,gradeq ] = nonlincons( x,A,b,tol )
                 %Chance Constrainted Optimisation Constraints (required for IPMs)               
                 constraints=A*x-b;
