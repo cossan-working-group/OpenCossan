@@ -25,7 +25,7 @@ function Mout = getValues(Xobj,varargin)
 % =====================================================================
 %% Validate input arguments
 
-opencossan.OpenCossan.validateCossanInputs(varargin{:})
+% opencossan.OpenCossan.validateCossanInputs(varargin{:})
 
 Cnames=Xobj.Cnames;
 
