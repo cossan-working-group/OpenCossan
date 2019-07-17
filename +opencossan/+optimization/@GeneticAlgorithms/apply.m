@@ -43,7 +43,6 @@ function [Xoptimum, varargout] = apply(Xobj,varargin)
 %% Define global variable for the objective function and the constrains
 global XoptGlobal XsimOutGlobal
 
-opencossan.OpenCossan.validateCossanInputs(varargin{:});
 LplotEvolution=false;
 
 %  Check whether or not required arguments have been passed
@@ -200,7 +199,6 @@ else
             Xop.NdesignVariables,[],[],[],[],...
             Xop.VlowerBounds,Xop.VupperBounds,[],Toptions);
     end
-    
 end
 
 opencossan.OpenCossan.getTimer().lap('Description','End GA optimization');

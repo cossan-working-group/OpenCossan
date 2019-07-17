@@ -149,7 +149,6 @@ opencossan.OpenCossan.resetRandomNumberGenerator(542727)
 Xoptimum1 = Xop.optimize('Xoptimizer',Xsqp);
 % Show results of the optimization
 display(Xoptimum1)
-
 % Now we optimize the problem using Cobyla
 Xoptimum2 = Xop.optimize('Xoptimizer',Xcobyla);
 % Show results of the optimization display(Xoptimum2)
@@ -168,7 +167,7 @@ SQP = [Xoptimum1.NevaluationsObjectiveFunctions;
    
 COBYLA = [Xoptimum2.NevaluationsObjectiveFunctions;
           Xoptimum2.VoptimalScores;
-          Xoptimum2.VoptimalDesign;
+          Xoptimum2.VoptimalDesign';
           Xoptimum2.VoptimalConstraints(1)];
   
 GA = [Xoptimum3.NevaluationsObjectiveFunctions;

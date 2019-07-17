@@ -283,7 +283,7 @@ classdef OptimizationProblem
             
             assert(~isempty(varargin),'openCOSSAN:OptimizationProblem:optimize',...
                 'Missing input argument!');
-            opencossan.OpenCossan.validateCossanInputs(varargin{:})
+
             for k=1:2:length(varargin)
                 switch lower(varargin{k})
                     case 'xoptimizer'

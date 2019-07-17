@@ -154,7 +154,7 @@ for iobj=1:length(obj)
 end
 
 %%   Apply scaling constant
-value  = Mout(1:Ncandidates,:)/scaling;
+value = Mout(1:Ncandidates,:)/scaling;
 
 %% Update function counter of the Optimisers
 XoptGlobal.NevaluationsObjectiveFunctions = XoptGlobal.NevaluationsObjectiveFunctions+height(Tinput);  % Number of objective function evaluations
@@ -162,16 +162,16 @@ XoptGlobal.NevaluationsObjectiveFunctions = XoptGlobal.NevaluationsObjectiveFunc
 switch class(XoptGlobal.XOptimizer)
     case {'opencossan.optimization.Cobyla' 'opencossan.optimization.Bobyqa'}
         %% Update Optimum object
-        XoptGlobal.Niterations=XoptGlobal.Niterations+1;
+        XoptGlobal.Niterations=XoptGlobal.Niterations + 1;
         
         % record design variables in optimum
         XoptGlobal = XoptGlobal.recordDesignVariables(...
-            'iteration', XoptGlobal.Niterations,...
+            'row', XoptGlobal.Niterations,...
             'designvariables', Minput);
         
         % record objective function in optimum
         XoptGlobal = XoptGlobal.recordObjectiveFunction(...
-            'iteration', XoptGlobal.Niterations,...
+            'row', XoptGlobal.Niterations,...
             'objectivefunction', Mout);
         
     case {'opencossan.optimization.CrossEntropy'}
@@ -186,6 +186,16 @@ switch class(XoptGlobal.XOptimizer)
         XoptGlobal=XoptGlobal.addIteration('MdesignVariables',Minput,...
             'MobjectiveFunction',Mout,...
             'Viterations',repmat(XoptGlobal.Niterations,size(Minput,1),1));
+    case {'opencossan.optimization.GeneticAlgorithms'}
+        for i = 1:size(Mout,1)
+            XoptGlobal.Niterations=XoptGlobal.Niterations + 1;
+            XoptGlobal = XoptGlobal.recordObjectiveFunction(...
+                'row', XoptGlobal.Niterations,...
+                'objectivefunction', Mout(i,:));
+            XoptGlobal = XoptGlobal.recordDesignVariables(...
+                'row', XoptGlobal.Niterations,...
+                'designvariables', Minput(i,:));
+        end
     otherwise
         % Default behaviour
         % Values of the design variables and objective function stored by

@@ -24,6 +24,8 @@ with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
 
 global XoptGlobal XsimOutGlobal
 
+fprintf('Constraints: %d\n', XoptGlobal.Niterations);
+
 [required, varargin] = opencossan.common.utilities.parseRequiredNameValuePairs(...
     ["optimizationproblem", "referencepoints"], varargin{:});
 
@@ -90,14 +92,14 @@ XoptGlobal.NevaluationsConstraints = XoptGlobal.NevaluationsConstraints+height(T
 switch class(XoptGlobal.XOptimizer)
     case 'opencossan.optimization.Cobyla'
         XoptGlobal = XoptGlobal.recordConstraints(...
-        'iteration',XoptGlobal.Niterations,...
+        'row',XoptGlobal.Niterations,...
         'constraints', constraintValues);
     case 'opencossan.optimization.GeneticAlgorithms'
-        %        XoptGlobal.Niterations=XoptGlobal.Niterations+1;
-        if size(constraintValues,1)==XoptGlobal.XOptimizer.NPopulationSize
-%             XoptGlobal=XoptGlobal.addIteration('MconstraintFunction',constraintValues,...
-%                 'Mdesignvariables',x,...
-%                 'Viterations',repmat(max(0,XoptGlobal.Niterations),size(x,1),1));
+        for i = 1:size(constraintValues,1)
+            XoptGlobal.Niterations=XoptGlobal.Niterations + 1;
+            XoptGlobal = XoptGlobal.recordConstraints(...
+                'row', XoptGlobal.Niterations,...
+                'constraints', constraintValues(i,:));
         end
     case 'opencossan.optimization.StochasticRanking'
         if size(constraintValues,1)==XoptGlobal.XOptimizer.Nlambda

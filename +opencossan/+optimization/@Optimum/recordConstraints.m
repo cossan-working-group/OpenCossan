@@ -19,9 +19,9 @@ function obj = recordConstraints(obj,varargin)
     along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
 %}
 [required] = opencossan.common.utilities.parseRequiredNameValuePairs(...
-    ["iteration", "constraints"], varargin{:});
+    ["row", "constraints"], varargin{:});
     
-    obj.TablesValues{required.iteration + 1, 'Constraints'} = ...
+    obj.TablesValues{required.row, 'Constraints'} = ...
         required.constraints;
 end
 

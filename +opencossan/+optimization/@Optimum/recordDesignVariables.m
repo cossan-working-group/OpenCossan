@@ -20,10 +20,9 @@ function obj = recordDesignVariables(obj,varargin)
 %}
 
 [required] = opencossan.common.utilities.parseRequiredNameValuePairs(...
-    ["iteration", "designvariables"], varargin{:});
+    ["row", "designvariables"], varargin{:});
     
-    obj.TablesValues{required.iteration + 1, 'Iteration'} = required.iteration;
-    obj.TablesValues{required.iteration + 1, 'DesignVariables'} = ...
+    obj.TablesValues{required.row, 'DesignVariables'} = ...
         required.designvariables;
 end
 

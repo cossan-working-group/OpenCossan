@@ -44,6 +44,8 @@ function Lstop = outputFunctionOptimiser(XOptimizer,Vx,ToptimValues,State)
 % Process inputs
 global XoptGlobal
 
+XoptGlobal.Niterations = ToptimValues.iteration + 1;
+
 switch State
     case 'init'
         % Initialize Optimum
@@ -53,13 +55,13 @@ switch State
         opencossan.OpenCossan.getTimer().lap('Description',['Iteration #' num2str(ToptimValues.iteration)]);
         
         XoptGlobal = XoptGlobal.recordDesignVariables(...
-            'iteration',ToptimValues.iteration,...
+            'row',XoptGlobal.Niterations,...
             'designvariables',Vx);
         XoptGlobal = XoptGlobal.recordObjectiveFunction(...
-            'iteration',ToptimValues.iteration,...
+            'row',XoptGlobal.Niterations,...
             'objectivefunction',ToptimValues.fval);
         XoptGlobal = XoptGlobal.recordConstraints(...
-            'iteration',ToptimValues.iteration,...
+            'row',XoptGlobal.Niterations,...
             'constraints',ToptimValues.constrviolation);
     case 'done'
         opencossan.OpenCossan.getTimer().lap('Description','End optimization');
@@ -68,9 +70,6 @@ switch State
         disp('State flag not recognised')
         disp(State)
 end
-
-% Because we are always ahead...
-XoptGlobal.Niterations=ToptimValues.iteration+1;
 
 %% Check Optimizer Termination criteria
 

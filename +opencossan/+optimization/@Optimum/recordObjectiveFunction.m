@@ -20,9 +20,9 @@ function obj = recordObjectiveFunction(obj,varargin)
 %}
 
 [required] = opencossan.common.utilities.parseRequiredNameValuePairs(...
-    ["iteration", "objectivefunction"], varargin{:});
+    ["row", "objectivefunction"], varargin{:});
     
-    obj.TablesValues{required.iteration + 1, 'ObjectiveFnc'} = ...
+    obj.TablesValues{required.row, 'ObjectiveFnc'} = ...
         required.objectivefunction;
 end
 

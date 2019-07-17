@@ -32,7 +32,7 @@ classdef Optimum
         totalTime                       % time required to solve problem
         XOptimizationProblem            % assosiated optimization problem
         XOptimizer                      % optimizer used to solve the problem
-        Niterations=-1;                 % number of iteration/generation
+        Niterations=0;                 % number of iteration/generation
         VoptimalDesign=[];              % design variables values at the optimal solution
         VoptimalScores=[];              % objective function values at the optimal solution
         VoptimalConstraints=[];         % constraint values at the optimal solution
@@ -85,7 +85,6 @@ classdef Optimum
             % Author: Edoardo Patelli
             
             %% Validate input arguments
-            opencossan.OpenCossan.validateCossanInputs(varargin{:})
             vararginTable={};
             LaddIteration=false;
 

@@ -49,14 +49,6 @@ switch Sflag
         opencossan.OpenCossan.cossanDisp('Start optimization process',3)
     case {'iter','interrupt'}
         opencossan.OpenCossan.cossanDisp(['Iteration #' num2str(Tstate.Generation)],3)
-       % OpenCossan.setLaptime('Sdescription',['Iteration #' num2str(ToptimValues.iteration)]);
-        %XOptimizer.Niterations=0;
-        if (Tstate.Generation > 0)
-            XoptGlobal = XoptGlobal.recordObjectiveFunction(...
-                'iteration',Tstate.Generation,...
-                'objectivefunction',Tstate.Best(Tstate.Generation));
-        end
-        % Concatenate current point and objective function
     case 'done'        
         opencossan.OpenCossan.getTimer().lap('Description','End optimization');
         XoptGlobal.totalTime=opencossan.OpenCossan.getTimer().delta(XOptimizer.InitialLapTime);
@@ -66,7 +58,7 @@ switch Sflag
 end
 
 % Store iteration number
-XoptGlobal.Niterations=Tstate.Generation;
+% XoptGlobal.Niterations=Tstate.Generation;
 
 
 if isfield(Tstate,'NonlinEq')
