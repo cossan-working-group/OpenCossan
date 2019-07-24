@@ -239,7 +239,7 @@ classdef IntervalPredictorModel < opencossan.metamodels.MetaModel
                 constraints=A*x-b;
                 
                 positiveConstraints=constraints>0;
-                nPositiveConstraints=length(positiveConstraints);
+                nPositiveConstraints=sum(positiveConstraints);
                 
                 [~,I]=sort(constraints);
                 
