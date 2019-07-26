@@ -78,7 +78,7 @@ Xmio_acc_gen = Mio('Sfile', 'miofun_cp_gen','Spath',pwd,...
 Sdirectory = fullfile(pwd);%OpenCossan.getCossanWorkingPath,'TutorialWorkingDir'
 Xinjector1  = Injector('Stype','scan','SscanFilePath',Sdirectory,...
                      'Sscanfilename','MDOF_damp.cossan.tcl','Sfile','MDOF_damp.tcl');
-Xinjector2  = TableInjector('Stype','matlab16','Sfile','acc.thf','Cinputnames',{'ground_acc'});
+Xinjector2  = TableInjector('Stype','matlab16','Sfile','acc.thf','Cinputnames',{'ground_acc'},'LinjectCoordinates',false);
 %% Extractor
 %
 
