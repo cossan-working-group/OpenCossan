@@ -43,7 +43,7 @@ import opencossan.optimization.*
 global XoptGlobal XsimOutGlobal
 
 %%   Argument Check
-OpenCossan.validateCossanInputs(varargin{:})
+%TODO: Update input parser
 
 %  Check whether or not required arguments have been passed
 for k=1:2:length(varargin),
@@ -78,17 +78,17 @@ if ~exist('Xop','var')
 end
 
 %% Add bounds to the constraints
-CnameDV=Xop.Xinput.CnamesDesignVariable;
+CnameDV=Xop.Xinput.DesignVariableNames;
 
 for ndv=1:Xop.Xinput.NdesignVariables
     
-    if isfinite(Xop.Xinput.XdesignVariable.(CnameDV{ndv}).lowerBound)
+    if isfinite(Xop.Xinput.DesignVariables.(CnameDV{ndv}).lowerBound)
         SdesignVariableName=[CnameDV{ndv} '_lowerBound'];
         
         OpenCossan.cossanDisp(['DesignVariable ' SdesignVariableName ' added to constraint object!'],3)
         
         Sscript=['for n=1:height(TableInput), TableOutput.' SdesignVariableName '(n) = ' ...
-            num2str(Xop.Xinput.XdesignVariable.(CnameDV{ndv}).lowerBound) ...
+            num2str(Xop.Xinput.DesignVariables.(CnameDV{ndv}).lowerBound) ...
             ' - TableInput.' CnameDV{ndv} '(n); end'];
         
          XconstraintDV= Constraint('Sdescription',['lower bound - current value of ' CnameDV{ndv}], ...
@@ -99,14 +99,14 @@ for ndv=1:Xop.Xinput.NdesignVariables
 
     end
     
-    if isfinite(Xop.Xinput.XdesignVariable.(CnameDV{ndv}).upperBound)
+    if isfinite(Xop.Xinput.DesignVariables.(CnameDV{ndv}).upperBound)
         SdesignVariableName=[CnameDV{ndv} '_upperBound'];
         
         OpenCossan.cossanDisp(['DesignVariable ' SdesignVariableName ' added to constraint object!'],3)
         
         Sscript=['for n=1:height(TableInput), TableOutput.' SdesignVariableName '(n) = ' ...
             ' + TableInput.' CnameDV{ndv} '(n) - ' ...
-            num2str(Xop.Xinput.XdesignVariable.(CnameDV{ndv}).upperBound) '; end'];
+            num2str(Xop.Xinput.DesignVariables.(CnameDV{ndv}).upperBound) '; end'];
         
         XconstraintDV= Constraint('Sdescription',['current value of ' CnameDV{ndv} ' - upper bound'], ...
         'Sscript',Sscript, 'SoutputName',SdesignVariableName,...
