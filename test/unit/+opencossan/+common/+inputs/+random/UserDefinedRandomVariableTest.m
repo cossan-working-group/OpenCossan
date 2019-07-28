@@ -34,6 +34,7 @@ classdef UserDefinedRandomVariableTest < matlab.unittest.TestCase
             testCase.pdf = normpdf(testCase.support);
             testCase.cdf = normcdf(testCase.support);
             testCase.data = randn(1,1000);
+            opencossan.OpenCossan.resetRandomNumberGenerator(51124);
         end
     end
     
