@@ -35,10 +35,12 @@ Then navigate to `OpenCossan\doc\GettingStarted.mlx` in Matlab to view further i
 
 Comprehensive documentation is available in the wiki available at https://cossan.co.uk/wiki
 
-### Documentation
+### Case studies 
 
-- [Link1](https://cossan.co.uk/wiki/index.php/Bayesian_optimisation)
-- [Link2](https://cossan.co.uk/wiki/index.php/Bayesian_optimisation)
+- [Reliability-based optimization of non linear viscous dampers](https://cossan.co.uk/casestudy/COSSAN_ViscousDampersCaseStudy.pdf)
+- [Analysis of the Grenfell Tower Fire with Bayesian Networks](https://cossan.co.uk/casestudy/COSSAN_FireCaseStudy.pdf)
+- [Baysian Optimisation](https://cossan.co.uk/wiki/index.php/Bayesian_optimisation)
+- [Resilient analysis of power grids]
 
 ## Project status
 
