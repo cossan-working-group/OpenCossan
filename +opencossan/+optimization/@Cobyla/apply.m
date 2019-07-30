@@ -163,6 +163,8 @@ constraint_cobyla=@(x)evaluate(Xop.Xconstraint,'optimizationproblem',Xop,...
 
 opencossan.OpenCossan.getTimer().lap('Description',['COBYLA:' Xobj.Description]);
 
+opencossan.optimization.OptimizationRecorder.clear();
+
 [VoptimalDesign,Nexitflag,XoptGlobal.VoptimalScores] = cobyla_matlab(Xobj,...
     Xop.VinitialSolution,Xobj.MaxFunctionEvaluations,Xobj.rho_ini,Xobj.rho_end,Ndv,N_ineq);
 

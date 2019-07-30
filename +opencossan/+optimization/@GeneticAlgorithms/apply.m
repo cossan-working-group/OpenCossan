@@ -162,6 +162,7 @@ XsimOutGlobal=[];
 opencossan.OpenCossan.getTimer().lap('Description',['GA:' Xobj.Description]);
 opencossan.OpenCossan.cossanDisp('Starting GeneticAlgorithms',3)
 
+opencossan.optimization.OptimizationRecorder.clear();
 if isempty(Xop.Xconstraint)
     if LplotEvolution
         Toptions = gaoptimset('PlotFcns',{@gaplotbestf});

@@ -159,6 +159,12 @@ value = Mout(1:Ncandidates,:)/scaling;
 %% Update function counter of the Optimisers
 XoptGlobal.NevaluationsObjectiveFunctions = XoptGlobal.NevaluationsObjectiveFunctions+height(Tinput);  % Number of objective function evaluations
 
+% record objective function values
+for i = 1:size(Mout,1)
+    opencossan.optimization.OptimizationRecorder.recordObjectiveFunction(...
+        Minput(i,:), Mout(i,:));
+end
+
 switch class(XoptGlobal.XOptimizer)
     case {'opencossan.optimization.Cobyla' 'opencossan.optimization.Bobyqa'}
         %% Update Optimum object

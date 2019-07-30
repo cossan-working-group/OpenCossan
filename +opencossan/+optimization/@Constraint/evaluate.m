@@ -24,8 +24,6 @@ with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
 
 global XoptGlobal XsimOutGlobal
 
-fprintf('Constraints: %d\n', XoptGlobal.Niterations);
-
 [required, varargin] = opencossan.common.utilities.parseRequiredNameValuePairs(...
     ["optimizationproblem", "referencepoints"], varargin{:});
 
@@ -34,7 +32,7 @@ optional = opencossan.common.utilities.parseOptionalNameValuePairs(...
 
 assert(isa(required.optimizationproblem, 'opencossan.optimization.OptimizationProblem'), ...
     'OpenCossan:optimization:constraint:evaluate',...
-    'An OptimizationProblem must be passed using the PropertyName XoptimizationProblem');
+    'An OptimizationProblem must be passed using the property name optimizationproblem');
 
 % destructure inputs
 optProb = required.optimizationproblem;
@@ -89,6 +87,11 @@ eq = constraintValues(:,~[obj.IsInequality]);
 %% Update function counter of the Optimiser
 XoptGlobal.NevaluationsConstraints = XoptGlobal.NevaluationsConstraints+height(Tinput);  % Number of objective function evaluations
 
+% record constraint values
+for i = 1:size(constraintValues,1)
+    opencossan.optimization.OptimizationRecorder.recordConstraints(...
+        x(i,:), constraintValues(i,:));
+end
 switch class(XoptGlobal.XOptimizer)
     case 'opencossan.optimization.Cobyla'
         XoptGlobal = XoptGlobal.recordConstraints(...

@@ -159,7 +159,7 @@ end
 % that contains the nonlinear equalities evaluated at x.  hconstrains is
 % a function handle such as function
 
-
+opencossan.optimization.OptimizationRecorder.clear();
 %% Perform Real optimization
 [XoptGlobal.VoptimalDesign,XoptGlobal.VoptimalScores,exitflag]  = ...
     fmincon(hobjfun,... % ObjectiveFunction
