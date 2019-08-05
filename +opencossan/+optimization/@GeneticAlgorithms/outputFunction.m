@@ -76,7 +76,7 @@ varargIteration=[{'iteration'},{repmat(Tstate.Generation,size(Tstate.Population,
                  {'objectivefunction'},{Tstate.Score}];
 
 
-if XoptGlobal.XOptimizationProblem.Nconstraints>0
+if XoptGlobal.XOptimizationProblem.NumberOfConstraints > 0
    % Store constraint
    varargIteration{end+1}='constraintfunction'; 
    varargIteration{end+1}=Mconstraints; 

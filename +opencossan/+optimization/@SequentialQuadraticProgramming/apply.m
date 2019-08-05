@@ -1,4 +1,4 @@
-function [Xoptimum,varargout] = apply(obj,varargin)
+function [optimum,varargout] = apply(obj,varargin)
 %   APPLY   This method applies the algorithm
 %           SequentialQuadraticProgramming (i.e. Sequential Quadratic
 %           Programming) for optimization
@@ -54,7 +54,7 @@ for k=1:2:length(varargin)
     switch lower(varargin{k})
         case {'xoptimizationproblem'}   %extract OptimizationProblem
             if isa(varargin{k+1},'opencossan.optimization.OptimizationProblem')    %check that arguments is actually an OptimizationProblem object
-                Xop     = varargin{k+1};
+                optProb     = varargin{k+1};
             else
                 error('OpenCossan:SequentialQuadraticProgramming:apply',...
                     'The variable %s must be an OptimizationProblem object, provided object of type %s',...
@@ -62,17 +62,17 @@ for k=1:2:length(varargin)
             end
          case {'cxoptimizationproblem'}   %extract OptimizationProblem
             if isa(varargin{k+1}{1},'OptimizationProblem')    %check that arguments is actually an OptimizationProblem object
-                Xop     = varargin{k+1}{1};
+                optProb     = varargin{k+1}{1};
             else
                 error('OpenCossan:SequentialQuadraticProgramming:apply',...
                                         ['the variable  ' inputname(k) ' must be an OptimizationProblem object']);
-            end  
+            end
         case {'xoptimum'}   %extract OptimizationProblem
-            if isa(varargin{k+1},'Optimum')    %check that arguments is actually an OptimizationProblem object
-                Xoptimum  = varargin{k+1};
+            if isa(varargin{k+1},'optimum')    %check that arguments is actually an OptimizationProblem object
+                optimum  = varargin{k+1};
             else
                 error('OpenCossan:SequentialQuadraticProgramming:apply',...
-                    ['the variable  ' inputname(k) ' must be an Optimum object']);
+                    ['the variable  ' inputname(k) ' must be an optimum object']);
             end
         case 'vinitialsolution'
             VinitialSolution=varargin{k+1};
@@ -83,7 +83,7 @@ for k=1:2:length(varargin)
 end
 
 %% Check Optimization problem
-assert(logical(exist('Xop','var')), 'OpenCossan:SequentialQuadraticProgramming:apply',...
+assert(logical(exist('optProb','var')), 'OpenCossan:SequentialQuadraticProgramming:apply',...
     'Optimization problem must be defined')
 
 % Check inputs and initialize variables
@@ -91,19 +91,19 @@ obj = initializeOptimizer(obj);
 
 %% Check initial solution
 if exist('VinitialSolution','var')
-    Xop.VinitialSolution=VinitialSolution;
+    optProb.InitialSolution = VinitialSolution;
 end
 
-assert(size(Xop.VinitialSolution,1)==1, ...
+assert(size(optProb.InitialSolution,1)==1, ...
     'OpenCossan:SequentialQuadraticProgramming:apply',...
     'Only 1 initial setting point is allowed')
 
-%% initialize Optimum
-if ~exist('Xoptimum','var')
-    XoptGlobal=opencossan.optimization.Optimum('XoptimizationProblem',Xop,'Xoptimizer',obj);
+%% initialize optimum
+if ~exist('optimum','var')
+    XoptGlobal = opencossan.optimization.Optimum('XoptimizationProblem',optProb,'Xoptimizer',obj);
 else
-    %TODO: Check Optimum
-    XoptGlobal=Xoptimum;
+    %TODO: Check optimum
+    XoptGlobal = optimum;
 end
 
 
@@ -120,34 +120,34 @@ options.FiniteDifferenceType = obj.FiniteDifferenceType;
 
 options.OutputFcn = @obj.outputFunctionOptimiser;
 
-XsimOutGlobal=[];
+XsimOutGlobal = [];
 
-if isempty(Xop.Xmodel)
+if isempty(optProb.Model)
     % Create handle of the objective function
-    hobjfun=@(x)evaluate(Xop.XobjectiveFunction,'Xoptimizationproblem',Xop,...
+    hobjfun=@(x)evaluate(optProb.ObjectiveFunctions,'Xoptimizationproblem',optProb,...
         'MreferencePoints',x, ...
         'scaling',obj.ObjectiveFunctionScalingFactor);
 else
     % Create handle of the objective function
-    hobjfun=@(x)evaluate(Xop.XobjectiveFunction,'Xoptimizationproblem',Xop,...
+    hobjfun=@(x)evaluate(optProb.ObjectiveFunctions,'Xoptimizationproblem',optProb,...
         'MreferencePoints',x,...
-        'scaling',obj.ObjectiveFunctionScalingFactor,'Xmodel',Xop.Xmodel);
+        'scaling',obj.ObjectiveFunctionScalingFactor,'Xmodel',optProb.Model);
 end
 
 
-assert(~logical(isempty(Xop.Xconstraint)) ||  ...
-    ~logical(isempty(Xop.VlowerBounds)) || ...
-    ~logical(isempty(Xop.VupperBounds)), ...
+assert(~logical(isempty(optProb.Constraints)) ||  ...
+    ~logical(isempty(optProb.LowerBounds)) || ...
+    ~logical(isempty(optProb.UpperBounds)), ...
     'OpenCossan:SequentialQuadraticProgramming:apply',...
     'SequentialQuadraticProgramming is a constrained Nonlinear Optimization and requires or a constrains object or design variables with bounds')
 
 
 % Create handle for the constrains
-if isempty(Xop.Xconstraint)
+if isempty(optProb.Constraints)
     constraints = [];
 else
-    constraints = @(x)evaluate(Xop.Xconstraint, ...
-        'optimizationproblem', Xop, ...
+    constraints = @(x)evaluate(optProb.Constraints, ...
+        'optimizationproblem', optProb, ...
         'referencepoints', x, ...
         'scaling', obj.ConstraintScalingFactor);
 end
@@ -163,12 +163,12 @@ opencossan.optimization.OptimizationRecorder.clear();
 %% Perform Real optimization
 [XoptGlobal.VoptimalDesign,XoptGlobal.VoptimalScores,exitflag]  = ...
     fmincon(hobjfun,... % ObjectiveFunction
-    Xop.VinitialSolution,[],[],[],[],...
-    Xop.VlowerBounds,Xop.VupperBounds,... % Bounds
+    optProb.InitialSolution,[],[],[],[],...
+    optProb.LowerBounds, optProb.UpperBounds,... % Bounds
     constraints,... % Contrains
     options);
 
-if ~isempty(Xop.Xconstraint)
+if ~isempty(optProb.Constraints)
     Vindex=all(XoptGlobal.TablesValues.DesignVariables==XoptGlobal.VoptimalDesign,2);
     Mdataout=XoptGlobal.TablesValues.Constraints(Vindex);
     Vpos=find(all(~isnan(Mdataout),2));
@@ -177,7 +177,7 @@ end
 
 XoptGlobal.Sexitflag = obj.ExitReasons(exitflag);
 
-Xoptimum = XoptGlobal;
+optimum = XoptGlobal;
 
 varargout{1} = XsimOutGlobal;
 
@@ -189,12 +189,12 @@ if ~isdeployed
     if ~isempty(XdbDriver)
         XdbDriver.insertRecord('StableType','Result',...
             'Nid',getNextPrimaryID(OpenCossan.getDatabaseDriver,'Result'),...
-            'CcossanObjects',{Xoptimum},...
-            'CcossanObjectsNames',{'Xoptimum'});
+            'CcossanObjects',{optimum},...
+            'CcossanObjectsNames',{'optimum'});
     end
 end
 %% Delete global variables
-clear global XoptGlobal XsimOutGlobal
+clear global globaloptimum globalSimulationData
 
 %% Record Time
 opencossan.OpenCossan.getTimer().lap('Description','End apply@SequentialQuadraticProgramming');

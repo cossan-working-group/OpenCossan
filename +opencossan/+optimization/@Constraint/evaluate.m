@@ -49,12 +49,12 @@ end
 NdesignVariables = size(x,2); %number of design variables
 Ncandidates = size(x,1); % Number of candidate solutions
 
-assert(optProb.NdesignVariables == NdesignVariables, ...
+assert(optProb.NumberOfDesignVariables == NdesignVariables, ...
     'OpenCossan:optimization:constraint:evaluate',...
     'Number of design Variables not correct');
 
 % Prepare input object
-Xinput = optProb.Xinput.setDesignVariable('CSnames',optProb.CnamesDesignVariables,'Mvalues',x);
+Xinput = optProb.Input.setDesignVariable('CSnames',optProb.DesignVariableNames,'Mvalues',x);
 Tinput = Xinput.getTable;
 
 % Extract required information from the SimulationData object (evaluated in

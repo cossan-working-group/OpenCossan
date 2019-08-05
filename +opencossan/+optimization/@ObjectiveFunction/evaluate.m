@@ -71,16 +71,16 @@ if exist('Minput','var')
     NdesignVariables = size(Minput,2); %number of design variables
     Ncandidates=size(Minput,1); % Number of candidate solutions
     
-    assert(XoptProb.NdesignVariables==NdesignVariables, ...
+    assert(XoptProb.NumberOfDesignVariables == NdesignVariables, ...
         'OpenCossan:ObjectiveFunction:evaluate',...
         'Number of design Variables %i does not match with the dimension of the referece point (%i)', ...
-        XoptProb.NdesignVariables,NdesignVariables);
+        XoptProb.NumberOfDesignVariables,NdesignVariables);
 else
     NdesignVariables=0;
 end
 
 %% Prepare input values
-Xinput=XoptProb.Xinput.setDesignVariable('CSnames',XoptProb.CnamesDesignVariables,'Mvalues',Minput);
+Xinput=XoptProb.Input.setDesignVariable('CSnames',XoptProb.DesignVariableNames,'Mvalues',Minput);
 Tinput=Xinput.getTable();
 
 %MobjectiveFunction=zeros(length(Tinput),length(Xobj));
@@ -99,7 +99,7 @@ if exist('Xmodel','var')
         
         if Ncandidates<=NsamplesSimOut
             % Check the consistency of the XsimOutGlobal with Minput
-            Mvalues=XsimOutGlobal.getValues('Cnames',XoptProb.CnamesDesignVariables);
+            Mvalues=XsimOutGlobal.getValues('Cnames',XoptProb.DesignVariableNames);
             
             Vpos=false(NsamplesSimOut,1);
             

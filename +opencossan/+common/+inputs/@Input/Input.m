@@ -29,13 +29,13 @@ classdef Input < opencossan.common.CossanObject
     
     properties % Public access
         DoFunctionsCheck(1,1) logical = true     % boolean for check of the Functions
+        Members containers.Map;
     end
     
     properties %(SetAccess=protected)            % SetAccess protected
         RandomVariableSets=struct;               % Collection of RandomVariableSet/GaussianRandomVariableSet object
         Functions=struct;                        % Collection of Function objects
         Parameters=struct;                       % Collection of Parameter objects
-        DesignVariables=struct;                  % Collection of Design Variable objects
         %Xbset=struct;                           % Collection of BoundedSet
         StochasticProcesses=struct;              % Collection of StochasticProcess objects
         Samples                                  % Collection of Samples object
@@ -47,7 +47,6 @@ classdef Input < opencossan.common.CossanObject
         NrandomVariables                         % Total number of randomvariables
         %        Nvariables                      % Total number of variables (random and bounded) % TODO: SILVIA: Is this still used???
         NstochasticProcesses                     % Total number of stochastic process
-        NdesignVariables                         % Total number of designvariables
         Nparameters                              % Total number of Parameters
         Nfunctions
         Nsamples                                 % Total number of samples stored in the Input
@@ -59,7 +58,9 @@ classdef Input < opencossan.common.CossanObject
         StochasticProcessNames                   % names of the StochasticProcess
         FunctionNames                            % names of the Function
         ParameterNames                           % names of the Parameter
-        DesignVariableNames                      % names of the DesignVariable
+        DesignVariables
+        DesignVariableNames   
+        NumberOfDesignVariables                  % names of the DesignVariable
 %         CnamesBoundedSet                         % names of the BoundedSet
 %         CnamesIntervalVariable                   % names of the Interval Variables
         AreDesignVariablesDiscrete               % flag to check if discrete DesignVariables are used
@@ -136,7 +137,7 @@ classdef Input < opencossan.common.CossanObject
             p.addParameter('GaussianMixtureRandomVariableSet',GaussianMixtureRandomVariableSet)
             p.addParameter('StochasticProcess',StochasticProcess)
             p.addParameter('Parameter',Parameter)
-            p.addParameter('DesignVariable',[])
+            p.addParameter('DesignVariables',[])
             p.addParameter('Samples',Samples)
             p.addParameter('Members',{})
             p.addParameter('MembersNames',"")
@@ -196,6 +197,7 @@ classdef Input < opencossan.common.CossanObject
                     'Length of Members (%i) must be equal to the length of MembersNames (%i)', ...
                     length(CXobjects),length(CSmembers))
                 
+                Xobj.Members = containers.Map(CSmembers, CXobjects);
                 for iobj=1:length(CXobjects)
                     switch class(CXobjects{iobj})
                         case 'opencossan.common.inputs.Function'
@@ -209,15 +211,10 @@ classdef Input < opencossan.common.CossanObject
                             Xobj.StochasticProcesses.(CSmembers{iobj})= CXobjects{iobj};
                         case 'opencossan.common.inputs.Parameter'
                             Xobj.Parameters.(CSmembers{iobj})= CXobjects{iobj};
-                        case {'opencossan.optimization.ContinuousDesignVariable', ...
-                              'opencossan.optimization.DiscreteDesignVariable' }
-                            Xobj.DesignVariables.(CSmembers{iobj})= CXobjects{iobj};
-%                         case 'opencossan.intervals.BoundedSet'
-%                             Xobj.Xbset.(CSmembers{iobj})= CXobjects{iobj};
                         otherwise
-                            error('openCOSSAN:Input:WrongObjectType',...
-                                'The object %s of type %s is not a valid', ...
-                                CSmembers{iobj},class(CXobjects{iobj}));
+%                             error('openCOSSAN:Input:WrongObjectType',...
+%                                 'The object %s of type %s is not a valid', ...
+%                                 CSmembers{iobj},class(CXobjects{iobj}));
                     end
                 end
             else
@@ -250,15 +247,14 @@ classdef Input < opencossan.common.CossanObject
         
         %% Dependent properties
         
-        function outdata = get.Names(Xobj)
+        function names = get.Names(obj)
             % Please DO NOT change the order of the variable name returned
-            outdata  = [Xobj.RandomVariableNames ...
-                Xobj.FunctionNames ...
-                Xobj.ParameterNames ...
-                Xobj.StochasticProcessNames ...
-                Xobj.DesignVariableNames ...
-                %Xobj.CnamesIntervalVariable,...
-                ];
+            % TODO: Should become keys(obj.Members) at some point.
+            names = [obj.RandomVariableNames ...
+                obj.FunctionNames ...
+                obj.ParameterNames ...
+                obj.StochasticProcessNames ...
+                obj.DesignVariableNames];
         end
         
         function CVariableNames = get.RandomVariableNames(Xobj)
@@ -291,8 +287,28 @@ classdef Input < opencossan.common.CossanObject
             end
         end
         
-        function NdesignVariables = get.NdesignVariables(Xobj)
-            NdesignVariables=length(Xobj.DesignVariableNames);
+        function dvs = get.DesignVariables(obj)
+            dvs = [];
+            for k = keys(obj.Members)
+                if isa(obj.Members(k{1}),...
+                        'opencossan.optimization.DesignVariable')
+                    dvs = [dvs obj.Members(k{1})]; %#ok<AGROW>
+                end
+            end
+        end
+        
+        function names = get.DesignVariableNames(obj)
+            names = [];
+            for k = keys(obj.Members)
+                if isa(obj.Members(k{1}),...
+                        'opencossan.optimization.DesignVariable')
+                    names = [names string(k{1})]; %#ok<AGROW>
+                end
+            end
+        end
+        
+        function n = get.NumberOfDesignVariables(obj)
+            n = length(obj.DesignVariables);
         end
         
         function NstochasticProcesses = get.NstochasticProcesses(Xobj)
@@ -342,13 +358,7 @@ classdef Input < opencossan.common.CossanObject
         
         function ParameterNames = get.ParameterNames(Xobj)
             ParameterNames = fieldnames(Xobj.Parameters)';
-        end
-        
-        function DesignVariableNames = get.DesignVariableNames(Xobj)
-            DesignVariableNames = fieldnames(Xobj.DesignVariables)';
-            % Be sure the names are exported in a vector
-        end
-        
+        end        
 %         function CnamesBoundedSet = get.CnamesBoundedSet(Xobj)
 %             % Return the names of the BoundedSet (only)
 %             CnamesBoundedSet  = fieldnames(Xobj.Xbset)';

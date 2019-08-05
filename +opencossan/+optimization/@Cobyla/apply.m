@@ -79,64 +79,64 @@ if ~exist('Xop','var')
         'Optimization problem must be defined')
 end
 
-%% Add bounds to the constraints
-CnameDV=Xop.Xinput.DesignVariableNames;
+%% Add bounds of design variables as constraints
+lowerScript = "for n=1:length(Tinput), Toutput(n).%s = %s - Tinput(n).%s; end";
+upperScript = "for n=1:length(Tinput), Toutput(n).%s = + Tinput(n).%s - %s; end";
 
-for ndv=1:Xop.Xinput.NdesignVariables
+for i = 1:Xop.Input.NumberOfDesignVariables
     
-    if isfinite(Xop.Xinput.DesignVariables.(CnameDV{ndv}).LowerBound)
-        SdesignVariableName=[CnameDV{ndv} '_lowerBound'];
+    dv = Xop.Input.DesignVariables(i);
+    name = Xop.Input.DesignVariableNames(i);
+    
+    if isfinite(dv.LowerBound)
+        constraintName = name + "_lowerBound";
+        constraintScript = sprintf(lowerScript,...
+            constraintName,num2str(dv.LowerBound),name);
         
-        opencossan.OpenCossan.cossanDisp(['DesignVariable ' SdesignVariableName ' added to constraint object!'],3)
+        constraint = opencossan.optimization.Constraint(...
+        'Description', strjoin(["lower bound - current value of" name]), ...
+        'Script',constraintScript,'OutputNames',{char(constraintName)},...
+        'InputNames',{char(name)},'inequality',true,'Format','structure'); 
         
-        Sscript=['for n=1:length(Tinput), Toutput(n).' SdesignVariableName ' = ' ...
-            num2str(Xop.Xinput.DesignVariables.(CnameDV{ndv}).LowerBound) ...
-            ' - Tinput(n).' CnameDV{ndv} '; end'];
-        
-         XconstraintDV = opencossan.optimization.Constraint('Description',['lower bound - current value of ' CnameDV{ndv}], ...
-        'Script',Sscript, 'OutputNames',{SdesignVariableName},...
-        'InputNames',CnameDV(ndv),'inequality',true,'Format','structure'); 
-        
-        Xop=Xop.addConstraint(XconstraintDV); 
-
+        Xop = Xop.addConstraint(constraint); 
+        opencossan.OpenCossan.cossanDisp(...
+        "Added constraint for the lower bound of: " + name, 3);
     end
     
-    if isfinite(Xop.Xinput.DesignVariables.(CnameDV{ndv}).UpperBound)
-        SdesignVariableName=[CnameDV{ndv} '_upperBound'];
+    if isfinite(dv.UpperBound)
+        constraintName = name + "_upperBound";
+        constraintScript = sprintf(upperScript,...
+            constraintName, name, num2str(dv.UpperBound));
         
-        opencossan.OpenCossan.cossanDisp(['DesignVariable ' SdesignVariableName ' added to constraint object!'],3)
+        constraint = opencossan.optimization.Constraint(...
+        'Description', strjoin(["current value of", name, "- upper bound"]), ...
+        'Script',constraintScript, 'OutputNames',{char(constraintName)},...
+        'InputNames',{char(name)},'inequality',true,'format','structure'); 
         
-        Sscript=['for n=1:length(Tinput), Toutput(n).' SdesignVariableName ' = ' ...
-            ' + Tinput(n).' CnameDV{ndv} '- ' ...
-            num2str(Xop.Xinput.DesignVariables.(CnameDV{ndv}).UpperBound) '; end'];
-        
-        XconstraintDV = opencossan.optimization.Constraint('Description',['current value of ' CnameDV{ndv} ' - upper bound'], ...
-        'Script',Sscript, 'OutputNames',{SdesignVariableName},...
-        'InputNames',CnameDV(ndv),'inequality',true,'format','structure'); 
-        
-        Xop=Xop.addConstraint(XconstraintDV); 
-
+        Xop = Xop.addConstraint(constraint); 
+        opencossan.OpenCossan.cossanDisp(...
+        "Added constraint for the upper bound of: " + name, 3);
     end
 end
 
-assert(~isempty(Xop.Xconstraint),...
+assert(~isempty(Xop.Constraints),...
     'OpenCossan:cobyla:apply',...
     'It is not possible to apply COBYLA to solve UNCONSTRAINED problem')
 
-Ndv     = Xop.NdesignVariables;  % number of design variables
-N_ineq =  Xop.Nconstraints;       % Number of constrains
+Ndv = Xop.NumberOfDesignVariables;  % number of design variables
+N_ineq = Xop.NumberOfConstraints;       % Number of constrains
 
 %% Check initial solution
 if exist('VinitialSolution','var')
-    Xop.VinitialSolution=VinitialSolution;  
+    Xop.InitialSolution = VinitialSolution;  
 end
 
 %% initialize Optimum
 if ~exist('Xoptimum','var')
-    XoptGlobal=opencossan.optimization.Optimum('XoptimizationProblem',Xop,'Xoptimizer',Xobj);
+    XoptGlobal = opencossan.optimization.Optimum('XoptimizationProblem',Xop,'Xoptimizer',Xobj);
 else
     %TODO: Check Optimum
-    XoptGlobal=Xoptimum;
+    XoptGlobal = Xoptimum;
 end
 
 % initialize global variable
@@ -144,18 +144,18 @@ XsimOutGlobal=[];
 
 % Create handle of the objective function
 % This variable is retrieved by mex file by name.
-if isempty(Xop.Xmodel)
-    objective_function_cobyla=@(x)evaluate(Xop.XobjectiveFunction,'Xoptimizationproblem',Xop,...
+if isempty(Xop.Model)
+    objective_function_cobyla=@(x)evaluate(Xop.ObjectiveFunctions,'Xoptimizationproblem',Xop,...
     'MreferencePoints',x,...
     'scaling',Xobj.ObjectiveFunctionScalingFactor); %#ok<NASGU>
 else
-    objective_function_cobyla=@(x)evaluate(Xop.XobjectiveFunction,'Xoptimizationproblem',Xop,...
-    'MreferencePoints',x,'Xmodel',Xop.Xmodel,...
+    objective_function_cobyla=@(x)evaluate(Xop.ObjectiveFunctions,'Xoptimizationproblem',Xop,...
+    'MreferencePoints',x,'Xmodel',Xop.Model,...
     'scaling',Xobj.ObjectiveFunctionScalingFactor); %#ok<NASGU>
 end
 
 % Create handle for the constrains
-constraint_cobyla=@(x)evaluate(Xop.Xconstraint,'optimizationproblem',Xop,...
+constraint_cobyla=@(x)evaluate(Xop.Constraints,'optimizationproblem',Xop,...
     'referencepoints',x,...
     'scaling',Xobj.ConstraintScalingFactor); %#ok<NASGU>
 
@@ -166,7 +166,7 @@ opencossan.OpenCossan.getTimer().lap('Description',['COBYLA:' Xobj.Description])
 opencossan.optimization.OptimizationRecorder.clear();
 
 [VoptimalDesign,Nexitflag,XoptGlobal.VoptimalScores] = cobyla_matlab(Xobj,...
-    Xop.VinitialSolution,Xobj.MaxFunctionEvaluations,Xobj.rho_ini,Xobj.rho_end,Ndv,N_ineq);
+    Xop.InitialSolution,Xobj.MaxFunctionEvaluations,Xobj.rho_ini,Xobj.rho_end,Ndv,N_ineq);
 
 XoptGlobal.VoptimalDesign=VoptimalDesign;
 

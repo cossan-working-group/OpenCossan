@@ -153,7 +153,7 @@ classdef Optimum
             if isempty(Xobj.XOptimizationProblem)
                 CdesignVariableNames={};
             else
-                CdesignVariableNames=Xobj.XOptimizationProblem.CnamesDesignVariables;
+                CdesignVariableNames=Xobj.XOptimizationProblem.DesignVariableNames;
             end
         end
         
@@ -162,7 +162,7 @@ classdef Optimum
             if isempty(Xobj.XOptimizationProblem)
                 CconstraintsNames={};
             else
-                CconstraintsNames=Xobj.XOptimizationProblem.CconstraintsNames;
+                CconstraintsNames=Xobj.XOptimizationProblem.ConstraintNames;
             end
         end
         
@@ -170,7 +170,7 @@ classdef Optimum
             if isempty(Xobj.XOptimizationProblem)
                 CobjectiveFunctionNames={};
             else
-                CobjectiveFunctionNames=Xobj.XOptimizationProblem.CobjectiveFunctionNames;
+                CobjectiveFunctionNames=Xobj.XOptimizationProblem.ObjectiveFunctionNames;
             end
         end
         

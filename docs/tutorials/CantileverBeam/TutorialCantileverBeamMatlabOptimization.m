@@ -27,8 +27,12 @@ with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
 %
 % The optimization analysis requires the definition of Design Variables
 % (i.e. the variables that define new configurations)
-b = opencossan.optimization.ContinuousDesignVariable('value', 0.12, 'lowerBound', 0.01, 'upperBound', 0.50, 'Description', 'Beam width');
-h = opencossan.optimization.ContinuousDesignVariable('value', 0.54, 'lowerBound', 0.02, 'upperBound', 1, 'Description', 'Beam Heigth');
+b = opencossan.optimization.ContinuousDesignVariable(...
+    'value', 0.12, 'lowerBound', 0.01, 'upperBound', 0.50,...
+    'Description','Beam width');
+h = opencossan.optimization.ContinuousDesignVariable(...
+    'value', 0.54, 'lowerBound', 0.02, 'upperBound', 1,...
+    'Description', 'Beam Heigth');
 
 % In this example we do not use random variables and we only use Parameters
 L = opencossan.common.inputs.Parameter('value', 1.8, 'Description', 'Beam Length');
@@ -42,8 +46,9 @@ I = opencossan.common.inputs.Function('Description','Moment of Inertia','Express
 
 %% Prepare Input Object
 % The above prepared objects can be added to an Input Object
-XinputOptimization = opencossan.common.inputs.Input('Members',{L b P h rho E I maxDisplacement},...
-    'MembersNames',{'L' 'b' 'P' 'h' 'rho' 'E' 'I' 'MaxW'});
+XinputOptimization = opencossan.common.inputs.Input(...
+    'Members', {L b P h rho E I maxDisplacement},...
+    'MembersNames', {'L' 'b' 'P' 'h' 'rho' 'E' 'I' 'MaxW'});
 
 %% Preparation of the Evaluator
 % Use of a matlab script to compute the Beam displacement
@@ -130,8 +135,8 @@ XconMaxStress = opencossan.optimization.Constraint(...
     'Inequality',true);
 
 %% Create object OptimizationProblem
-Xop = opencossan.optimization.OptimizationProblem('Sdescription','Optimization problem', ...
-    'XobjectiveFunction',Xobjfun,'Xconstraint',XconMaxStress,'Xmodel',Xmodel);
+Xop = opencossan.optimization.OptimizationProblem('description', 'Optimization problem', ...
+    'objectivefunctions', Xobjfun, 'constraints', XconMaxStress, 'model', Xmodel);
 
 % Define Optimizers
 Xsqp = opencossan.optimization.SequentialQuadraticProgramming();

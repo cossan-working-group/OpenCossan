@@ -45,7 +45,7 @@ assert(logical(exist('Xinput','var')),...
     'openCOSSAN:DesignOfExperiments:sample', ...
     'The method sample requires an opencossan.common.inputs.Input object to be execured')
 
-Ndv=Xinput.NdesignVariables;
+Ndv=Xinput.NumberOfDesignVariables;
 Nrv=Xinput.NrandomVariables;
 CnamesRV=Xinput.RandomVariableNames;
 CnamesDV=Xinput.DesignVariableNames;
@@ -58,13 +58,11 @@ assert(Ndv>0 | Nrv>0,'openCOSSAN:DesignOfExperiments:sample:noDVorRV',...
 
 % DeseignVariables without bounds are not accepted
 if Ndv > 0
-    for idv = 1:Ndv
-        if Xinput.DesignVariables.(CnamesDV{idv}).LowerBound == -inf ...
-                || Xinput.DesignVariables.(CnamesDV{idv}).UpperBound == inf
-            error('openCOSSAN:DesignOfExperiments:sample',...
-                'All Design Variables should have a defined lower & upper bounds')
-        end
-    end
+    lb = [Xinput.DesignVariables.LowerBound];
+    ub = [Xinput.DesignVariables.UpperBound];
+    
+    assert(~any(isinf([lb, ub])), 'openCOSSAN:DesignOfExperiments:sample',...
+        'All Design Variables should have a defined lower & upper bounds');
 end
 
 % if TWO-LEVEL FACTORIAL is chosen, the dimension should be less than 25
@@ -217,52 +215,51 @@ else
         % The coordinates of the DOE points are transformed to actual values
         % using the following steps
         MdoePhysicalSpaceDV = zeros(size(Xobj.MdoeFactors(:,1:Ndv)));
-        for idv = 1:Ndv
+        idv = 0;
+        for dv = Xinput.DesignVariables
+            idv = idv + 1;
             % Xobj.LuseCurrentValues= TRUE => If MdoeFactor = 0, use CURRENT value of the DV
             if Xobj.LuseCurrentValues
                 % Identify the indices of zeros and other values
-                Vzeroindices = Xobj.MdoeFactors(:,idv+Nrv)==0;
-                Vnonzeroindices = find(Xobj.MdoeFactors(:,idv+Nrv));
+                zeroIndices = Xobj.MdoeFactors(:,idv+Nrv) == 0;
+                nonzeroIndices = find(Xobj.MdoeFactors(:, idv+Nrv));
                 % First map the zeros to the current values of the DVs
-                MdoePhysicalSpaceDV(Vzeroindices,idv) = ...
-                    Xinput.DesignVariables.(Xinput.DesignVariableNames{idv}).Value;
-                % For CONTINOUS DVs
-                if isa(Xinput.DesignVariables.(Xinput.DesignVariableNames{idv}), 'opencossan.optimization.ContinuousDesignVariable')
-                    interval = Xinput.DesignVariables.(Xinput.DesignVariableNames{idv}).UpperBound - ...
-                        Xinput.DesignVariables.(Xinput.DesignVariableNames{idv}).LowerBound;
-                    MdoePhysicalSpaceDV(Vnonzeroindices,idv) = ...
-                        Xinput.DesignVariables.(Xinput.DesignVariableNames{idv}).LowerBound + ...
-                        unifcdf(Xobj.MdoeFactors(Vnonzeroindices,idv+Nrv),-1,1).*interval;
-                    % For DISCRETE DVs
+                MdoePhysicalSpaceDV(zeroIndices,idv) = dv.Value;
+                
+                if isa(dv, 'opencossan.optimization.ContinuousDesignVariable')
+                    % For CONTINOUS DVs
+                    interval = dv.UpperBound - dv.LowerBound;
+                    
+                    MdoePhysicalSpaceDV(nonzeroIndices,idv) = ...
+                        dv.LowerBound + unifcdf(Xobj.MdoeFactors(nonzeroIndices,idv+Nrv),-1,1).*interval;
                 else
-                    Vindices = unidinv(unifcdf(Xobj.MdoeFactors(Vnonzeroindices,idv+Nrv),-1,1),...
-                        length(Xinput.DesignVariables.(Xinput.DesignVariableNames{idv}).Support));
+                    % For DISCRETE DVs
+                    Vindices = unidinv(unifcdf(Xobj.MdoeFactors(nonzeroIndices,idv+Nrv),-1,1),...
+                        length(dv.Support));
                     % Since unidinv returns NaN for zero, these are replaced woth the lowerbound, i.e.
                     % Vsupport(1) values
                     VNaNindices = isnan(Vindices);
                     Vindices(VNaNindices) = 1;
-                    MdoePhysicalSpaceDV(Vnonzeroindices,idv) = ...
-                        Xinput.DesignVariable.(Xinput.DesignVariableNames{idv}).Support(Vindices);
+                    MdoePhysicalSpaceDV(nonzeroIndices,idv) = ...
+                        dv.Support(Vindices);
                 end
                 % Xobj.LuseCurrentValues= TRUE => If MdoeFactor = 0, use MEDIAN value of the interval of DV
             else
-                % For CONTINOUS DVs
-                if isa(Xinput.DesignVariables.(Xinput.DesignVariable{idv}), 'opencossan.optimization.ContinuousDesignVariable')
-                    interval = Xinput.DesignVariables.(Xinput.DesignVariableNames{idv}).UpperBound - ...
-                        Xinput.DesignVariables.(Xinput.DesignVariableNames{idv}).LowerBound;
+                if isa(dv, 'opencossan.optimization.ContinuousDesignVariable')
+                    % For CONTINOUS DVs
+                    interval = dv.UpperBound - dv.LowerBound;
                     MdoePhysicalSpaceDV(:,idv) = ...
-                        Xinput.DesignVariables.(Xinput.DesignVariableNames{idv}).LowerBound + ...
-                        unifcdf(Xobj.MdoeFactors(:,idv+Nrv),-1,1).*interval;
-                    % For DISCRETE DVs
+                        dv.LowerBound + unifcdf(Xobj.MdoeFactors(:,idv+Nrv),-1,1).*interval;
                 else
+                    % For DISCRETE DVs
                     Vindices = unidinv(unifcdf(Xobj.MdoeFactors(:,idv+Nrv),-1,1),...
-                        length(Xinput.DesignVariables.(Xinput.DesignVariableNames{idv}).Support));
+                        length(dv.Support));
                     % Since unidinv returns NaN for zero, these are replaced woth the lowerbound, i.e.
                     % Vsupport(1) values
                     VNaNindices = isnan(Vindices);
                     Vindices(VNaNindices) = 1;
                     MdoePhysicalSpaceDV(:,idv) = ...
-                        Xinput.DesignVariables.(Xinput.DesignVariableNames{idv}).Support(Vindices);
+                        dv.Support(Vindices);
                 end
             end
         end
