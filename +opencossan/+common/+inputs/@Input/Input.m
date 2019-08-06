@@ -137,7 +137,7 @@ classdef Input < opencossan.common.CossanObject
             p.addParameter('GaussianMixtureRandomVariableSet',GaussianMixtureRandomVariableSet)
             p.addParameter('StochasticProcess',StochasticProcess)
             p.addParameter('Parameter',Parameter)
-            p.addParameter('DesignVariables',[])
+            p.addParameter('DesignVariable',[])
             p.addParameter('Samples',Samples)
             p.addParameter('Members',{})
             p.addParameter('MembersNames',"")
@@ -161,7 +161,7 @@ classdef Input < opencossan.common.CossanObject
                             'Only a scalar input is allowed after the Parameter field');
                         Xobj.Parameters.(inputname(k+1))=p.Results.Parameter;
                     case {'DesignVariable'}
-                        Xobj.DesignVariables.(inputname(k+1))=p.Results.DesignVariable;
+                        Xobj.Members(inputname(k+1)) = p.Results.DesignVariable;
                         %                     case {'xbset','xboundedset'}
                         %                         Xobj.Xbset.(inputname(k+1))=varargin{k+1};
                     case {'Description'}
@@ -222,6 +222,7 @@ classdef Input < opencossan.common.CossanObject
                     'openCOSSAN:Input',...
                     ['It is mandatory to pass objects using the ' ...
                     'PropertyName CXmembers']);
+                Xobj.Members = containers.Map();
             end
             
             if ~isempty(Xobj.Samples)
@@ -288,7 +289,7 @@ classdef Input < opencossan.common.CossanObject
         end
         
         function dvs = get.DesignVariables(obj)
-            dvs = [];
+            dvs = opencossan.optimization.DesignVariable.empty;
             for k = keys(obj.Members)
                 if isa(obj.Members(k{1}),...
                         'opencossan.optimization.DesignVariable')

@@ -1,4 +1,4 @@
-classdef EvolutionStrategy < Optimizer
+classdef EvolutionStrategy < opencossan.optimization.Optimizer
     %   Evolution Strategies is a gradient-free optimization algorithm that
     %   performs a stochastic search in the space of the design variables.
     

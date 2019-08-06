@@ -1,4 +1,4 @@
-classdef BFGS < Optimizer
+classdef BFGS < opencossan.optimization.Optimizer
     % BFFS class is intended for solving unconstrained nonlinear optimization
     % problem using gradients
     

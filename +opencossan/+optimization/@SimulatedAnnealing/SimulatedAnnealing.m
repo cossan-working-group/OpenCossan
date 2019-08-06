@@ -1,4 +1,4 @@
-classdef SimulatedAnnealing < Optimizer
+classdef SimulatedAnnealing < opencossan.optimization.Optimizer
     %   SimulatedAnnealing (SA) is a gradient-free optimization method. SA can
     %   be used to find a MINIMUM of a function.
     %% Properties of the object

@@ -84,13 +84,13 @@ for j=1:Xinput.NstochasticProcesses
 end
 
 % generates samples for DesignVariables
-if Xinput.NdesignVariables>0
-    Mdv=zeros(Nsamples,Xinput.NdesignVariables);
-    for n=1:Xinput.NdesignVariables
-        Mdv(:,n)=Xinput.DesignVariables.(Cdv{n}).sample('Nsamples',Nsamples,'perturbation',perturbation);
+if Xinput.NumberOfDesignVariables > 0
+    Mdv=zeros(Nsamples,Xinput.NumberOfDesignVariables);
+    for n = 1:Xinput.NumberOfDesignVariables
+        Mdv(:,n) = Xinput.DesignVariables(n).sample('Nsamples',Nsamples,'perturbation',perturbation);
     end
-    XsmplAdd=Samples('CnamesDesignVariable',Xinput.DesignVariableNames,'MdoeDesignVariables',Mdv);
-    Xsample=Xsample.add('XSamples',XsmplAdd);
+    XsmplAdd = Samples('CnamesDesignVariable',Xinput.DesignVariableNames,'MdoeDesignVariables',Mdv);
+    Xsample = Xsample.add('XSamples',XsmplAdd);
 end
 
 % If Ladd is true add generated samples to the sample object present in the Input

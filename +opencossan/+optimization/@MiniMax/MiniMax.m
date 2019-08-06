@@ -1,4 +1,4 @@
-classdef MiniMax < Optimizer
+classdef MiniMax < opencossan.optimization.Optimizer
     %  MiniMax class is intended for solving an multi-objective optimization
     %  problems.
     %% Properties of the object

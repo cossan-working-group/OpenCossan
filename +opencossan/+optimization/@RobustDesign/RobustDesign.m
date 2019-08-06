@@ -1,4 +1,4 @@
-classdef RobustDesign < OptimizationProblem
+classdef RobustDesign < opencossan.optimization.OptimizationProblem
     %RobustDesign This is class used to define a robust design problem.
     % It extends the class OptimizationProblem,
     

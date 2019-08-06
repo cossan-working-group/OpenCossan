@@ -65,7 +65,7 @@ switch class(XaddObject)
     case {'opencossan.optimization.ContinuousDesignVariable', ...
           'opencossan.optimization.DiscreteDesignVariable'}
         obj.Samples =[];
-        obj.DesignVariables.(Sname)=XaddObject;
+        obj.Members(Sname) = XaddObject;
     case {'opencossan.common.inputs.random.RandomVariableSet','opencossan.common.inputs.GaussianMixtureRandomVariableSet'}
         obj.Samples =[]; % Remove/reset Samples object
         obj.RandomVariableSets.(Sname)=XaddObject;       

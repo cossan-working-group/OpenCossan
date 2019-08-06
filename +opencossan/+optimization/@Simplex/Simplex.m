@@ -1,4 +1,4 @@
-classdef Simplex < Optimizer
+classdef Simplex < opencossan.optimization.Optimizer
     %SIMPLEX The simplex class define the optimizator SIMPLEX to solve
     % unconstrained nonlinear problems  using a gradients free method 
     

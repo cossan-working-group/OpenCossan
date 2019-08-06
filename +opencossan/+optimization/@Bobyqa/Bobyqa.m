@@ -1,4 +1,4 @@
-classdef Bobyqa < Optimizer
+classdef Bobyqa < opencossan.optimization.Optimizer
 %    BOBYQA (Bounded Optimization by Quadratic Approximation) 
 %   seeks the least value of a function of many variables,
 %   by applying a trust region method that forms quadratic models

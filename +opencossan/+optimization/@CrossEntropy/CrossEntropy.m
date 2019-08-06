@@ -1,4 +1,4 @@
-classdef CrossEntropy < Optimizer
+classdef CrossEntropy < opencossan.optimization.Optimizer
     %   Cross Entropy is a gradient-free unconstrained optimization algorithm
     %   based in stochastic search; if parameters of the model are tuned
     %   correctly, the solution provided by CE may correspond to the global

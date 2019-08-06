@@ -1,4 +1,4 @@
-classdef RBOProblem < OptimizationProblem
+classdef RBOProblem < opencossan.optimization.OptimizationProblem
     %RBOProblem This is class used to define the ReliabilityBasedOptimization
     %Problem. It exends the class OptimizationProblem,
     %

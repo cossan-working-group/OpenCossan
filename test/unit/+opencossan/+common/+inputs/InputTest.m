@@ -109,7 +109,7 @@ classdef InputTest < matlab.unittest.TestCase
         function testDesignVariableIO(testCase)
             Xdv1 = opencossan.optimization.ContinuousDesignVariable('Description', 'dummy', 'value', 5);
             Xin  = opencossan.common.inputs.Input('DesignVariable', Xdv1);
-            testCase.assumeEqual(Xin.DesignVariableNames, {'Xdv1'})
+            testCase.assumeEqual(Xin.DesignVariableNames, "Xdv1")
         end
         
         %% Test method add
@@ -126,7 +126,7 @@ classdef InputTest < matlab.unittest.TestCase
             Xin = opencossan.common.inputs.Input('Description', 'Description');
             Xin = Xin.add('Member', Xdv, 'Name', 'Xdv');
             testCase.assertLength(Xin.DesignVariables, 1)
-            testCase.assertEqual(Xin.DesignVariableNames, {'Xdv'});
+            testCase.assertEqual(Xin.DesignVariableNames, "Xdv");
         end
         
         function addShouldAddRandomVariableSet(testCase)
@@ -260,7 +260,7 @@ classdef InputTest < matlab.unittest.TestCase
             
             testCase.assertEqual(Xin.Names, ["x1","x2","Xfun1","Xmat1","SP1","Xdv1"]);
             testCase.assertEqual(Xin.StochasticProcessNames, {'SP1'});
-            testCase.assertEqual(Xin.DesignVariableNames, {'Xdv1'});
+            testCase.assertEqual(Xin.DesignVariableNames, "Xdv1");
             testCase.assertEqual(Xin.FunctionNames, {'Xfun1'});
         end
         

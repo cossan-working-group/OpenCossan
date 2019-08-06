@@ -31,12 +31,12 @@ switch lower(PropertyName)
             Out  = [];
         end
     case {'designvariablevalues'}
-        if ~Xobj.NdesignVariables == 0
-            Cdesvar    = (Xobj.DesignVariableNames);
-            for idv=1:length(Cdesvar)
-                Out.(Cdesvar{idv}) = Xobj.DesignVariables.(Cdesvar{idv}).Value;
+        if Xobj.NumberOfDesignVariables ~= 0
+            dvs = Xobj.DesignVariables;
+            names = Xobj.DesignVariableNames;
+            for i = 1:length(dvs)
+                Out.(names(i)) = dvs(i).Value;
             end
-            varargout{2}=[];
         else
             Out  = [];
         end
