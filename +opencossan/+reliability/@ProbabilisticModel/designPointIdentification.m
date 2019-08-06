@@ -45,7 +45,7 @@ for k=1:2:length(varargin)
                 'openCOSSAN:reliability:ProbabilisticModel:designPointIdentification', ...
                 ['An optimizer object is required, object provided of type ' mc.SuperClasses{1}.Name ])
         case {'mreferencepoints','vinitialsolution'}
-            VuUnsorted     = Xpm.Xmodel.Xinput.map2stdnorm(varargin{k+1});
+            VuUnsorted     = Xpm.Xmodel.Input.map2stdnorm(varargin{k+1});
         case {'csnamerandomvariables'}
             CnamesRandomVariablesInitialSolution =  varargin{k+1};
         case {'vinitialsolutionstandardnormalspace'}
@@ -68,7 +68,7 @@ if ~exist('Xoptim','var')
     % Use the HLRF approach
     [Xdp,Xopt] = HLRF(Xpm,varargin{:});    
 else    
-    Cmembers=Xpm.Xinput.CnamesRandomVariable;
+    Cmembers=Xpm.Input.RandomVariableNames;
     NPopulationSize=1;
     
     %% Reorder the initial solution
@@ -84,23 +84,23 @@ else
     end
     
     %% Compute performance function at the origin
-    XoutAtOrigin = Xpm.apply(Xpm.Xinput.getDefaultValuesStructure);
+    XoutAtOrigin = Xpm.apply(Xpm.Input.getDefaultValuesStructure);
     
     %% Assign default value for initial guess of design point
     if isempty(Mu0),
-        if isa(Xoptim,'GeneticAlgorithms'),
+        if isa(Xoptim,'opencossan.optimization.GeneticAlgorithms'),
             Mu0 = randn(Xoptim.NPopulationSize,length(Cmembers));   %create random population in standard normal space
         else
             Mu0 = zeros(1,length(Cmembers));    %create solution at origin of standard normal space
         end
-    elseif isa(Xoptim,'GeneticAlgorithms'),     %in case Mu0 was defined and Optimizer is GeneticAlgorithms, check size of initial solution
+    elseif isa(Xoptim,'opencossan.optimization.GeneticAlgorithms'),     %in case Mu0 was defined and Optimizer is GeneticAlgorithms, check size of initial solution
         if ~all(size(Mu0)==[Xoptim.NPopulationSize length(Cmembers)]),
             error('openCOSSAN:ProbabilisticModel:designPointIdentification',...
                 'the size of the matrix containing the initial population is incorrect');
         end
     end
     
-    if isa(Xoptim,'GeneticAlgorithms') %TODO: what about SA? 
+    if isa(Xoptim,'opencossan.optimization.GeneticAlgorithms') %TODO: what about SA? 
         if  strcmp(Xoptim.SMutationFcn,'mutationgaussian')
             Xoptim.SMutationFcn='mutationadaptfeasible';            
         end
@@ -125,6 +125,6 @@ else
     
 end
 
-OpenCossan.cossanDisp('[openCOSSAN:ProbabilisticModel:designPointIdentification] Design point identified',3)
+opencossan.OpenCossan.cossanDisp('[openCOSSAN:ProbabilisticModel:designPointIdentification] Design point identified',3)
 
 return

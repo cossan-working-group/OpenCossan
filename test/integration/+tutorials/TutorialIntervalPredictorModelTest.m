@@ -1,5 +1,5 @@
 classdef TutorialIntervalPredictorModelTest < tutorials.TutorialTest
-        
+    
     properties
         TutorialName  = 'TutorialIntervalPredictorModel';
 

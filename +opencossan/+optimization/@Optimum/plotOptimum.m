@@ -32,7 +32,7 @@ Cnames=Xobj.CdesignVariableNames;
 Cmarkers={'*' 'o' '+' 'x' 's' '^' 'v' 'p' 'h'};
 
 %% Validate input arguments
-OpenCossan.validateCossanInputs(varargin{:})
+opencossan.OpenCossan.validateCossanInputs(varargin{:})
 
 for k=1:2:length(varargin)
     switch lower(varargin{k})    

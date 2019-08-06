@@ -71,7 +71,7 @@ classdef DesignPoint
             end
             
             %% Validate input arguments
-            OpenCossan.validateCossanInputs(varargin{:})
+            opencossan.OpenCossan.validateCossanInputs(varargin{:})
             
             % Set values passed by the user
             for ivar=1:2:length(varargin)
@@ -86,7 +86,7 @@ classdef DesignPoint
                         % Probabilistic model
                         if isa(varargin{ivar+1},'opencossan.reliability.ProbabilisticModel')
                             Xoutput.XProbabilisticModel = varargin{ivar+1};
-                            Xoutput.Xinput = Xoutput.XProbabilisticModel.Xinput;
+                            Xoutput.Xinput = Xoutput.XProbabilisticModel.Input;
                         else
                             error('openCOSSAN:DesignPoint:DesignPoint',...
                                 'field XProbabilisticModel must contain a ProbabilisticModel');

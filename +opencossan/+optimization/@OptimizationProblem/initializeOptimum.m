@@ -32,8 +32,6 @@ function Xoptimum=initializeOptimum(Xobj,varargin)
     along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
 %}
 
-OpenCossan.validateCossanInputs(varargin{:});
-
 %set default values
 LgradientObjFun=false;
 LgradientConstraints=false;

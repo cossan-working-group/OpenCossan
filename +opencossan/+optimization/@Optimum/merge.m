@@ -51,14 +51,3 @@ assert(all(ismember(Xobj.CdesignVariableNames,Xobj2.CdesignVariableNames)),...
  
 % DO MERGE    
 Xobj.TablesValues=outerjoin(Xobj.TablesValues,Xobj2.TablesValues,'MergeKeys',true);
-
-
-
-
-
-
-
-
-
-
-

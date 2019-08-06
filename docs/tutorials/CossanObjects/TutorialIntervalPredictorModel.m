@@ -121,18 +121,12 @@ XmodRS2= opencossan.common.Model('Evaluator',XevRS2,'Input',Xin);
 Xpm_metamodel2 = opencossan.reliability.ProbabilisticModel('Model',XmodRS2,'PerformanceFunction',Xpf);
 Xo_metamodel2 = Xpm_metamodel2.computeFailureProbability(Xmc);
 
-f1=figure(1);
-Xipm.plotregression;
-close(f1);
 
-f2=figure(2);
-Xipm.reliabilityPlot;
-close(f2);
+f1 = Xipm.plotregression();
+f2 = Xipm.reliabilityPlot();
 
-f3=figure(3);
-Xipm2.plotregression;
-close(f3);
+f3 = Xipm2.plotregression();
+f4 = Xipm2.reliabilityPlot();
 
-f4=figure(4);
-Xipm2.reliabilityPlot;
-close(f4);
+%% Close figures
+close(f1,f2,f3,f4);

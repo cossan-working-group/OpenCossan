@@ -52,8 +52,8 @@ classdef Optimum
     
     %% Methods of the class
     methods
-        display(Xobj)  % shows the summary of the Optimum object
-        
+        disp(Xobj)  % shows the summary of the Optimum object
+
         varargout=plotOptimum(Xobj,varargin); % Main function used to plot values stored in the Optimum object
         
         varargout=plotObjectiveFunction(Xobj,varargin) % Display the evolution of the
@@ -179,7 +179,7 @@ classdef Optimum
     end     %of methods
     
     methods (Access = private)
-        TablesValues=initialaseTable(Xobj,varargin)
+        TablesValues=initializeTable(Xobj,varargin)
     end        
     
 end     %of classdef

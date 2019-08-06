@@ -33,7 +33,7 @@ MvaluesObjectiveFunction=[];
 MvaluesConstraint=[];
 
 if isempty(Xobj.TablesValues)
-    Xobj.TablesValues=initialaseTable(Xobj,varargin{:});
+    Xobj.TablesValues=initializeTable(Xobj,varargin{:});
 else
     
     for k=1:2:length(varargin)
@@ -56,7 +56,6 @@ else
     NobjFnc=size(Xobj.TablesValues.ObjectiveFnc,2);
     Ndv=size(Xobj.TablesValues.DesignVariables,2);
     Nconst=size(Xobj.TablesValues.Constraints,2);
-    
     
     %% Validate inputs
     NdesignVariablesInput = size(MvaluesDesignVariables,2);  % Nmber of design variables
@@ -82,15 +81,15 @@ else
     else
         MvaluesObjectiveFunction=NaN(Nrows,NobjFnc);
     end
-       
+    
     if ~isempty(MvaluesConstraint)
-%         assert(NconstraintFunctionsInput==Nconst,...
-%             'openCOSSAN:Optimum:addIteration:wrongNumberContraints',...
-%             'Size of Contraints function evaluation %i does not match (expected size: %i))', ...
-%             NconstraintFunctionsInput,Nconst);
+        assert(NconstraintFunctionsInput==Nconst,...
+            'openCOSSAN:Optimum:addIteration:wrongNumberContraints',...
+            'Size of Contraints function evaluation %i does not match (expected size: %i))', ...
+            NconstraintFunctionsInput,Nconst);
     else
         MvaluesConstraint=NaN(Nrows,Nconst);
-    end      
+    end
     
     % Create a new table
     AddTables=table(Viteration,...
@@ -106,4 +105,3 @@ else
     Xobj.TablesValues = [Xobj.TablesValues; AddTables];
     
 end
-

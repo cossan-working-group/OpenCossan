@@ -36,7 +36,7 @@ toleranceDesignPoint=1e-2;
 Nmaxiteration=10;
 LfiniteDifferences=true;
 
-Vu=zeros(1,Xobj.Xinput.NrandomVariables);
+Vu=zeros(1,Xobj.Input.NrandomVariables);
 
 %% Process inputs
 opencossan.OpenCossan.validateCossanInputs(varargin{:})
@@ -57,8 +57,8 @@ for k=1:2:length(varargin)
             Valpha= varargin{k+1};
         case {'nmaxiteration'}
             Nmaxiteration= varargin{k+1};
-        case {'xoptimum'},   %extract OptimizationProblem
-            if isa(varargin{k+1},'Optimum'),    %check that arguments is actually an OptimizationProblem object
+        case {'xoptimum'}   %extract OptimizationProblem
+            if isa(varargin{k+1},'Optimum')    %check that arguments is actually an OptimizationProblem object
                 Xoptimum  = varargin{k+1};
             else
                 error('openCOSSAN:HLRF',...
@@ -70,7 +70,7 @@ for k=1:2:length(varargin)
     end
 end
 
-CnameRandomVariable=Xobj.Xinput.CnamesRandomVariable;
+CnameRandomVariable=Xobj.Input.RandomVariableNames;
 %% Reorder the initial solution
 if exist('VuUnsorted','var')
     assert(logical(exist('CnamesRandomVariablesInitialSolution','var')),...
@@ -89,7 +89,7 @@ XoptimizationProblem=prepareOptimizationProblem(Xobj,Vu);
 
 %% initialize Optimum
 if ~exist('Xoptimum','var')
-    XoptGlobal=XoptimizationProblem.initializeOptimum('Lgradientobjectivefunction',false,'Lgradientconstraints',true);
+    XoptGlobal=opencossan.optimization.Optimum('XoptimizationProblem',XoptimizationProblem);
 else
     %TODO: Check Optimum
     XoptGlobal=Xoptimum;
@@ -108,16 +108,16 @@ hobjfun=@(x)evaluate(XoptimizationProblem.XobjectiveFunction,'Xoptimizationprobl
 %% Here we go
 while 1
     iIteration=iIteration+1;
-    Vphysical=Xobj.Xinput.map2physical(Vu);
+    Vphysical=Xobj.Input.map2physical(Vu);
     
     if LfiniteDifferences
         XlocalSensitivity=LocalSensitivityFiniteDifference('Xtarget',Xobj, ...
-            'Coutputname',{Xobj.SperformanceFunctionVariable},...
+            'Coutputname',{Xobj.PerformanceFunctionVariable},...
             'Cinputnames',CnameRandomVariable,'VreferencePoint',Vphysical);
     else
         if exist('Valpha','var')
          XlocalSensitivity=LocalSensitivityMonteCarlo('Xtarget',Xobj, ...
-            'Coutputname',{Xobj.SperformanceFunctionVariable},...
+            'Coutputname',{Xobj.PerformanceFunctionVariable},...
             'Cinputnames',CnameRandomVariable,'VreferencePoint',Vphysical,...
             'Valpha',Valpha);
             
@@ -136,18 +136,22 @@ while 1
     % Compute the gradient 
     [Xgradient,Xout]=XlocalSensitivity.computeGradientStandardNormalSpace;
     
+    Vg=Xout.getValues('SName', Xobj.PerformanceFunctionVariable);
+    
+    % Store values of input variables
+    MphysicalGradient=Xout.getValues('Cnames', CnameRandomVariable);    
+    
+    if iIteration == 1
+        perfomanceAtOrigin = Vg(1);
+    end
+    VevaluationPoint=Xobj.Input.map2stdnorm(Xgradient.VreferencePoint);
+    
     % Collect SimulationData
     if ~exist('XsimOut','var')
         XsimOut=Xout;
     else
         XsimOut=XsimOut.merge(Xout);
     end
-    
-    Vg=Xout.getValues('Sname', Xobj.SperformanceFunctionVariable);
-    if iIteration == 1
-        perfomanceAtOrigin = Vg(1);
-    end
-    VevaluationPoint=Xobj.Xinput.map2stdnorm(Xgradient.VreferencePoint);
     
     %% Check if the points are finite!
     
@@ -157,29 +161,20 @@ while 1
         sprintf('%e ',VevaluationPoint));
     
     % Evaluate Objective Function
-    [~] = hobjfun(Vphysical);  %Objective function evaluation
-    
-    %% Update Optimum object
-               
-    XoptGlobal.Xconstrains=addData(XoptGlobal.Xconstrains,...
-            'Vdata',Vg(1),'Mcoord',length(XoptGlobal.Xconstrains.Mcoord)+1);
-        
-    XoptGlobal.XconstrainsGradient= ...
-                addData(XoptGlobal.XconstrainsGradient,...
-                'Vdata',Xgradient.Valpha,'Mcoord',XoptGlobal.NevaluationsConstraints);
-    
+    [~] = hobjfun(Vu);  %Objective function evaluation
+    % Compute important direction
     Valpha=Xgradient.Valpha;
-    
+       
     VB=(VevaluationPoint*Valpha)*Valpha';
-    Vu=VB -Vg(1)/norm(Xgradient.Vgradient)* Valpha';
+    Vu=VB -Vg(1)/norm(Xgradient.Vgradient)* Valpha'; 
     
-    
+    % Compute safety factor beta
     if iIteration==1
         bet0  = norm(Vu);
     else
         bet  = norm(Vu);
         convergenceFactor=abs( (bet - bet0) / bet0);
-        OpenCossan.cossanDisp(sprintf('* %i Convergence factor %e ',iIteration,convergenceFactor),2)
+        opencossan.OpenCossan.cossanDisp(sprintf('* %i Convergence factor %e ',iIteration,convergenceFactor),2)
         if convergenceFactor < toleranceDesignPoint,
             Sexitflag   = 'HL-RF converged';
             break
@@ -190,6 +185,13 @@ while 1
         
         bet0    = bet;
     end
+    
+    %% Update Optimum object
+    % Add only the values of the constraints
+     XoptGlobal=XoptGlobal.addIteration('MdesignVariables',MphysicalGradient,...
+                            'ConstraintFunction',Vg,...
+                            'Viterations',repmat(iIteration,size(MphysicalGradient,1),1));
+                        
 end
 
 Xoptimum=XoptGlobal;

@@ -1,4 +1,4 @@
-function tableOutput = evaluate(Xobj,Minputs)
+function tableOutput = evaluate(obj, inputs)
 %Evaluate
 %
 %   This method applies the ResponseSurface over an Input object
@@ -9,30 +9,21 @@ function tableOutput = evaluate(Xobj,Minputs)
 %
 % Copyright~1993-2011, COSSAN Working Group, University of Innsbruck, Austria$
 
-%%  Check that ResponseSurface has been trained
-import opencossan.common.outputs.SimulationData
-
 %%  Evaluate response surface
-Minputs=table2array(Minputs);
+inputs = table2array(inputs);
 
-Minputs=Minputs./Xobj.rescaleInputs;
-MD      = x2fx(Minputs,Xobj.Mexponents);
+inputs = inputs./obj.RescaleInputs;
+MD = x2fx(inputs,obj.Exponents);
 
-Mrs=zeros(size(Minputs,1),length(Xobj.OutputNames));
+assert(length(obj.OutputNames) == 1, ...
+    'Currently only one output name is supported')
 
-assert(length(Xobj.OutputNames)==1,'Currently only one output name is supported')
-
-MrsUpper=0.5*(MD-abs(MD))*Xobj.PLower+0.5*(MD+abs(MD))*Xobj.PUpper;
-MrsLower=0.5*(MD+abs(MD))*Xobj.PLower+0.5*(MD-abs(MD))*Xobj.PUpper;
-
-if strcmpi(Xobj.Bound,'lower')
-    Mrs=MrsLower;
-elseif strcmpi(Xobj.Bound,'upper')
-    Mrs=MrsUpper;
-else
-    error('Unknown Bound Error')
+if strcmpi(obj.Bound,'lower')
+    Mrs = 0.5*(MD+abs(MD))*obj.PLower+0.5*(MD-abs(MD))*obj.PUpper;
+elseif strcmpi(obj.Bound,'upper')
+    Mrs = 0.5*(MD-abs(MD))*obj.PLower+0.5*(MD+abs(MD))*obj.PUpper;
 end
 
-tableOutput=array2table(Mrs,'VariableNames',Xobj.OutputNames);
+tableOutput = array2table(Mrs, 'VariableNames', obj.OutputNames);
 
 return

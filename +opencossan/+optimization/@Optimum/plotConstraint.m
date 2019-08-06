@@ -3,7 +3,7 @@ function varargout=plotConstraint(Xobj,varargin)
 %
 % Check that some constraints exist
 if Xobj.XOptimizationProblem.Nconstraints==0
-    OpenCossan.cossanDisp('No contraints present in the Optimum object, nothing to show :(',1)
+    opencossan.OpenCossan.cossanDisp('No contraints present in the Optimum object, nothing to show :(',1)
     return
 end
 
@@ -44,4 +44,3 @@ varargin{end+1}='Constraint';
 varargout{:}=plotOptimum(Xobj,varargin{:});
 
 end
-
