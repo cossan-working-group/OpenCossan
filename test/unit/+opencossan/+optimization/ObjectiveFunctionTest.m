@@ -7,7 +7,6 @@ classdef ObjectiveFunctionTest < matlab.unittest.TestCase
         Script = 'for n=1:length(Tinput), Toutput(n).Out = Tinput(n).In1 + Tinput(n).In2; end';
         OutputNames = {'Out'};
         InputNames = {'In1' 'In2'};
-        Scaling = 2;
     end
     
     
@@ -23,13 +22,11 @@ classdef ObjectiveFunctionTest < matlab.unittest.TestCase
                 'Description', testCase.Description, ...
                 'Script', testCase.Script, ...
                 'OutputNames', testCase.OutputNames, ...
-                'InputNames', testCase.InputNames, ...
-                'Scaling', testCase.Scaling);
+                'InputNames', testCase.InputNames);
             testCase.verifyEqual(obj.Description, testCase.Description);
             testCase.verifyEqual(obj.Script, testCase.Script);
             testCase.verifyEqual(obj.OutputNames, testCase.OutputNames);
             testCase.verifyEqual(obj.InputNames, testCase.InputNames);
-            testCase.verifyEqual(obj.Scaling, testCase.Scaling);
         end
         
         function shouldErrorForMultipleOutputs(testCase)

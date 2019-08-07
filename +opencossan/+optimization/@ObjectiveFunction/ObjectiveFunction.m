@@ -20,30 +20,15 @@ classdef ObjectiveFunction < opencossan.workers.Mio
     along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
     %}
     
-    properties
-        % Scaling parameter for the objective function
-        Scaling(1,1) double = 1;
-    end
-    
     methods
         function obj = ObjectiveFunction(varargin)
             %OBJECTIVEFUNCTION Can only have one single output.
             %
             % see also 
             
-            if nargin == 0
-                super_args = {};
-            else
-                [optional, super_args] = ...
-                    opencossan.common.utilities.parseOptionalNameValuePairs( ...
-                        "scaling",{1}, varargin{:});
-            end
-            
-            obj@opencossan.workers.Mio(super_args{:});
+            obj@opencossan.workers.Mio(varargin{:});
             
             if nargin > 0
-                obj.Scaling = optional.scaling;
-
                 % The objective function must have a single output
                 assert(length(obj.OutputNames) == 1,...
                     'openCOSSAN:optimization:ObjectiveFunction',...
