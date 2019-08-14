@@ -20,15 +20,11 @@ You should have received a copy of the GNU General Public License along
 with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
 %}
 
-% Define global variable to store the optimum
-
-global XsimOutGlobal
-
 [required, varargin] = opencossan.common.utilities.parseRequiredNameValuePairs(...
     ["optimizationproblem", "referencepoints"], varargin{:});
 
 optional = opencossan.common.utilities.parseOptionalNameValuePairs(...
-    ["scaling"], {[], 1}, varargin{:});
+    "scaling", {[], 1}, varargin{:});
 
 assert(isa(required.optimizationproblem, 'opencossan.optimization.OptimizationProblem'), ...
     'OpenCossan:optimization:constraint:evaluate',...
@@ -53,18 +49,21 @@ assert(optProb.NumberOfDesignVariables == NdesignVariables, ...
 Xinput = optProb.Input.setDesignVariable('CSnames',optProb.DesignVariableNames,'Mvalues',x);
 Tinput = Xinput.getTable;
 
-% Extract required information from the SimulationData object (evaluated in
-% the Objective Function) if available
+modelResult = ...
+    opencossan.optimization.OptimizationRecorder.getModelEvaluation(...
+    optProb.DesignVariableNames, x);
 
-% Evaluate the model if required by the constraints
-
-XsimOutGlobal = apply(optProb.Model,Tinput);
+if isempty(modelResult)
+    modelResult = apply(optProb.Model,Tinput);
+    modelResult = modelResult.TableValues;
+    opencossan.optimization.OptimizationRecorder.recordModelEvaluations(...
+        modelResult);
+end
 
 constraintValues = zeros(size(x));
 for i = 1:numel(obj)
-    TableInputSolver = opencossan.workers.Evaluator.addField2Table(obj(i),XsimOutGlobal,Tinput);
-    
-    %% Evaluate function
+    TableInputSolver = modelResult(:,obj(i).InputNames);
+
     TableOutConstrains = evaluate@opencossan.workers.Mio(obj(i),TableInputSolver);
     
     constraintValues(:,i) = TableOutConstrains.(obj(i).OutputNames{1});

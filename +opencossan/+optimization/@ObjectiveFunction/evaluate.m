@@ -29,16 +29,11 @@ function value = evaluate(obj, varargin)
     along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
 %}
 
-% Define global variable to store the optimum
-global XsimOutGlobal
-
 % Process inputs
 scaling=1;
 
 for k=1:2:length(varargin)
     switch lower(varargin{k})
-        case 'xmodel'
-            Xmodel=varargin{k+1};
         case 'xoptimizationproblem'
             XoptProb=varargin{k+1};
         case 'mreferencepoints'
@@ -75,70 +70,25 @@ else
     NdesignVariables=0;
 end
 
-%% Prepare input values
-Xinput=XoptProb.Input.setDesignVariable('CSnames',XoptProb.DesignVariableNames,'Mvalues',Minput);
-Tinput=Xinput.getTable();
+% prepare input
+Xinput = XoptProb.Input.setDesignVariable('CSnames',XoptProb.DesignVariableNames,'Mvalues',Minput);
+Tinput = Xinput.getTable();
 
-%MobjectiveFunction=zeros(length(Tinput),length(Xobj));
+% evaluate model
+modelResult = ...
+    opencossan.optimization.OptimizationRecorder.getModelEvaluation(...
+    XoptProb.DesignVariableNames, Minput);
 
-%% Evaluate Model
-if exist('Xmodel','var')
-    % If a model should be evaluate then check first if the solution has been
-    % already computed during the evaluation of the constraints
-    
-    % TODO: Check computed solutions for genetic algorithm
-    if false
-        if ~isempty(XsimOutGlobal)
-            NsamplesSimOut=XsimOutGlobal.Nsamples;
-        else
-            NsamplesSimOut=0;
-        end
-        
-        if Ncandidates<=NsamplesSimOut
-            % Check the consistency of the XsimOutGlobal with Minput
-            Mvalues=XsimOutGlobal.getValues('Cnames',XoptProb.DesignVariableNames);
-            
-            Vpos=false(NsamplesSimOut,1);
-            
-            for iCandidates=1:Ncandidates
-                Vindex=false(NsamplesSimOut,1);
-                for iSamples=1:NsamplesSimOut
-                    if abs(max(Minput(iCandidates,:)-Mvalues(iSamples,:)))<1e-6
-                        Vindex(iSamples)=true;
-                    end
-                end
-                
-                if sum(Vindex)>0
-                    Vpos(iCandidates)=true;
-                end
-            end
-            
-            opencossan.OpenCossan.cossanDisp(['[OpenCossan:ObjectiveFunction:evaluate] Ri-evaluating model (' ...
-                num2str(Ncandidates-sum(Vpos))   '/' num2str(Ncandidates) ')'],4)
-            
-            % Remove Samples not present anymore in the candidate solutions
-            if Ncandidates==sum(Vpos)
-                XsimOutGlobal.TableValues(~Vpos,:) = [];
-            else
-                XsimOutGlobal = apply(Xmodel,Tinput);
-                % Update counter
-                XoptGlobal.NevaluationsModel=XoptGlobal.NevaluationsModel+height(Tinput);
-            end
-        else
-            opencossan.OpenCossan.cossanDisp('[OpenCossan:ObjectiveFunction:evaluate] Ri-evaluating all samples',4)
-            XsimOutGlobal = apply(Xmodel,Tinput);
-        end
-    else
-        % Evaluate the model
-        opencossan.OpenCossan.cossanDisp('[OpenCossan:ObjectiveFunction:evaluate] Ri-evaluating all samples',4)
-        XsimOutGlobal = apply(Xmodel,Tinput);
-    end
+if isempty(modelResult)
+    modelResult = apply(XoptProb.Model,Tinput);
+    modelResult = modelResult.TableValues;
+    opencossan.optimization.OptimizationRecorder.recordModelEvaluations(...
+        modelResult);
 end
-
 
 for iobj=1:length(obj)
     % Prepare Input structure
-    TinputSolver = opencossan.workers.Evaluator.addField2Table(obj(iobj),XsimOutGlobal,Tinput);
+    TinputSolver = modelResult(:,obj(iobj).InputNames);
     
     % Evalutate Obj.Function
     XoutObjective = evaluate@opencossan.workers.Mio(obj(iobj),TinputSolver);

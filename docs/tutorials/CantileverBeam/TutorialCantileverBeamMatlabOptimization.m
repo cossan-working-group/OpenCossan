@@ -152,6 +152,8 @@ opencossan.OpenCossan.resetRandomNumberGenerator(542727)
 
 % We start with the Sequential Quadratic Programming method.
 Xoptimum1 = Xop.optimize('Xoptimizer',Xsqp);
+
+return;
 % Show results of the optimization
 disp(Xoptimum1)
 % Now we optimize the problem using Cobyla

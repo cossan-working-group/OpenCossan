@@ -25,6 +25,7 @@ classdef (Sealed) OptimizationRecorder < handle
         Constraints table = table();
         % Results of objective function evaluations
         ObjectiveFunction table = table();
+        ModelEvaluations table = table();
     end
     
     properties (Dependent)
@@ -77,10 +78,27 @@ classdef (Sealed) OptimizationRecorder < handle
                 {'DesignVariables', 'ObjectiveFnc'})];
         end
         
+        function recordModelEvaluations(model)
+            recorder = opencossan.optimization.OptimizationRecorder.getInstance();
+            recorder.ModelEvaluations = [
+                recorder.ModelEvaluations; model];
+        end
+        
+        function values = getModelEvaluation(names, values)
+            recorder = opencossan.optimization.OptimizationRecorder.getInstance();
+            if isempty(recorder.ModelEvaluations)
+                values = [];
+            else
+                idx = all(table2array(recorder.ModelEvaluations(:, names)) == values,2);
+                values = recorder.ModelEvaluations(idx,:);
+            end
+        end
+        
         function clear()
             recorder = opencossan.optimization.OptimizationRecorder.getInstance();
             recorder.Constraints = table();
             recorder.ObjectiveFunction = table();
+            recorder.ModelEvaluations = table();
         end
     end
 end

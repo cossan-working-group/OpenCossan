@@ -46,9 +46,6 @@ function [optimum,varargout] = apply(obj,varargin)
 
 import opencossan.optimization.OptimizationRecorder;
 
-%% Define global variable for the objective function and the constrains
-global XsimOutGlobal
-
 opencossan.OpenCossan.validateCossanInputs(varargin{:});
 
 %  Check whether or not required arguments have been passed
@@ -106,8 +103,6 @@ options.FiniteDifferenceType = obj.FiniteDifferenceType;
 
 % options.OutputFcn = @obj.outputFunctionOptimiser;
 
-XsimOutGlobal = [];
-
 if isempty(optProb.Model)
     % Create handle of the objective function
     hobjfun=@(x)evaluate(optProb.ObjectiveFunctions,'Xoptimizationproblem',optProb,...
@@ -117,7 +112,7 @@ else
     % Create handle of the objective function
     hobjfun=@(x)evaluate(optProb.ObjectiveFunctions,'Xoptimizationproblem',optProb,...
         'MreferencePoints',x,...
-        'scaling',obj.ObjectiveFunctionScalingFactor,'Xmodel',optProb.Model);
+        'scaling',obj.ObjectiveFunctionScalingFactor);
 end
 
 
@@ -163,9 +158,10 @@ optimum = opencossan.optimization.Optimum(...
     'optimizationproblem', optProb, ...
     'optimizer', obj, ...
     'constraints', OptimizationRecorder.getInstance().Constraints, ...
-    'objectivefunction', OptimizationRecorder.getInstance().ObjectiveFunction);
+    'objectivefunction', OptimizationRecorder.getInstance().ObjectiveFunction, ...
+    'modelevaluations', OptimizationRecorder.getInstance().ModelEvaluations);
 
-varargout{1} = XsimOutGlobal;
+varargout{1} = {};
 
 if ~isdeployed
     % add entries in simulation and analysis database at the end of the
@@ -179,7 +175,3 @@ if ~isdeployed
             'CcossanObjectsNames',{'optimum'});
     end
 end
-%% Delete global variables
-clear global globalSimulationData
-
-

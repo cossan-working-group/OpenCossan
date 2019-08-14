@@ -41,6 +41,8 @@ classdef Optimum < opencossan.common.CossanObject
         Constraints table = table();
         % Results of objective function evaluations
         ObjectiveFunction table = table();
+        % Results of model evaluations
+        ModelEvaluations table = table();
     end
     
     properties (Dependent=true)
@@ -60,7 +62,7 @@ classdef Optimum < opencossan.common.CossanObject
                     opencossan.common.utilities.parseRequiredNameValuePairs(...
                     ["exitflag", "totaltime", "optimizationproblem", ...
                      "optimizer", "optimalsolution", "constraints", ...
-                     "objectivefunction"], varargin{:});
+                     "objectivefunction", "modelevaluations"], varargin{:});
             end
             obj@opencossan.common.CossanObject(super_args{:});
             
@@ -72,6 +74,7 @@ classdef Optimum < opencossan.common.CossanObject
                 obj.OptimalSolution = required.optimalsolution;
                 obj.Constraints = required.constraints;
                 obj.ObjectiveFunction = required.objectivefunction;
+                obj.ModelEvaluations = required.modelevaluations;
             end
         end
         
