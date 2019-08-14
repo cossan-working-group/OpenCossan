@@ -75,7 +75,7 @@ classdef (Sealed) OptimizationRecorder < handle
             recorder.ObjectiveFunction = [
                 recorder.ObjectiveFunction; ...
                 table(variables,objFcn,'VariableNames', ...
-                {'DesignVariables', 'ObjectiveFnc'})];
+                {'DesignVariables', 'ObjectiveFunction'})];
         end
         
         function recordModelEvaluations(model)

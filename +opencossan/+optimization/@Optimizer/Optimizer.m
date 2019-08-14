@@ -106,6 +106,6 @@ classdef Optimizer < opencossan.common.CossanObject
     end
     
     methods (Abstract)
-        [optimum, varargout] = apply(obj, varargin)
+        optimum = apply(obj, varargin)
     end
 end

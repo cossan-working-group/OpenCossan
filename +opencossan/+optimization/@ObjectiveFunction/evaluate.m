@@ -31,7 +31,7 @@ function value = evaluate(obj, varargin)
 
 % Process inputs
 scaling=1;
-
+transpose = false;
 for k=1:2:length(varargin)
     switch lower(varargin{k})
         case 'xoptimizationproblem'
@@ -40,6 +40,8 @@ for k=1:2:length(varargin)
             Minput=varargin{k+1};
         case 'scaling'
             scaling=varargin{k+1};
+        case 'transpose'
+            transpose = varargin{k+1};
         case 'cxobjects'
             obj.Cxobjects=varargin{k+1};
         otherwise
@@ -48,16 +50,15 @@ for k=1:2:length(varargin)
     end
 end
 
-% Collect quantities
-Coutputnames=[obj.OutputNames];
-
 %% Check inputs
 assert(logical(exist('XoptProb','var')),...
     'OpenCossan:ObjectiveFunction:evaluate',...
     'An optimizationProblem object must be defined');
 
 if exist('Minput','var')
-    % TODO: Transpose values for cobyla
+    if transpose
+        Minput = Minput';
+    end
     
     NdesignVariables = size(Minput,2); %number of design variables
     Ncandidates=size(Minput,1); % Number of candidate solutions
@@ -66,8 +67,6 @@ if exist('Minput','var')
         'OpenCossan:ObjectiveFunction:evaluate',...
         'Number of design Variables %i does not match with the dimension of the referece point (%i)', ...
         XoptProb.NumberOfDesignVariables,NdesignVariables);
-else
-    NdesignVariables=0;
 end
 
 % prepare input

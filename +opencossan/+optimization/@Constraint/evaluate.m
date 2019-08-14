@@ -24,7 +24,7 @@ with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
     ["optimizationproblem", "referencepoints"], varargin{:});
 
 optional = opencossan.common.utilities.parseOptionalNameValuePairs(...
-    "scaling", {[], 1}, varargin{:});
+    ["scaling", "transpose"], {1, false}, varargin{:});
 
 assert(isa(required.optimizationproblem, 'opencossan.optimization.OptimizationProblem'), ...
     'OpenCossan:optimization:constraint:evaluate',...
@@ -34,14 +34,13 @@ assert(isa(required.optimizationproblem, 'opencossan.optimization.OptimizationPr
 optProb = required.optimizationproblem;
 x = required.referencepoints;
 
-scaling = optional.scaling;
+if optional.transpose
+    x = x';
+end
 
-% TODO: Transpose values for cobyla
-
-NdesignVariables = size(x,2); %number of design variables
 Ncandidates = size(x,1); % Number of candidate solutions
 
-assert(optProb.NumberOfDesignVariables == NdesignVariables, ...
+assert(optProb.NumberOfDesignVariables == size(x,2), ...
     'OpenCossan:optimization:constraint:evaluate',...
     'Number of design Variables not correct');
 
@@ -70,7 +69,7 @@ for i = 1:numel(obj)
 end
 
 %%   Apply scaling constant
-constraintValues = constraintValues(1:Ncandidates,:)/scaling;
+constraintValues = constraintValues(1:Ncandidates,:)/optional.scaling;
 
 % Assign output to the inequality and equality constrains
 in = constraintValues(:,[obj.IsInequality]);

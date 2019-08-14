@@ -1,4 +1,4 @@
-function [optimum,varargout] = apply(obj,varargin)
+function optimum = apply(obj, varargin)
 %   APPLY   This method applies the algorithm
 %           SequentialQuadraticProgramming (i.e. Sequential Quadratic
 %           Programming) for optimization
@@ -45,48 +45,22 @@ function [optimum,varargout] = apply(obj,varargin)
 %}
 
 import opencossan.optimization.OptimizationRecorder;
+import opencossan.common.utilities.*;
 
-opencossan.OpenCossan.validateCossanInputs(varargin{:});
+[required, varargin] = parseRequiredNameValuePairs(...
+    "optimizationproblem", varargin{:});
 
-%  Check whether or not required arguments have been passed
-for k=1:2:length(varargin)
-    switch lower(varargin{k})
-        case {'xoptimizationproblem'}   %extract OptimizationProblem
-            if isa(varargin{k+1},'opencossan.optimization.OptimizationProblem')    %check that arguments is actually an OptimizationProblem object
-                optProb     = varargin{k+1};
-            else
-                error('OpenCossan:SequentialQuadraticProgramming:apply',...
-                    'The variable %s must be an OptimizationProblem object, provided object of type %s',...
-                    inputname(k),class(varargin{k+1}));
-            end
-         case {'cxoptimizationproblem'}   %extract OptimizationProblem
-            if isa(varargin{k+1}{1},'OptimizationProblem')    %check that arguments is actually an OptimizationProblem object
-                optProb     = varargin{k+1}{1};
-            else
-                error('OpenCossan:SequentialQuadraticProgramming:apply',...
-                                        ['the variable  ' inputname(k) ' must be an OptimizationProblem object']);
-            end
-        case 'vinitialsolution'
-            VinitialSolution=varargin{k+1};
-        otherwise
-            error('OpenCossan:SequentialQuadraticProgramming:apply',...
-                'the field %s is not valid', varargin{k});
-    end
-end
+optProb = required.optimizationproblem;
 
-%% Check Optimization problem
-assert(logical(exist('optProb','var')), 'OpenCossan:SequentialQuadraticProgramming:apply',...
-    'Optimization problem must be defined')
+optional = parseOptionalNameValuePairs(...
+    "initialsolution", {optProb.InitialSolution}, ...
+    varargin{:});
 
+x0 = optional.initialsolution;
 % Check inputs and initialize variables
 obj = initializeOptimizer(obj);
 
-%% Check initial solution
-if exist('VinitialSolution','var')
-    optProb.InitialSolution = VinitialSolution;
-end
-
-assert(size(optProb.InitialSolution,1)==1, ...
+assert(size(x0, 1) == 1, ...
     'OpenCossan:SequentialQuadraticProgramming:apply',...
     'Only 1 initial setting point is allowed')
 
@@ -101,27 +75,17 @@ options.StepTolerance = obj.DesignVariableTolerance;
 options.FiniteDifferenceStepSize = obj.FiniteDifferenceStepSize;
 options.FiniteDifferenceType = obj.FiniteDifferenceType;
 
-% options.OutputFcn = @obj.outputFunctionOptimiser;
 
-if isempty(optProb.Model)
-    % Create handle of the objective function
-    hobjfun=@(x)evaluate(optProb.ObjectiveFunctions,'Xoptimizationproblem',optProb,...
-        'MreferencePoints',x, ...
-        'scaling',obj.ObjectiveFunctionScalingFactor);
-else
-    % Create handle of the objective function
-    hobjfun=@(x)evaluate(optProb.ObjectiveFunctions,'Xoptimizationproblem',optProb,...
-        'MreferencePoints',x,...
-        'scaling',obj.ObjectiveFunctionScalingFactor);
-end
-
+objfun = @(x)evaluate(optProb.ObjectiveFunctions,...
+        'Xoptimizationproblem', optProb, ...
+        'MreferencePoints', x, ...
+        'scaling', obj.ObjectiveFunctionScalingFactor);
 
 assert(~logical(isempty(optProb.Constraints)) ||  ...
     ~logical(isempty(optProb.LowerBounds)) || ...
     ~logical(isempty(optProb.UpperBounds)), ...
     'OpenCossan:SequentialQuadraticProgramming:apply',...
     'SequentialQuadraticProgramming is a constrained Nonlinear Optimization and requires or a constrains object or design variables with bounds')
-
 
 % Create handle for the constrains
 if isempty(optProb.Constraints)
@@ -133,23 +97,19 @@ else
         'scaling', obj.ConstraintScalingFactor);
 end
 
-% The function that computes the nonlinear inequality constraints c(x)≤ 0
-% and the nonlinear equality constraints ceq(x) = 0. hconstrains accepts a
-% vector x and returns the two vectors c and ceq. c is a vector that
-% contains the nonlinear inequalities evaluated at x, and ceq is a vector
-% that contains the nonlinear equalities evaluated at x.  hconstrains is
-% a function handle such as function
-
 OptimizationRecorder.clear();
-%% Perform Real optimization
+
+startTime = tic;
+
+% optimize using fmincon
 [optimalSolution, ~, exitFlag] = ...
-    fmincon(hobjfun, ... % ObjectiveFunction
-    optProb.InitialSolution, [], [], [], [], ...
-    optProb.LowerBounds, optProb.UpperBounds, ... % Bounds
-    constraints, ... % Contrains
+    fmincon(objfun, ...
+    x0, [], [], [], [], ...
+    optProb.LowerBounds, optProb.UpperBounds, ...
+    constraints, ...
     options);
 
-totalTime = opencossan.OpenCossan.getTimer().lap('Description','End apply@SequentialQuadraticProgramming');
+totalTime = toc(startTime);
 
 optimum = opencossan.optimization.Optimum(...
     'optimalsolution', optimalSolution, ...
@@ -160,8 +120,6 @@ optimum = opencossan.optimization.Optimum(...
     'constraints', OptimizationRecorder.getInstance().Constraints, ...
     'objectivefunction', OptimizationRecorder.getInstance().ObjectiveFunction, ...
     'modelevaluations', OptimizationRecorder.getInstance().ModelEvaluations);
-
-varargout{1} = {};
 
 if ~isdeployed
     % add entries in simulation and analysis database at the end of the

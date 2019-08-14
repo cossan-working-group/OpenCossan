@@ -49,6 +49,8 @@ classdef Optimum < opencossan.common.CossanObject
         ConstraintNames
         ObjectiveFunctionNames
         DesignVariableNames
+        OptimalConstraints
+        OptimalObjectiveFunction
     end
     
     %% Methods of the class
@@ -84,6 +86,16 @@ classdef Optimum < opencossan.common.CossanObject
         
         function names = get.ObjectiveFunctionNames(obj)
             names = obj.OptimizationProblem.ObjectiveFunctionNames;
+        end
+        
+        function constraints = get.OptimalConstraints(obj)
+            idx = all(obj.Constraints.DesignVariables == obj.OptimalSolution, 2);
+            constraints = obj.Constraints.Constraints(idx,:);
+        end
+        
+        function objective = get.OptimalObjectiveFunction(obj)
+            idx = all(obj.ObjectiveFunction.DesignVariables == obj.OptimalSolution, 2);
+            objective = obj.ObjectiveFunction.ObjectiveFunction(idx);
         end
         
         varargout = plotOptimum(obj, varargin);

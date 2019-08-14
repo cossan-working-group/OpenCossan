@@ -200,37 +200,16 @@ classdef OptimizationProblem
             obj.ObjectiveFunctions(end + 1) = objectiveFunction;
         end
 
-        %% Method optimize
-        function [Xopt, varargout] = optimize(obj, varargin)
+        function optimum = optimize(obj, varargin)
 
-            assert(~isempty(varargin), 'openCOSSAN:OptimizationProblem:optimize', ...
-                'Missing input argument!');
+            [required, varargin] = ...
+                opencossan.common.utilities.parseRequiredNameValuePairs(...
+                "optimizer", varargin{:});
 
-            for k = 1:2:length(varargin)
+            % add optimization problem to optimizer.apply inputs
+            varargin = [{ 'optimizationproblem', obj}, varargin];
 
-                switch lower(varargin{k})
-                    case 'xoptimizer'
-                        Xoptimizer = varargin{k + 1};
-                        npos = k;
-                        break
-                    case 'cxoptimizer'
-                        Xoptimizer = varargin{k + 1}{1};
-                        npos = k;
-                        break
-                end
-
-            end
-
-            % Remove optimizer from varargin
-            varargin = varargin([1:npos-1 npos+2:end]);
-
-            % This method call the apply method of the Optimizer object
-            [Xopt, XSimOutput] = Xoptimizer.apply('XOptimizationProblem', obj, varargin{:});
-
-            if nargout > 1
-                varargout{1} = XSimOutput;
-            end
-
+            optimum = required.optimizer.apply(varargin{:});
         end
 
         Xoptimum = initializeOptimum(obj, varargin)% Initialize an empty Optimum object

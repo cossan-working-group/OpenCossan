@@ -139,8 +139,8 @@ Xop = opencossan.optimization.OptimizationProblem('description', 'Optimization p
     'objectivefunctions', Xobjfun, 'constraints', XconMaxStress, 'model', Xmodel);
 
 % Define Optimizers
-Xsqp = opencossan.optimization.SequentialQuadraticProgramming();
-Xcobyla = opencossan.optimization.Cobyla();
+sqpOptimizer = opencossan.optimization.SequentialQuadraticProgramming();
+cobylaOptimizer = opencossan.optimization.Cobyla();
 Xga = opencossan.optimization.GeneticAlgorithms('Smutationfcn','mutationadaptfeasible','NmaxIterations',10, ...
     'NPopulationSize',10);
 
@@ -151,15 +151,14 @@ Xga = opencossan.optimization.GeneticAlgorithms('Smutationfcn','mutationadaptfea
 opencossan.OpenCossan.resetRandomNumberGenerator(542727)
 
 % We start with the Sequential Quadratic Programming method.
-Xoptimum1 = Xop.optimize('Xoptimizer',Xsqp);
+sqpOptimum = Xop.optimize('optimizer', sqpOptimizer);
 
-return;
-% Show results of the optimization
-disp(Xoptimum1)
 % Now we optimize the problem using Cobyla
-Xoptimum2 = Xop.optimize('Xoptimizer',Xcobyla);
+cobylaOptimum = Xop.optimize('optimizer',cobylaOptimizer);
+
+return
 % Show results of the optimization display(Xoptimum2)
-disp(Xoptimum2)
+disp(cobylaOptimum)
 % Now we optimize the problem using Genetic Algorithms
 Xoptimum3 = Xop.optimize('Xoptimizer',Xga);
 % Show results of the optimization
@@ -167,15 +166,15 @@ disp(Xoptimum3)
 
 %% Compare Optimization results
 % Show results in a table
-SQP = [Xoptimum1.NevaluationsObjectiveFunctions;
-       Xoptimum1.VoptimalScores;
-       Xoptimum1.VoptimalDesign';
-       Xoptimum1.VoptimalConstraints];
+SQP = [sqpOptimum.NevaluationsObjectiveFunctions;
+       sqpOptimum.VoptimalScores;
+       sqpOptimum.VoptimalDesign';
+       sqpOptimum.VoptimalConstraints];
    
-COBYLA = [Xoptimum2.NevaluationsObjectiveFunctions;
-          Xoptimum2.VoptimalScores;
-          Xoptimum2.VoptimalDesign';
-          Xoptimum2.VoptimalConstraints(1)];
+COBYLA = [cobylaOptimum.NevaluationsObjectiveFunctions;
+          cobylaOptimum.VoptimalScores;
+          cobylaOptimum.VoptimalDesign';
+          cobylaOptimum.VoptimalConstraints(1)];
   
 GA = [Xoptimum3.NevaluationsObjectiveFunctions;
       Xoptimum3.VoptimalScores;

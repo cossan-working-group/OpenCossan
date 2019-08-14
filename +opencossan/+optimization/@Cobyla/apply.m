@@ -1,4 +1,4 @@
-function [Xoptimum,varargout] = apply(Xobj,varargin)
+function optimum = apply(obj, varargin)
 %   APPLY   This method applies the algorithm COBYLA (Costrained
 %           Optimization by Linear Approximations) for optimization
 %
@@ -35,58 +35,28 @@ function [Xoptimum,varargout] = apply(Xobj,varargin)
     along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
     %}
 
-%% Define global variable for the objective function and the constrains
-global XoptGlobal XsimOutGlobal
+import opencossan.optimization.OptimizationRecorder;
+import opencossan.common.utilities.*;
 
-%  Check whether or not required arguments have been passed
-for k=1:2:length(varargin)
-    switch lower(varargin{k})
-        case {'xoptimizationproblem'}   %extract OptimizationProblem
-            if isa(varargin{k+1},'opencossan.optimization.OptimizationProblem')    %check that arguments is actually an OptimizationProblem object
-                Xop     = varargin{k+1};
-            else
-                error('OpenCossan:Cobyla:apply',...
-                    ['the variable  ' inputname(k) ...
-                    ' must be an OptimizationProblem object']);
-            end
-        case {'cxoptimizationproblem'}   %extract OptimizationProblem
-            if isa(varargin{k+1}{1},'OptimizationProblem')    %check that arguments is actually an OptimizationProblem object
-                Xop     = varargin{k+1}{1};
-            else
-                error('OpenCossan:Cobyla:apply',...
-                    ['the variable  ' inputname(k) ' must be an OptimizationProblem object']);
-            end  
-       case {'xoptimum'}   %extract OptimizationProblem
-            if isa(varargin{k+1},'Optimum')    %check that arguments is actually an OptimizationProblem object
-                Xoptimum  = varargin{k+1};
-            else
-                error('OpenCossan:Cobyla:apply',...
-                    ['the variable  ' inputname(k) ...
-                    ' must be an Optimum object']);
-            end
-        case 'vinitialsolution'
-            VinitialSolution=varargin{k+1};
-        otherwise
-            error('OpenCossan:Cobyla:apply:wrongInputArgument', ...
-                'The PropertyName %s is not valid',varargin{k});
-    end
-end
+[required, varargin] = parseRequiredNameValuePairs(...
+    "optimizationproblem", varargin{:});
 
+optProb = required.optimizationproblem;
 
-%% Check Optimization problem
-if ~exist('Xop','var')
-    error('OpenCossan:Cobyla:apply:NoOptimizationProblemDefined',...
-        'Optimization problem must be defined')
-end
+optional = parseOptionalNameValuePairs(...
+    "initialsolution", {optProb.InitialSolution}, ...
+    varargin{:});
+
+x0 = optional.initialsolution;
 
 %% Add bounds of design variables as constraints
 lowerScript = "for n=1:length(Tinput), Toutput(n).%s = %s - Tinput(n).%s; end";
 upperScript = "for n=1:length(Tinput), Toutput(n).%s = + Tinput(n).%s - %s; end";
 
-for i = 1:Xop.Input.NumberOfDesignVariables
+for i = 1:optProb.Input.NumberOfDesignVariables
     
-    dv = Xop.Input.DesignVariables(i);
-    name = Xop.Input.DesignVariableNames(i);
+    dv = optProb.Input.DesignVariables(i);
+    name = optProb.Input.DesignVariableNames(i);
     
     if isfinite(dv.LowerBound)
         constraintName = name + "_lowerBound";
@@ -98,7 +68,7 @@ for i = 1:Xop.Input.NumberOfDesignVariables
         'Script',constraintScript,'OutputNames',{char(constraintName)},...
         'InputNames',{char(name)},'inequality',true,'Format','structure'); 
         
-        Xop = Xop.addConstraint(constraint); 
+        optProb = optProb.addConstraint(constraint); 
         opencossan.OpenCossan.cossanDisp(...
         "Added constraint for the lower bound of: " + name, 3);
     end
@@ -113,94 +83,49 @@ for i = 1:Xop.Input.NumberOfDesignVariables
         'Script',constraintScript, 'OutputNames',{char(constraintName)},...
         'InputNames',{char(name)},'inequality',true,'format','structure'); 
         
-        Xop = Xop.addConstraint(constraint); 
+        optProb = optProb.addConstraint(constraint); 
         opencossan.OpenCossan.cossanDisp(...
         "Added constraint for the upper bound of: " + name, 3);
     end
 end
 
-assert(~isempty(Xop.Constraints),...
+assert(~isempty(optProb.Constraints),...
     'OpenCossan:cobyla:apply',...
     'It is not possible to apply COBYLA to solve UNCONSTRAINED problem')
 
-Ndv = Xop.NumberOfDesignVariables;  % number of design variables
-N_ineq = Xop.NumberOfConstraints;       % Number of constrains
+Ndv = optProb.NumberOfDesignVariables;  % number of design variables
+N_ineq = optProb.NumberOfConstraints;       % Number of constrains
 
-%% Check initial solution
-if exist('VinitialSolution','var')
-    Xop.InitialSolution = VinitialSolution;  
-end
 
-%% initialize Optimum
-if ~exist('Xoptimum','var')
-    XoptGlobal = opencossan.optimization.Optimum('XoptimizationProblem',Xop,'Xoptimizer',Xobj);
-else
-    %TODO: Check Optimum
-    XoptGlobal = Xoptimum;
-end
-
-% initialize global variable
-XsimOutGlobal=[];
-
-% Create handle of the objective function
-% This variable is retrieved by mex file by name.
-if isempty(Xop.Model)
-    objective_function_cobyla=@(x)evaluate(Xop.ObjectiveFunctions,'Xoptimizationproblem',Xop,...
-    'MreferencePoints',x,...
-    'scaling',Xobj.ObjectiveFunctionScalingFactor); %#ok<NASGU>
-else
-    objective_function_cobyla=@(x)evaluate(Xop.ObjectiveFunctions,'Xoptimizationproblem',Xop,...
-    'MreferencePoints',x,'Xmodel',Xop.Model,...
-    'scaling',Xobj.ObjectiveFunctionScalingFactor); %#ok<NASGU>
-end
+objective_function_cobyla = @(x)evaluate(optProb.ObjectiveFunctions,'Xoptimizationproblem',optProb,...
+'MreferencePoints',x, 'transpose', true, ...
+'scaling',obj.ObjectiveFunctionScalingFactor); %#ok<NASGU>
 
 % Create handle for the constrains
-constraint_cobyla=@(x)evaluate(Xop.Constraints,'optimizationproblem',Xop,...
-    'referencepoints',x,...
-    'scaling',Xobj.ConstraintScalingFactor); %#ok<NASGU>
+constraint_cobyla= @(x)evaluate(optProb.Constraints,'optimizationproblem',optProb,...
+    'referencepoints',x,'transpose', true, ...
+    'scaling',obj.ConstraintScalingFactor); %#ok<NASGU>
 
 %% Perform optimization using Cobyla
 
-opencossan.OpenCossan.getTimer().lap('Description',['COBYLA:' Xobj.Description]);
-
 opencossan.optimization.OptimizationRecorder.clear();
 
-[VoptimalDesign,Nexitflag,XoptGlobal.VoptimalScores] = cobyla_matlab(Xobj,...
-    Xop.InitialSolution,Xobj.MaxFunctionEvaluations,Xobj.rho_ini,Xobj.rho_end,Ndv,N_ineq);
+startTime = tic;
 
-XoptGlobal.VoptimalDesign=VoptimalDesign;
+[optimalSolution, exitFlag] = cobyla_matlab(obj, x0, ...
+    obj.MaxFunctionEvaluations,obj.rho_ini,obj.rho_end,Ndv,N_ineq);
 
-% Retrieve values of constraints from the Optimum
-VoptimalConstraint=XoptGlobal.TablesValues.Constraints ...
-    (all(XoptGlobal.TablesValues.DesignVariables==VoptimalDesign,2),:);
+totalTime = toc(startTime);
 
-% Remove NaN
-XoptGlobal.VoptimalConstraints=VoptimalConstraint(~isnan(VoptimalConstraint))';
-
-opencossan.OpenCossan.getTimer().lap('Description','End of the COBYLA analysis');
-
-%6.3.   Prepare string with reason for termination of optimization algorithm
-switch Nexitflag
-    case{-2}
-        Sexitflag   = 'No. optimization variables <0 or No. constraints <0';
-    case{-1}
-        Sexitflag   = 'Memory allocation failed';
-    case{0}
-        Sexitflag   = 'Normal return from cobyla';
-    case{1}
-        Sexitflag   = 'Maximum number of function evaluations reached';
-    case{2}
-        Sexitflag   = 'Rounding errors are becoming damaging';
-    case{3}
-        Sexitflag   = 'User requested end of minimization';
-end
-
-% Assign outputs
-Xoptimum=XoptGlobal;
-Xoptimum.Sexitflag=Sexitflag;
-
-% Export Simulation Output
-varargout{1}    = XsimOutGlobal;
+optimum = opencossan.optimization.Optimum(...
+    'optimalsolution', optimalSolution, ...
+    'exitflag', exitFlag, ...
+    'totaltime', totalTime, ...
+    'optimizationproblem', optProb, ...
+    'optimizer', obj, ...
+    'constraints', OptimizationRecorder.getInstance().Constraints, ...
+    'objectivefunction', OptimizationRecorder.getInstance().ObjectiveFunction, ...
+    'modelevaluations', OptimizationRecorder.getInstance().ModelEvaluations);
 
 if ~isdeployed
     % add entries in simulation and analysis database at the end of the
@@ -214,9 +139,4 @@ if ~isdeployed
             'CcossanObjectsNames',{'Xoptimum'});
     end
 end
-%% Delete global variables
-clear global XoptGlobal XsimOutGlobal 
-
-%% Record Time
-opencossan.OpenCossan.getTimer().lap('Description',['End apply@' class(Xobj)]);
 
