@@ -44,8 +44,10 @@ function [optimum,varargout] = apply(obj,varargin)
     along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
 %}
 
+import opencossan.optimization.OptimizationRecorder;
+
 %% Define global variable for the objective function and the constrains
-global XoptGlobal XsimOutGlobal
+global XsimOutGlobal
 
 opencossan.OpenCossan.validateCossanInputs(varargin{:});
 
@@ -66,13 +68,6 @@ for k=1:2:length(varargin)
             else
                 error('OpenCossan:SequentialQuadraticProgramming:apply',...
                                         ['the variable  ' inputname(k) ' must be an OptimizationProblem object']);
-            end
-        case {'xoptimum'}   %extract OptimizationProblem
-            if isa(varargin{k+1},'optimum')    %check that arguments is actually an OptimizationProblem object
-                optimum  = varargin{k+1};
-            else
-                error('OpenCossan:SequentialQuadraticProgramming:apply',...
-                    ['the variable  ' inputname(k) ' must be an optimum object']);
             end
         case 'vinitialsolution'
             VinitialSolution=varargin{k+1};
@@ -98,15 +93,6 @@ assert(size(optProb.InitialSolution,1)==1, ...
     'OpenCossan:SequentialQuadraticProgramming:apply',...
     'Only 1 initial setting point is allowed')
 
-%% initialize optimum
-if ~exist('optimum','var')
-    XoptGlobal = opencossan.optimization.Optimum('XoptimizationProblem',optProb,'Xoptimizer',obj);
-else
-    %TODO: Check optimum
-    XoptGlobal = optimum;
-end
-
-
 options = optimoptions('fmincon', 'Algorithm', 'sqp', 'Display', 'iter');
 options.MaxFunctionEvaluations = obj.MaxFunctionEvaluations;
 options.MaxIterations = obj.MaxIterations;
@@ -118,7 +104,7 @@ options.StepTolerance = obj.DesignVariableTolerance;
 options.FiniteDifferenceStepSize = obj.FiniteDifferenceStepSize;
 options.FiniteDifferenceType = obj.FiniteDifferenceType;
 
-options.OutputFcn = @obj.outputFunctionOptimiser;
+% options.OutputFcn = @obj.outputFunctionOptimiser;
 
 XsimOutGlobal = [];
 
@@ -159,25 +145,25 @@ end
 % that contains the nonlinear equalities evaluated at x.  hconstrains is
 % a function handle such as function
 
-opencossan.optimization.OptimizationRecorder.clear();
+OptimizationRecorder.clear();
 %% Perform Real optimization
-[XoptGlobal.VoptimalDesign,XoptGlobal.VoptimalScores,exitflag]  = ...
-    fmincon(hobjfun,... % ObjectiveFunction
-    optProb.InitialSolution,[],[],[],[],...
-    optProb.LowerBounds, optProb.UpperBounds,... % Bounds
-    constraints,... % Contrains
+[optimalSolution, ~, exitFlag] = ...
+    fmincon(hobjfun, ... % ObjectiveFunction
+    optProb.InitialSolution, [], [], [], [], ...
+    optProb.LowerBounds, optProb.UpperBounds, ... % Bounds
+    constraints, ... % Contrains
     options);
 
-if ~isempty(optProb.Constraints)
-    Vindex=all(XoptGlobal.TablesValues.DesignVariables==XoptGlobal.VoptimalDesign,2);
-    Mdataout=XoptGlobal.TablesValues.Constraints(Vindex);
-    Vpos=find(all(~isnan(Mdataout),2));
-    XoptGlobal.VoptimalConstraints=Mdataout(Vpos(1),:);
-end
+totalTime = opencossan.OpenCossan.getTimer().lap('Description','End apply@SequentialQuadraticProgramming');
 
-XoptGlobal.Sexitflag = obj.ExitReasons(exitflag);
-
-optimum = XoptGlobal;
+optimum = opencossan.optimization.Optimum(...
+    'optimalsolution', optimalSolution, ...
+    'exitflag', exitFlag, ...
+    'totaltime', totalTime, ...
+    'optimizationproblem', optProb, ...
+    'optimizer', obj, ...
+    'constraints', OptimizationRecorder.getInstance().Constraints, ...
+    'objectivefunction', OptimizationRecorder.getInstance().ObjectiveFunction);
 
 varargout{1} = XsimOutGlobal;
 
@@ -194,7 +180,6 @@ if ~isdeployed
     end
 end
 %% Delete global variables
-clear global globaloptimum globalSimulationData
+clear global globalSimulationData
 
-%% Record Time
-opencossan.OpenCossan.getTimer().lap('Description','End apply@SequentialQuadraticProgramming');
+

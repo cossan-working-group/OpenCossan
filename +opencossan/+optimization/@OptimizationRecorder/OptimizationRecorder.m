@@ -1,4 +1,4 @@
-classdef OptimizationRecorder < handle
+classdef (Sealed) OptimizationRecorder < handle
     %OPTIMIZATIONRECORDER Singleton class to record results of constraint
     %and objective function evaluations during the optimization.
     

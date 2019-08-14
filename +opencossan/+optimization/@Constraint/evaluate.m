@@ -22,13 +22,13 @@ with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
 
 % Define global variable to store the optimum
 
-global XoptGlobal XsimOutGlobal
+global XsimOutGlobal
 
 [required, varargin] = opencossan.common.utilities.parseRequiredNameValuePairs(...
     ["optimizationproblem", "referencepoints"], varargin{:});
 
 optional = opencossan.common.utilities.parseOptionalNameValuePairs(...
-    ["model", "scaling"], {[], 1}, varargin{:});
+    ["scaling"], {[], 1}, varargin{:});
 
 assert(isa(required.optimizationproblem, 'opencossan.optimization.OptimizationProblem'), ...
     'OpenCossan:optimization:constraint:evaluate',...
@@ -38,13 +38,9 @@ assert(isa(required.optimizationproblem, 'opencossan.optimization.OptimizationPr
 optProb = required.optimizationproblem;
 x = required.referencepoints;
 
-model = optional.model;
 scaling = optional.scaling;
 
-if isa(XoptGlobal.XOptimizer, 'opencossan.optimization.Cobyla')
-    % cobyla passes the variables as a column vector
-    x = x';
-end
+% TODO: Transpose values for cobyla
 
 NdesignVariables = size(x,2); %number of design variables
 Ncandidates = size(x,1); % Number of candidate solutions
@@ -61,11 +57,8 @@ Tinput = Xinput.getTable;
 % the Objective Function) if available
 
 % Evaluate the model if required by the constraints
-if ~isempty(model)
-    XsimOutGlobal = apply(model,Tinput);
-    % Update counter
-    XoptGlobal.NevaluationsModel = XoptGlobal.NevaluationsModel+height(Tinput);
-end
+
+XsimOutGlobal = apply(optProb.Model,Tinput);
 
 constraintValues = zeros(size(x));
 for i = 1:numel(obj)
@@ -84,32 +77,10 @@ constraintValues = constraintValues(1:Ncandidates,:)/scaling;
 in = constraintValues(:,[obj.IsInequality]);
 eq = constraintValues(:,~[obj.IsInequality]);
 
-%% Update function counter of the Optimiser
-XoptGlobal.NevaluationsConstraints = XoptGlobal.NevaluationsConstraints+height(Tinput);  % Number of objective function evaluations
-
 % record constraint values
 for i = 1:size(constraintValues,1)
     opencossan.optimization.OptimizationRecorder.recordConstraints(...
         x(i,:), constraintValues(i,:));
-end
-switch class(XoptGlobal.XOptimizer)
-    case 'opencossan.optimization.Cobyla'
-        XoptGlobal = XoptGlobal.recordConstraints(...
-        'row',XoptGlobal.Niterations,...
-        'constraints', constraintValues);
-    case 'opencossan.optimization.GeneticAlgorithms'
-        for i = 1:size(constraintValues,1)
-            XoptGlobal.Niterations=XoptGlobal.Niterations + 1;
-            XoptGlobal = XoptGlobal.recordConstraints(...
-                'row', XoptGlobal.Niterations,...
-                'constraints', constraintValues(i,:));
-        end
-    case 'opencossan.optimization.StochasticRanking'
-        if size(constraintValues,1)==XoptGlobal.XOptimizer.Nlambda
-            XoptGlobal=XoptGlobal.addIteration('MconstraintFunction',MoutConstrains,...
-                'Mdesignvariables',Minput,...
-                'Viterations',repmat(max(0,XoptGlobal.Niterations),size(Minput,1),1));
-        end        
 end
 
 end

@@ -30,7 +30,7 @@ function value = evaluate(obj, varargin)
 %}
 
 % Define global variable to store the optimum
-global XoptGlobal XsimOutGlobal
+global XsimOutGlobal
 
 % Process inputs
 scaling=1;
@@ -47,8 +47,6 @@ for k=1:2:length(varargin)
             scaling=varargin{k+1};
         case 'cxobjects'
             obj.Cxobjects=varargin{k+1};
-        case 'xoptimum'
-            XoptGlobal=varargin{k+1};
         otherwise
             error('OpenCossan:ObjectiveFunction:evaluate:wrongInputArgument',...
                 'PropertyName %s not valid', varargin{k});
@@ -64,10 +62,8 @@ assert(logical(exist('XoptProb','var')),...
     'An optimizationProblem object must be defined');
 
 if exist('Minput','var')
-    if isa(XoptGlobal.XOptimizer, 'opencossan.optimization.Cobyla')
-        % cobyla passes the variables as a column vector
-        Minput = Minput';
-    end
+    % TODO: Transpose values for cobyla
+    
     NdesignVariables = size(Minput,2); %number of design variables
     Ncandidates=size(Minput,1); % Number of candidate solutions
     
@@ -90,7 +86,8 @@ if exist('Xmodel','var')
     % If a model should be evaluate then check first if the solution has been
     % already computed during the evaluation of the constraints
     
-    if isa(XoptGlobal.XOptimizer,'opencossan.optimization.GeneticAlgorithms')
+    % TODO: Check computed solutions for genetic algorithm
+    if false
         if ~isempty(XsimOutGlobal)
             NsamplesSimOut=XsimOutGlobal.Nsamples;
         else
@@ -135,9 +132,6 @@ if exist('Xmodel','var')
         % Evaluate the model
         opencossan.OpenCossan.cossanDisp('[OpenCossan:ObjectiveFunction:evaluate] Ri-evaluating all samples',4)
         XsimOutGlobal = apply(Xmodel,Tinput);
-        
-        % Update counter
-        XoptGlobal.NevaluationsModel=XoptGlobal.NevaluationsModel+height(Tinput);
     end
 end
 
@@ -156,61 +150,11 @@ end
 %%   Apply scaling constant
 value = Mout(1:Ncandidates,:)/scaling;
 
-%% Update function counter of the Optimisers
-XoptGlobal.NevaluationsObjectiveFunctions = XoptGlobal.NevaluationsObjectiveFunctions+height(Tinput);  % Number of objective function evaluations
-
 % record objective function values
 for i = 1:size(Mout,1)
     opencossan.optimization.OptimizationRecorder.recordObjectiveFunction(...
         Minput(i,:), Mout(i,:));
 end
 
-switch class(XoptGlobal.XOptimizer)
-    case {'opencossan.optimization.Cobyla' 'opencossan.optimization.Bobyqa'}
-        %% Update Optimum object
-        XoptGlobal.Niterations=XoptGlobal.Niterations + 1;
-        
-        % record design variables in optimum
-        XoptGlobal = XoptGlobal.recordDesignVariables(...
-            'row', XoptGlobal.Niterations,...
-            'designvariables', Minput);
-        
-        % record objective function in optimum
-        XoptGlobal = XoptGlobal.recordObjectiveFunction(...
-            'row', XoptGlobal.Niterations,...
-            'objectivefunction', Mout);
-        
-    case {'opencossan.optimization.CrossEntropy'}
-        
-        %   XoptGlobal.Niterations=XoptGlobal.Niterations+1;
-        
-        XoptGlobal=XoptGlobal.addIteration('MdesignVariables',Minput,...
-            'MobjectiveFunction',Mout,...
-            'Viterations',repmat(XoptGlobal.Niterations,size(Minput,1),1));
-        
-    case {'opencossan.optimization.EvolutionStrategy'}
-        XoptGlobal=XoptGlobal.addIteration('MdesignVariables',Minput,...
-            'MobjectiveFunction',Mout,...
-            'Viterations',repmat(XoptGlobal.Niterations,size(Minput,1),1));
-    case {'opencossan.optimization.GeneticAlgorithms'}
-        for i = 1:size(Mout,1)
-            XoptGlobal.Niterations=XoptGlobal.Niterations + 1;
-            XoptGlobal = XoptGlobal.recordObjectiveFunction(...
-                'row', XoptGlobal.Niterations,...
-                'objectivefunction', Mout(i,:));
-            XoptGlobal = XoptGlobal.recordDesignVariables(...
-                'row', XoptGlobal.Niterations,...
-                'designvariables', Minput(i,:));
-        end
-    otherwise
-        % Default behaviour
-        % Values of the design variables and objective function stored by
-        % the outputFunctionOptimise function
-        
-        % XoptGlobal.Niterations=XoptGlobal.Niterations+1;
-        
-        %         XoptGlobal=XoptGlobal.addIteration('MdesignVariables',Minput,...
-        %             'MobjectiveFunction',Mout,...
-        %             'Viterations',repmat(max(0,XoptGlobal.Niterations),size(Minput,1),1));
 end
 
