@@ -35,6 +35,19 @@ classdef GeneticAlgorithms < opencossan.optimization.Optimizer
             'selectionstochunif' 'selectionroulette' 'selectiontournament'}
     end
     
+    properties (Hidden)
+        ExitReasons = containers.Map([4, 3, 2, 1, 0, -1, -2, -4, -5],[
+            "Magnitude of step smaller than machine precision and constraint violation less than options.TolCon.", ...
+            "The value of the fitness function did not change in options.StallGenLimit generations and constraint violation less than options.TolCon.", ...
+            "Fitness limit reached and constraint violation less than options.TolCon.", ...
+            "Average cumulative change in value of the fitness function over options.StallGenLimit generations less than options.TolFun and constraint violation less than options.TolCon.", ...
+            "Maximum number of generations exceeded.", ...
+            "Optimization terminated by the output or plot function.", ...
+            "No feasible point found.", ...
+            "Stall time limit exceeded.", ...
+            "Time limit exceeded."]);
+    end
+    
     methods
         varargout    = apply(Xobj,varargin)  %This method perform the simulation adopting the Xobj
         [Tstate,Toptions,Loptchanged] = outputFunction(Xobj,Toptions,Tstate,Sflag)
@@ -88,9 +101,6 @@ classdef GeneticAlgorithms < opencossan.optimization.Optimizer
             %  Optimization Options - default parameters
             Xobj.Description   = 'GeneticAlgorithms object';
             Xobj.MaxFunctionEvaluations          = 1e5;
-            
-            % Argument Check
-            opencossan.OpenCossan.validateCossanInputs(varargin{:})
             
             % Process input arguments
             for k=1:2:length(varargin)

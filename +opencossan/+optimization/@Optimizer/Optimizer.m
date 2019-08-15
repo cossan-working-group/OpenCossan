@@ -54,6 +54,10 @@ classdef Optimizer < opencossan.common.CossanObject
         IterationName;
     end
     
+    properties (Abstract, Hidden)
+        ExitReasons;
+    end
+    
     properties (Hidden, SetAccess = protected)
         IterationFileName = 'SimulationData_iteration_';
         IterationFolder = [];

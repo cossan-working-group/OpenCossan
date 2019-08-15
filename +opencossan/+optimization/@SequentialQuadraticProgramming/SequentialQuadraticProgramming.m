@@ -33,7 +33,7 @@ classdef SequentialQuadraticProgramming < opencossan.optimization.Optimizer
         FiniteDifferenceType {mustBeMember(FiniteDifferenceType, {'forward', 'central'})} = 'forward';
     end
     
-    properties (Access = private, Hidden)
+    properties (Hidden)
         ExitReasons = containers.Map([1, 0, -1, -2, -3],[
             "First-order optimality measure was less than options.OptimalityTolerance, and maximum constraint violation was less than options.ConstraintTolerance.", ...
             "Number of iterations exceeded options.MaxIterations or number of function evaluations exceeded options.MaxFunctionEvaluations.", ...

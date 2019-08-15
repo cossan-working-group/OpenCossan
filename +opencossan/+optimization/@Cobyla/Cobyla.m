@@ -14,6 +14,16 @@ classdef Cobyla < opencossan.optimization.Optimizer
         rho_ini     = 1     %Size of initial Trust Region
         rho_end     = 1e-3  %Size of target Trust Region
     end
+    
+    properties (Hidden)
+        ExitReasons = containers.Map([3, 2, 1, 0, -1, -2],[
+            "User requested end of minimization.", ...
+            "Rounding errors are becoming damaging.", ...
+            "Maximum number of function evaluations reached.", ...
+            "Normal return from cobyla.", ...
+            "Memory allocation failed.", ...
+            "No. optimization variables <0 or No. constraints <0."]);
+    end
     %% 2.    Methods inherited from the superclass
     methods
         varargout    = apply(Xobj,varargin)  %This method perform the simulation adopting the Xobj

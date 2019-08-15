@@ -27,8 +27,6 @@ classdef Optimum < opencossan.common.CossanObject
     
     %% Properties of the object
     properties
-        % Exit flag of the optimization algorithm
-        ExitFlag(1,1) {mustBeInteger}
         % Time required to solve the problem
         TotalTime(1,1) double
         % Associated optimization problem
@@ -43,9 +41,12 @@ classdef Optimum < opencossan.common.CossanObject
         ObjectiveFunction table = table();
         % Results of model evaluations
         ModelEvaluations table = table();
+        % Exit flag of the optimization algorithm
+        ExitFlag(1,1) {mustBeInteger}
     end
     
     properties (Dependent=true)
+        ExitReason
         ConstraintNames
         ObjectiveFunctionNames
         DesignVariableNames
@@ -102,6 +103,10 @@ classdef Optimum < opencossan.common.CossanObject
             if size(objective, 1) > 1
                 objective = objective(1,:);
             end
+        end
+        
+        function reason = get.ExitReason(obj)
+            reason = obj.Optimizer.ExitReasons(obj.ExitFlag);
         end
         
         varargout = plotOptimum(obj, varargin);
