@@ -139,47 +139,45 @@ Xop = opencossan.optimization.OptimizationProblem('description', 'Optimization p
     'objectivefunctions', Xobjfun, 'constraints', XconMaxStress, 'model', Xmodel);
 
 % Define Optimizers
-sqpOptimizer = opencossan.optimization.SequentialQuadraticProgramming();
-cobylaOptimizer = opencossan.optimization.Cobyla();
-Xga = opencossan.optimization.GeneticAlgorithms('Smutationfcn','mutationadaptfeasible','NmaxIterations',10, ...
-    'NPopulationSize',10);
+
+
+
 
 %% Perform optimization
-
 % Reset the random number generator in order to obtain always the same
 % results. DO NOT CHANGE THE VALUES OF THE SEED
 opencossan.OpenCossan.resetRandomNumberGenerator(542727)
 
-% We start with the Sequential Quadratic Programming method.
+% Optimize using Sequential Quadratic Programming
+sqpOptimizer = opencossan.optimization.SequentialQuadraticProgramming();
 sqpOptimum = Xop.optimize('optimizer', sqpOptimizer);
 
-% Now we optimize the problem using Cobyla
-cobylaOptimum = Xop.optimize('optimizer',cobylaOptimizer);
+% Optimize using COBYLA
+cobylaOptimizer = opencossan.optimization.Cobyla();
+cobylaOptimum = Xop.optimize('optimizer', cobylaOptimizer);
 
-return
-% Show results of the optimization display(Xoptimum2)
-disp(cobylaOptimum)
-% Now we optimize the problem using Genetic Algorithms
-Xoptimum3 = Xop.optimize('Xoptimizer',Xga);
-% Show results of the optimization
-disp(Xoptimum3)
+% Optimize using Genetic Algorithms
+gaOptimizer = opencossan.optimization.GeneticAlgorithms(...
+    'Smutationfcn','mutationadaptfeasible',...
+    'NmaxIterations', 10, ...
+    'NPopulationSize',10);
+gaOptimum = Xop.optimize('optimizer', gaOptimizer);
 
 %% Compare Optimization results
-% Show results in a table
-SQP = [sqpOptimum.NevaluationsObjectiveFunctions;
-       sqpOptimum.VoptimalScores;
-       sqpOptimum.VoptimalDesign';
-       sqpOptimum.VoptimalConstraints];
+SQP = [height(sqpOptimum.ModelEvaluations);
+       sqpOptimum.OptimalObjectiveFunction;
+       sqpOptimum.OptimalSolution';
+       sqpOptimum.OptimalConstraints];
    
-COBYLA = [cobylaOptimum.NevaluationsObjectiveFunctions;
-          cobylaOptimum.VoptimalScores;
-          cobylaOptimum.VoptimalDesign';
-          cobylaOptimum.VoptimalConstraints(1)];
+COBYLA = [height(cobylaOptimum.ModelEvaluations);
+          cobylaOptimum.OptimalObjectiveFunction;
+          cobylaOptimum.OptimalSolution';
+          cobylaOptimum.OptimalConstraints(1)];
   
-GA = [Xoptimum3.NevaluationsObjectiveFunctions;
-      Xoptimum3.VoptimalScores;
-      Xoptimum3.VoptimalDesign';
-      Xoptimum3.VoptimalConstraints];
+GA = [height(gaOptimum.ModelEvaluations);
+      gaOptimum.OptimalObjectiveFunction;
+      gaOptimum.OptimalSolution';
+      gaOptimum.OptimalConstraints];
   
 results = table(SQP,COBYLA,GA,'RowNames',{'Number of Evaluations',...
     'Objective Function', 'Design Variable b', 'Design Variable h',...
@@ -188,20 +186,7 @@ results = table(SQP,COBYLA,GA,'RowNames',{'Number of Evaluations',...
 display(results);
 
 %% Validate Solutions
-% Compare the optimal constraints against the reference solutions.
-Vsolution = [SQP(5) COBYLA(5) GA(5)];
-Vreference=[ 1.01e-07   2.6385e-05   9.9860e-04];
-assert(abs(max(Vsolution-Vreference))<1e-4, 'Tutorial:TutorialCantileverBeamOptimization',...
+solution = [SQP(5) COBYLA(5) GA(5)];
+reference = [ 1.01e-07   2.6385e-05   9.9860e-04];
+assert(abs(max(solution-reference))<1e-4, 'Tutorial:TutorialCantileverBeamOptimization',...
     'Solutions do not match reference values');
-
-%% RELIABILITY ANALYSIS
-% The reliaility analysis is performed by the following tutorial
-%  See Also: <TutorialCantileverBeamMatlabReliabilityAnalysis.html>
-
-% echodemo TutorialCantileverBeamMatlabReliabilityAnalysis
-
-%% RELIABILITY BASED OPTIMIZAZION
-% The reliability based optimization is shown in the following tutotial See
-% Also: <TutorialCantileverBeamMatlabRBO.html>
-
-% echodemo TutorialCantileverBeamMatlabRBO

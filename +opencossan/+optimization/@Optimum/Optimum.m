@@ -91,11 +91,17 @@ classdef Optimum < opencossan.common.CossanObject
         function constraints = get.OptimalConstraints(obj)
             idx = all(obj.Constraints.DesignVariables == obj.OptimalSolution, 2);
             constraints = obj.Constraints.Constraints(idx,:);
+            if size(constraints, 1) > 1
+                constraints = constraints(1,:);
+            end
         end
         
         function objective = get.OptimalObjectiveFunction(obj)
             idx = all(obj.ObjectiveFunction.DesignVariables == obj.OptimalSolution, 2);
             objective = obj.ObjectiveFunction.ObjectiveFunction(idx);
+            if size(objective, 1) > 1
+                objective = objective(1,:);
+            end
         end
         
         varargout = plotOptimum(obj, varargin);

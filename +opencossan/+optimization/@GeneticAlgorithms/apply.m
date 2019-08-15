@@ -1,4 +1,4 @@
-function [Xoptimum, varargout] = apply(Xobj,varargin)
+function optimum = apply(obj, varargin)
 %   APPLY   This method applies the algorithm
 %           GeneticAlgorithms for optimization
 %
@@ -40,212 +40,118 @@ function [Xoptimum, varargout] = apply(Xobj,varargin)
     along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
 %}
 
-%% Define global variable for the objective function and the constrains
-global XoptGlobal XsimOutGlobal
+import opencossan.optimization.OptimizationRecorder;
+import opencossan.common.utilities.*;
 
-LplotEvolution=false;
+[required, varargin] = parseRequiredNameValuePairs(...
+    "optimizationproblem", varargin{:});
 
+optProb = required.optimizationproblem;
+
+optional = parseOptionalNameValuePairs(...
+    ["initialsolution", "plotevolution"], {optProb.InitialSolution, false}, ...
+    varargin{:});
+
+x0 = optional.initialsolution;
+plotEvolution = optional.plotevolution;
 %  Check whether or not required arguments have been passed
-for k=1:2:length(varargin)
-    switch lower(varargin{k})
-        case {'xoptimizationproblem'}   %extract OptimizationProblem
-            assert(isa(varargin{k+1},'opencossan.optimization.OptimizationProblem'),...
-                'OpenCossan:GeneticAlgorithms:apply',...
-                'The object of class %s is not allowed after the XoptimizationProblem fieldname', class(varargin{k+1}));
-                Xop     = varargin{k+1};
-          case {'cxoptimizationproblem'}   %extract OptimizationProblem
-            if isa(varargin{k+1}{1},'OptimizationProblem')    %check that arguments is actually an OptimizationProblem object
-                Xop     = varargin{k+1}{1};
-            else
-                error('OpenCossan:GeneticAlgorithms:apply',...
-                    ['the variable  ' inputname(k) ' must be an OptimizationProblem object']);
-            end  
-        case {'xoptimum'}   %extract OptimizationProblem
-            if isa(varargin{k+1},'Optimum')    %check that arguments is actually an OptimizationProblem object
-                Xoptimum  = varargin{k+1};
-            else
-                error('OpenCossan:GeneticAlgorithms:apply',...
-                    ['the variable  ' inputname(k) ' must be an Optimum object']);
-            end
-        case 'minitialsolutions'
-            MinitialSolutions=varargin{k+1};
-        case 'lplotevolution'
-            LplotEvolution=varargin{k+1};
-        otherwise
-            warning('OpenCossan:GeneticAlgorithms:apply',['the field ' varargin{k} ...
-                ' is ignored when applying GeneticAlgorithms']);
-    end
-end
-
-%% Check Optimization problem
-assert(logical(exist('Xop','var')), 'OpenCossan:GeneticAlgorithms:apply',...
-    'Optimization problem must be defined')
 
 % Check inputs and initialize variables
-Xobj = initializeOptimizer(Xobj);
+obj = initializeOptimizer(obj);
 
+% Create handle of the objective function
+hobjfun=@(x)evaluate(optProb.ObjectiveFunctions,'Xoptimizationproblem',optProb,...
+    'MreferencePoints',x,...
+    'scaling',obj.ObjectiveFunctionScalingFactor);
 
-%% Check initial solution
-if exist('MinitialSolution','var')
-    % The initial population can also be partial! Hence, no check about
-    % the size of the provides initial solutions
-    Xop.VinitialSolution=MinitialSolutions;
-end
+% Create handle of the objective function
+hconstrains=@(x)evaluate(optProb.Constraints,'optimizationproblem',optProb,...
+    'referencepoints',x,...
+    'scaling',obj.ConstraintScalingFactor);
 
-%% initialize Optimum
-if ~exist('Xoptimum','var')
-    XoptGlobal=opencossan.optimization.Optimum('XoptimizationProblem',Xop,'Xoptimizer',Xobj);
-else
-    %TODO: Check Optimum
-    XoptGlobal=Xoptimum;
-end
-
-if isempty(Xop.Model)
-    % Create handle of the objective function
-    hobjfun=@(x)evaluate(Xop.ObjectiveFunctions,'Xoptimizationproblem',Xop,...
-        'MreferencePoints',x,'Lgradient',false,...
-        'scaling',Xobj.ObjectiveFunctionScalingFactor);
-else
-    % Create handle of the objective function
-    hobjfun=@(x)evaluate(Xop.ObjectiveFunctions,'Xoptimizationproblem',Xop,...
-        'MreferencePoints',x,'Xmodel',Xop.Model,...
-        'scaling',Xobj.ObjectiveFunctionScalingFactor);
-end
-
-if isempty(Xop.Model)
-    % Create handle of the objective function
-    hconstrains=@(x)evaluate(Xop.Constraints,'optimizationproblem',Xop,...
-        'referencepoints',x,...
-        'scaling',Xobj.ConstraintScalingFactor);
-else
-    % Create handle of the objective function
-    hconstrains=@(x)evaluate(Xop.Constraints,'optimizationproblem',Xop,...
-        'referencepoints',x,'model',Xop.Model,...
-        'scaling',Xobj.ConstraintScalingFactor);
-end
-
-assert(size(Xop.InitialSolution,1)<=Xobj.NPopulationSize, ...
+assert(size(x0, 1) <= obj.NPopulationSize, ...
     'OpenCossan:GeneticAlgorithms:apply', ...
-    ['Initial population must be less the NpopulationSize (' num2str(Xobj.NPopulationSize) ')'])
+    ['Initial population must be less the NpopulationSize (' num2str(obj.NPopulationSize) ')'])
 
-assert(size(Xop.InitialSolution,2)==length(Xop.DesignVariableNames), ...
+assert(size(x0, 2) == length(optProb.DesignVariableNames), ...
     'OpenCossan:GeneticAlgorithms:apply', ...
     'Initial solution must contain a number of columns equal to the number of design variables');
 
 %% Prepare options structure for GeneticAlgorithms
 Toptions                    = gaoptimset;                %Default optimization options
-Toptions.InitialPopulation  = Xop.InitialSolution;      % Define the initial population
-Toptions.PopulationSize     = Xobj.NPopulationSize;      %scalar, number of individuals in population
-Toptions.EliteCount         = Xobj.NEliteCount;          %scalar, indicates the number of elite individuals that are passed directly to the next generation
-Toptions.CrossoverFraction  = Xobj.crossoverFraction;    %percentage of individuals of the next generation that are generated by means of crossover operations
-Toptions.Generations        = Xobj.MaxIterations;         %scalar defining maximum number of generations to be created
-Toptions.StallGenLimit      = Xobj.NStallGenLimit;       %scalar; the optimization algorithm stops if there has been no improvement in the objective function for 'NStallGenLimit' consecutive generations
-Toptions.TolFun             = Xobj.ObjectiveFunctionTolerance;   %Termination criterion w.r.t. objective function; algorithm is stopped if the  cumulative change of the fitness function over 'NStallGenLimit' is less than 'ToleranceObjectiveFunction'
-Toptions.TolCon             = Xobj.ConstraintTolerance;          %Defines tolerance w.r.t. constraints
-Toptions.InitialPenalty     = Xobj.initialPenalty;               %Initial value of penalty parameter; used in constrained optimization
-Toptions.PenaltyFactor      = Xobj.PenaltyFactor;                %parameter for updating the penalty factor; required in constrained optimization
-Toptions.FitnessScalingFcn  = str2func(Xobj.SFitnessScalingFcn); %eval(['@' SFitnessScalingFcn]);   %scaling of fitness function
-Toptions.SelectionFcn       = str2func(Xobj.SSelectionFcn);      %eval(['@' SSelectionFcn]);        %function for selecting parents for crossover and mutation
-Toptions.CrossoverFcn       = str2func(Xobj.SCrossoverFcn);      %eval(['@' SCrossoverFcn]);        %function for generating crossover children
-Toptions.MutationFcn       = str2func(Xobj.SMutationFcn);
-Toptions.CreationFcn       = str2func(Xobj.SCreationFcn);
+Toptions.InitialPopulation  = x0;      % Define the initial population
+Toptions.PopulationSize     = obj.NPopulationSize;      %scalar, number of individuals in population
+Toptions.EliteCount         = obj.NEliteCount;          %scalar, indicates the number of elite individuals that are passed directly to the next generation
+Toptions.CrossoverFraction  = obj.crossoverFraction;    %percentage of individuals of the next generation that are generated by means of crossover operations
+Toptions.Generations        = obj.MaxIterations;         %scalar defining maximum number of generations to be created
+Toptions.StallGenLimit      = obj.NStallGenLimit;       %scalar; the optimization algorithm stops if there has been no improvement in the objective function for 'NStallGenLimit' consecutive generations
+Toptions.TolFun             = obj.ObjectiveFunctionTolerance;   %Termination criterion w.r.t. objective function; algorithm is stopped if the  cumulative change of the fitness function over 'NStallGenLimit' is less than 'ToleranceObjectiveFunction'
+Toptions.TolCon             = obj.ConstraintTolerance;          %Defines tolerance w.r.t. constraints
+Toptions.InitialPenalty     = obj.initialPenalty;               %Initial value of penalty parameter; used in constrained optimization
+Toptions.PenaltyFactor      = obj.PenaltyFactor;                %parameter for updating the penalty factor; required in constrained optimization
+Toptions.FitnessScalingFcn  = str2func(obj.SFitnessScalingFcn); %eval(['@' SFitnessScalingFcn]);   %scaling of fitness function
+Toptions.SelectionFcn       = str2func(obj.SSelectionFcn);      %eval(['@' SSelectionFcn]);        %function for selecting parents for crossover and mutation
+Toptions.CrossoverFcn       = str2func(obj.SCrossoverFcn);      %eval(['@' SCrossoverFcn]);        %function for generating crossover children
+Toptions.MutationFcn       = str2func(obj.SMutationFcn);
+Toptions.CreationFcn       = str2func(obj.SCreationFcn);
 Toptions.Display            = 'iter';    %sets level of display
 Toptions.Vectorized         = 'on';     %enables possibility of calculating fitness of population using a single function callXop.VlowerBounds,Xop.VupperBounds
-Toptions.TimeLimit          = Xobj.Timeout; % termination criteria
-Toptions.OutputFcns = @Xobj.outputFunction;
-
-% initialize global variable
-XsimOutGlobal=[];
-
-%% Perform Real optimization
-
-opencossan.OpenCossan.getTimer().lap('Description',['GA:' Xobj.Description]);
-opencossan.OpenCossan.cossanDisp('Starting GeneticAlgorithms',3)
+Toptions.TimeLimit          = obj.Timeout; % termination criteria
+% Toptions.OutputFcns = @obj.outputFunction;
 
 opencossan.optimization.OptimizationRecorder.clear();
-if isempty(Xop.Constraints)
-    if LplotEvolution
+
+startTime = tic;
+if isempty(optProb.Constraints)
+    if plotEvolution
         Toptions = gaoptimset('PlotFcns',{@gaplotbestf});
     end
     
-    if ~Xobj.LextremeOptima
+    if ~obj.LextremeOptima
         % Run constrained optimisation
-        [Vsol,Vfval,Nexitflag, ~] =ga(hobjfun,...
-            Xop.NumberOfDesignVariables,[],[],[],[],Xop.LowerBounds,Xop.UpperBounds,...
+        [optimalSolution,~,exitFlag, ~] =ga(hobjfun,...
+            Xop.NumberOfDesignVariables,[],[],[],[],optProb.LowerBounds,optProb.UpperBounds,...
             [],Toptions);
     else
         % Run unconstrained extreme-values optimization with bounded
         % design variables
-        [Vsol,Vfval,Nexitflag,~] =ga_minmax(hobjfun,...
-            Xop.NumberOfDesignVariables,[],[],[],[],...
-            Xop.LowerBounds,Xop.UpperBounds,[],Toptions);
+        [optimalSolution,~,exitFlag,~] =ga_minmax(hobjfun,...
+            optProb.NumberOfDesignVariables,[],[],[],[],...
+            optProb.LowerBounds,optProb.UpperBounds,[],Toptions);
     end
     
 else
     
-    if LplotEvolution
+    if plotEvolution
         Toptions = gaoptimset('PlotFcns',{@gaplotbestf,@gaplotmaxconstr});
     end
     
-    if ~Xobj.LextremeOptima
+    if ~obj.LextremeOptima
         % Run constrained optimisation
-        [Vsol,Vfval,Nexitflag, ~] =ga(hobjfun,...
-            Xop.NumberOfDesignVariables,[],[],[],[],Xop.LowerBounds,Xop.UpperBounds,...
+        [optimalSolution,~,exitFlag, ~] =ga(hobjfun,...
+            optProb.NumberOfDesignVariables,[],[],[],[],optProb.LowerBounds,optProb.UpperBounds,...
             hconstrains,...
             Toptions);
     else
         % Run unconstrained extreme-values optimization with bounded
         % design variables
-        [Vsol,Vfval,Nexitflag,~] =ga_minmax(hobjfun,...
-            Xop.NumberOfDesignVariables,[],[],[],[],...
-            Xop.LowerBounds,Xop.UpperBounds,[],Toptions);
+        [optimalSolution,~,exitFlag,~] =ga_minmax(hobjfun,...
+            optProb.NumberOfDesignVariables,[],[],[],[],...
+            optProb.LowerBounds,optProb.UpperBounds,[],Toptions);
     end
 end
 
-opencossan.OpenCossan.getTimer().lap('Description','End GA optimization');
+totalTime = toc(startTime);
 
-%% Output
-% All the quantities of interest are automatically stored in the Optimum
-% object.
-
-% Prepare string with reason for termination of optimization algorithm
-switch Nexitflag
-    case{1}
-        Sexitflag   = 'Average cumulative change in value of the fitness function over options.StallGenLimit generations less than options.TolFun and constraint violation less than options.TolCon';
-    case{2}
-        Sexitflag   = 'Fitness limit reached and constraint violation less than options.TolCon';
-    case{3}
-        Sexitflag   = 'The value of the fitness function did not change in options.StallGenLimit generations and constraint violation less than options.TolCon';
-    case{4}
-        Sexitflag   = 'Magnitude of step smaller than machine precision and constraint violation less than options.TolCon';
-    case{0}
-        Sexitflag   = 'Maximum number of generations exceeded';
-    case{-1}
-        Sexitflag   = 'Optimization terminated by the output or plot function';
-    case{-2}
-        Sexitflag   = 'No feasible point found';
-    case{-4}
-        Sexitflag   = 'Stall time limit exceeded';
-    case{-5}
-        Sexitflag   = 'Time limit exceeded';
-end
-
-XoptGlobal.Sexitflag=[XoptGlobal.Sexitflag; Sexitflag];
-
-% Assign outputs
-XoptGlobal.VoptimalDesign=Vsol;
-XoptGlobal.VoptimalScores=Vfval;
-if ~isempty(Xop.Constraints)
-    Vindex=all(XoptGlobal.TablesValues.DesignVariables==XoptGlobal.VoptimalDesign,2);
-    Mdataout=XoptGlobal.TablesValues.Constraints(Vindex);
-    Vpos=find(all(~isnan(Mdataout),2));
-    XoptGlobal.VoptimalConstraints=Mdataout(Vpos(1),:);
-end
-
-Xoptimum=XoptGlobal;
-
-% Export Simulation Output
-varargout{1}    = XsimOutGlobal;
+optimum = opencossan.optimization.Optimum(...
+    'optimalsolution', optimalSolution, ...
+    'exitflag', exitFlag, ...
+    'totaltime', totalTime, ...
+    'optimizationproblem', optProb, ...
+    'optimizer', obj, ...
+    'constraints', OptimizationRecorder.getInstance().Constraints, ...
+    'objectivefunction', OptimizationRecorder.getInstance().ObjectiveFunction, ...
+    'modelevaluations', OptimizationRecorder.getInstance().ModelEvaluations);
 
 if ~isdeployed
     % add entries in simulation and analysis database at the end of the
@@ -260,10 +166,5 @@ if ~isdeployed
     end
 end
 
-%% Delete global variables
-clear global XoptGlobal XsimOutGlobal
+end
 
-%% Record Time
-opencossan.OpenCossan.getTimer().lap('Description',['End apply@' class(Xobj)]);
-
-return

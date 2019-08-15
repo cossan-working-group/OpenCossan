@@ -34,51 +34,55 @@ assert(isa(required.optimizationproblem, 'opencossan.optimization.OptimizationPr
 optProb = required.optimizationproblem;
 x = required.referencepoints;
 
+% cobyla passes the inputs transposed for some reason
 if optional.transpose
     x = x';
 end
-
-Ncandidates = size(x,1); % Number of candidate solutions
 
 assert(optProb.NumberOfDesignVariables == size(x,2), ...
     'OpenCossan:optimization:constraint:evaluate',...
     'Number of design Variables not correct');
 
-% Prepare input object
-Xinput = optProb.Input.setDesignVariable('CSnames',optProb.DesignVariableNames,'Mvalues',x);
-Tinput = Xinput.getTable;
-
-modelResult = ...
-    opencossan.optimization.OptimizationRecorder.getModelEvaluation(...
-    optProb.DesignVariableNames, x);
-
-if isempty(modelResult)
-    modelResult = apply(optProb.Model,Tinput);
-    modelResult = modelResult.TableValues;
-    opencossan.optimization.OptimizationRecorder.recordModelEvaluations(...
-        modelResult);
-end
-
-constraintValues = zeros(size(x));
-for i = 1:numel(obj)
-    TableInputSolver = modelResult(:,obj(i).InputNames);
-
-    TableOutConstrains = evaluate@opencossan.workers.Mio(obj(i),TableInputSolver);
+%% Evaluate constraint(s)
+constraints = zeros(size(x, 1), length(obj));
+% Some algorithms pass multiple inputs at the same time, this loop
+% evaluates the constraint(s) for all of them
+for i = 1:size(x, 1)
+    input = optProb.Input.setDesignVariable('CSnames',optProb.DesignVariableNames,'Mvalues',x(i,:));
+    input = input.getTable;
     
-    constraintValues(:,i) = TableOutConstrains.(obj(i).OutputNames{1});
+    modelResult = ...
+    opencossan.optimization.OptimizationRecorder.getModelEvaluation(...
+    optProb.DesignVariableNames, x(i,:));
+    
+    if isempty(modelResult)
+        modelResult = apply(optProb.Model, input);
+        modelResult = modelResult.TableValues;
+        opencossan.optimization.OptimizationRecorder.recordModelEvaluations(...
+            modelResult);
+    end
+    
+    % loop over all constraints
+    for j = 1:numel(obj)
+        TableInputSolver = modelResult(:,obj(j).InputNames);
+
+        TableOutConstrains = evaluate@opencossan.workers.Mio(obj(j),TableInputSolver);
+
+        constraints(i,j) = TableOutConstrains.(obj(j).OutputNames{1});
+    end
 end
 
-%%   Apply scaling constant
-constraintValues = constraintValues(1:Ncandidates,:)/optional.scaling;
+% Scale constraints
+constraints = constraints/optional.scaling;
 
 % Assign output to the inequality and equality constrains
-in = constraintValues(:,[obj.IsInequality]);
-eq = constraintValues(:,~[obj.IsInequality]);
+in = constraints(:,[obj.IsInequality]);
+eq = constraints(:,~[obj.IsInequality]);
 
 % record constraint values
-for i = 1:size(constraintValues,1)
+for i = 1:size(constraints,1)
     opencossan.optimization.OptimizationRecorder.recordConstraints(...
-        x(i,:), constraintValues(i,:));
+        x(i,:), constraints(i,:));
 end
 
 end

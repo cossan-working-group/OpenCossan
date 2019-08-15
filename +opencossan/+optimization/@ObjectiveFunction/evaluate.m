@@ -1,4 +1,4 @@
-function value = evaluate(obj, varargin)
+function objective = evaluate(obj, varargin)
 %EVALUATE The method evaluates the ObjectiveFunction
 %
 % The candidate solutions (i.e. Design Variables) are stored in the matrix
@@ -37,13 +37,11 @@ for k=1:2:length(varargin)
         case 'xoptimizationproblem'
             XoptProb=varargin{k+1};
         case 'mreferencepoints'
-            Minput=varargin{k+1};
+            x=varargin{k+1};
         case 'scaling'
             scaling=varargin{k+1};
         case 'transpose'
             transpose = varargin{k+1};
-        case 'cxobjects'
-            obj.Cxobjects=varargin{k+1};
         otherwise
             error('OpenCossan:ObjectiveFunction:evaluate:wrongInputArgument',...
                 'PropertyName %s not valid', varargin{k});
@@ -55,54 +53,55 @@ assert(logical(exist('XoptProb','var')),...
     'OpenCossan:ObjectiveFunction:evaluate',...
     'An optimizationProblem object must be defined');
 
-if exist('Minput','var')
-    if transpose
-        Minput = Minput';
+if transpose
+    x = x';
+end
+
+NdesignVariables = size(x,2); % number of design variables
+
+assert(XoptProb.NumberOfDesignVariables == NdesignVariables, ...
+    'OpenCossan:ObjectiveFunction:evaluate',...
+    'Number of design Variables %i does not match with the dimension of the referece point (%i)', ...
+    XoptProb.NumberOfDesignVariables,NdesignVariables);
+
+%% Evaluate objective function(s)
+objective = zeros(size(x, 1), length(obj));
+% Some algorithms pass multiple inputs at the same time, this loop
+% evaluates the objective function(s) for all of them
+for i = 1:size(x,1)
+    
+    input = XoptProb.Input.setDesignVariable('CSnames',XoptProb.DesignVariableNames,'Mvalues',x(i,:));
+    input = input.getTable();
+    
+    modelResult = ...
+        opencossan.optimization.OptimizationRecorder.getModelEvaluation(...
+        XoptProb.DesignVariableNames, x(i,:));
+    
+    if isempty(modelResult)
+        modelResult = apply(XoptProb.Model,input);
+        modelResult = modelResult.TableValues;
+        opencossan.optimization.OptimizationRecorder.recordModelEvaluations(...
+            modelResult);
     end
     
-    NdesignVariables = size(Minput,2); %number of design variables
-    Ncandidates=size(Minput,1); % Number of candidate solutions
+    % loop over all objective functions
+    for j = 1:length(obj)
+        TinputSolver = modelResult(:,obj(j).InputNames);
+        
+        XoutObjective = evaluate@opencossan.workers.Mio(obj(j),TinputSolver);
+
+        objective(i,j) = XoutObjective.(obj(j).OutputNames{1});
+    end
     
-    assert(XoptProb.NumberOfDesignVariables == NdesignVariables, ...
-        'OpenCossan:ObjectiveFunction:evaluate',...
-        'Number of design Variables %i does not match with the dimension of the referece point (%i)', ...
-        XoptProb.NumberOfDesignVariables,NdesignVariables);
-end
-
-% prepare input
-Xinput = XoptProb.Input.setDesignVariable('CSnames',XoptProb.DesignVariableNames,'Mvalues',Minput);
-Tinput = Xinput.getTable();
-
-% evaluate model
-modelResult = ...
-    opencossan.optimization.OptimizationRecorder.getModelEvaluation(...
-    XoptProb.DesignVariableNames, Minput);
-
-if isempty(modelResult)
-    modelResult = apply(XoptProb.Model,Tinput);
-    modelResult = modelResult.TableValues;
-    opencossan.optimization.OptimizationRecorder.recordModelEvaluations(...
-        modelResult);
-end
-
-for iobj=1:length(obj)
-    % Prepare Input structure
-    TinputSolver = modelResult(:,obj(iobj).InputNames);
-    
-    % Evalutate Obj.Function
-    XoutObjective = evaluate@opencossan.workers.Mio(obj(iobj),TinputSolver);
-    
-    % keep only the variables defined in the Coutputnames
-    Mout(:,iobj) = XoutObjective.(obj(iobj).OutputNames{1});
 end
 
 %%   Apply scaling constant
-value = Mout(1:Ncandidates,:)/scaling;
+objective = objective/scaling;
 
 % record objective function values
-for i = 1:size(Mout,1)
+for i = 1:size(x,1)
     opencossan.optimization.OptimizationRecorder.recordObjectiveFunction(...
-        Minput(i,:), Mout(i,:));
+        x(i,:), objective(i,:));
 end
 
 end
