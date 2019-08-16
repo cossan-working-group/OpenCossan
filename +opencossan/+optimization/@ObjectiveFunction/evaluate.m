@@ -1,68 +1,46 @@
 function objective = evaluate(obj, varargin)
-%EVALUATE The method evaluates the ObjectiveFunction
-%
-% The candidate solutions (i.e. Design Variables) are stored in the matrix
-% Minput (Ncandidates,NdesignVariable)
-%
-% The objective functions are stored in Mfobj(Ncandidates,NobjectiveFunctions)
-% The gradient of the objective function is store in Mdfobj(NdesignVariable,NobjectiveFunctions)
-%
-% See Also: https://cossan.co.uk/wiki/evaluate@ObjectiveFunction
-%
-% Author: Edoardo Patelli
+% EVALUATE Evaluate the objective function
 
 %{
-    This file is part of OpenCossan <https://cossan.co.uk>.
-    Copyright (C) 2006-2018 COSSAN WORKING GROUP
+This file is part of OpenCossan <https://cossan.co.uk>.
+Copyright (C) 2006-2018 COSSAN WORKING GROUP
 
-    OpenCossan is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License or,
-    (at your option) any later version.
-    
-    OpenCossan is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU General Public License for more details.
-    
-    You should have received a copy of the GNU General Public License
-    along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
+OpenCossan is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License or,
+(at your option) any later version.
+
+OpenCossan is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
 %}
 
-% Process inputs
-scaling=1;
-transpose = false;
-for k=1:2:length(varargin)
-    switch lower(varargin{k})
-        case 'xoptimizationproblem'
-            XoptProb=varargin{k+1};
-        case 'mreferencepoints'
-            x=varargin{k+1};
-        case 'scaling'
-            scaling=varargin{k+1};
-        case 'transpose'
-            transpose = varargin{k+1};
-        otherwise
-            error('OpenCossan:ObjectiveFunction:evaluate:wrongInputArgument',...
-                'PropertyName %s not valid', varargin{k});
-    end
-end
+[required, varargin] = opencossan.common.utilities.parseRequiredNameValuePairs(...
+    ["optimizationproblem", "referencepoints"], varargin{:});
 
-%% Check inputs
-assert(logical(exist('XoptProb','var')),...
-    'OpenCossan:ObjectiveFunction:evaluate',...
-    'An optimizationProblem object must be defined');
+optional = opencossan.common.utilities.parseOptionalNameValuePairs(...
+    ["scaling", "transpose"], {1, false}, varargin{:});
 
-if transpose
+assert(isa(required.optimizationproblem, 'opencossan.optimization.OptimizationProblem'), ...
+    'OpenCossan:optimization:constraint:evaluate',...
+    'An OptimizationProblem must be passed using the property name optimizationproblem');
+
+% destructure inputs
+optProb = required.optimizationproblem;
+x = required.referencepoints;
+
+% cobyla passes the inputs transposed for some reason
+if optional.transpose
     x = x';
 end
 
-NdesignVariables = size(x,2); % number of design variables
-
-assert(XoptProb.NumberOfDesignVariables == NdesignVariables, ...
-    'OpenCossan:ObjectiveFunction:evaluate',...
-    'Number of design Variables %i does not match with the dimension of the referece point (%i)', ...
-    XoptProb.NumberOfDesignVariables,NdesignVariables);
+assert(optProb.NumberOfDesignVariables == size(x,2), ...
+    'OpenCossan:optimization:constraint:evaluate',...
+    'Number of design Variables not correct');
 
 %% Evaluate objective function(s)
 objective = zeros(size(x, 1), length(obj));
@@ -70,15 +48,15 @@ objective = zeros(size(x, 1), length(obj));
 % evaluates the objective function(s) for all of them
 for i = 1:size(x,1)
     
-    input = XoptProb.Input.setDesignVariable('CSnames',XoptProb.DesignVariableNames,'Mvalues',x(i,:));
+    input = optProb.Input.setDesignVariable('CSnames',optProb.DesignVariableNames,'Mvalues',x(i,:));
     input = input.getTable();
     
     modelResult = ...
         opencossan.optimization.OptimizationRecorder.getModelEvaluation(...
-        XoptProb.DesignVariableNames, x(i,:));
+        optProb.DesignVariableNames, x(i,:));
     
     if isempty(modelResult)
-        modelResult = apply(XoptProb.Model,input);
+        modelResult = apply(optProb.Model, input);
         modelResult = modelResult.TableValues;
         opencossan.optimization.OptimizationRecorder.recordModelEvaluations(...
             modelResult);
@@ -96,7 +74,7 @@ for i = 1:size(x,1)
 end
 
 %%   Apply scaling constant
-objective = objective/scaling;
+objective = objective/optional.scaling;
 
 % record objective function values
 for i = 1:size(x,1)

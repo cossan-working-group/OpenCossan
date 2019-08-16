@@ -23,21 +23,21 @@ function optimum = apply(obj, varargin)
 % Website: http://www.cossan.co.uk
 
 %{
-    This file is part of OpenCossan <https://cossan.co.uk>.
-    Copyright (C) 2006-2018 COSSAN WORKING GROUP
+This file is part of OpenCossan <https://cossan.co.uk>.
+Copyright (C) 2006-2018 COSSAN WORKING GROUP
 
-    OpenCossan is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License or,
-    (at your option) any later version.
-    
-    OpenCossan is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU General Public License for more details.
-    
-    You should have received a copy of the GNU General Public License
-    along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
+OpenCossan is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License or,
+(at your option) any later version.
+
+OpenCossan is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
 %}
 
 import opencossan.optimization.OptimizationRecorder;
@@ -60,14 +60,14 @@ plotEvolution = optional.plotevolution;
 obj = initializeOptimizer(obj);
 
 % Create handle of the objective function
-hobjfun=@(x)evaluate(optProb.ObjectiveFunctions,'Xoptimizationproblem',optProb,...
-    'MreferencePoints',x,...
-    'scaling',obj.ObjectiveFunctionScalingFactor);
+hobjfun=@(x)evaluate(optProb.ObjectiveFunctions,'optimizationproblem', optProb, ...
+    'referencepoints',x , ...
+    'scaling', obj.ObjectiveFunctionScalingFactor);
 
 % Create handle of the objective function
-hconstrains=@(x)evaluate(optProb.Constraints,'optimizationproblem',optProb,...
-    'referencepoints',x,...
-    'scaling',obj.ConstraintScalingFactor);
+hconstrains=@(x)evaluate(optProb.Constraints,'optimizationproblem', optProb, ...
+    'referencepoints', x, ...
+    'scaling', obj.ConstraintScalingFactor);
 
 assert(size(x0, 1) <= obj.NPopulationSize, ...
     'OpenCossan:GeneticAlgorithms:apply', ...
