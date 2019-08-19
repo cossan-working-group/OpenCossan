@@ -50,22 +50,24 @@ for i = 1:size(x, 1)
     input = optProb.Input.setDesignVariable('CSnames',optProb.DesignVariableNames,'Mvalues',x(i,:));
     input = input.getTable;
     
-    modelResult = ...
-    opencossan.optimization.OptimizationRecorder.getModelEvaluation(...
-    optProb.DesignVariableNames, x(i,:));
-    
-    if isempty(modelResult)
-        modelResult = apply(optProb.Model, input);
-        modelResult = modelResult.TableValues;
-        opencossan.optimization.OptimizationRecorder.recordModelEvaluations(...
-            modelResult);
+    if ~isempty(optProb.Model)
+        modelResult = ...
+        opencossan.optimization.OptimizationRecorder.getModelEvaluation(...
+        optProb.DesignVariableNames, x(i,:));
+
+        if isempty(modelResult)
+            modelResult = apply(optProb.Model, input);
+            modelResult = modelResult.TableValues;
+            opencossan.optimization.OptimizationRecorder.recordModelEvaluations(...
+                modelResult);
+        end
+        input = modelResult;
     end
     
     % loop over all constraints
     for j = 1:numel(obj)
-        TableInputSolver = modelResult(:,obj(j).InputNames);
-
-        TableOutConstrains = evaluate@opencossan.workers.Mio(obj(j),TableInputSolver);
+        TableOutConstrains = evaluate@opencossan.workers.Mio(obj(j), ...
+            input(:,obj(j).InputNames));
 
         constraints(i,j) = TableOutConstrains.(obj(j).OutputNames{1});
     end
@@ -79,10 +81,8 @@ in = constraints(:,[obj.IsInequality]);
 eq = constraints(:,~[obj.IsInequality]);
 
 % record constraint values
-for i = 1:size(constraints,1)
-    opencossan.optimization.OptimizationRecorder.recordConstraints(...
-        x(i,:), constraints(i,:));
-end
+opencossan.optimization.OptimizationRecorder.recordConstraints(...
+        x, constraints);
 
 end
 

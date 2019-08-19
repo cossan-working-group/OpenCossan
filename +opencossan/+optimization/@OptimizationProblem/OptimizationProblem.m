@@ -5,9 +5,9 @@ classdef OptimizationProblem
     %   object and the design variables are defined by means of a cell of
     %   Parameters
 
-    % Properties
     properties (SetAccess = protected)
-        Model(1, 1)
+        Model
+        Input
         ObjectiveFunctions(1,:) opencossan.optimization.ObjectiveFunction;
         Constraints(1,:) opencossan.optimization.Constraint;
     end
@@ -20,7 +20,6 @@ classdef OptimizationProblem
     end
 
     properties (Dependent = true)
-        Input
         OutputNames
         InputNames
         ConstraintNames% Names of the constraint outputs
@@ -38,28 +37,29 @@ classdef OptimizationProblem
 
         function obj = OptimizationProblem(varargin)
             %OPTIMIZATIONPROBLEM This method defines a OptimizationProblem object
-            %
-            % Copyright 1993-2011, COSSAN Working Group, University of Innsbruck, Austria
-            % Author: Edoardo-Patelli
 
             if nargin == 0, return, end
 
             [required, varargin] = ...
                 opencossan.common.utilities.parseRequiredNameValuePairs(...
-                ["model", "objectivefunctions"], varargin{:});
+                "objectivefunctions", varargin{:});
 
             [optional, ~] = ...
                 opencossan.common.utilities.parseOptionalNameValuePairs(...
-                ["description", "constraints", "weights", "initialsolution"], {"", opencossan.optimization.Constraint.empty, [], []}, varargin{:});
+                ["description", "constraints", "weights", ...
+                "initialsolution", "model", "input"], {"", ...
+                opencossan.optimization.Constraint.empty, [], [], [], []}, ...
+                varargin{:});
 
-            obj.Model = required.model;
             obj.ObjectiveFunctions = required.objectivefunctions;
 
             obj.Description = optional.description;
             obj.Constraints = optional.constraints;
             obj.Weights = optional.weights;
             obj.InitialSolution = optional.initialsolution;
-
+            obj.Model = optional.model;
+            obj.Input = optional.input;
+            
             if isempty(obj.Weights)
                 obj.Weights = ones(size(obj.ObjectiveFunctions));
             else
@@ -90,11 +90,15 @@ classdef OptimizationProblem
                     'openCOSSAN:OptimizationProblem', ...
                     ['The length of InitialSolution (' num2str(size(obj.InitialSolution, 2)) ...
                     ') must be equal to the number of design variables (' ...
-                    num2str(length(obj.Xinput.DesignVariableNames)) ')'])
+                    num2str(length(obj.Input.DesignVariableNames)) ')'])
             end
         end
 
         function input = get.Input(obj)
+            if ~isempty(obj.Input)
+                input = obj.Input;
+                return;
+            end
             switch (class(obj.Model))
                 case 'opencossan.common.Model'
                     input = obj.Model.Input;

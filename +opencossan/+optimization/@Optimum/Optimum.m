@@ -61,11 +61,16 @@ classdef Optimum < opencossan.common.CossanObject
             if nargin == 0
                 super_args = {};
             else
-                [required, super_args] = ...
+                [required, varargin] = ...
                     opencossan.common.utilities.parseRequiredNameValuePairs(...
                     ["exitflag", "totaltime", "optimizationproblem", ...
-                     "optimizer", "optimalsolution", "constraints", ...
-                     "objectivefunction", "modelevaluations"], varargin{:});
+                     "optimizer", "optimalsolution", "objectivefunction"], ... 
+                     varargin{:});
+                 
+                 [optional, super_args] = ...
+                     opencossan.common.utilities.parseOptionalNameValuePairs(...
+                     ["constraints", "modelevaluations"], {table(), table()}, ...
+                     varargin{:});
             end
             obj@opencossan.common.CossanObject(super_args{:});
             
@@ -75,9 +80,10 @@ classdef Optimum < opencossan.common.CossanObject
                 obj.OptimizationProblem = required.optimizationproblem;
                 obj.Optimizer = required.optimizer;
                 obj.OptimalSolution = required.optimalsolution;
-                obj.Constraints = required.constraints;
                 obj.ObjectiveFunction = required.objectivefunction;
-                obj.ModelEvaluations = required.modelevaluations;
+                
+                obj.Constraints = optional.constraints;
+                obj.ModelEvaluations = optional.modelevaluations;
             end
         end
         

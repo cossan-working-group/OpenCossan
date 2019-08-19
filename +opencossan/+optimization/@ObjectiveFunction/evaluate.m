@@ -51,36 +51,37 @@ for i = 1:size(x,1)
     input = optProb.Input.setDesignVariable('CSnames',optProb.DesignVariableNames,'Mvalues',x(i,:));
     input = input.getTable();
     
-    modelResult = ...
-        opencossan.optimization.OptimizationRecorder.getModelEvaluation(...
-        optProb.DesignVariableNames, x(i,:));
-    
-    if isempty(modelResult)
-        modelResult = apply(optProb.Model, input);
-        modelResult = modelResult.TableValues;
-        opencossan.optimization.OptimizationRecorder.recordModelEvaluations(...
-            modelResult);
+    if ~isempty(optProb.Model)
+        modelResult = ...
+            opencossan.optimization.OptimizationRecorder.getModelEvaluation(...
+            optProb.DesignVariableNames, x(i,:));
+        
+        if isempty(modelResult)
+            modelResult = apply(optProb.Model, input);
+            modelResult = modelResult.TableValues;
+            opencossan.optimization.OptimizationRecorder.recordModelEvaluations(...
+                modelResult);
+        end
+        input = modelResult;
     end
     
     % loop over all objective functions
     for j = 1:length(obj)
-        TinputSolver = modelResult(:,obj(j).InputNames);
+        XoutObjective = evaluate@opencossan.workers.Mio(obj(j), ...
+            input(:,obj(j).InputNames));
         
-        XoutObjective = evaluate@opencossan.workers.Mio(obj(j),TinputSolver);
-
         objective(i,j) = XoutObjective.(obj(j).OutputNames{1});
     end
     
 end
 
-%%   Apply scaling constant
+% scale values
 objective = objective/optional.scaling;
 
-% record objective function values
-for i = 1:size(x,1)
-    opencossan.optimization.OptimizationRecorder.recordObjectiveFunction(...
-        x(i,:), objective(i,:));
-end
+% record values
+opencossan.optimization.OptimizationRecorder.recordObjectiveFunction(...
+    x, objective);
+
 
 end
 
