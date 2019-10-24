@@ -48,31 +48,14 @@ switch Ndim
         for iargin = 1:length(varargin)-1
             Mcoord1 = varargin{iargin}.Mcoord;
             Mcoord2 = varargin{iargin+1}.Mcoord;
-            CSindexName1 = varargin{iargin}.CSindexName;
-            CSindexName2 = varargin{iargin+1}.CSindexName;
-            CSindexUnit1 = varargin{iargin}.CSindexUnit;
-            CSindexUnit2 = varargin{iargin+1}.CSindexUnit;
-                assert(size(Mcoord1,2)==size(Mcoord2,2) &&...
-                    isequal(Mcoord1,Mcoord2),...
-                    'openCOSSAN:Dataseries:vertcat',...
-                    'All the Dataseries array must have the same Mcoord')
-%                 assert(strcmpi(CSindexName1,CSindexName2),...
-%                     'openCOSSAN:Dataseries:vertcat',...
-%                     'All the Dataseries array must have the same SindexName')
-%                 assert(strcmpi(CSindexUnit1,CSindexUnit2),...
-%                     'openCOSSAN:Dataseries:vertcat',...
-%                     'All the Dataseries array must have the same SindexUnit')
+            assert(size(Mcoord1,2)==size(Mcoord2,2) &&...
+                isequal(Mcoord1,Mcoord2),...
+                'openCOSSAN:Dataseries:vertcat',...
+                'All the Dataseries array must have the same Mcoord')
         end
         % Create empty output arrey and concatenate the prperties of the
         % input arrays accordingly.
-        Xobj = Dataseries;
-        Xobj.CSindexName = varargin{1}.CSindexName;
-        Xobj.CSindexUnit = varargin{1}.CSindexUnit;
-        Xobj.Mcoord = varargin{1}.Mcoord;
-        Xobj.Mdata = repmat(varargin{1}.Mdata,length(varargin),1);
-        for iargin = 2:length(varargin)
-            Xobj.Mdata(iargin,:) = varargin{iargin}.Mdata;
-        end
+        Xobj = vertcat(varargin{:});        
     case 2
         % Concatenate matrices in columns (i.e. [XobjA,XobjB])
         % Check that all the Mdata in the objects have the same number of
@@ -81,7 +64,7 @@ switch Ndim
         assert(all(Msizes == Msizes(1)),'openCOSSAN:Dataseries:vertcat',...
             'CAT arguments dimensions are not consistent')
         % Concatenate objects directly
-        Xobj = builtin('horzcat',varargin{:});
+        Xobj = horzcat(varargin{:});
     otherwise
         % no support for dataseries matrices of dimension higher than 2
         error('openCOSSAN:Dataseries:cat',...
