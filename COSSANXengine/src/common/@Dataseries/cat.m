@@ -69,9 +69,9 @@ switch Ndim
         Xobj.CSindexName = varargin{1}.CSindexName;
         Xobj.CSindexUnit = varargin{1}.CSindexUnit;
         Xobj.Mcoord = varargin{1}.Mcoord;
-        Xobj.Mdata = varargin{1}.Mdata;
+        Xobj.Mdata = repmat(varargin{1}.Mdata,length(varargin),1);
         for iargin = 2:length(varargin)
-            Xobj.Mdata = [Xobj.Mdata;varargin{iargin}.Mdata];
+            Xobj.Mdata(iargin,:) = varargin{iargin}.Mdata;
         end
     case 2
         % Concatenate matrices in columns (i.e. [XobjA,XobjB])

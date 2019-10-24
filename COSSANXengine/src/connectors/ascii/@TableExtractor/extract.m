@@ -80,7 +80,7 @@ if ~isempty(Xobj.Sdelimiter)
 end
     
 %% Do import
-Textract = readtable(Sfile,Carguments{:});
+Textract = readtable(Sfile,Carguments{:},'FileType','text');
 
 for n=1:length(Xobj.Coutputnames)
     TableData=Textract(Xobj.ClinePosition{n},Xobj.CcolumnPosition{n});
