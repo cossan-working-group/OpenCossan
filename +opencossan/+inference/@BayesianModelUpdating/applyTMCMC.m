@@ -36,7 +36,7 @@ function [samplesOut, log_fD] = applyTMCMC(XBayes)
     
     %Prior Evaluation and Sampling function handles
     fT = @(x)Prior.evalpdf('Mxsamples',x);
-    sample_from_fT = @(N) get(Prior.sample('Nsamples', N),'MsamplesPhysicalSpace');
+    sample_from_fT = @(N) get(Prior.sample(N),'MsamplesPhysicalSpace');
 
     beta = 0.2; %<-- I think this is a paramter for the gaussian. <--Eq.17 used as the scaling factor in the covarience matrix
     S    = ones(1,50); %<-- read paper for more clarity, it is a vector of the mean wieghts in every step?? Eq.15
@@ -90,7 +90,7 @@ function [samplesOut, log_fD] = applyTMCMC(XBayes)
 %             surf(xx,yy,zz);
             
           
-        end;
+        end
 
         j = j+1;
 
@@ -160,7 +160,7 @@ function [samplesOut, log_fD] = applyTMCMC(XBayes)
         % to guarantee the quality of the samples:
         if pj1 == 1
             burnin = lastburnin;
-        end;
+        end
 
         %% Start N different Markov chains
         fprintf('Markov chains ...\n\n');

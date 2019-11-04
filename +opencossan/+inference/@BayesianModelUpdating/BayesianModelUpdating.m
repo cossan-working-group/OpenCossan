@@ -80,14 +80,15 @@ classdef BayesianModelUpdating
                 obj.Prior = p.Results.Prior;
                 obj.Coutputnames = obj.Prior.Cmembers;
             else
-                obj.Prior = obj.Xmodel.Xinput.Xrvset;
+                name = obj.Xmodel.Input.RandomVariableSetNames;
+                obj.Prior = obj.Xmodel.Input.RandomVariableSets.(name{1});
             end
             
         end
-        
-       Xmodel = obj.applyTMCMC(obj);
-        
+       
+        % This line should return simulation data?
+       Xmodel = applyTMCMC(obj);
+       
     end
-    
     
 end

@@ -21,7 +21,7 @@ classdef LogLikelihood < opencossan.workers.Mio
         
         Xmodel              %The model that is to be used in the evaluation
         Data                %The Data to be used to update
-        ShapeParamters      %The Shape Paramters that can be used in the updating procedure
+        ShapeParameters     %The Shape Paramters that can be used in the updating procedure
         CustomLog           %User can pass custom likelihood function as a function handle
         
     end
