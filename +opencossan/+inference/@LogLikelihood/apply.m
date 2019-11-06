@@ -23,9 +23,9 @@ function [logL] = apply(XLogL,theta)
     
     Tinput1 = cell2struct(num2cell([theta, ParVals]'),Xmodel.InputNames);
     
-    Tinput = struct2table(Tinput1);
+    %Tinput = struct2table(Tinput1);
     
-    Xout = Xmodel.apply(Tinput);
+    Xout = Xmodel.apply(Tinput1);
     output  = Xout.getValues('cnames',Xmodel.OutputNames);
     
     D = XLogL.Data.getValues('cnames',Xmodel.OutputNames);
@@ -41,7 +41,7 @@ function [logL] = apply(XLogL,theta)
         if ~isempty(XLogL.ShapeParameters)
             epsilon_r = XLogL.ShapeParameters;
         else
-            epsilon_r = 1e-4*ones(DimOut,1);
+            epsilon_r = std(D);
         end
 
         for iSample = 1:nSamples
