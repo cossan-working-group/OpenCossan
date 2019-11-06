@@ -15,7 +15,8 @@ function [samplesOut, log_fD] = applyTMCMC(XBayes)
 % We will assume in this algorithm that N0 = N1 = ... = Nm
 
 
-
+VerboseSave =opencossan.OpenCossan.getVerbosityLevel;
+opencossan.OpenCossan.setVerbosityLevel(1);
 
     %% Number of cores, Not sure how to do this with openCossan's jobManager
     if ~isempty(gcp('nocreate'))
@@ -211,6 +212,8 @@ function [samplesOut, log_fD] = applyTMCMC(XBayes)
         samplesOut = addVariable(samplesOut,'Cnames',names,'Mvalues',thetaj);
         
     end
+    
+    opencossan.OpenCossan.setVerbosityLevel(VerboseSave);
     samplesOut = addVariable(samplesOut,'Cnames',XBayes.Coutputnames,'Mvalues',thetaj);
 
 return
