@@ -13,10 +13,13 @@
 % results. using the method 'resetRandomNumberGenerator' from OpenCossan
 
 % DO NOT CHANGE THE VALUES OF THE SEED
-opencossan.OpenCossan.resetRandomNumberGenerator(51125);
+%opencossan.OpenCossan.resetRandomNumberGenerator(51125);
 
 %% Preparation of the parameters and random variables
 % Definition of the Parameters using 'Parameter' constructor from OpenCossan
+
+opencossan.OpenCossan.getVerbosityLevel
+
 F1=opencossan.common.inputs.Parameter('value',2.0,'description','Applied Load in node 1');
 F2=opencossan.common.inputs.Parameter('value',1.0,'description','Applied Load in node 2');
 k1real=opencossan.common.inputs.Parameter('value',1.0,'description','Stiffness of spring 1');
@@ -87,8 +90,8 @@ ActualDisplacements=Xout.getValues('Cnames',{'y1' 'y2'});
 F1 = opencossan.common.inputs.Parameter('value',2.0,'description','Applied Load in node 1');
 F2 = opencossan.common.inputs.Parameter('value',1.0,'description','Applied Load in node 2');
 
-k1 = opencossan.common.inputs.random.UniformRandomVariable('bounds',[0.01,5],'description','Stiffness of spring 1');
-k2 = opencossan.common.inputs.random.UniformRandomVariable('bounds',[0.01,5],'description','Stiffness of spring 2');
+k1 = opencossan.common.inputs.random.UniformRandomVariable('bounds',[0.01,4],'description','Stiffness of spring 1');
+k2 = opencossan.common.inputs.random.UniformRandomVariable('bounds',[0.01,4],'description','Stiffness of spring 2');
 
 
 Xrvset = opencossan.common.inputs.random.RandomVariableSet('members',[k1; k2],'names',['k1'; 'k2']);
@@ -107,8 +110,8 @@ XevaluatorBayes = opencossan.workers.Evaluator('CXmembers',{XmioBayes},'CSmember
 
 XmodelBayes = opencossan.common.Model('input',XinputBayes,'evaluator',XevaluatorBayes);
 
-LogLike = opencossan.inference.LogLikelihood('Xmodel',XmodelBayes, 'Data', XsyntheticData);
+LogLike = opencossan.inference.LogLikelihood('Xmodel',XmodelBayes, 'Data', XsyntheticData, 'ShapeParameters', [0.1,0.1]);
 
-Bayes = opencossan.inference.BayesianModelUpdating('Xmodel', XmodelBayes,'Xlog',LogLike ,'CoutputNames', {'k1', 'k2'});
+Bayes = opencossan.inference.BayesianModelUpdating('Xmodel', XmodelBayes,'Xlog',LogLike ,'CoutputNames', {'k1', 'k2'}, 'Nsamples', 200);
 
 Samps = applyTMCMC(Bayes);

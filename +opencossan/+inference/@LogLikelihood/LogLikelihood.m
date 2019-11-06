@@ -40,12 +40,15 @@ classdef LogLikelihood < opencossan.workers.Mio
                 p.addParameter('Xmodel',obj.Xmodel);
                 p.addParameter('Data',obj.Data);
                 p.addParameter('CustomLog',obj.CustomLog)
-
+                p.addParameter('ShapeParameters', obj.ShapeParameters);
+                
                 p.parse(varargin{:});
 
                 obj.Xmodel = p.Results.Xmodel;
                 obj.Data = p.Results.Data;
                 obj.CustomLog = p.Results.CustomLog;
+                obj.ShapeParameters = p.Results.ShapeParameters;
+                
             end
             
         end
