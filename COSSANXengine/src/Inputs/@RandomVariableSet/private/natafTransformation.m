@@ -522,34 +522,12 @@ end
 Vstd=get(Xrvset,'Cmembers','std');
 McovarianceNataf = Vstd * Vstd' .* McorrelationNataf;
 
-if isempty(Xrvset.Nmaxeigs)
-    [Meigvecs,Meigvals] = eig(full(McorrelationNataf));
-else
-    opts.disp=0; %set verbosity of the eigs to null
-    [Meigvecs,Meigvals] = eigs(McorrelationNataf,Xrvset.Nmaxeigs,'LM',opts);
-    % 	Meigvecs=zeros(Nvar);
-    % 	Meigvals=zeros(Nvar);
-    % 	Meigvecs(1:size(Mneigvecs,1),1:size(Mneigvecs,2))=Mneigvecs;
-    % 	Meigvals(1:size(Mneigvals,1),1:size(Mneigvals,2))=Mneigvals;
-end
-
-%Check whether there are any negative eigenvalues
-Vipos = find(diag(Meigvals)>0);
-if length(Vipos) < Nvar,
-    error('openCOSSAN:rvset:nataftransformation', ...
-        ['There are ' num2str(Nvar-length(Vipos)) ' negative eigenvalues!']);
-    
-
-end
-
-
 %MUY - matrix transforming rv's from uncorrelated std. norm. space (U) to
-%correlated std. norm. space (Y)
-MUY =  Meigvecs * sqrt(Meigvals);
+MUY = chol(McorrelationNataf,'lower');
 
 %MYU - matrix transforming rv's from correlated std. norm. space (Y) to
 %uncorrelated std. norm. space (U)
-MYU =  MUY^-1;
+MYU =  inv(MUY);
 %% Store the matricies in sparse format
 Xrvset.McorrelationNataf=sparse(McorrelationNataf);
 Xrvset.McovarianceNataf=sparse(McovarianceNataf );

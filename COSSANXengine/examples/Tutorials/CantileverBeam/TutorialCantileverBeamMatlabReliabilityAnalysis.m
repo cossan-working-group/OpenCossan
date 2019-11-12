@@ -87,13 +87,12 @@ assert(abs(XfailureProbLHS.pfhat-0.0696)<2.81*XfailureProbLHS.stdPfhat,...
 
 XlsFD = LocalSensitivityFiniteDifference('Xmodel',XprobModelBeamMatlab,'Coutputname',{'Vg'});
 display(XlsFD);
-
 % Compute the LocalSensitivityMeasure
-XlocalSensitivity = XlsFD.computeIndices;
+XlocalSensitivity = XlsFD.computeGradientStandardNormalSpace;
 
 OpenCossan.resetRandomNumberGenerator(49564);
 % Use sensitivity information to define the important direction for LineSampling
-XLS = LineSampling('XlocalSensitivityMeasures',XlocalSensitivity,'Nlines',50);
+XLS = LineSampling('XlocalSensitivityMeasures',XlocalSensitivity,'Nlines',50,'Vset',0.5:3.5);
 % Run Reliability Analysis
 [XfailureProbLS, Xout]=XLS.computeFailureProbability(XprobModelBeamMatlab);
 % Display results
