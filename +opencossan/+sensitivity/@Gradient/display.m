@@ -25,7 +25,7 @@ function display(Xobj)
 
 %% Set parameters
 Nmaxcomponents=5;
-
+import opencossan.OpenCossan
 %  Name and description
 OpenCossan.cossanDisp('===================================================================',3);
 OpenCossan.cossanDisp([' Gradient Object  -  Name: ' inputname(1)],1);
