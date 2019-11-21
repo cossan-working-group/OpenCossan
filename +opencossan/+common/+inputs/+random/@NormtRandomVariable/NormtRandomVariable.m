@@ -196,7 +196,7 @@ classdef NormtRandomVariable < opencossan.common.inputs.random.RandomVariable
             p = unifrnd(0,1,size);
             %invert CDF of normal truncated distribution
             clft = normcdf(obj.Bounds(1),obj.Mu,obj.Sigma);
-            crgt = normcdf(obj.Bounds(1),obj.Mu,obj.Sigma);
+            crgt = normcdf(obj.Bounds(2),obj.Mu,obj.Sigma);
             if length(p) == 1
                 samples = norminv(p*(crgt - clft) + clft,obj.Mu,obj.Sigma);
             else
