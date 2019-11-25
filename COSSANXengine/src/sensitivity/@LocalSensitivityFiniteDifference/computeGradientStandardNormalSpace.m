@@ -54,6 +54,8 @@ end
 % Evaluate the gradient
 %[Mgradients, ~, NfunctionEvaluation, varargout{2}]=Xobj.doFiniteDifferences;
 
+[~, input2reference] = ismember(Xobj.Cinputnames, Xobj.Xinput.CnamesRandomVariable);
+[~, reference2input] = ismember(Xobj.Xinput.CnamesRandomVariable, Xobj.Cinputnames);
 %% Generate Samples object from the Reference Point
 if isempty(Xobj.Xsamples0)
     % Construct Reference Point
@@ -64,7 +66,7 @@ if isempty(Xobj.Xsamples0)
         ' the sum of the number of random variables (%i)'), ...
         length(Xobj.VreferencePoint),Nrv)
     
-    Xobj.Xsamples0=Samples('MsamplesPhysicalSpace',Xobj.VreferencePoint,'Xinput',Xobj.Xinput);    
+    Xobj.Xsamples0=Samples('MsamplesPhysicalSpace',Xobj.VreferencePoint(reference2input),'Xinput',Xobj.Xinput);    
 else
     Xobj.VreferencePoint=Xobj.Xsamples0.MsamplesStandardNormalSpace;
 end
@@ -77,13 +79,13 @@ if isempty(Xobj.fx0)
             'XsimulationData',Xout0,'Nbatchnumber',0) 
     end  
     NfunctionEvaluation=NfunctionEvaluation+Xout0.Nsamples;
-    Vreference=Xout0.getValues('Cnames',Xobj.Coutputnames);
+    VreferenceOutput=Xout0.getValues('Cnames',Xobj.Coutputnames);
 else
     Cvariables=Xobj.Xsamples0.Cvariables;
     Cvariables(end+1)=Xobj.Coutputname;
     Mfx0=[Xobj.Xsamples0.MsamplesPhysicalSpace Xobj.fx0];
     Xout0=SimulationData('Cnames',Cvariables,'Mvalues',Mfx0);
-    Vreference=Xobj.fx0;
+    VreferenceOutput=Xobj.fx0;
 end
 
 %% Compute finite difference for each component
@@ -110,7 +112,7 @@ NfunctionEvaluation     = NfunctionEvaluation+Xdeltai.Nsamples;
 MgradientsSNS=zeros(Ninputs,length(Xobj.Coutputnames));
 
 for iout=1:length(Xobj.Coutputnames)
-    MgradientsSNS(:,iout) = (Xdeltai.getValues('Cnames',Xobj.Coutputnames(iout)) - Vreference(iout) )./Xobj.perturbation;
+    MgradientsSNS(:,iout) = (Xdeltai.getValues('Cnames',Xobj.Coutputnames(iout)) - VreferenceOutput(iout) )./Xobj.perturbation;
 end
 
 %% Compute the variance of the responce in standard normal space
@@ -118,7 +120,7 @@ Mindices=zeros(Ninputs,length(Xobj.Coutputnames));
 
 for iout=1:length(Xobj.Coutputnames)
     Mindices(:,iout) = (Xdeltai.getValues('Cnames',Xobj.Coutputnames(iout)) - ...
-        Vreference(iout) )/Xobj.perturbation;    
+        VreferenceOutput(iout) )/Xobj.perturbation;    
 end
 XsimData=Xout0.merge(Xdeltai); % Export SimulationData
 %% Export results
@@ -130,7 +132,7 @@ for n=1:length(Xobj.Coutputnames)
             'Cnames',Xobj.Cinputnames, ...
             'LstandardNormalSpace',true, ...
             'NfunctionEvaluation',NfunctionEvaluation,...
-            'Vgradient',MgradientsSNS(:,n),'Vreferencepoint',Xobj.VreferencePoint,...
+            'Vgradient',MgradientsSNS(input2reference,n),'Vreferencepoint',Xobj.VreferencePoint,...
             'SfunctionName',Xobj.Coutputnames{n});   
 end
 
