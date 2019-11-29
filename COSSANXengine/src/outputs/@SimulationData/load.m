@@ -105,7 +105,7 @@ for ipar=1:length(Cnames)
                 % reassign the values of Dataseries in a Nsamples x 1 
                 % cell array of 1-samples Dataseries
                 for isample=1:SimOutReserved_Nsamples
-                    CellTot{isample,ipar} = Xds.getSamples(isample);
+                    CellTot{isample,ipar} = Xds(isample);
                 end
             case 'cell'
                 % check that the cell contains only dataseries

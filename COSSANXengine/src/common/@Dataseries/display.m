@@ -29,16 +29,16 @@ if size(Xobj,2)>1
     OpenCossan.cossanDisp('===================================================================',3);
     OpenCossan.cossanDisp([' Dataseries object  '],3);
     OpenCossan.cossanDisp('===================================================================',3);
-    OpenCossan.cossanDisp(['* Array of ' num2str(size(Xobj,2)) ' Dataseries'],2);
+    OpenCossan.cossanDisp(['* Array of ' num2str(size(Xobj,1)) 'x' num2str(size(Xobj,2)) ' Dataseries'],2);
     Vdatalengths=[Xobj.VdataLength];
-    OpenCossan.cossanDisp(['* Dataseries lengths  : ' num2str(Vdatalengths(1:(min(10,length(Vdatalengths))))) ],2);
+    OpenCossan.cossanDisp(['  - Dataseries lengths  : ' num2str(Vdatalengths(1:size(Xobj,1):(min(10,length(Vdatalengths))))) ],2);
 else    
     %% Name and description
     OpenCossan.cossanDisp('===================================================================',3);
     OpenCossan.cossanDisp([' Dataseries object  -  Description: ' Xobj(1).Sdescription ],1);
     OpenCossan.cossanDisp('===================================================================',3);
-    OpenCossan.cossanDisp(['* Dataseries lengths  : ' num2str(Xobj(1).VdataLength) ],2);
+    OpenCossan.cossanDisp(['  - Dataseries lengths  : ' num2str(Xobj(1).VdataLength) ],2);
 end
-    OpenCossan.cossanDisp(['* Number of Samples   : ' num2str(size(Xobj,1)) ],2);
+    OpenCossan.cossanDisp(['  - Number of Samples   : ' num2str(size(Xobj,1)) ],2);
     
 return;

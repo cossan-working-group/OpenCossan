@@ -105,13 +105,7 @@ for n=1:length(Cnames)
     if all(Msizes==repmat(Msizes(1,:),size(Msizes,1),1))
         % if Mcoord is the same for all the entries, convert the cell array
         % into a vector of Dataseries
-        Mdata = vertcat(cellfun(@(x)x.Vdata,Cdataseries(:,n),'UniformOutput',false));
-        Mdata = cat(1,Mdata{:});
-        Cout{n}=Dataseries('Sdescription',Cdataseries{1,n}.Sdescription,...
-            'CSindexName',Cdataseries{1,n}.Xcoord.CSindexName,...
-            'CSindexUnit',Cdataseries{1}.Xcoord.CSindexUnit,...
-            'Mcoord',Cdataseries{1,n}.Mcoord,...
-            'Mdata',Mdata);
+        Cout{n}=cat(1,Cdataseries{:,n});
     else
         % export the Dataseries objects contained in the column to a cell 
         % array since they cannot be converted to a single dataseries
@@ -127,7 +121,7 @@ if all(cellfun(@(x) isa(x,'Dataseries'),Cout))
     % if it was possible to create a matrix of Dataseries for each entry in
     % the SimulationData, convert all the columns intoto a single
     % Dataseries matrix
-    Cout = horzcat(Cout{:});
+    Cout = horzcat(Cout{1,:});
 end
 
 end

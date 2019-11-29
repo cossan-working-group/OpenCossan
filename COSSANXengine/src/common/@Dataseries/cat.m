@@ -60,8 +60,8 @@ switch Ndim
         % Concatenate matrices in columns (i.e. [XobjA,XobjB])
         % Check that all the Mdata in the objects have the same number of
         % rows
-        Msizes=cellfun(@(x)size(x.Mdata,1),varargin);
-        assert(all(Msizes == Msizes(1)),'openCOSSAN:Dataseries:vertcat',...
+        Msizes=cellfun(@(x)size(x,1),varargin);
+        assert(all(Msizes == Msizes(1)),'openCOSSAN:Dataseries:horzcat',...
             'CAT arguments dimensions are not consistent')
         % Concatenate objects directly
         Xobj = horzcat(varargin{:});
