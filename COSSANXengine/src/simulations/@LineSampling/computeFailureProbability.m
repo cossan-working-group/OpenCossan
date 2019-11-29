@@ -60,6 +60,12 @@ end
 % Make sure the reliability index is a column vector
 Xobj.Valpha=Xobj.Valpha(:);
 
+% Make sure that the order of the input variables in Valpha is the same as
+% the order in the input of the probabilistic model
+[~,idx]=ismember(Xtarget.Xmodel.Xinput.CnamesRandomVariable, Xobj.CalphaNames);
+Xobj.CalphaNames = Xobj.CalphaNames(idx);
+Xobj.Valpha=Xobj.Valpha(idx);
+
 SexitFlag=[];           % Exit flag
 
 OpenCossan.cossanDisp('[LineSampling:pf] Start LineSampling analysis',3)
