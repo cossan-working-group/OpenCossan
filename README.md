@@ -55,8 +55,8 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 
 Please make sure to update tests as appropriate.
 
-## External dependencies
-
+## Requirements and dependencies
+Matlab R2018b or above is suggested. Most of the components should also work with less recent version of Matlab but there is not guarantee of it. 
 The following packages are used by OpenCossan and are required for some functionalities:
 
 1. Statistical and Machine learning toolbox
