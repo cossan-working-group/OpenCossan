@@ -142,7 +142,6 @@ Xop = opencossan.optimization.OptimizationProblem('description', 'Optimization p
 
 
 
-
 %% Perform optimization
 % Reset the random number generator in order to obtain always the same
 % results. DO NOT CHANGE THE VALUES OF THE SEED

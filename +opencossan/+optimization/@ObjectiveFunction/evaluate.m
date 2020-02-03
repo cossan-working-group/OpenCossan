@@ -23,7 +23,7 @@ along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
     ["optimizationproblem", "referencepoints"], varargin{:});
 
 optional = opencossan.common.utilities.parseOptionalNameValuePairs(...
-    ["scaling", "transpose"], {1, false}, varargin{:});
+    ["model", "scaling", "transpose"], {{}, 1, false}, varargin{:});
 
 assert(isa(required.optimizationproblem, 'opencossan.optimization.OptimizationProblem'), ...
     'OpenCossan:optimization:constraint:evaluate',...
@@ -48,27 +48,25 @@ objective = zeros(size(x, 1), length(obj));
 % evaluates the objective function(s) for all of them
 for i = 1:size(x,1)
     
-    input = optProb.Input.setDesignVariable('CSnames',optProb.DesignVariableNames,'Mvalues',x(i,:));
-    input = input.getTable();
-    
-    if ~isempty(optProb.Model)
-        modelResult = ...
-            opencossan.optimization.OptimizationRecorder.getModelEvaluation(...
-            optProb.DesignVariableNames, x(i,:));
-        
-        if isempty(modelResult)
-            modelResult = apply(optProb.Model, input);
-            modelResult = modelResult.TableValues;
-            opencossan.optimization.OptimizationRecorder.recordModelEvaluations(...
-                modelResult);
-        end
-        input = modelResult;
+    % memoized model passed
+    if ~isempty(optional.model)
+        input = optProb.Input.setDesignVariable('CSnames',optProb.DesignVariableNames,'Mvalues',x(i,:));
+        input = input.getTable();
+        result = optional.model(input);
+        output = result.TableValues;
+        % opencossan.optimization.OptimizationRecorder.recordModelEvaluations(output);
+    elseif ~isempty(optProb.Model)
+        input = optProb.Input.setDesignVariable('CSnames',optProb.DesignVariableNames,'Mvalues',x(i,:));
+        input = input.getTable();
+        result = apply(optProb.Model, input);
+        output = result.TableValues;
+        % opencossan.optimization.OptimizationRecorder.recordModelEvaluations(output);
     end
     
     % loop over all objective functions
     for j = 1:length(obj)
         XoutObjective = evaluate@opencossan.workers.Mio(obj(j), ...
-            input(:,obj(j).InputNames));
+            output(:,obj(j).InputNames));
         
         objective(i,j) = XoutObjective.(obj(j).OutputNames{1});
     end
@@ -79,8 +77,7 @@ end
 objective = objective/optional.scaling;
 
 % record values
-opencossan.optimization.OptimizationRecorder.recordObjectiveFunction(...
-    x, objective);
+opencossan.optimization.OptimizationRecorder.recordObjectiveFunction(x, objective);
 
 
 end
