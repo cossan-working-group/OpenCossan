@@ -96,15 +96,16 @@ assert(~isempty(optProb.Constraints),...
 Ndv = optProb.NumberOfDesignVariables;  % number of design variables
 N_ineq = optProb.NumberOfConstraints;       % Number of constrains
 
+memoizedModel = opencossan.optimization.memoizeModel(optProb);
 
 objective_function_cobyla = @(x)evaluate(optProb.ObjectiveFunctions,'optimizationproblem',optProb,...
-'referencepoints',x, 'transpose', true, ...
-'scaling',obj.ObjectiveFunctionScalingFactor); %#ok<NASGU>
+'referencepoints',x, 'transpose', true,...
+'model',memoizedModel, 'scaling',obj.ObjectiveFunctionScalingFactor); %#ok<NASGU>
 
 % Create handle for the constrains
 constraint_cobyla= @(x)evaluate(optProb.Constraints,'optimizationproblem',optProb,...
     'referencepoints',x,'transpose', true, ...
-    'scaling',obj.ConstraintScalingFactor); %#ok<NASGU>
+    'model', memoizedModel, 'scaling',obj.ConstraintScalingFactor); %#ok<NASGU>
 
 %% Perform optimization using Cobyla
 

@@ -75,24 +75,13 @@ options.StepTolerance = obj.DesignVariableTolerance;
 options.FiniteDifferenceStepSize = obj.FiniteDifferenceStepSize;
 options.FiniteDifferenceType = obj.FiniteDifferenceType;
 
-% Memoize model to save computation
-% function out = evaluateModel(x)
-%     input = optProb.Input.setDesignVariable('CSnames',optProb.DesignVariableNames,'Mvalues',x);
-%     input = input.getTable;
-% 
-%     out = apply(optProb.Model, input).TableValues;
-%     opencossan.optimization.OptimizationRecorder.recordModelEvaluations(out);
-% end
-
-memoizedModel = memoize(@(x) apply(optProb.Model, x));
-memoizedModel.CacheSize = 1000;
+memoizedModel = opencossan.optimization.memoizeModel(optProb);
 
 objfun = @(x)evaluate(optProb.ObjectiveFunctions,...
     'optimizationproblem', optProb, ...
     'referencepoints', x, ...
     'model', memoizedModel, ...
     'scaling', 1);
-
 
 assert(~logical(isempty(optProb.Constraints)) ||  ...
     ~logical(isempty(optProb.LowerBounds)) || ...

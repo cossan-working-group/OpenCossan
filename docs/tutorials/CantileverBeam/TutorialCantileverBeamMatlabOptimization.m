@@ -164,20 +164,20 @@ gaOptimum = Xop.optimize('optimizer', gaOptimizer);
 
 %% Compare Optimization results
 SQP = [height(sqpOptimum.ModelEvaluations);
-       sqpOptimum.OptimalObjectiveFunction;
-       sqpOptimum.OptimalSolution';
-       sqpOptimum.OptimalConstraints];
-   
+    sqpOptimum.OptimalObjectiveFunction;
+    sqpOptimum.OptimalSolution';
+    sqpOptimum.OptimalConstraints];
+
 COBYLA = [height(cobylaOptimum.ModelEvaluations);
-          cobylaOptimum.OptimalObjectiveFunction;
-          cobylaOptimum.OptimalSolution';
-          cobylaOptimum.OptimalConstraints(1)];
-  
+    cobylaOptimum.OptimalObjectiveFunction;
+    cobylaOptimum.OptimalSolution';
+    cobylaOptimum.OptimalConstraints(1)];
+
 GA = [height(gaOptimum.ModelEvaluations);
-      gaOptimum.OptimalObjectiveFunction;
-      gaOptimum.OptimalSolution';
-      gaOptimum.OptimalConstraints];
-  
+    gaOptimum.OptimalObjectiveFunction;
+    gaOptimum.OptimalSolution';
+    gaOptimum.OptimalConstraints];
+
 results = table(SQP,COBYLA,GA,'RowNames',{'Number of Evaluations',...
     'Objective Function', 'Design Variable b', 'Design Variable h',...
     'Constraint'});

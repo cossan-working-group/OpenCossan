@@ -32,7 +32,6 @@ assert(isa(required.optimizationproblem, 'opencossan.optimization.OptimizationPr
 % destructure inputs
 optProb = required.optimizationproblem;
 x = required.referencepoints;
-model = optional.model;
 
 % cobyla passes the inputs transposed for some reason
 if optional.transpose
@@ -49,19 +48,15 @@ constraints = zeros(size(x, 1), length(obj));
 % evaluates the constraint(s) for all of them
 for i = 1:size(x, 1)
     
-    
+    % memoized model passed
     if ~isempty(optional.model)
-        input = optProb.Input.setDesignVariable('CSnames',optProb.DesignVariableNames,'Mvalues',x(i,:));
-        input = input.getTable();
-        result = optional.model(input);
-        output = result.TableValues;
-%         opencossan.optimization.OptimizationRecorder.recordModelEvaluations(output);
+        output = optional.model(x(i, :));
     elseif ~isempty(optProb.Model)
         input = optProb.Input.setDesignVariable('CSnames',optProb.DesignVariableNames,'Mvalues',x(i,:));
         input = input.getTable;
         result = apply(optProb.Model, input);
         output = result.TableValues;
-%         opencossan.optimization.OptimizationRecorder.recordModelEvaluations(output);
+        opencossan.optimization.OptimizationRecorder.recordModelEvaluations(output);
     end
     
     % loop over all constraints

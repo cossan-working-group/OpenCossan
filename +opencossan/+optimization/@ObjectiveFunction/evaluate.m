@@ -50,17 +50,13 @@ for i = 1:size(x,1)
     
     % memoized model passed
     if ~isempty(optional.model)
-        input = optProb.Input.setDesignVariable('CSnames',optProb.DesignVariableNames,'Mvalues',x(i,:));
-        input = input.getTable();
-        result = optional.model(input);
-        output = result.TableValues;
-        % opencossan.optimization.OptimizationRecorder.recordModelEvaluations(output);
+        output = optional.model(x(i, :));
     elseif ~isempty(optProb.Model)
         input = optProb.Input.setDesignVariable('CSnames',optProb.DesignVariableNames,'Mvalues',x(i,:));
         input = input.getTable();
         result = apply(optProb.Model, input);
         output = result.TableValues;
-        % opencossan.optimization.OptimizationRecorder.recordModelEvaluations(output);
+        opencossan.optimization.OptimizationRecorder.recordModelEvaluations(output);
     end
     
     % loop over all objective functions
