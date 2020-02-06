@@ -57,6 +57,9 @@ for i = 1:size(x,1)
         result = apply(optProb.Model, input);
         output = result.TableValues;
         opencossan.optimization.OptimizationRecorder.recordModelEvaluations(output);
+    else
+        input = optProb.Input.setDesignVariable('CSnames',optProb.DesignVariableNames,'Mvalues',x(i,:));
+        output = input.getTable();
     end
     
     % loop over all objective functions

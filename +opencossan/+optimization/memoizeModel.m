@@ -1,5 +1,10 @@
 function model = memoizeModel(optProb, cacheSize)
     
+    if isempty(optProb.Model)
+        model = {};
+        return
+    end
+    
     if nargin == 1
         cacheSize = 1000;
     end

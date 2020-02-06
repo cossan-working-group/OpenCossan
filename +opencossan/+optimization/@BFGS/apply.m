@@ -1,4 +1,4 @@
-function [Xoptimum,varargout] = apply(Xobj,varargin)
+function optimum = apply(obj,varargin)
 %APPLY  This method applies the algorithm BFGS for solving an unconstrained
 %       optimization problem.
 %
@@ -25,165 +25,78 @@ function [Xoptimum,varargout] = apply(Xobj,varargin)
     along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
 %}
 
-%% Define global variable for the objective function and the constrains
-global XoptGlobal XsimOutGlobal
+import opencossan.optimization.OptimizationRecorder;
+import opencossan.common.utilities.*;
 
-OpenCossan.validateCossanInputs(varargin{:});
+[required, varargin] = parseRequiredNameValuePairs(...
+    "optimizationproblem", varargin{:});
 
-%  Check whether or not required arguments have been passed
-for k=1:2:length(varargin)
-    switch lower(varargin{k})
-        case {'xoptimizationproblem'}   %extract OptimizationProblem
-            if isa(varargin{k+1},'OptimizationProblem')    %check that arguments is actually an OptimizationProblem object
-                Xop     = varargin{k+1};
-            else
-                error('OpenCossan:BFGS:apply',...
-                    ['the variable  ' inputname(k) ' must be an OptimizationProblem object']);
-            end
-        case {'cxoptimizationproblem'}   %extract OptimizationProblem
-            if isa(varargin{k+1}{1},'OptimizationProblem')    %check that arguments is actually an OptimizationProblem object
-                Xop     = varargin{k+1}{1};
-            else
-                error('OpenCossan:BFGS:apply',...
-                    ['the variable  ' inputname(k) ' must be an OptimizationProblem object']);
-            end  
-        case {'xoptimum'}   %extract OptimizationProblem
-            if isa(varargin{k+1},'Optimum')    %check that arguments is actually an OptimizationProblem object
-                Xoptimum  = varargin{k+1};
-            else
-                error('openCOSSAN:BFGS:apply',...
-                    ['the variable  ' inputname(k) ' must be an Optimum object']);
-            end
-        case {'vinitialsolution'}
-            VinitialSolution=varargin{k+1};
-        otherwise
-            error('OpenCossan:BFGS:PropertyNameNotValid', ...
-                'The PropertyName %s is not valid',varargin{k});
-    end
-end
+optProb = required.optimizationproblem;
 
-%% Check Optimization problem
-assert(logical(exist('Xop','var')), 'OpenCossan:BFGS:apply',...
-    'Optimization problem must be defined')
+optional = parseOptionalNameValuePairs(...
+    "initialsolution", {optProb.InitialSolution}, ...
+    varargin{:});
+
+x0 = optional.initialsolution;
 
 % Check inputs and initialize variables
-Xobj = initializeOptimizer(Xobj);
+obj = initializeOptimizer(obj);
 
-%% Check initial solution
-if exist('VinitialSolution','var')
-    Xop.VinitialSolution=VinitialSolution;
-end
-
-assert(size(Xop.VinitialSolution,1)==1, ...
-    'OpenCossan::apply',...
+assert(size(x0, 1) == 1, ...
+    'OpenCossan:BFGS:apply',...
     'Only 1 initial setting point is allowed')
 
-assert(logical(isempty(Xop.Xconstraint)), ...
+assert(isempty(optProb.Constraints), ...
     'OpenCossan:BFGS:apply',...
     'BFGS is an UNconstrained Nonlinear Optimization.')
 
-%% initialise Global Variables
-% initialise SimulationData object
-%XsimOutGlobal=[];
-% initialise Optimum object
-if ~exist('Xoptimum','var')
-    XoptGlobal=Optimum('XoptimizationProblem',Xop,'Xoptimizer',Xobj);
-else
-    %TODO: Check Optimum
-    XoptGlobal=Xoptimum;
-end
 
+options = optimoptions('fminunc', 'Display', 'iter');  %Default optimization options
 
-%%  Perform optimization
-%   Set matlab options
-Xoptions = optimoptions('fminunc');  %Default optimization options
+options.MaxFunctionEvaluations = obj.MaxFunctionEvaluations;
+options.MaxIterations = obj.MaxIterations;
 
-% According to Matlab documentation: if the objective function includes a
-% gradient, use 'Algorithm' = 'trust-region', and set the
-% SpecifyObjectiveGradient option to true. Otherwise, use 'Algorithm' =
-% 'quasi-newton'. 
-if Xop.XobjectiveFunction.Lgradient
-    Xoptions.Algorithm    = 'trust-region';   %Turns on intermediate information about optimization procedure
-    Xoptions.SpecifyObjectiveGradient=true;
-else
-    Xoptions.Algorithm    = 'quasi-newton';   %Turns on intermediate information about optimization procedure
-end
+options.OptimalityTolerance = obj.ObjectiveFunctionTolerance;
+options.StepTolerance = obj.DesignVariableTolerance;
 
-Xoptions.Display    = 'iter-detailed';   %Turns on intermediate information about optimization procedure
-Xoptions.GradObj    = 'on';              %Gradient of objective function is on
-Xoptions.MaxFunEvals   = Xobj.Nmax;              %Maximum number of function evaluations that is allowed
-Xoptions.MaxIter       = Xobj.NmaxIterations;          %Maximum number of iterations that is allowed
-Xoptions.DerivativeCheck = 'off';
-Xoptions.TolFun        = Xobj.toleranceObjectiveFunction;     %Termination tolerance on the value of the objective function
-Xoptions.TolX          = Xobj.toleranceDesignVariables;       %Termination tolerance on the design variable vector
-Xoptions.FinDiffType   = Xobj.SfiniteDifferenceType; % Finite differences, used to estimate gradients
-Xoptions.DerivativeCheck = 'off';
-Xoptions.OutputFcn = @Xobj.outputFunctionOptimiser;
+options.FiniteDifferenceStepSize = obj.FiniteDifferenceStepSize;
+options.FiniteDifferenceType = obj.FiniteDifferenceType;
 
-if isempty(Xop.Xmodel)
-    % Create handle of the objective function
-    hobjfun=@(x)evaluate(Xop.XobjectiveFunction,'Xoptimizationproblem',Xop,...
-        'MreferencePoints',x,'Lgradient',true,...
-        'finiteDifferencePerturbation',Xobj.finiteDifferencePerturbation,...
-        'scaling',Xobj.scalingFactor);
-else
-    % Create handle of the objective function
-    hobjfun=@(x)evaluate(Xop.XobjectiveFunction,'Xoptimizationproblem',Xop,...
-        'MreferencePoints',x,'Lgradient',true,...
-        'finiteDifferencePerturbation',Xobj.finiteDifferencePerturbation,...
-        'scaling',Xobj.scalingFactor,'Xmodel',Xop.Xmodel);
-end
+memoizedModel = opencossan.optimization.memoizeModel(optProb);
 
-%% Perform Real optimization
-[XoptGlobal.VoptimalDesign,XoptGlobal.VoptimalScores,Nexitflag] = ...
-                            fminunc(hobjfun,Xop.VinitialSolution,Xoptions);
+objfun = @(x) evaluate(optProb.ObjectiveFunctions, ...
+        'optimizationproblem', optProb, ...
+        'referencepoints', x, ...
+        'model', memoizedModel, ...
+        'scaling', obj.ObjectiveFunctionScalingFactor);
 
-%% Output
-% All the quantities of interest are automatically stored in the Optimum
-% object.
+OptimizationRecorder.clear();
 
-% Prepare string with reason for termination of optimization algorithm
-switch Nexitflag
-    case{1}
-        Sexitflag   = 'First order optimality conditions were satisfied to the specified tolerance';
-    case{2}
-        Sexitflag   = 'Change in x was less than the specified tolerance';
-    case{3}
-        Sexitflag   = 'Change in the objective function value was less than the specified tolerance';
-    case{4}
-        Sexitflag   = 'Magnitude of the search direction was less than the specified tolerance and constraint violation was less than options.TolCon';
-    case{5}
-        Sexitflag   = 'Magnitude of directional derivative was less than the specified tolerance and constraint violation was less than options.TolCon';
-    case{0}
-        Sexitflag   = 'Number of iterations exceeded options.MaxIter or number of function evaluations exceeded options.MaxFunEvals';
-    case{-1}
-        Sexitflag   = 'Algorithm was terminated by the output function';
-    case{-2}
-        Sexitflag   = 'No feasible point was found';
-end
+startTime = tic;
 
-XoptGlobal.Sexitflag=Sexitflag;
+[optimalSolution, ~, exitFlag] = ...
+    fminunc(objfun, x0, options);
+
+totalTime = toc(startTime);
+
+optimum = opencossan.optimization.Optimum(...
+    'optimalsolution', optimalSolution, ...
+    'exitflag', exitFlag, ...
+    'totaltime', totalTime, ...
+    'optimizationproblem', optProb, ...
+    'optimizer', obj, ...
+    'objectivefunction', OptimizationRecorder.getInstance().ObjectiveFunction, ...
+    'modelevaluations', OptimizationRecorder.getInstance().ModelEvaluations);
 
 if ~isdeployed
     % add entries in simulation and analysis database at the end of the
     % computation when not deployed. The deployed version does this with
     % the finalize command
-    XdbDriver = OpenCossan.getDatabaseDriver;
+    XdbDriver = opencossan.OpenCossan.getDatabaseDriver;
     if ~isempty(XdbDriver)
         XdbDriver.insertRecord('StableType','Result',...
             'Nid',getNextPrimaryID(OpenCossan.getDatabaseDriver,'Result'),...
-            'CcossanObjects',{Xoptimum},...
-            'CcossanObjectsNames',{'Xoptimum'});
+            'CcossanObjects',{optimum},...
+            'CcossanObjectsNames',{'optimum'});
     end
 end
-
-%% Export results and clean up
-% Export Optimum
-Xoptimum    = XoptGlobal;
-% Export Simulation Output
-varargout{1}    = XsimOutGlobal;
-% Delete global variables
-clear global XoptGlobal XsimOutGlobal
-
-%% Record Time
-OpenCossan.setLaptime('Sdescription',['End apply@' class(Xobj)]);
