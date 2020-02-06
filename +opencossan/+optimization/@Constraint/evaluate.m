@@ -53,10 +53,13 @@ for i = 1:size(x, 1)
         output = optional.model(x(i, :));
     elseif ~isempty(optProb.Model)
         input = optProb.Input.setDesignVariable('CSnames',optProb.DesignVariableNames,'Mvalues',x(i,:));
-        input = input.getTable;
+        input = input.getTable();
         result = apply(optProb.Model, input);
         output = result.TableValues;
         opencossan.optimization.OptimizationRecorder.recordModelEvaluations(output);
+    else
+        input = optProb.Input.setDesignVariable('CSnames',optProb.DesignVariableNames,'Mvalues',x(i,:));
+        output = input.getTable();
     end
     
     % loop over all constraints

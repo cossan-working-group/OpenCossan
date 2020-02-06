@@ -58,7 +58,6 @@ optimizer = opencossan.optimization.BFGS();
 %% Optimize
 optimum = optProb.optimize('optimizer', optimizer);
 
-
 %% Validate solution
 referenceSolution = [0 0];
 
@@ -71,6 +70,6 @@ assert(norm(referenceSolution - optimum.OptimalSolution) < 1e-7, ...
 
 % To use a function handle as objective function it has to be defined at
 % the end of the file.
-function input = objective(input)
-    input.y = input.x1.^2 + input.x2.^2;
+function output = objective(input)
+    output.y = input.x1.^2 + input.x2.^2;
 end
