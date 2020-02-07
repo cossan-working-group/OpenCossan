@@ -46,7 +46,21 @@ classdef SequentialQuadraticProgramming < opencossan.optimization.Optimizer
         function obj = SequentialQuadraticProgramming(varargin)
             %SEQUENTIALQUADRATICPROGRAMMING
             
-            obj@opencossan.optimization.Optimizer(varargin{:});
+            import opencossan.common.utilities.parseOptionalNameValuePairs;
+            if nargin == 0
+                super_args = {};
+            else
+                [optional, super_args] = parseOptionalNameValuePairs(...
+                    ["FiniteDifferenceStepSize", "FiniteDifferenceType"], ...
+                    {sqrt(eps), 'forward'}, varargin{:});
+            end
+            
+            obj@opencossan.optimization.Optimizer(super_args{:});
+            
+            if nargin > 0
+                obj.FiniteDifferenceStepSize = optional.finitedifferencestepsize;
+                obj.FiniteDifferenceType = optional.finitedifferencetype;
+            end
         end
         
         varargout = apply(obj, varargin)

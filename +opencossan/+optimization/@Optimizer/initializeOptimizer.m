@@ -35,10 +35,10 @@ Xobj.InitialLapTime = opencossan.OpenCossan.getTimer().lap('Description',Scaller
 
 %% Initialize variables
 if isempty(Xobj.IterationFolder)
-    Xobj.IterationFolder=datestr(now,30);
+    Xobj.IterationFolder = datestr(now,30);
 end
 
-Xobj.NumberOfIterations = 0;   % Number of iterations processed
+Xobj.NumberOfIterations = 0;
 
 end
 

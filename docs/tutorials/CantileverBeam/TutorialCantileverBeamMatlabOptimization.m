@@ -53,9 +53,13 @@ XinputOptimization = opencossan.common.inputs.Input(...
 %% Preparation of the Evaluator
 % Use of a matlab script to compute the Beam displacement
 folder = fileparts(mfilename('fullpath'));% returns the current folder
-Xmio = opencossan.workers.Mio('FullFileName',fullfile(folder,'model','tipDisplacement.m'),...
-    'InputNames',{'I', 'b', 'L', 'h', 'rho', 'P', 'E'},'Format','structure', ...
+Xmio = opencossan.workers.Mio(...
+    'FunctionHandle', @tipDisplacement, ...
+    'IsFunction', true, ...
+    'Format', 'table', ...
+    'InputNames',{'I', 'b', 'L', 'h', 'rho', 'P', 'E'}, ...
     'OutputNames',{'w'});
+
 % Add the MIO object to an Evaluator object
 Xevaluator = opencossan.workers.Evaluator('CXmembers',{Xmio},'CSmembers',{'Xmio'});
 
@@ -94,32 +98,25 @@ display(Xdoe)
 XoutDoe=Xdoe.apply(Xmodel);
 
 %% Results of the Design of Experiments
-h = XoutDoe.getValues('Sname','h');
-b = XoutDoe.getValues('Sname','b');
-w = XoutDoe.getValues('Sname','w');
-status = cell(9,1);
+h = XoutDoe.TableValues.h;
+b = XoutDoe.TableValues.b;
+w = XoutDoe.TableValues.w;
+feasible = w < maxDisplacement.Value;
 
-for n = 1:numel(w)
-    if (w(n) < maxDisplacement.Value)
-        status{n} = 'Feasible';
-    else
-        status{n} = 'Infeasible';
-    end
-end
+results = table(h,b,w,feasible);
+format shorte; display(results); format short;
 
-results = table(h,b,w,status);
-format shorte;
-display(results);
-format short;
+fprintf("Number of feasible solutions: %d\n", sum(feasible));
 
-% There are 3 feasible solutions and this means the the opimization problem
-% is well define. Now we have to identify the oprimal solution.
+% There are 3 feasible solutions and this means the the optimization problem
+% is well defined. Now we have to identify the optimal solution.
 
 %% Define the Objective Funtion
 % The aim of this optimization is to minimaze the weight of the beam. The
 % weight can be easely computed using a matlab script.
-Xobjfun = opencossan.optimization.ObjectiveFunction('Description','Objective function', ...
-    'Script','for n=1:length(Tinput),Toutput(n).BeamWeight=Tinput(n).rho*Tinput(n).b*Tinput(n).h*Tinput(n).L;end', ...
+Xobjfun = opencossan.optimization.ObjectiveFunction(...
+    'FunctionHandle', @beamWeight, ...
+    'IsFunction', true, ...
     'OutputNames',{'BeamWeight'}, ...
     'Format','structure', ...
     'InputNames',{'rho' 'b' 'h' 'L'});
@@ -127,20 +124,18 @@ Xobjfun = opencossan.optimization.ObjectiveFunction('Description','Objective fun
 %% Create (inequality) constraint
 % The maximum displacement of the beam tip
 XconMaxStress = opencossan.optimization.Constraint(...
-    'Description','Constraint', ...
-    'Script','for n=1:length(Tinput),Toutput(n).Constraint=Tinput(n).w-Tinput(n).MaxW; end', ...
+    'FunctionHandle', @displacementConstraint, ...
+    'IsFunction', true, ...
     'OutputNames',{'Constraint'}, ...
     'Format','structure', ...
     'InputNames',{'w' 'MaxW' }, ...
     'Inequality',true);
 
 %% Create object OptimizationProblem
-Xop = opencossan.optimization.OptimizationProblem('description', 'Optimization problem', ...
-    'objectivefunctions', Xobjfun, 'constraints', XconMaxStress, 'model', Xmodel);
-
-% Define Optimizers
-
-
+Xop = opencossan.optimization.OptimizationProblem(...
+    'objectivefunctions', Xobjfun, ...
+    'constraints', XconMaxStress, ...
+    'model', Xmodel);
 
 %% Perform optimization
 % Reset the random number generator in order to obtain always the same
@@ -158,34 +153,51 @@ cobylaOptimum = Xop.optimize('optimizer', cobylaOptimizer);
 % Optimize using Genetic Algorithms
 gaOptimizer = opencossan.optimization.GeneticAlgorithms(...
     'Smutationfcn','mutationadaptfeasible',...
-    'NmaxIterations', 10, ...
+    'Ngenerations', 10, ...
     'NPopulationSize', 10);
 gaOptimum = Xop.optimize('optimizer', gaOptimizer);
 
 %% Compare Optimization results
-SQP = [height(sqpOptimum.ModelEvaluations);
+sqp = [height(sqpOptimum.ModelEvaluations);
     sqpOptimum.OptimalObjectiveFunction;
     sqpOptimum.OptimalSolution';
     sqpOptimum.OptimalConstraints];
 
-COBYLA = [height(cobylaOptimum.ModelEvaluations);
+cobyla = [height(cobylaOptimum.ModelEvaluations);
     cobylaOptimum.OptimalObjectiveFunction;
     cobylaOptimum.OptimalSolution';
     cobylaOptimum.OptimalConstraints(1)];
 
-GA = [height(gaOptimum.ModelEvaluations);
+ga = [height(gaOptimum.ModelEvaluations);
     gaOptimum.OptimalObjectiveFunction;
     gaOptimum.OptimalSolution';
     gaOptimum.OptimalConstraints];
 
-results = table(SQP,COBYLA,GA,'RowNames',{'Number of Evaluations',...
+results = table(sqp,cobyla,ga,'RowNames',{'Number of Evaluations',...
     'Objective Function', 'Design Variable b', 'Design Variable h',...
     'Constraint'});
 
 display(results);
 
 %% Validate Solutions
-solution = [SQP(5) COBYLA(5) GA(5)];
+solution = [sqp(5) cobyla(5) ga(5)];
 reference = [ 1.01e-07   2.6385e-05   9.9860e-04];
 assert(abs(max(solution-reference))<1e-4, 'Tutorial:TutorialCantileverBeamOptimization',...
     'Solutions do not match reference values');
+
+% Is passed to the Mio as a function handle
+function out = tipDisplacement(in)
+    out = table();
+    out.w = (in.rho .* 9.81 .* in.b .* in.h .* in.L.^4) ./ (8 .* in.E .* in.I) + ...
+        (in.P .* in.L.^3) ./ (3 .* in.E .* in.I);
+end
+
+% Is passed to the ObjectiveFunction as a function handle
+function out = beamWeight(in)
+    out.BeamWeight = in.rho .* in.b .* in.h .* in.L;
+end
+
+% Is passed to the Constraint as a function handle
+function out = displacementConstraint(in)
+    out.Constraint = in.w - in.MaxW;
+end

@@ -22,76 +22,101 @@
 %    
 % 
 % See Also: http://cossan.cfd.liv.ac.uk/wiki/index.php/@Cobyla
-%
-% $Copyright~1993-2011,~COSSAN~Working~Group,~University~of~Innsbruck,~Austria$
-% $Author: Edoardo-Patelli$ 
 
-clear;
-close all
-clc;
-%% Create input 
-% In this tutorial we create a very simple accademic example in order to show
-% how to used the optimization method. The input object must contain at least 1
-% Design Variable.
+%{
+This file is part of OpenCossan <https://cossan.co.uk>.
+Copyright (C) 2006-2018 COSSAN WORKING GROUP
 
+OpenCossan is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License or,
+(at your option) any later version.
 
-X1      = opencossan.optimization.DesignVariable('Sdescription','design variable 1','value',7,'lowerBound',0);
-X2      = opencossan.optimization.DesignVariable('Sdescription','design variable 2','value',2,'lowerBound',0);
-Xin     = opencossan.common.inputs.Input('MembersNames',{'X1' 'X2'},'Members',{X1 X2});
+OpenCossan is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
 
-
-%% Define a model 
-Xm  = opencossan.workers.Mio('Description','objective function of optimization problem', ...
-...    'Spath','./',...
-    'Script','for i=1:length(Tinput),x1  = Tinput(i).X1; x2  = Tinput(i).X2; Toutput(i).mioout     = x1.^2 + x2.^2; end',...
-    'Format','structure',...
-    'IsFunction',false,...
-    'InputNames',{'X1','X2'},...
-    'OutputNames',{'mioout'});
-% 
- Xe      = opencossan.workers.Evaluator('Xmio',Xm);     % Define the evaluator
- Xmdl    = opencossan.common.Model('Xevaluator',Xe,'Xinput',Xin);
+You should have received a copy of the GNU General Public License
+along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
+%}
 
 
-%%  Create objective function
-% The objective function corresponds to the output of the model. It is not
-% necessary to have a Model to perform and optimization. 
+%% Input
 
-Xofun1   = opencossan.optimization.ObjectiveFunction('Description','objective function', ...
-    'Script','for n=1:height(TableInput), TableOutput.fobj(n)=TableInput.mioout(n); end',...
-    'InputNames',{'mioout'},...
+% Design variables
+x1 = opencossan.optimization.ContinuousDesignVariable('value',7,'lowerBound',0);
+x2 = opencossan.optimization.ContinuousDesignVariable('value',2,'lowerBound',0);
+
+% Input
+input = opencossan.common.inputs.Input('MembersNames',{'x1' 'x2'},'Members',{x1 x2});
+
+
+%% Model
+mio  = opencossan.workers.Mio('Description','objective function of optimization problem', ...
+    'FunctionHandle',@f, ...
+    'Format','structure', ...
+    'IsFunction', true, ...
+    'InputNames',{'x1','x2'},...
+    'OutputNames',{'y'});
+
+evaluator = opencossan.workers.Evaluator('Xmio',mio);
+model = opencossan.common.Model('evaluator',evaluator,'input',input);
+
+
+%% Objective function
+% The objective function is the output of the model. It is not necessary to
+% have a model to perform optimization. 
+
+objfun = opencossan.optimization.ObjectiveFunction('Description','objective function', ...
+    'FunctionHandle',@g, ...
+    'IsFunction', true, ...
+    'Format', 'structure', ...
+    'InputNames',{'y'}, ...
     'OutputNames',{'fobj'});
 
 %% Create non linear inequality constraint
-Xcon   = opencossan.optimization.Constraint('Description','non linear inequality constraint', ...
-    'Script','for n=1:height(TableInput),TableOutput.Con1(n)=2-TableInput.X1(n)-TableInput.X2(n);end',...
-    'OutputNames',{'Con1'},'InputNames',{'X1','X2'},'Linequality',true);
+constraint = opencossan.optimization.Constraint('Description','non linear inequality constraint', ...
+    'FunctionHandle',@c, ...
+    'IsFunction', true, ...
+    'Format', 'structure', ...
+    'OutputNames',{'con'},...
+    'InputNames',{'x1','x2'},...
+    'Inequality',true);
 
-%% define the optimizator problem
-Xop     = OptimizationProblem('Sdescription','Optimization problem', ...
-    'Xmodel',Xmdl,'VinitialSolution',[-5 -1], ...
-    'XobjectiveFunction',Xofun1,'Xconstraint',Xcon);
+%% Optimization problem
+optProb = opencossan.optimization.OptimizationProblem(...
+    'model',model,'initialsolution',[-5 -1], ...
+    'objectivefunctions',objfun,'constraints',constraint);
 
-%% Create optimizer
-% A COBYLA objet is a optimizer with 2 dedicate parameters:
+%% Optimizer
+% A COBYLA object is a optimizer with 2 dedicate parameters:
 % * initialTrustRegion = define the radious of the initial spheric trust region
 % * finalTrustRegion = define the minimum radius of the spheric trust region
 
-Xcob    = Cobyla('initialTrustRegion',1,'finalTrustRegion',0.01);
-
-% Reset the random number generator in order to obtain always the same results.
-% DO NOT CHANGE THE VALUES OF THE SEED
-OpenCossan.resetRandomNumberGenerator(46354)
-
-Xoptimum=Xop.optimize('Xoptimizer',Xcob);
-display(Xoptimum)
+cobyla = opencossan.optimization.Cobyla('initialTrustRegion',1,'finalTrustRegion',0.01);
+optimum = optProb.optimize('optimizer', cobyla);
 
 %% Reference Solution
-OpenCossan.cossanDisp(' ');
-OpenCossan.cossanDisp('Reference solution');
-OpenCossan.cossanDisp('f(1.0,1.0) = 2.0');
+referenceSolution = [1.0 1.0];
 
-%% Validate solution
-Vreference=[ 9.9084e-01; 1.0092e+00];
-Mdata = [Xoptimum.XdesignVariable(1).Vdata; Xoptimum.XdesignVariable(2).Vdata];
-assert(max(Vreference-Mdata(:,end))<1e-4,'openCOSSAN:Tutorial:TutorialCobyla','Reference Solution not identified')
+fprintf("Reference solution: [%.1f, %.1f]\n", referenceSolution);
+fprintf("Found optimum: [%d, %d]\n", optimum.OptimalSolution);
+
+assert(norm(referenceSolution - optimum.OptimalSolution) < 1e-1, ...
+    'openCOSSAN:Tutorials:BFGS', ...
+    'Obtained solution does not match the reference solution.')
+
+% To use a function handle as model/objective/constraint they have to be
+% defined at the end of the file.
+function out = f(in)
+    out.y = in.x1.^2 + in.x2.^2;
+end
+
+function out = g(in)
+    out.fobj = in.y;
+end
+
+function out = c(in)
+    out.con = 2 - in.x1 - in.x2;
+end

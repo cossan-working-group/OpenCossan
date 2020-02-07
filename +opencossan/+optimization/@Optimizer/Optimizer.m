@@ -105,8 +105,21 @@ classdef Optimizer < opencossan.common.CossanObject
     end
     
     methods (Access=protected)
-        exportResults(Xobj,varargin)  % This method is used to export the SimulationData
-        [Xobj, Xinput]=initializeOptimizer(Xobj,Xtarget)
+        exportResults(Xobj,varargin); % This method is used to export the SimulationData
+        obj = initializeOptimizer(obj, target);
+        
+        function saveOptimumToDatabase(~, optimum)
+            % Save the optimum in the database if there is a valid database
+            % driver.
+            dbDriver = opencossan.OpenCossan.getDatabaseDriver();
+            if ~isempty(dbDriver)
+                dbDriver.insertRecord(...
+                    'StableType','Result',...
+                    'Nid',getNextPrimaryID(dbDriver,'Result'), ...
+                    'CcossanObjects',{optimum}, ...
+                    'CcossanObjectsNames',{'Xoptimum'});
+            end
+        end
     end
     
     methods (Abstract)

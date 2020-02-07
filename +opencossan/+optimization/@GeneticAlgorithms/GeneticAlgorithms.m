@@ -49,10 +49,9 @@ classdef GeneticAlgorithms < opencossan.optimization.Optimizer
     end
     
     methods
-        varargout    = apply(Xobj,varargin)  %This method perform the simulation adopting the Xobj
-        [Tstate,Toptions,Loptchanged] = outputFunction(Xobj,Toptions,Tstate,Sflag)
+        varargout = apply(Xobj,varargin)  %This method perform the simulation adopting the Xobj
         
-        function Xobj   = GeneticAlgorithms(varargin)
+        function obj = GeneticAlgorithms(varargin)
             %GENETICALGORITHMS   Constructor function for class GeneticAlgorithms
             %
             %   GeneticAlgorithms
@@ -99,110 +98,107 @@ classdef GeneticAlgorithms < opencossan.optimization.Optimizer
             % =====================================================================
             
             %  Optimization Options - default parameters
-            Xobj.Description   = 'GeneticAlgorithms object';
-            Xobj.MaxFunctionEvaluations          = 1e5;
+            obj.Description   = 'GeneticAlgorithms object';
+            obj.MaxFunctionEvaluations          = 1e5;
             
             % Process input arguments
             for k=1:2:length(varargin)
                 switch lower(varargin{k})
                     % From the super-class
                     case {'nmaxiterations','ngenerations'}
-                        Xobj.MaxIterations=varargin{k+1};
+                        obj.MaxIterations=varargin{k+1};
                     case 'description'
-                        Xobj.Description=varargin{k+1};
+                        obj.Description=varargin{k+1};
                     case  {'nmax','nmaxmodelevaluations'}
-                        Xobj.Nmax=varargin{k+1};
+                        obj.Nmax=varargin{k+1};
                     case  'objectivelimit'
-                        Xobj.objectiveLimit=varargin{k+1};
+                        obj.objectiveLimit=varargin{k+1};
                     case  'timeout'
-                        Xobj.timeout=varargin{k+1};
+                        obj.timeout=varargin{k+1};
                     case  'toleranceobjectivefunction'
-                        Xobj.toleranceObjectiveFunction=varargin{k+1};
+                        obj.toleranceObjectiveFunction=varargin{k+1};
                     case  'toleranceconstraint'
-                        Xobj.toleranceConstraint=varargin{k+1};
+                        obj.toleranceConstraint=varargin{k+1};
                     case 'lintermediedresults'
-                        Xobj.Lintermediedresults=varargin{k+1};
+                        obj.Lintermediedresults=varargin{k+1};
                     case  'scalingfactor'
-                        Xobj.scalingFactor=varargin{k+1};
+                        obj.scalingFactor=varargin{k+1};
                     case  'penalityfactor'
-                        Xobj.penalityFactor=varargin{k+1};
+                        obj.penalityFactor=varargin{k+1};
                     case  'xjobmanager'
-                        Xobj.XjobManager=varargin{k+1};
+                        obj.XjobManager=varargin{k+1};
                         
                     case {'nseedrandomnumbergenerator'}
                         Nseed       = varargin{k+1};
-                        Xobj.RandomNumberGenerator = ...
+                        obj.RandomNumberGenerator = ...
                             RandStream('mt19937ar','Seed',Nseed);
                     case {'xrandomnumbergenerator'}
                         if isa(varargin{k+1},'RandStream')
-                            Xobj.XrandomNumberGenerator  = varargin{k+1};
+                            obj.XrandomNumberGenerator  = varargin{k+1};
                         else
                             error('openCOSSAN:GeneticAlgorithms',...
                                 ['argument associated with (' varargin{k} ...
                                 ') is not a RandStream object']);
                         end
                     case  'npopulationsize'
-                        Xobj.NPopulationSize=varargin{k+1};
+                        obj.NPopulationSize=varargin{k+1};
                     case  'crossoverfraction'
-                        Xobj.crossoverFraction=varargin{k+1};
+                        obj.crossoverFraction=varargin{k+1};
                     case  'nelitecount'
-                        Xobj.NEliteCount=varargin{k+1};
+                        obj.NEliteCount=varargin{k+1};
                     case  'nstallgenlimit'
-                        Xobj.NStallGenLimit=varargin{k+1};
+                        obj.NStallGenLimit=varargin{k+1};
                     case  'sfitnessscalingfcn' 
                         if ~strcmp(varargin{k+1}(1),'@')
-                        assert(ismember(varargin{k+1},Xobj.CfitnessScalingFunction), ...
+                        assert(ismember(varargin{k+1},obj.CfitnessScalingFunction), ...
                             'openCOSSAN:GeneticAlgorithms', ...
-                            strcat('Available options for SFitnessscalingFcn are: ',sprintf('\n* %s',Xobj.CfitnessScalingFunction{:})))
+                            strcat('Available options for SFitnessscalingFcn are: ',sprintf('\n* %s',obj.CfitnessScalingFunction{:})))
                         end
                         
-                        Xobj.SFitnessScalingFcn=varargin{k+1};
+                        obj.SFitnessScalingFcn=varargin{k+1};
                     case  'sselectionfcn'
                         if ~strcmp(varargin{k+1}(1),'@')
-                                                assert(ismember(varargin{k+1},Xobj.CselectionFunction), ...
+                                                assert(ismember(varargin{k+1},obj.CselectionFunction), ...
                             'openCOSSAN:GeneticAlgorithms', ...
-                            strcat('Available options for SSelectionFcn are: ',sprintf('\n* %s', Xobj.CselectionFunction{:})))
+                            strcat('Available options for SSelectionFcn are: ',sprintf('\n* %s', obj.CselectionFunction{:})))
                         end
-                        Xobj.SSelectionFcn=varargin{k+1};
+                        obj.SSelectionFcn=varargin{k+1};
                     case  'smutationfcn'
                         if ~strcmp(varargin{k+1}(1),'@')
                             
-                        assert(ismember(varargin{k+1},Xobj.CmutationFunction), ...
+                        assert(ismember(varargin{k+1},obj.CmutationFunction), ...
                             'openCOSSAN:GeneticAlgorithms', ...
-                            strcat('Available options for SMutationFcn are: ',sprintf('\n*  %s', Xobj.CmutationFunction{:})))
+                            strcat('Available options for SMutationFcn are: ',sprintf('\n*  %s', obj.CmutationFunction{:})))
                         end
-                        Xobj.SMutationFcn=varargin{k+1};
+                        obj.SMutationFcn=varargin{k+1};
                     case  'scrossoverfcn'
                         if ~strcmp(varargin{k+1}(1),'@')
-                        assert(ismember(varargin{k+1},Xobj.CcrossoverFunction), ...
+                        assert(ismember(varargin{k+1},obj.CcrossoverFunction), ...
                             'openCOSSAN:GeneticAlgorithms', ...
-                            strcat('Available options for SCrossoverFcn are: ',sprintf('\n*  %s', Xobj.CcrossoverFunction{:})))
+                            strcat('Available options for SCrossoverFcn are: ',sprintf('\n*  %s', obj.CcrossoverFunction{:})))
                         end
-                        Xobj.SCrossoverFcn=varargin{k+1};
+                        obj.SCrossoverFcn=varargin{k+1};
                     case  'screationfcn'
                         if ~strcmp(varargin{k+1}(1),'@')
-                        assert(ismember(varargin{k+1},Xobj.CcreationFunction), ...
+                        assert(ismember(varargin{k+1},obj.CcreationFunction), ...
                             'openCOSSAN:GeneticAlgorithms', ...
-                            strcat('Available options for SCreationFcn are: ',sprintf('\n*  %s', Xobj.CcreationFunction{:})))
+                            strcat('Available options for SCreationFcn are: ',sprintf('\n*  %s', obj.CcreationFunction{:})))
                         end
-                        Xobj.SCreationFcn=varargin{k+1};
+                        obj.SCreationFcn=varargin{k+1};
                     case  'mutationrate'
-                        Xobj.mutationRate=varargin{k+1};
+                        obj.mutationRate=varargin{k+1};
                     case  'vscale'
-                        Xobj.Vscale=varargin{k+1};
+                        obj.Vscale=varargin{k+1};
                     case  'vshrink'
-                        Xobj.Vshrink=varargin{k+1};
+                        obj.Vshrink=varargin{k+1};
                     case 'lextremeoptima'
-                        Xobj.LextremeOptima=varargin{k+1};
+                        obj.LextremeOptima=varargin{k+1};
                     otherwise
                         error('OpenCossan:GeneticAlgorithms',...
                             'PropertyName %s not valid ',varargin{k} );
                 end
                 
-            end % input check
-            
+            end
         end
-        
     end
-    
 end
