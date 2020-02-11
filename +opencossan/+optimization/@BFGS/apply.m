@@ -50,7 +50,6 @@ function optimum = apply(obj,varargin)
         'OpenCossan:BFGS:apply',...
         'BFGS is an UNconstrained Nonlinear Optimization.')
     
-    
     options = optimoptions('fminunc', 'Display', 'iter');  %Default optimization options
     
     options.MaxFunctionEvaluations = obj.MaxFunctionEvaluations;
