@@ -18,21 +18,21 @@ function optimum = apply(obj, varargin)
     % Author: Edoardo Patelli
     
     %{
-This file is part of OpenCossan <https://cossan.co.uk>.
-Copyright (C) 2006-2019 COSSAN WORKING GROUP
+    This file is part of OpenCossan <https://cossan.co.uk>.
+    Copyright (C) 2006-2019 COSSAN WORKING GROUP
 
-OpenCossan is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License or,
-(at your option) any later version.
+    OpenCossan is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License or,
+    (at your option) any later version.
 
-OpenCossan is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
+    OpenCossan is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
+    You should have received a copy of the GNU General Public License
+    along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
     %}
     
     import opencossan.optimization.OptimizationRecorder;
@@ -50,8 +50,8 @@ along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
     x0 = optional.initialsolution;
     
     %% Add bounds of design variables as constraints
-    lowerScript = "for n=1:length(Tinput), Toutput(n).%s = %s - Tinput(n).%s; end";
-    upperScript = "for n=1:length(Tinput), Toutput(n).%s = + Tinput(n).%s - %s; end";
+    lowerScript = "for n=1:length(Tinput), Toutput(n).%s = %d - Tinput(n).%s; end";
+    upperScript = "for n=1:length(Tinput), Toutput(n).%s = + Tinput(n).%s - %d; end";
     
     for i = 1:optProb.Input.NumberOfDesignVariables
         
@@ -61,7 +61,7 @@ along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
         if isfinite(dv.LowerBound)
             constraintName = name + "_lowerBound";
             constraintScript = sprintf(lowerScript,...
-                constraintName,num2str(dv.LowerBound),name);
+                constraintName, dv.LowerBound, name);
             
             constraint = opencossan.optimization.Constraint(...
                 'Description', strjoin(["lower bound - current value of" name]), ...
@@ -76,7 +76,7 @@ along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
         if isfinite(dv.UpperBound)
             constraintName = name + "_upperBound";
             constraintScript = sprintf(upperScript,...
-                constraintName, name, num2str(dv.UpperBound));
+                constraintName, name, dv.UpperBound);
             
             constraint = opencossan.optimization.Constraint(...
                 'Description', strjoin(["current value of", name, "- upper bound"]), ...
@@ -93,8 +93,8 @@ along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
         'OpenCossan:cobyla:apply',...
         'It is not possible to apply COBYLA to solve UNCONSTRAINED problem')
     
-    Ndv = optProb.NumberOfDesignVariables;  % number of design variables
-    N_ineq = optProb.NumberOfConstraints;       % Number of constrains
+    Ndv = optProb.NumberOfDesignVariables; % number of design variables
+    N_ineq = optProb.NumberOfConstraints; % Number of constrains
     
     memoizedModel = opencossan.optimization.memoizeModel(optProb);
     
@@ -113,8 +113,8 @@ along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
     
     startTime = tic;
     
-    [optimalSolution, exitFlag] = cobyla_matlab(obj, x0, ...
-        obj.MaxFunctionEvaluations,obj.rho_ini,obj.rho_end,Ndv,N_ineq);
+    [optimalSolution, exitFlag] = cobyla_matlab(obj, x0, 100, ...
+        obj.InitialTrustRegion, obj.FinalTrustRegion, Ndv, N_ineq);
     
     totalTime = toc(startTime);
     
@@ -130,4 +130,3 @@ along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
     
     if ~isdeployed; obj.saveOptimumToDatabase(optimum); end
 end
-

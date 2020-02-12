@@ -76,21 +76,25 @@ classdef Optimizer < opencossan.common.CossanObject
                     "maxfunctionevaluations", ...
                     "maxiterations", ...
                     "objectivefunctionlimit", ...
-                    "timeout"];
-                defaults = {Inf, Inf, Inf, -Inf, Inf};
+                    "timeout", ...
+                    "constraintscalingfactor", ...
+                    "objectivefunctionscalingfactor"];
+                defaults = {Inf, Inf, Inf, -Inf, Inf, 1, 1};
 
-                [results, super_args] = parseOptionalNameValuePairs(names, ...
+                [optional, super_args] = parseOptionalNameValuePairs(names, ...
                     defaults, varargin{:});
             end
             
             obj@opencossan.common.CossanObject(super_args{:});
             
             if nargin > 0
-                obj.MaxModelEvaluations = results.maxmodelevaluations;
-                obj.MaxFunctionEvaluations = results.maxfunctionevaluations;
-                obj.MaxIterations = results.maxiterations;
-                obj.ObjectiveFunctionLimit = results.objectivefunctionlimit;
-                obj.Timeout = results.timeout;
+                obj.MaxModelEvaluations = optional.maxmodelevaluations;
+                obj.MaxFunctionEvaluations = optional.maxfunctionevaluations;
+                obj.MaxIterations = optional.maxiterations;
+                obj.ObjectiveFunctionLimit = optional.objectivefunctionlimit;
+                obj.Timeout = optional.timeout;
+                obj.ConstraintScalingFactor = optional.constraintscalingfactor;
+                obj.ObjectiveFunctionScalingFactor = optional.objectivefunctionscalingfactor;
             end
         end
         

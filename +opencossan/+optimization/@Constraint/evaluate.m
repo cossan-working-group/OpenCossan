@@ -72,7 +72,7 @@ for i = 1:size(x, 1)
 end
 
 % Scale constraints
-constraints = constraints/optional.scaling;
+constraints = constraints / optional.scaling;
 
 % Assign output to the inequality and equality constrains
 in = constraints(:,[obj.IsInequality]);
