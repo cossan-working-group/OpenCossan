@@ -216,6 +216,5 @@ classdef OptimizationProblem
             optimum = required.optimizer.apply(varargin{:});
         end
 
-        Xoptimum = initializeOptimum(obj, varargin)% Initialize an empty Optimum object
     end
 end
