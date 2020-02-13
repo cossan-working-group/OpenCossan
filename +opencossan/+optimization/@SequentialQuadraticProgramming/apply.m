@@ -22,9 +22,6 @@ function optimum = apply(obj, varargin)
     %                               lb <= x <= ub
     %
     % See Also: https://cossan.co.uk/wiki/apply@MiniMax
-    %
-    % Author: Edoardo Patelli
-    % Website: http://www.cossan.co.uk
     
     %{
     This file is part of OpenCossan <https://cossan.co.uk>.
@@ -125,5 +122,4 @@ function optimum = apply(obj, varargin)
         'modelevaluations', OptimizationRecorder.getInstance().ModelEvaluations);
     
     if ~isdeployed; obj.saveOptimumToDatabase(optimum); end
-    
 end
