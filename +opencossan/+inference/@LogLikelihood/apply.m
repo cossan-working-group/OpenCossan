@@ -10,25 +10,25 @@ function [logL] = apply(XLogL,theta)
     
     DimOut = length(Xmodel.OutputNames);
    
-    DefaultVals = Xmodel.Input.getDefaultValuesTable;
-    names = Xmodel.Input.ParameterNames;
-    
-    Nparam = Xmodel.Input.Nparameters;
-    ParVals = zeros(nSamples,Nparam);
-    
-    for i = 1:Nparam
-        Value = DefaultVals.(names{i});
-        ParVals(:,i) = Value;
+    Params = Xmodel.Input.Parameters;
+    for n = fieldnames(Params)'
+        Params.(n{1}) = repmat(Params.(n{1}).Value, nSamples, 1);
     end
     
-    Tinput1 = cell2struct(num2cell([theta, ParVals]'),Xmodel.InputNames);
+    Tinput = struct2table(Params);
     
-    %Tinput = struct2table(Tinput1);
+    tableTheta = array2table(theta);
     
-    Xout = Xmodel.apply(Tinput1);
-    output  = Xout.getValues('cnames',Xmodel.OutputNames);
+    tableTheta.Properties.VariableNames = Xmodel.Input.RandomVariableNames;
     
-    D = XLogL.Data.getValues('cnames',Xmodel.OutputNames);
+    Tinput = [tableTheta, Tinput];
+    Xout = Xmodel.apply(Tinput);
+    
+    output  = Xout.TableValues(:, Xmodel.OutputNames);
+    output = output{:, :};
+    
+    D = XLogL.Data.TableValues(:, Xmodel.OutputNames);
+    D = D{:, :};
     
     if ~isempty(XLogL.CustomLog)
         

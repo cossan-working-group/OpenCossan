@@ -103,5 +103,4 @@ else
     end
 end
 % Export data 
-XSimData=SimulationData('Table',TableOutput);
-XSimData=XSimData.merge(XSimInp);
+XSimData=SimulationData('Table',[TableOutput, TableInput]);

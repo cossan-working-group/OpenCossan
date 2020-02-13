@@ -21,7 +21,7 @@ along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
 
 import opencossan.OpenCossan
 
-OpenCossan.getTimer().lap('description','[Model Apply] Start model evaluation')
+%OpenCossan.getTimer().lap('description','[Model Apply] Start model evaluation')
 
 % If samples are passed, set them in the input object
 if isa(input,'opencossan.common.Samples')
@@ -32,5 +32,5 @@ end
 XsimData = apply(obj.Evaluator, input);
 XsimData.Sdescription = [XsimData.Sdescription ' - apply(@Model)'];
 
-OpenCossan.getTimer().lap('description','[Model Apply] Stop model evaluation')
+%OpenCossan.getTimer().lap('description','[Model Apply] Stop model evaluation')
 
