@@ -1,2 +1,6 @@
 codecov:
   branch: development
+
+coverage:
+  status:
+    patch: off  
