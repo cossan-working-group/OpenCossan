@@ -163,7 +163,7 @@ Xop = OptimizationProblem('Sdescription','Optimization problem', ...
 Xsqp = SequentialQuadraticProgramming('finitedifferenceperturbation',0.01);
 Xcobyla = Cobyla();
 Xga = GeneticAlgorithms('Smutationfcn','mutationadaptfeasible','NmaxIterations',50, ...
-    'NPopulationSize',200);
+    'NPopulationSize',20);
 
 %% Optimization: Setup
 % Reset the random number generator in order to always obtain the same
