@@ -104,14 +104,6 @@ classdef InputTest < matlab.unittest.TestCase
             testCase.assumeEqual(Xin.RandomVariableSetNames, {'Xrvs1'})
         end
         
-        %% test Xdesignvariable
-        
-        function testDesignVariableIO(testCase)
-            Xdv1 = opencossan.optimization.ContinuousDesignVariable('Description', 'dummy', 'value', 5);
-            Xin  = opencossan.common.inputs.Input('DesignVariable', Xdv1);
-            testCase.assumeEqual(Xin.DesignVariableNames, "Xdv1")
-        end
-        
         %% Test method add
         function addShouldAddParameter(testCase)
             Xmat = opencossan.common.inputs.Parameter('description', 'Material 1', 'Value', 7E+5);
