@@ -22,11 +22,10 @@ function checkFunction(obj)
     
     % Check that the inputs required by the functions are present
     for i = 1:numel(functions)
-        [found, idx] = ismember(functions(i).Tokens, obj.Names);
-        assert(all(found), obj.Names, ...
-            'OpenCossan:Input:checkFunctions', ...
+        [found, idx] = ismember(functions(i).Tokens, obj.InputNames);
+        assert(all(found), 'OpenCossan:Input:checkFunctions', ...
             'The following inputs required by Function %s are missing: %s\n', ...
-            names(i), strjoin(obj.Names(idx), ','));
+            names(i), strjoin(obj.InputNames(idx(idx > 0)), ','));
     end
     
     % Check that the functions can be called in the right order

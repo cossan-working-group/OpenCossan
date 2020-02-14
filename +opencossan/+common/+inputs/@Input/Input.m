@@ -25,7 +25,6 @@ classdef Input < opencossan.common.CossanObject
     
     properties
         DoFunctionsCheck(1,1) logical = true;
-        Samples opencossan.common.Samples
     end
     
     properties (SetAccess = private)
@@ -40,8 +39,8 @@ classdef Input < opencossan.common.CossanObject
         NumberOfDesignVariables 
         NumberOfRandomVariables 
         NumberOfRandomVariableSets
+        NumberOfGaussianMixtureRandomVariableSets
         NumberOfStochasticProcesses
-        % NumberOfSamples
         
         ParameterNames
         FunctionNames
@@ -57,9 +56,11 @@ classdef Input < opencossan.common.CossanObject
         RandomVariables
         RandomVariableSets
         StochasticProcesses
-        % GaussianMixtureRandomVariableSets 
+        GaussianMixtureRandomVariableSets 
  
         AreDesignVariablesDiscrete
+        
+        InputNames
     end
     
     methods
@@ -80,10 +81,6 @@ classdef Input < opencossan.common.CossanObject
         TableOutput=getTable(Xobj)              % Generate matlab table with the realizations of input objecs
         
         Poutput=getValues(Xobj,varargin)        % Retrieve the value(s) of a single variable
-        
-        Cout = evaluateFunction(Xobj,varargin)  % Compute the functions
-        
-        MX = getSampleMatrix(Xobj)              % Retrive reliazation in a matrix format
         
         varargout = getMoments(Xobj,varargin)   % Retrive the moments of Random Variables
         varargout = getStatistics(Xobj,varargin)% Retrieve the Statistic of interest
@@ -122,8 +119,7 @@ classdef Input < opencossan.common.CossanObject
                 [required, varargin] = opencossan.common.utilities.parseRequiredNameValuePairs(...
                     ["members", "names"], varargin{:});
                 [optional, super_args] = opencossan.common.utilities.parseOptionalNameValuePairs(...
-                    ["dofunctionscheck", "samples"], ...
-                    {true, Samples.empty(1,0)}, varargin{:});
+                    ["dofunctionscheck"], {true}, varargin{:});
             end
             
             obj@opencossan.common.CossanObject(super_args{:});
@@ -133,23 +129,12 @@ classdef Input < opencossan.common.CossanObject
                 obj.Names = required.names;
                 
                 obj.DoFunctionsCheck = optional.dofunctionscheck;
-                obj.Samples = optional.samples;
             end
             
             assert(length(obj.Members) == length(obj.Names), ...
                 'openCOSSAN:Input:WrongInputLength',...
                 'Length of Members (%i) must be equal to the length of MembersNames (%i)', ...
                 length(obj.Members),length(obj.Names))
-            
-            if ~isempty(obj.Samples)
-                assert(isempty(setxor(obj.Samples.Cvariables, obj.names)), ...
-                    'openCOSSAN:Input:SamplesObjectsMismatchVariables',...
-                    ['The variables defined in the Samples object do not match',...
-                    ' the variable defined in the Input object)\n',...
-                    'Input variables: %s\nSamples variables: %s'],...
-                    sprintf(' ''%s'';',obj.XSmples.Cvariables{:}),...
-                    sprintf(' ''%s'';',obj.Names));
-            end
             
             if obj.NumberOfFunctions > 0 && obj.DoFunctionsCheck
                 checkFunction(obj)
@@ -239,33 +224,40 @@ classdef Input < opencossan.common.CossanObject
             names = obj.filterNames('opencossan.common.inputs.StochasticProcess');
         end
         
-        function Tdef = getDefaultValuesStructure(Xobj)
-            Tdef =  Xobj.get('DefaultValues');
+        %% Dependent GaussianMixtureRandomVariableSets properties
+        function gsmrvset = get.GaussianMixtureRandomVariableSets(obj)
+            gsmrvset = obj.filterMembers('opencossan.common.inputs.GaussianMixtureRandomVariableSets');
         end
         
-        function Cdef = getDefaultValuesCell(Xobj)
-            Cdef = struct2cell( Xobj.get('DefaultValues'));
+        function n = get.NumberOfGaussianMixtureRandomVariableSets(obj)
+            n = numel(obj.GaussianMixtureRandomVariableSets);
         end
         
-        function TableDefault = getDefaultValuesTable(Xobj)
-            TableDefault = struct2table( Xobj.get('DefaultValues'),'AsArray',true);
+        function names = get.GaussianMixtureRandomVariableSetNames(obj)
+            names = obj.filterNames('opencossan.common.inputs.GaussianMixtureRandomVariableSets');
         end
         
-        function AreDesignVariablesDiscrete = get.AreDesignVariablesDiscrete(Xobj)
-            AreDesignVariablesDiscrete=false;
-            CDVNames=Xobj.DesignVariableNames;
-            for n=1:length(CDVNames)
-                if isa(Xobj.DesignVariables(CDVNames{n}), ...
-                        'opencossan.optimization.DiscreteDesignVariable')
-                    AreDesignVariablesDiscrete=true;
-                    break
-                end
+        %%
+        
+        function names = get.InputNames(obj)
+            names = obj.Names;
+            for set = obj.RandomVariableSets
+                names = [names set.Names]; %#ok<AGROW>
             end
+            [~, idx] = ismember(obj.RandomVariableSetNames, names);
+            names(idx) = [];
         end
         
-        checkFunction(Xobj)  %method checking whether the input functions are valid
+        function discrete = get.AreDesignVariablesDiscrete(Xobj)
+            discrete = any(arrayfun(@(dv) isa(dv, 'opencossan.optimization.DiscreteDesignVariable'), ...
+                obj.DesignVariablesdescrete));
+        end
         
-    end % End methods
+        
+        values = getDefaultValues(obj);
+        checkFunction(obj);
+        
+    end
     
     %% Private Methods
     methods (Access=private)

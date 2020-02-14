@@ -66,7 +66,7 @@ classdef Model < opencossan.common.CossanObject
         end
         
         function names = get.InputNames(obj)
-            names = obj.Input.Names;
+            names = obj.Input.InputNames;
         end
     end
 end

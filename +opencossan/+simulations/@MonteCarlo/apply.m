@@ -58,13 +58,10 @@ while isempty(SexitFlag)
             ' ( ' num2str(Ns) ' samples)' ],4)
         
     % Generate samples
-    Xs = Xobj.sample('Nsamples',Ns,'Xinput',Xinput);
-            
-    Xinput=set(Xinput,'Xsamples',Xs);
-    
+    samples = Xobj.sample('Nsamples',Ns,'Xinput',Xinput);    
     
     %% evaluate performance function
-    Xout= apply(Xtarget,Xinput);
+    Xout = apply(Xtarget, samples);
                 
     %% Export results
     if ~Xobj.Lintermediateresults

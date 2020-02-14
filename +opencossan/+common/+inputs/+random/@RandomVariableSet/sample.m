@@ -1,4 +1,4 @@
-function XS = sample(obj,Nsamples)
+function samples = sample(obj,Nsamples)
 %SAMPLE   produce samples of a set of random variables
 %
 % The method returns a Samples object containing the samples of the
@@ -54,6 +54,7 @@ else
     VX = copularnd('Gaussian', obj.NatafModel.Correlation,Nsamples);
 end
 
-XS = Samples('Xrvset',obj,'MsamplesHyperCube',VX);
+samples = array2table(VX);
+samples.Properties.VariableNames = obj.Names;
 
 end
