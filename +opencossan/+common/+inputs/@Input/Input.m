@@ -1,76 +1,70 @@
 classdef Input < opencossan.common.CossanObject
     %INPUT  Constructor for the Input object
-    % This class is linking the various input objects with the toolboxes of
-    % COSSAN X
+    % This class is linking the various input objects with the toolboxes of COSSAN X
     %
     % See Also: http://cossan.cfd.liv.ac.uk/wiki/index.php/@Input
     %
-    % Author: Edoardo Patelli
-    % Institute for Risk and Uncertainty, University of Liverpool, UK
-    % email address: openengine@cossan.co.uk
-    % Website: http://www.cossan.co.uk
+    % Author: Edoardo Patelli Institute for Risk and Uncertainty, University of Liverpool, UK email
+    % address: openengine@cossan.co.uk Website: http://www.cossan.co.uk
     
-    % =====================================================================
-    % This file is part of openCOSSAN.  The open general purpose matlab
-    % toolbox for numerical analysis, risk and uncertainty quantification.
+    % ===================================================================== This file is part of
+    % openCOSSAN.  The open general purpose matlab toolbox for numerical analysis, risk and
+    % uncertainty quantification.
     %
-    % openCOSSAN is free software: you can redistribute it and/or modify
-    % it under the terms of the GNU General Public License as published by
-    % the Free Software Foundation, either version 3 of the License.
+    % openCOSSAN is free software: you can redistribute it and/or modify it under the terms of the
+    % GNU General Public License as published by the Free Software Foundation, either version 3 of
+    % the License.
     %
-    % openCOSSAN is distributed in the hope that it will be useful,
-    % but WITHOUT ANY WARRANTY; without even the implied warranty of
-    % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    % GNU General Public License for more details.
+    % openCOSSAN is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+    % without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See
+    % the GNU General Public License for more details.
     %
-    %  You should have received a copy of the GNU General Public License
-    %  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
+    %  You should have received a copy of the GNU General Public License along with openCOSSAN.  If
+    %  not, see <http://www.gnu.org/licenses/>.
     % =====================================================================
     
-    properties % Public access
-        DoFunctionsCheck(1,1) logical = true     % boolean for check of the Functions
-        Members containers.Map;
+    properties
+        DoFunctionsCheck(1,1) logical = true;
+        Samples opencossan.common.Samples
     end
     
-    properties %(SetAccess=protected)            % SetAccess protected
-        RandomVariableSets=struct;               % Collection of RandomVariableSet/GaussianRandomVariableSet object
-        Functions=struct;                        % Collection of Function objects
-        Parameters=struct;                       % Collection of Parameter objects
-        %Xbset=struct;                           % Collection of BoundedSet
-        StochasticProcesses=struct;              % Collection of StochasticProcess objects
-        Samples                                  % Collection of Samples object
-        %CinputMapping                           % names of the Intervals to be mapped into RV hyperparameters
+    properties (SetAccess = private)
+        Members(1, :) = {}
+        Names(1, :) string = []
     end
     
-    properties (Dependent = true, SetAccess = protected)
-        Ninputs                                  % Total number of objects (entries) defined in the Input
-        NrandomVariables                         % Total number of randomvariables
-        %        Nvariables                      % Total number of variables (random and bounded) % TODO: SILVIA: Is this still used???
-        NstochasticProcesses                     % Total number of stochastic process
-        Nparameters                              % Total number of Parameters
-        Nfunctions
-        Nsamples                                 % Total number of samples stored in the Input
-        Names                                    % Collection of Names of all the variables
-        SetNames                                 % names of the all the sets (RandomVariablesSet GaussianMixtureRandomVariablesSet BoundedSet)
-        RandomVariableSetNames                   % names of the RandomVariablesSet (only)
-        GaussianMixtureRandomVariableSetNames    % names of the GaussianMixtureRandomVariablesSet
-        RandomVariableNames                      % names of the Random Variables
-        StochasticProcessNames                   % names of the StochasticProcess
-        FunctionNames                            % names of the Function
-        ParameterNames                           % names of the Parameter
-        DesignVariables
-        DesignVariableNames   
-        NumberOfDesignVariables                  % names of the DesignVariable
-%         CnamesBoundedSet                         % names of the BoundedSet
-%         CnamesIntervalVariable                   % names of the Interval Variables
-        AreDesignVariablesDiscrete               % flag to check if discrete DesignVariables are used
+    properties (Dependent = true)
+        NumberOfInputs
+        NumberOfParameters
+        NumberOfFunctions
+        NumberOfDesignVariables 
+        NumberOfRandomVariables 
+        NumberOfRandomVariableSets
+        NumberOfStochasticProcesses
+        % NumberOfSamples
+        
+        ParameterNames
+        FunctionNames
+        DesignVariableNames
+        RandomVariableNames
+        RandomVariableSetNames
+        StochasticProcessNames
+        GaussianMixtureRandomVariableSetNames 
+        
+        Parameters
+        Functions
+        DesignVariables 
+        RandomVariables
+        RandomVariableSets
+        StochasticProcesses
+        % GaussianMixtureRandomVariableSets 
+ 
+        AreDesignVariablesDiscrete
     end
     
-    %% Methods
     methods
         
         varargout=sample(Xobj,varargin)         % Generate samples from the Input object
-        
         Xobj=add(Xobj,varargin)                 % Add an object to the Input object
         
         Xobj=merge(Xobj,XobjectToBeAdded)       % Merge 2 input objects
@@ -110,286 +104,139 @@ classdef Input < opencossan.common.CossanObject
         Xobj=setDesignOfExperiments(Xobj,varargin)
         
         %% constructor
-        function Xobj=Input(varargin)
+        function obj = Input(varargin)
             %INPUT Constructor method for the Input object.
             %
             % See Also: http://cossan.co.uk/wiki/index.php/@Input
             %
-            % Author: Edoardo Patelli
-            % Institute for Risk and Uncertainty, University of Liverpool, UK
-            % email address: openengine@cossan.co.uk
-            % Website: http://www.cossan.co.uk
+            % Author: Edoardo Patelli Institute for Risk and Uncertainty, University of Liverpool,
+            % UK email address: openengine@cossan.co.uk Website: http://www.cossan.co.uk
             
             import opencossan.common.Samples
             import opencossan.common.inputs.*
             import opencossan.optimization.DesignVariable
-
             
-            % process inputs via inputParser
-            p = inputParser;
-            p.FunctionName = 'opencossan.common.inputs.Input';
-            
-            % Use default values
-            p.addParameter('Description',Xobj.Description);
-            p.addParameter('DoFunctionsCheck',Xobj.DoFunctionsCheck);
-            p.addParameter('Function',Function)
-            p.addParameter('RandomVariableSet',random.RandomVariableSet)
-            p.addParameter('GaussianMixtureRandomVariableSet',GaussianMixtureRandomVariableSet)
-            p.addParameter('StochasticProcess',StochasticProcess)
-            p.addParameter('Parameter',Parameter)
-            p.addParameter('Samples',Samples)
-            p.addParameter('Members',{})
-            p.addParameter('MembersNames',"")
-            
-            p.parse(varargin{:});
-            
-            for k=1:2:length(varargin)
-                switch (varargin{k})
-                    case {'Function'}
-                        Xobj.Functions.(inputname(k+1))=p.Results.Function;
-                    case {'RandomVariableSet','GaussianMixtureRandomVariableSet'}
-                        Xobj.RandomVariableSets.(inputname(k+1))=p.Results.RandomVariableSet;
-                    case {'StochasticProcess'}
-                        assert(~isempty(p.Results.StochasticProcess.McovarianceEigenvectors), ...
-                            'openCOSSAN:Input',...
-                            'The KL-terms of the stochastic process are not determined');
-                        Xobj.StochasticProcess.(inputname(k+1))=p.Results.StochasticProcess;
-                    case {'Parameter'}
-                        assert(isscalar(p.Results.Parameter), ...
-                            'openCOSSAN:Input:wrongParameterLenght',...
-                            'Only a scalar input is allowed after the Parameter field');
-                        Xobj.Parameters.(inputname(k+1))=p.Results.Parameter;
-                    case {'Description'}
-                        Xobj.Description=p.Results.Description;
-                    case {'Samples'}
-                        Xobj.Samples=p.Results.Samples;
-                    case {'DoFunctionsCheck'}
-                        Xobj.DoFunctionsCheck=p.Results.DoFunctionsCheck;
-                    case {'MembersNames'}
-                        CSmembers=p.Results.MembersNames;
-                    case {'Members'}
-                        CXobjects=p.Results.Members;
-                        % The object are retrieved from the base workspace
-                    case {'ccxmembers','ccxmember'}
-                        CXobjects=cell(size(varargin{k+1}));
-                        for n=1:length(varargin{k+1})
-                            CXobjects(n)=varargin{k+1}{n};
-                        end
-                    case 'cinputmapping'
-                        Xobj.CinputMapping=varargin{k+1};
-                end
-            end
-            
-            % Add objects to the Input
-            if exist('CXobjects','var')
-                assert(logical(exist('CSmembers','var')),...
-                    'openCOSSAN:Input:NoMembersNames',...
-                    ['It is necessary to define the names of the objects',...
-                    ' (i.e. Parameters, RandomVariableSet, StochasticProcess, DesignVariable) using the ProperyField MembersNames']);
-                
-                assert(length(CXobjects)==length(CSmembers), ...
-                    'openCOSSAN:Input:WrongInputLength',...
-                    'Length of Members (%i) must be equal to the length of MembersNames (%i)', ...
-                    length(CXobjects),length(CSmembers))
-                
-                Xobj.Members = containers.Map(CSmembers, CXobjects);
-                for iobj=1:length(CXobjects)
-                    switch class(CXobjects{iobj})
-                        case 'opencossan.common.inputs.Function'
-                            Xobj.Functions.(CSmembers{iobj})= CXobjects{iobj};
-                        case 'opencossan.common.inputs.random.RandomVariableSet'
-                            Xobj.RandomVariableSets.(CSmembers{iobj})= CXobjects{iobj};
-                        case 'opencossan.common.inputs.GaussianMixtureRandomVariableSet'
-                            Xobj.RandomVariableSets.(CSmembers{iobj})= CXobjects{iobj};
-                        case {'opencossan.common.inputs.stochasticprocess.KarhunenLoeve',...
-                                'opencossan.common.inputs.stochasticprocess.AtkinsonSilva'}
-                            Xobj.StochasticProcesses.(CSmembers{iobj})= CXobjects{iobj};
-                        case 'opencossan.common.inputs.Parameter'
-                            Xobj.Parameters.(CSmembers{iobj})= CXobjects{iobj};
-                        otherwise
-%                             error('openCOSSAN:Input:WrongObjectType',...
-%                                 'The object %s of type %s is not a valid', ...
-%                                 CSmembers{iobj},class(CXobjects{iobj}));
-                    end
-                end
+            if nargin == 0
+                super_args = {};
             else
-                assert(logical(~exist('CSmembers','var')),...
-                    'openCOSSAN:Input',...
-                    ['It is mandatory to pass objects using the ' ...
-                    'PropertyName CXmembers']);
-                Xobj.Members = containers.Map();
+                [required, varargin] = opencossan.common.utilities.parseRequiredNameValuePairs(...
+                    ["members", "names"], varargin{:});
+                [optional, super_args] = opencossan.common.utilities.parseOptionalNameValuePairs(...
+                    ["dofunctionscheck", "samples"], ...
+                    {true, Samples.empty(1,0)}, varargin{:});
             end
             
-            if ~isempty(Xobj.Samples)
-                %% Check the Sample object
-                assert(length(Xobj.Samples) <= 1,...
-                    'openCOSSAN:Input:TooManySamplesObjects',...
-                    'Only 1 Samples objects is allowed in the Input)')
+            obj@opencossan.common.CossanObject(super_args{:});
+            
+            if nargin > 0
+                obj.Members = required.members;
+                obj.Names = required.names;
                 
-                
-                assert(isempty(setxor(Xobj.Xsamples.Cvariables,CSmembers)), ...
+                obj.DoFunctionsCheck = optional.dofunctionscheck;
+                obj.Samples = optional.samples;
+            end
+            
+            assert(length(obj.Members) == length(obj.Names), ...
+                'openCOSSAN:Input:WrongInputLength',...
+                'Length of Members (%i) must be equal to the length of MembersNames (%i)', ...
+                length(obj.Members),length(obj.Names))
+            
+            if ~isempty(obj.Samples)
+                assert(isempty(setxor(obj.Samples.Cvariables, obj.names)), ...
                     'openCOSSAN:Input:SamplesObjectsMismatchVariables',...
                     ['The variables defined in the Samples object do not match',...
                     ' the variable defined in the Input object)\n',...
                     'Input variables: %s\nSamples variables: %s'],...
-                    sprintf(' ''%s'';',Xobj.Xsamples.Cvariables{:}),...
-                    sprintf(' ''%s'';',CSmembers{:}));
+                    sprintf(' ''%s'';',obj.XSmples.Cvariables{:}),...
+                    sprintf(' ''%s'';',obj.Names));
             end
             
-            if ~isempty(Xobj.FunctionNames) && Xobj.DoFunctionsCheck
-                checkFunction(Xobj)
-            end
-        end % End constructor
-        
-        %% Dependent properties
-        
-        function names = get.Names(obj)
-            % Please DO NOT change the order of the variable name returned
-            % TODO: Should become keys(obj.Members) at some point.
-            names = [obj.RandomVariableNames ...
-                obj.FunctionNames ...
-                obj.ParameterNames ...
-                obj.StochasticProcessNames ...
-                obj.DesignVariableNames];
-        end
-        
-        function CVariableNames = get.RandomVariableNames(Xobj)
-            CVariableNames={};
-            CRVSetNames=fieldnames(Xobj.RandomVariableSets)';
-            for irvs=1:length(CRVSetNames)
-                if isa(Xobj.RandomVariableSets.(CRVSetNames{irvs}),'opencossan.common.inputs.GaussianMixtureRandomVariableSet')
-                    CVariableNames = [CVariableNames ...
-                    Xobj.RandomVariableSets.(CRVSetNames{irvs}).Cmembers];   %#ok<AGROW>
-                else
-                CVariableNames = [CVariableNames ...
-                    Xobj.RandomVariableSets.(CRVSetNames{irvs}).Names];   %#ok<AGROW>
-                end
+            if obj.NumberOfFunctions > 0 && obj.DoFunctionsCheck
+                checkFunction(obj)
             end
         end
         
-        function NrandomVariables = get.NrandomVariables(Xobj)
-            Crvset=Xobj.RandomVariableSetNames;
-            NrandomVariables=0;
-            if ~isempty(Crvset)
-                for irvs=1:length(Crvset)
-                    NrandomVariables = NrandomVariables + Xobj.RandomVariableSets.(Crvset{irvs}).Nrv;
-                end
-            end
-            CrvsetGauss=Xobj.GaussianMixtureRandomVariableSetNames;
-            if ~isempty(CrvsetGauss)
-                for irvs=1:length(CrvsetGauss)
-                    NrandomVariables = NrandomVariables + Xobj.RandomVariableSets.(CrvsetGauss{irvs}).Nrv;
-                end
-            end
+        function n = get.NumberOfInputs(obj)
+            n = numel(obj.Members);
         end
         
+        %% Dependent Parameter properties
+        
+        function parameters = get.Parameters(obj)
+            parameters = obj.filterMembers('opencossan.common.inputs.Parameter');
+        end
+        
+        function n = get.NumberOfParameters(obj)
+            n = numel(obj.Parameters);
+        end
+        
+        function names = get.ParameterNames(obj)
+            names = obj.filterNames('opencossan.common.inputs.Parameter');
+        end
+        
+        %% Dependent Function properties
+        function funs = get.Functions(obj)
+            funs = obj.filterMembers('opencossan.common.inputs.Function');
+        end
+        
+        function n = get.NumberOfFunctions(obj)
+            n = numel(obj.Functions);
+        end
+        
+        function names = get.FunctionNames(obj)
+            names = obj.filterNames('opencossan.common.inputs.Function');
+        end
+        
+        %% Dependent RandomVariable properties
+        function rvs = get.RandomVariables(obj)
+            rvs = obj.filterMembers('opencossan.common.inputs.random.RandomVariable');
+        end
+        
+        function n = get.NumberOfRandomVariables(obj)
+            n = numel(obj.RandomVariables);
+        end
+        
+        function names = get.RandomVariableNames(obj)
+            names = obj.filterNames('opencossan.common.inputs.random.RandomVariable');
+        end
+        
+        %% Dependent DesignVariable properties
         function dvs = get.DesignVariables(obj)
-            dvs = opencossan.optimization.DesignVariable.empty;
-            for k = keys(obj.Members)
-                if isa(obj.Members(k{1}),...
-                        'opencossan.optimization.DesignVariable')
-                    dvs = [dvs obj.Members(k{1})]; %#ok<AGROW>
-                end
-            end
-        end
-        
-        function names = get.DesignVariableNames(obj)
-            names = [];
-            for k = keys(obj.Members)
-                if isa(obj.Members(k{1}),...
-                        'opencossan.optimization.DesignVariable')
-                    names = [names string(k{1})]; %#ok<AGROW>
-                end
-            end
+            dvs = obj.filterMembers('opencossan.optimization.DesignVariable');
         end
         
         function n = get.NumberOfDesignVariables(obj)
-            n = length(obj.DesignVariables);
+            n = numel(obj.DesignVariables);
         end
         
-        function NstochasticProcesses = get.NstochasticProcesses(Xobj)
-            NstochasticProcesses=length(Xobj.StochasticProcessNames);
+        function names = get.DesignVariableNames(obj)
+            names = obj.filterNames('opencossan.optimization.DesignVariable');
         end
         
-        function RandomVariableSetNames = get.RandomVariableSetNames(Xobj)
-            % Return the names of the RandomVariableSet (only)
-            Cnames=fieldnames(Xobj.RandomVariableSets)';
-            if ~isempty(Cnames) && ~isempty(fieldnames(Xobj.RandomVariableSets))
-                Vpos=false(length(Cnames),1);
-                for irvset=1:length(Cnames)
-                    Vpos(irvset)=isa(Xobj.RandomVariableSets.(Cnames{irvset}),'opencossan.common.inputs.random.RandomVariableSet');
-                end
-                RandomVariableSetNames=Cnames(Vpos);
-            else
-                RandomVariableSetNames  ={};
-            end
+        %% Dependent RandomVariableSet properties
+        function dvs = get.RandomVariableSets(obj)
+            dvs = obj.filterMembers('opencossan.common.inputs.random.RandomVariableSet');
         end
         
-        function GaussianMixtureRandomVariableSetNames = get.GaussianMixtureRandomVariableSetNames(Xobj)
-            % Return the names of the GaussianMixtureRandomVariableSet (only)
-            Cnames=fieldnames(Xobj.RandomVariableSets)';
-            if ~isempty(Cnames) && ~isempty(fieldnames(Xobj.RandomVariableSets))
-                Vpos=false(length(Cnames),1);
-                for irvset=1:length(Xobj.RandomVariableSets)
-                    Vpos(irvset)=isa(Xobj.RandomVariableSets.(Cnames{irvset}),'opencossan.common.inputs.GaussianMixtureRandomVariableSet');
-                end
-                GaussianMixtureRandomVariableSetNames=Cnames(Vpos);
-            else
-                GaussianMixtureRandomVariableSetNames  ={};
-            end
-            % Be sure the names are exported in a row
-            if isvector(GaussianMixtureRandomVariableSetNames)
-                GaussianMixtureRandomVariableSetNames=GaussianMixtureRandomVariableSetNames';
-            end
-            
+        function n = get.NumberOfRandomVariableSets(obj)
+            n = numel(obj.RandomVariableSets);
         end
         
-        function StochasticProcessNames = get.StochasticProcessNames(Xobj)
-            StochasticProcessNames  = fieldnames(Xobj.StochasticProcesses)';
+        function names = get.RandomVariableSetNames(obj)
+            names = obj.filterNames('opencossan.common.inputs.random.RandomVariableSet');
         end
         
-        function FunctionNames = get.FunctionNames(Xobj)
-            FunctionNames = fieldnames(Xobj.Functions)';
+        %% Dependent StochasticProcess properties
+        function sps = get.StochasticProcesses(obj)
+            sps = obj.filterMembers('opencossan.common.inputs.StochasticProcess');
         end
         
-        function ParameterNames = get.ParameterNames(Xobj)
-            ParameterNames = fieldnames(Xobj.Parameters)';
-        end        
-%         function CnamesBoundedSet = get.CnamesBoundedSet(Xobj)
-%             % Return the names of the BoundedSet (only)
-%             CnamesBoundedSet  = fieldnames(Xobj.Xbset)';
-%         end
-        
-%         function CnamesIntervalVariable = get.CnamesIntervalVariable(Xobj)
-%             Cbset=Xobj.CnamesBoundedSet;
-%             CnamesIntervalVariable={};
-%             for iiv=1:length(Cbset)
-%                 CnamesIntervalVariable = [CnamesIntervalVariable ...
-%                     Xobj.Xbset.(Cbset{iiv}).Names;];   %#ok<AGROW>
-%             end
-%             if ~isrow(CnamesIntervalVariable)
-%                 CnamesIntervalVariable=CnamesIntervalVariable';
-%             end
-%         end
-        
-        function Nparameters = get.Nparameters(Xobj)
-            Nparameters = length(Xobj.ParameterNames);
+        function n = get.NumberOfStochasticProcesses(obj)
+            n = numel(obj.StochasticProcesses);
         end
         
-        function Nparameters = get.Nfunctions(Xobj)
-            Nparameters = length(Xobj.FunctionNames);
-        end
-        
-        function Ninputs = get.Ninputs(Xobj)
-            Ninputs  = length(Xobj.Names);
-        end
-        
-        function Nsamples = get.Nsamples(Xobj)
-            if isempty(Xobj.Samples)
-                Nsamples = 0;
-            else
-                Nsamples = Xobj.Samples.Nsamples;
-            end
+        function names = get.StochasticProcessNames(obj)
+            names = obj.filterNames('opencossan.common.inputs.StochasticProcess');
         end
         
         function Tdef = getDefaultValuesStructure(Xobj)
@@ -409,7 +256,7 @@ classdef Input < opencossan.common.CossanObject
             CDVNames=Xobj.DesignVariableNames;
             for n=1:length(CDVNames)
                 if isa(Xobj.DesignVariables(CDVNames{n}), ...
-                    'opencossan.optimization.DiscreteDesignVariable')
+                        'opencossan.optimization.DiscreteDesignVariable')
                     AreDesignVariablesDiscrete=true;
                     break
                 end
@@ -422,8 +269,18 @@ classdef Input < opencossan.common.CossanObject
     
     %% Private Methods
     methods (Access=private)
-        Cout=evaluateFunctions(Xobj,varargin) % Estimate the function defined
-        % in the Input Object and return a cell array
+        % Estimate the function defined in the Input Object and return a cell array
+        Cout=evaluateFunctions(Xobj,varargin)
+        
+        function members = filterMembers(obj, type)
+            idx = cellfun(@(m) isa(m, type), obj.Members);
+            members = [obj.Members{idx}];
+        end
+        
+        function members = filterNames(obj, type)
+            idx = cellfun(@(m) isa(m, type), obj.Members);
+            members = obj.Names(idx);
+        end
     end
     
 end
