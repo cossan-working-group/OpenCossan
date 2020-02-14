@@ -167,7 +167,7 @@ opencossan.OpenCossan.setVerbosityLevel(1);
         %% Prepare for the next iteration
         thetaj = thetaj1;
         pj     = pj1;
-        names = strcat(Bayes.OutputNames,'_',num2str(j));
+        names = `;
         samplesOut = addVariable(samplesOut,'Cnames',names,'Mvalues',thetaj);
         
     end
