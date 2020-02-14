@@ -2,80 +2,61 @@ classdef BFGS < opencossan.optimization.Optimizer
     % BFFS class is intended for solving unconstrained nonlinear optimization
     % problem using gradients
     
+    %{
+    This file is part of OpenCossan <https://cossan.co.uk>.
+    Copyright (C) 2006-2019 COSSAN WORKING GROUP
+
+    OpenCossan is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the
+    Free Software Foundation, either version 3 of the License or, (at your
+    option) any later version.
+
+    OpenCossan is distributed in the hope that it will be useful, but
+    WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+    General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along
+    with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
+    %}
     
-    %% Properties of the object
-    properties % Public access
-        finiteDifferencePerturbation    = 0.001 %Perturbation for performing 
-                                                % finite differences (required
-                                                % for gradient estimation)
-        SfiniteDifferenceType = 'forward'       % Finite differences, used to 
-                                                % estimate gradients
+    properties
+        FiniteDifferenceStepSize(1,1) = sqrt(eps);
+        FiniteDifferenceType {mustBeMember(FiniteDifferenceType, {'forward', 'central'})} = 'forward';
     end
     
-    %%  Methods inherited from the superclass
+    properties (Hidden)
+        ExitReasons = containers.Map([1, 2, 3, 5, 0, -1, -3],[
+            "Magnitude of gradient is smaller than the OptimalityTolerance tolerance.", ...
+            "Change in x was smaller than the StepTolerance tolerance.", ...
+            "Change in the objective function value was less than the FunctionTolerance tolerance.", ...
+            "Predicted decrease in the objective function was less than the FunctionTolerance tolerance.", ...
+            "Number of iterations exceeded MaxIterations or number of function evaluations exceeded MaxFunctionEvaluations.", ...
+            "Algorithm was terminated by the output function.", ...
+            "Objective function at current iteration went below ObjectiveLimit."]);
+    end
+    
     methods
-        varargout    = apply(Xobj,varargin)  %This method perform the simulation adopting the Xobj
+        function obj = BFGS(varargin)
+            %BFGS
+            
+            import opencossan.common.utilities.parseOptionalNameValuePairs;
+            if nargin == 0
+                super_args = {};
+            else
+                [optional, super_args] = parseOptionalNameValuePairs(...
+                    ["FiniteDifferenceStepSize", "FiniteDifferenceType"], ...
+                    {sqrt(eps), 'forward'}, varargin{:});
+            end
+            
+            obj@opencossan.optimization.Optimizer(super_args{:});
+            
+            if nargin > 0
+                obj.FiniteDifferenceStepSize = optional.finitedifferencestepsize;
+                obj.FiniteDifferenceType = optional.finitedifferencetype;
+            end
+        end
         
-        function Xobj   = BFGS(varargin)
-            %BFGS   Constructor function for optimizer BFGS
-            %
-            %   
-            %
-            % =========================================================================
-            % COSSAN-X - The next generation of the computational stochastic analysis
-            % University of Innsbruck, Copyright 1993-2011 IfM
-            % =========================================================================
-            
-            % Argument Check
-            OpenCossan.validateCossanInputs(varargin{:})
-            
-            % Set predefined values
-            Xobj.Sdescription   = 'BFGS object';
-            Xobj.Nmax           = 1e3;
-            
-            % Process input arguments
-            for k=1:2:length(varargin)
-                switch lower(varargin{k})
-                    case 'sdescription'
-                        Xobj.Sdescription=varargin{k+1};
-                    case  {'nmax','nmaxmodelevaluations'}
-                        Xobj.Nmax=varargin{k+1};
-                    case 'lintermediateresults'
-                        Xobj.Lintermediateresults=varargin{k+1};
-                    case  'scalingfactor'
-                        Xobj.scalingFactor=varargin{k+1};
-                    case  'xjobmanager'
-                        Xobj.XjobManager=varargin{k+1};
-                    case  'nmaxiterations'
-                        Xobj.NmaxIterations=varargin{k+1};
-                    case {'nseedrandomnumbergenerator'}
-                        Nseed       = varargin{k+1};
-                        Xobj.RandomNumberGenerator = ...
-                            RandStream('mt19937ar','Seed',Nseed);
-                    case {'xrandomnumbergenerator'}
-                        assert(isa(varargin{k+1},'RandStream'),...
-                            'openCOSSAN:optimization:BFGS',...
-                            'RandStream object expected after property name %s',varargin{k})
-                        
-                            Xobj.XrandomNumberGenerator  = varargin{k+1};    
-                    case 'finitedifferenceperturbation'
-                        Xobj.finiteDifferencePerturbation=varargin{k+1};
-                    case 'sfinitedifferencetype'
-                        CallowedValues={'forward','central'};
-                        assert(ismember(varargin{k+1},CallowedValues),...
-                              'openCOSSAN:optimization:BFGS',...
-                              'Value %s not valid\nValid SfiniteDifferenceType are: ''%s'' and ''%s'' ', ...
-                              varargin{k+1},CallowedValues{1},CallowedValues{2})
-                        Xobj.SfiniteDifferenceType=varargin{k+1};
-                    case  'toleranceobjectivefunction'
-                        Xobj.toleranceObjectiveFunction=varargin{k+1};
-                    case  'tolerancedesignvariables'
-                        Xobj.toleranceDesignVariables=varargin{k+1};
-                    otherwise
-                        warning('openCOSSAN:BFGS',...
-                            'PropertyName %s  not valid ',varargin{k});
-                end
-            end % input check
-        end % constructor
-    end % methods
-end % classdef
+        varargout = apply(obj, varargin);
+    end
+end

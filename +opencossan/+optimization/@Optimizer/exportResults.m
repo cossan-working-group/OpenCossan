@@ -25,7 +25,7 @@ function exportResults(Xobj,varargin)
 % =====================================================================
 
 % Mesure the time required to store the output file
-ndelta=OpenCossan.setLaptime('description','Store results on file system');
+ndelta=OpenCossan.setLaptime('Sdescription','Store results on file system');
 
 %% Validate input arguments
 OpenCossan.validateCossanInputs(varargin{:})
@@ -98,4 +98,4 @@ OpenCossan.cossanDisp(['[Optimizer:exportResults] Iteration #'  ...
 OpenCossan.cossanDisp(['[Optimizer:exportResults] Results stored in the folder: ' Sfullname],3);
 
 % Mesure the time required to store the output file
-OpenCossan.setLaptime('description','End storing results on file system');
+OpenCossan.setLaptime('Sdescription','End storing results on file system');

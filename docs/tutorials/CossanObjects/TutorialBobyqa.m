@@ -6,107 +6,89 @@
 % See Also: http://cossan.co.uk/wiki/index.php/@Bobyqa
 % See Also:
 % http://cossan.cfd.liv.ac.uk/wiki/index.php/computeFailureProbability@ProbabilisticModel
-%
-% $Copyright~1993-2015,~COSSAN~Working~Group,~University~of~Liverpool,~UK$
-% $Author: Edoardo-Patelli$
 
-% =====================================================================
-% This file is part of openCOSSAN.  The open general purpose matlab
-% toolbox for numerical analysis, risk and uncertainty quantification.
-%
-% openCOSSAN is free software: you can redistribute it and/or modify
-% it under the terms of the GNU General Public License as published by
-% the Free Software Foundation, either version 3 of the License.
-%
-% openCOSSAN is distributed in the hope that it will be useful,
-% but WITHOUT ANY WARRANTY; without even the implied warranty of
-% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-% GNU General Public License for more details.
-%
-%  You should have received a copy of the GNU General Public License
-%  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
-% =====================================================================
+%{
+    This file is part of OpenCossan <https://cossan.co.uk>.
+    Copyright (C) 2006-2018 COSSAN WORKING GROUP
 
-clear;
-close all
-clc;
+    OpenCossan is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License or,
+    (at your option) any later version.
+    
+    OpenCossan is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU General Public License for more details.
+    
+    You should have received a copy of the GNU General Public License
+    along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
+%}
+
 %% Create input 
-% In this tutorial we create a very simple accademic example in order to show
-% how to used the optimization method. The input object must contain at least 1
-% Design Variable.
 
-X1      = opencossan.optimization.DesignVariable('Sdescription','design variable 1','value',rand,...
+x1 = opencossan.optimization.ContinuousDesignVariable('value',rand,...
     'lowerBound',-5,'upperBound',5);
-X2      = opencossan.optimization.DesignVariable('Sdescription','design variable 2','value',rand,...
+x2 = opencossan.optimization.ContinuousDesignVariable('value',rand,...
     'lowerBound',-5,'upperBound',5);
-Xin     = opencossan.common.inputs.Input('MembersNames',{'X1' 'X2'},'Members',{X1 X2});
-
+input = opencossan.common.inputs.Input('MembersNames',{'x1' 'x2'},'Members',{x1 x2});
 
 %% Define a model 
-SrosenbrockPath=fullfile(opencossan.OpenCossan.getRoot,'examples','Models','MatlabFunctions','Rosenbrock.m');
-Xm  = opencossan.workers.Mio('Description','the objective function is the Rosenbrock function', ...
-    'FullFileName',SrosenbrockPath, ...
-...    'Spath',SrosenbrockPath,...
-...    'Sfile','Rosenbrock.m',...
-...    'Liostructure',false,...
-    'IsFunction',true,...
-...    'Liomatrix',true,...
-    'InputNames',{'X1','X2'},...
-    'OutputNames',{'mioout'});
-% 
- Xe      = Evaluator('Xmio',Xm);     % Define the evaluator
- Xmdl    = Model('Xevaluator',Xe,'Xinput',Xin);
+SrosenbrockPath=fullfile(opencossan.OpenCossan.getRoot(),'lib','MatlabFunctions','Rosenbrock.m');
+Xm  = opencossan.workers.Mio(...
+    'FullFileName', SrosenbrockPath,...
+    'IsFunction', true, ...
+    'Format', 'matrix', ...
+    'InputNames', {'x1','x2'},...
+    'OutputNames', {'out'});
 
+evaluator = opencossan.workers.Evaluator('Xmio', Xm);
+model = opencossan.common.Model('Evaluator', evaluator, 'Input', input);
 
 %%  Create objective function
 % The objective function corresponds to the output of the model. It is not
 % necessary to have a Model to perform and optimization. 
 
-Xofun1   = ObjectiveFunction('Sdescription','objective function', ...
-    'Sscript','for n=1:length(Toutput), Toutput(n).fobj=Tinput(n).mioout; end',...
-    'Cinputnames',{'mioout'},...
-    'Liostructure',true,...
-    'Coutputnames',{'fobj'});
-
+objfun = opencossan.optimization.ObjectiveFunction(...
+    'FunctionHandle', @objective, ...
+    'IsFunction', true, ...
+    'Format', 'structure', ...
+    'InputNames',{'out'},...
+    'OutputNames',{'fobj'});
 
 %% define the optimizator problem
-Xop     = OptimizationProblem('Sdescription','Optimization problem', ...
-    'Xmodel',Xmdl,'VinitialSolution',[-4 1], ...
-    'XobjectiveFunction',Xofun1);
+optProb = opencossan.optimization.OptimizationProblem(...
+    'model',model,'initialsolution',[-4, 1], ...
+    'objectivefunctions', objfun);
 
 %% Create optimizer
 % A COBYLA objet is a optimizer with 2 dedicate parameters:
 % * initialTrustRegion = define the radious of the initial spheric trust region
 % * finalTrustRegion = define the minimum radius of the spheric trust region
 
-Xbob    = Bobyqa('nInterpolationConditions',0,...
-    'stepSize',0.01,...
-    'rhoEnd', 1e-6,...
-    'xtolRel',1e-9,...
-    'minfMax',1e-9,...
-    'ftolRel',1e-8,...
-    'ftolAbs',1e-14,...
-    'verbose',1);
+bobyqua = opencossan.optimization.Bobyqa('npt', 0,...
+    'stepSize', 0.01,...
+    'rhoEnd',  1e-6,...
+    'xtolRel', 1e-9,...
+    'minfMax', 1e-9,...
+    'ftolRel', 1e-8,...
+    'ftolAbs', 1e-14,...
+    'verbose', 1);
 
-% % Reset the random number generator in order to obtain always the same results.
-% % DO NOT CHANGE THE VALUES OF THE SEED
-% OpenCossan.resetRandomNumberGenerator(46354)
-
-Xoptimum=Xop.optimize('Xoptimizer',Xbob);
-display(Xoptimum)
-
-%% Reference Solution
-OpenCossan.cossanDisp('Textbook solution');
-OpenCossan.cossanDisp('f(1.0,1.0) = 0');
-OpenCossan.cossanDisp('Reference solution');
-OpenCossan.cossanDisp(['0.999997828110346 ','0.999995813360559'])
-OpenCossan.cossanDisp('Bobyqa solution');
-OpenCossan.cossanDisp(num2str(Xoptimum.getOptimalDesign,'% 10.15f'));
+optimum = optProb.optimize('Optimizer',bobyqua);
 
 %% Validate solution
-Vreference=[  0.999997828110346; 0.999995813360559];
-Mdata = [Xoptimum.XdesignVariable(1).Vdata; Xoptimum.XdesignVariable(2).Vdata];
-assert(max(Vreference-Mdata(:,end))<1e-4,...
-    'openCOSSAN:Tutorial:TutorialCobylaWrongReferenceSolution',...
-    'Reference solution not identified!')
+referenceSolution = [1 1];
 
+fprintf("Reference solution: [%d, %d]\n", referenceSolution);
+fprintf("Found optimum: [%d, %d]\n", optimum.OptimalSolution);
+
+assert(norm(referenceSolution - optimum.OptimalSolution) < 1e-4, ...
+    'openCOSSAN:Tutorials:BFGS', ...
+    'Obtained solution does not match the reference solution.')
+
+% To use a function handle as objective function it has to be defined at
+% the end of the file.
+function output = objective(input)
+    output.fobj = input.out;
+end

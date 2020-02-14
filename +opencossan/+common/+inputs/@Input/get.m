@@ -31,12 +31,12 @@ switch lower(PropertyName)
             Out  = [];
         end
     case {'designvariablevalues'}
-        if ~Xobj.NdesignVariables == 0
-            Cdesvar    = (Xobj.DesignVariableNames);
-            for idv=1:length(Cdesvar)
-                Out.(Cdesvar{idv})     = Xobj.DesignVariables.(Cdesvar{idv}).value;
+        if Xobj.NumberOfDesignVariables ~= 0
+            dvs = Xobj.DesignVariables;
+            names = Xobj.DesignVariableNames;
+            for i = 1:length(dvs)
+                Out.(names(i)) = dvs(i).Value;
             end
-            varargout{2}=[];
         else
             Out  = [];
         end
@@ -56,7 +56,6 @@ switch lower(PropertyName)
         CnamesDesignVariable= Xobj.DesignVariableNames;
         Vmean       = zeros(1,length(Crvname));
         irv         = 0;
-        Vdsvalue = zeros(1,length(Xobj.DesignVariableNames ));
         %             Vinvalue = zeros(1,length(Xinput.CnamesIntervalVariable ));
         
         for irvs=1:length(Crvsetname)
@@ -65,9 +64,7 @@ switch lower(PropertyName)
             irv = irv+Nrv;
         end
         
-        for i=1:length(CnamesDesignVariable)
-            Vdsvalue(i) =  Xobj.DesignVariables.(CnamesDesignVariable{i}).value;
-        end
+        Vdsvalue = [Xobj.DesignVariables.Value];
         
         %            Niv=0;
         %             for n=1:length(Civsetname)
@@ -89,7 +86,7 @@ switch lower(PropertyName)
         % set mean values as sampled values
         
         % TODO: This code should definietely be improved
-        Xobj.Samples=[];
+        Xobj.Samples = [];
         if ~isempty(Crvsetname) && ~isempty(Cspname)
             Xobj.Samples     = Samples('CnamesStochasticProcess',Cspname,...
                 'CnamesRandomVariableSet',Crvsetname,...

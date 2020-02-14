@@ -1,7 +1,7 @@
 function Xobj = initializeOptimizer(Xobj)
 %INITIALIZEOPTIMIZER This method initializes the object Optimizer
 %
-% See Also: http://cossan.cfd.liv.ac.uk/wiki/initializeOptimizer@Optimizer
+% See Also: Optimizer TutorialOptimizer
 %
 % Author: Edoardo Patelli
 % Institute for Risk and Uncertainty, University of Liverpool, UK
@@ -28,17 +28,17 @@ function Xobj = initializeOptimizer(Xobj)
 % Retrieve information of the caller
 ST = dbstack(1);
 
-ScallerDescription=['Start Simulation: ' ST(1).name '@' class(Xobj) ' ' Xobj.Sdescription];
+ScallerDescription=['Start Simulation: ' ST(1).name '@' class(Xobj) ' ' Xobj.Description];
 
 % Initialize Timer
-Xobj.initialLaptime = OpenCossan.setLaptime('description',ScallerDescription);
+Xobj.InitialLapTime = opencossan.OpenCossan.getTimer().lap('Description',ScallerDescription);
 
 %% Initialize variables
-if isempty(Xobj.SiterationFolder)
-    Xobj.SiterationFolder=datestr(now,30);
+if isempty(Xobj.IterationFolder)
+    Xobj.IterationFolder = datestr(now,30);
 end
 
-Xobj.iIterations = 0;   % Number of iterations processed
+Xobj.NumberOfIterations = 0;
 
 end
 
