@@ -83,6 +83,7 @@ classdef BayesianModelUpdating
        
         % This line should return simulation data?
        posterior = applyTMCMC(obj);
+       posterior = applyTMCMC2(obj);
        plotTransitionalSamples(obj,posterior, names, indicies);
        
     end

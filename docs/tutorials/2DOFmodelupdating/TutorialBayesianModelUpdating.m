@@ -116,7 +116,7 @@ XmodelBayes = opencossan.common.Model('input',XinputBayes,'evaluator',Xevaluator
 LogLike = opencossan.inference.LogLikelihood('Model',XmodelBayes, 'Data', XsyntheticData, 'WidthFactor', [2,2]);
 
 
-Nsamples = 200;
+Nsamples = 600;
 Bayes = opencossan.inference.BayesianModelUpdating('LogLikelihood',LogLike ,'OutputNames', ["k1", "k2"], 'Nsamples', Nsamples);
 
 Samps = applyTMCMC(Bayes);
@@ -151,7 +151,8 @@ CalData = XsyntheticData.getValues('Cnames',{'y1' 'y2'});
 figure;
 pdata = [yOut; CalData];
 groups = [repmat('Calibrated model',size(yOut,1),1);repmat("Calibrated Data",size(CalData,1),1)];
-gplotmatrix(pdata,[],groups,'rb','+o',[1,2]);
+
+gplotmatrix(pdata,[],groups,lines(2),[],[],[],'grpbars',["k1", "k2"]);
 
 Bayes.plotTransitionalSamples(Samps, ["k1", "k2"])
 

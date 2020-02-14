@@ -1,4 +1,4 @@
-function [samplesOut, log_fD] = applyTMCMC(Bayes)
+function [samplesOut, log_fD] = applyTMCMC2(Bayes)
 %% Transitional Markov Chain Monte Carlo
 %
 % This program implements a method described in:
@@ -29,216 +29,180 @@ opencossan.OpenCossan.setVerbosityLevel(1);
     %% Initialise properties from the XBayes object
     %Taking properties from the BayesianModelUpdating object
     Prior = Bayes.Prior;
-    log_fD_T = Bayes.LogLikelihood;
-    N = Bayes.Nsamples;
+    log_fD_T = @(theta) Bayes.LogLikelihood.apply(theta);
+    Nm = Bayes.Nsamples;
+    Np = length(Bayes.OutputNames);
     samplesOut = opencossan.common.outputs.SimulationData;
     
-    fprintf('Nsamples TMCMC = %d\n', N);
+    fprintf('Nsamples TMCMC = %d\n', Nm);
     
     %Prior Evaluation and Sampling function handles
     fT = @(x)Prior.evalpdf('Mxsamples',x);
-    sample_from_fT = @(N) get(Prior.sample(N),'MsamplesPhysicalSpace');
+    sample_fT = @(N) get(Prior.sample(N),'MsamplesPhysicalSpace');
 
-    beta = 0.2; %<-- I think this is a paramter for the gaussian. <--Eq.17 used as the scaling factor in the covarience matrix
-    S    = ones(1,50); %<-- read paper for more clarity, it is a vector of the mean wieghts in every step?? Eq.15
-    with_replacement = true; % DO NOT CHANGE!!!
-    burnin           = 20;
-    lastburnin       = 20;  % burnin in the last iteration
+    beta2  = 0.01;  % Square of scaling parameter (MH algorithm)
+    Nstage = 20;    % Preallocation of number of stages
 
-    %% Obtain N samples from the prior pdf f(T)
-    j      = 0;
-    thetaj = sample_from_fT(N);  % theta0 = N x D (these are the samples, initially just the prior, uniform in many cases)
-    pj     = 0;                  % p0 = 0 (initial tempering parameter)
-    D      = size(thetaj, 2);    % size of the vector theta
+    %% PREALLOCATION
+    Th_j    = cell(Nstage,1);
+    alpha_j = zeros(Nstage,1);
+    Lp_j     = cell(Nstage,1);
+    Log_S_j = zeros(Nstage,1);
+    wn_j    = cell(Nstage,1);
 
-    %% Initialization of matrices and vectors
-    thetaj1   = zeros(N, D);
+    %% OPTIMIZATION PROCESS
+
+    j = 1; alpha_j(1) = 0;
+
+    % First stage simulation - Sample from prior distribution
+    Th_j{j} = sample_fT(Nm)';  % initial sample = Nd x Nm
+
+    %   Log-likelihood function
+    Th0 = Th_j{j}; Lp0 = zeros(Nm,1);
     
-    names = strcat(Bayes.OutputNames,'_',num2str(j));
-    samplesOut = samplesOut.addVariable('Cnames',names,'Mvalues',thetaj);
+    names = strcat(Bayes.OutputNames,'_',num2str(j-1));
+    samplesOut = samplesOut.addVariable('Cnames',names,'Mvalues',Th0');
     
-    %% Main loop
-    while pj < 1
+    Lp0 = log_fD_T(Th0');
+    
+    Lp_j{j} = Lp0;
 
- 
-        j = j+1;
-
-        %% Calculate the tempering parameter p(j+1):
-        log_fD_T_thetaj = log_fD_T.apply(thetaj);
-        if any(isinf(log_fD_T_thetaj))
-            error('The prior distribution is too far from the true region');
+    % for kkk = 2:Nstage  % Maximum number of stages
+    while alpha_j(j) < 1
+        %----------------------------------------------------------------------
+        % CHOOSE ALPHA_{j+1}    (Bisection method)
+        %----------------------------------------------------------------------
+        low_alpha = alpha_j(j); up_alpha = 2; Lp_adjust = max(Lp_j{j});
+        while (up_alpha - low_alpha)/((up_alpha + low_alpha)/2) > 1e-6
+            x1 = (up_alpha + low_alpha)/2;
+            wj_test = exp((x1-alpha_j(j))*(Lp_j{j}-Lp_adjust));
+            cov_w   = std(wj_test)/mean(wj_test);
+            if cov_w > 1, up_alpha = x1; else, low_alpha = x1; end
         end
-        pj1 = calculate_pj1(log_fD_T_thetaj, pj);
-        fprintf('TMCMC: Iteration j = %2d, pj1 = %f\n', j, pj1);
-  
-        %% Compute the plausibility weight for each sample wrt f_{j+1}
-        fprintf('Computing the weights ...\n');
-        % wj     = fD_T(thetaj).^(pj1-pj);         % N x 1 (eq 12)
-        a       = (pj1-pj)*log_fD_T_thetaj;
-        wj      = exp(a); %<- the log likelyhood is passed, the wieghts are 
-        %calculated from the difference between the likelyhoods (no log) for
-        %the two transitional steps (pj1-pj). It is a indication by how much
-        %the likelyhood function is represenatative of the data. This is then
-        %reflected in pj1.
-        wj_norm = wj./sum(wj);                % normalization of the weights
+        alpha_j(j+1) = min(1,x1);
 
-        %% Compute S(j) = E[w{j}] (eq 15)
-        S(j) = mean(wj);
+        %----------------------------------------------------------------------
+        % WEIGTHS, LOG-EVIDENCE AND NORMALIZED WEIGHTS FOR CURRENT STAGE
+        %----------------------------------------------------------------------
+        %   Adjusted weights
+        w_j = exp((alpha_j(j+1)-alpha_j(j))*(Lp_j{j}-Lp_adjust));
 
-        %% Do the resampling step to obtain N samples from f_{j+1}(theta) and
-        % then perform Metropolis-Hastings on each of these samples using as a
-        % stationary PDF "fj1"
-        % fj1 = @(t) fT(t).*log_fD_T(t).^pj1;   % stationary PDF (eq 11) f_{j+1}(theta)
-        log_fj1 = @(t) log(fT(t)) + pj1*log_fD_T.apply(t);
+        %   Log-evidence of j-th intermediate distribution
+        Log_S_j(j) = log(mean(exp((Lp_j{j}-Lp_adjust)*(alpha_j(j+1)-alpha_j(j)))))+(alpha_j(j+1)-alpha_j(j))*Lp_adjust;
 
-        % and using as proposal PDF a Gaussian centered at thetaj(idx,:) and
-        % with covariance matrix equal to an scaled version of the covariance
-        % matrix of fj1:
+        %   Normalized weights
+        wn_j{j} = w_j/(sum(w_j));
 
-        % weighted mean
-        mu = zeros(1, D);
-        for l = 1:N
-            mu = mu + wj_norm(l)*thetaj(l,:); % 1 x N
+        %----------------------------------------------------------------------
+        % WEIGHTED MEAN AND COVARIANCE MATRIX (PROPOSAL DISTRIBUTION)
+        %----------------------------------------------------------------------
+        %   Weighted mean of parameters
+        Th_wm = Th_j{j}*wn_j{j};
+
+        %   Covariance matrix
+        SIGMA_j  = zeros(Np);
+        for l = 1:Nm
+            SIGMA_j = SIGMA_j + beta2*wn_j{j}(l)*(Th_j{j}(:,l)-Th_wm)*(Th_j{j}(:,l)-Th_wm)';
+        end
+        SIGMA_j = (SIGMA_j'+SIGMA_j)/2; % Enforcing symmetry
+
+        %----------------------------------------------------------------------
+        % GENERATION OF CONDITIONAL SAMPLES (METROPOLIS-HASTING ALGORITHM)
+        %----------------------------------------------------------------------
+        %   Cumulative probability mass of each sample
+        wn_j_csum = cumsum(wn_j{j});
+
+        %   Definition of Markov chains: seed sample
+        mkchain_ind = zeros(Nm,1);
+        for i_mc = 1:Nm
+            mkchain_ind(i_mc) = find( rand < wn_j_csum ,1,'first');
+        end
+        seed_index = unique(mkchain_ind);
+    %     if kkk>2, N_Mc_old = N_Mc; else N_Mc_old=0; end
+        N_Mc = numel(seed_index);
+
+        %   Definition of Markov chains: lengths
+        lengths = zeros(size(seed_index));
+        for i_mc = 1:numel(lengths); lengths(i_mc)=sum(seed_index(i_mc)==mkchain_ind); end
+
+
+        %   Preallocation
+        Th_j{j+1} = zeros(Np,Nm);
+        Lp_j{j+1} = zeros(Nm,1);
+        a_j1      = alpha_j(j+1); 
+        THJ       = Th_j{j}(:,seed_index);
+        LPJ       = Lp_j{j}(seed_index);
+        Th_new    = cell(1,N_Mc);
+        Lp_new    = cell(N_Mc,1);
+
+        %   Parallel generation of chains
+        parfor n_markovchain = 1:N_Mc
+            Th_lead = THJ(:,n_markovchain);
+            Lp_lead = LPJ(n_markovchain);
+            Th_new{n_markovchain} = zeros(Np,lengths(n_markovchain));
+            Lp_new{n_markovchain} = zeros(lengths(n_markovchain),1);
+            fT_for = fT;
+            log_fD_T_for = log_fD_T;
+            for l = 1:lengths(n_markovchain)
+                %------------------------------------------------------------------
+                % Candidate sample generation (normal over feasible space)
+                %------------------------------------------------------------------
+                while true
+                    Th_cand = mvnrnd(Th_lead,SIGMA_j)';
+                    if fT_for(Th_cand')
+                        break;
+                    end
+                end
+
+                %------------------------------------------------------------------
+                % Log-likelihood of candidate sample
+                %------------------------------------------------------------------
+                if fT_for(Th_cand') == 0
+                    GAMMA   = 0;
+                    Lp_cand = Lp_lead;
+                else
+                    Lp_cand = log_fD_T_for(Th_cand');
+                    GAMMA = exp(a_j1*(Lp_cand - Lp_lead))*fT_for(Th_cand')/fT_for(Th_lead'); % pdf ratio
+                end
+
+                %------------------------------------------------------------------
+                % Rejection step
+                %------------------------------------------------------------------
+                if rand <= min(1,GAMMA)
+                    Th_new{n_markovchain}(:,l) = Th_cand;
+                    Lp_new{n_markovchain}(l)   = Lp_cand;
+                    Th_lead = Th_cand;
+                    Lp_lead = Lp_cand;
+                else
+                    Th_new{n_markovchain}(:,l) = Th_lead;
+                    Lp_new{n_markovchain}(l)   = Lp_lead;
+                end
+            end
+
         end
 
-        % scaled covariance matrix of fj1 (eq 17)
-        cov_gauss = zeros(D);
-        for k = 1:N
-            % this formula is slightly different to eq 17 (the transpose)
-            % because of the size of the vectors)m and because Ching and Chen
-            % forgot to normalize the weight wj:
-            tk_mu = thetaj(k,:) - mu;
-            cov_gauss = cov_gauss + wj_norm(k)*(tk_mu'*tk_mu);
-        end
-        cov_gauss = beta^2 * cov_gauss;
-        assert(~isinf(cond(cov_gauss)),'Something is wrong with the likelihood.')
-        % proposal distribution
-        proppdf = @(x,y) problemA_proppdf(x, y, cov_gauss, fT); %q(x,y) = q(x|y).
-        proprnd = @(x)   problemA_proprnd(x, cov_gauss, fT);    %mvnrnd(x, cov_gauss, 1);
+        Th_j{j+1} = cell2mat(Th_new);
+        Lp_j{j+1} = cell2mat(Lp_new);
 
-        %% During the last iteration we require to do a better burnin in order
-        % to guarantee the quality of the samples:
-        if pj1 == 1
-            burnin = lastburnin;
-        end
-
-        %% Start N different Markov chains
-        fprintf('Markov chains ...\n\n');
-        idx = randsample(N, N, with_replacement, wj_norm);
-        parfor i = 1:N
-        %% Sample one point with probability wj_norm
-        
-        % smpl = mhsample(start, nsamples,
-        %                'pdf', pdf, 'proppdf', proppdf, 'proprnd', proprnd);
-        % start = row vector containing the start value of the Markov Chain,
-        % nsamples = number of samples to be generated
-        [thetaj1(i,:), acceptance_rate] = mhsample(thetaj(idx(i), :), 1, ...
-            'logpdf',  log_fj1, ...
-            'proppdf', proppdf, ...
-            'proprnd', proprnd, ...
-            'thin',    3,       ...
-            'burnin',  burnin);
-            % this works only because we are generating only one samples from 
-            % each chain
-            %thetaj1(idx==i,:) = squeeze(chains)';         
-            % According to Cheung and Beck (2009) - Bayesian model updating ...,
-            % the initial samples from reweighting and the resample of samples of
-            % fj, in general, do not exactly follow fj1, so that the Markov
-            % chains must "burn-in" before samples follow fj1, requiring a large
-            % amount of samples to be generated for each level.
-
-            %% Adjust the acceptance rate (optimal = 23%)
-            % See: http://www.dms.umontreal.ca/~bedard/Beyond_234.pdf <READ
-            %{
-          if acceptance_rate < 0.3
-             % Many rejections means an inefficient chain (wasted computation
-             %time), decrease the variance
-             beta = 0.99*beta;
-          elseif acceptance_rate > 0.5
-             % High acceptance rate: Proposed jumps are very close to current
-             % location, increase the variance
-             beta = 1.01*beta;
-          end
-            %}
-            %fprintf('Done Iteration!!!!!! %d\n                  %d \n\n',i,pj1);
-        end
-        fprintf('\n');
-
-        %% Prepare for the next iteration
-        thetaj = thetaj1;
-        pj     = pj1;
         names = strcat(Bayes.OutputNames,'_',num2str(j));
-        samplesOut = addVariable(samplesOut,'Cnames',names,'Mvalues',thetaj);
-        
+        samplesOut = addVariable(samplesOut,'Cnames',names,'Mvalues',Th_j{j}');
+        % Update iteration step
+        j = j+1;
     end
+
+    m = j;
+
+    Th_j     = Th_j(1:m);
+    alpha_j  = alpha_j(1:m);
+    Lp_j     = Lp_j(1:m);
+    Log_S_j  = Log_S_j(1:(m-1));
+    Log_S    = sum(Log_S_j(1:(m-1)));
+
+    Th_posterior = Th_j{m};
+    Lp_posterior = Lp_j{m};
+
     
     opencossan.OpenCossan.setVerbosityLevel(VerboseSave);
-    samplesOut = addVariable(samplesOut,'Cnames',Bayes.OutputNames,'Mvalues',thetaj);
-
-return
-
-
-
-%% Calculate the tempering parameter p(j+1)
-function pj1 = calculate_pj1(log_fD_T_thetaj, pj)
-
-%This is some optimization problem
-
-% find pj1 such that COV <= threshold, that is
-%
-%  std(wj)
-% --------- <= threshold
-%  mean(wj)
-%
-% here
-% size(thetaj) = N x D,
-% wj = fD_T(thetaj).^(pj1 - pj)
-% e = pj1 - pj
-
-threshold = 1; % 100% = threshold on the COV
-
-% wj = @(e) fD_T_thetaj^e; % N x 1
-% Note the following trick in order to calculate e:
-% Take into account that e>=0
-wj = @(e) exp(abs(e)*log_fD_T_thetaj); % N x 1
-%fmin = @(e) std(wj(e))/mean(wj(e)) - threshold;
-fmin = @(e) std(wj(e)) - threshold*mean(wj(e)) + realmin;
-e = abs(fzero(fmin, 0)); % e is >= 0, and fmin is an even function
-if isnan(e)
-    error('There is an error finding e');
+    samplesOut = addVariable(samplesOut,'Cnames',Bayes.OutputNames,'Mvalues',Th_j{m}');
 end
 
-pj1 = min(1, pj + e);
-
-% 
-% figure
-% p = linspace(0,0.3,10000);
-% hold on
-% plot(p, arrayfun(fmin, p));
-% plot(e,0,'rx');
-% grid minor;
-% 
-
-return; % bye, bye
-
-function y = problemA_proppdf(x, mu, covmat, box)
-% Proposal PDF for the Markov Chain.
-% Take into account that for problem A, box is the uniform PDF in the
-% feasible region. So if a point is out of bounds, this function will
-% return 0.
-y = mvnpdf(x, mu, covmat).*box(x); %q(x,y) = q(x|y).
-return;
-
-
-function t = problemA_proprnd(mu, covmat, box)
-% Sampling from the proposal PDF for the Markov Chain.
-while true
-    t = mvnrnd(mu(1,:), covmat, size(mu,1));
-    if box(t)
-        % For problem A, box is the uniform PDF in the feasible region. So if
-        % a point is out of bounds, this function will return 0 = false
-        break;
-    end
-end
-
-return
