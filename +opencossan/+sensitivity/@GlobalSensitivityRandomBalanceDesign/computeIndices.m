@@ -27,7 +27,7 @@ function varargout=computeIndices(Xobj,varargin)
 % =====================================================================
 
 %% Check inputs
-OpenCossan.validateCossanInputs(varargin{:})
+opencossan.OpenCossan.validateCossanInputs(varargin{:})
 
 %% Process inputs
 for k=1:2:length(varargin)
@@ -44,14 +44,19 @@ end
 
 % Set the analysis name when not deployed
 if ~isdeployed
-    OpenCossan.setAnalysisName(class(Xobj));
+    opencossan.OpenCossan.setAnalysisName(class(Xobj));
 end
 % set the analyis ID 
-OpenCossan.setAnalysisID;
+if isempty(opencossan.OpenCossan.getAnalysisId())
+    opencossan.OpenCossan.setAnalysisId(1)
+else
+    opencossan.OpenCossan.setAnalysisId(opencossan.OpenCossan.getAnalysisId()+1)
+end
+
 % insert entry in Analysis DB
-if ~isempty(OpenCossan.getDatabaseDriver)
-    insertRecord(OpenCossan.getDatabaseDriver,'StableType','Analysis',...
-        'Nid',OpenCossan.getAnalysisID);
+if ~isempty(opencossan.OpenCossan.getDatabaseDriver)
+    insertRecord(opencossan.OpenCossan.getDatabaseDriver,'StableType','Analysis',...
+        'Nid',opencossan.OpenCossan.getAnalysisID);
 end
 
 %% Compute Sobol' Indices
@@ -62,7 +67,7 @@ end
 %% Export results
 % Construct SensitivityMeasure object
 for n=1:length(Xobj.Coutputnames)    
-    varargout{1}(n)=SensitivityMeasures('Cinputnames',Xobj.Cinputnames, ... 
+    varargout{1}(n) = opencossan.sensitivity.SensitivityMeasures('Cinputnames',Xobj.Cinputnames, ... 
     'Soutputname',  Xobj.Coutputnames{n},'Xevaluatedobject',Xobj.Xtarget, ...
     'Sevaluatedobjectname',Xobj.Sevaluatedobjectname, ...
     'VsobolFirstIndices',MfirstOrder(:,n)', ...
@@ -75,7 +80,7 @@ if ~isdeployed
     % add entries in simulation and analysis database at the end of the
     % computation when not deployed. The deployed version does this with
     % the finalize command
-    XdbDriver = OpenCossan.getDatabaseDriver;
+    XdbDriver = opencossan.OpenCossan.getDatabaseDriver;
     if ~isempty(XdbDriver)
         XdbDriver.insertRecord('StableType','Result',...
             'Nid',getNextPrimaryID(OpenCossan.getDatabaseDriver,'Result'),...
