@@ -166,7 +166,7 @@ opencossan.OpenCossan.setVerbosityLevel(1);
         %% Start N different Markov chains
         fprintf('Markov chains ...\n\n');
         idx = randsample(N, N, with_replacement, wj_norm);
-        for i = 1:N
+        parfor i = 1:N
         %% Sample one point with probability wj_norm
         
         % smpl = mhsample(start, nsamples,

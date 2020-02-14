@@ -27,8 +27,8 @@ k2real=opencossan.common.inputs.Parameter('value',1.0,'description','Stiffness o
 
 % Definition of the Random Variables to simulate synthetic data using
 % 'RandomVariable' constructor from OpenCossan
-p1=opencossan.common.inputs.random.NormalRandomVariable('mean',0.0,'std',1.0,'description','randomperturbation for measured displacement 1');
-p2=opencossan.common.inputs.random.NormalRandomVariable('mean',0.0,'std',1.0,'description','randomperturbation for measured displacement 2');
+p1=opencossan.common.inputs.random.NormalRandomVariable('mean',0.0,'std',0.0191,'description','randomperturbation for measured displacement 1');
+p2=opencossan.common.inputs.random.NormalRandomVariable('mean',0.0,'std',0.1309,'description','randomperturbation for measured displacement 2');
 % Gathering random data into a single structure set using
 % 'RandomVariableSet' from OpenCossan
 Xrvset=opencossan.common.inputs.random.RandomVariableSet('members',[p1; p2],'names',['p1'; 'p2']);
@@ -44,16 +44,17 @@ Sfolder=fileparts(which('Tutorial2DOFModelUpdatingMatlab.m')); % returns the cur
 % Prepare the perturbed Model by 'mio' constructor from OpenCossan using a
 % matlab script that is coded to handle the random vector to be added to the output
 % displacements (to simulate synthetic data)
-XmioPert=opencossan.workers.Mio('FullFileName',fullfile(Sfolder,'MatlabModel/displacementsPerturbation.m'),...
+XmioPert=opencossan.workers.Mio('FunctionHandle', @eigenValuesPerturbs,...
+    'IsFunction', true, ...
     'inputnames',{'F1' 'F2' 'k1' 'k2', 'p1','p2'}, ...
     'outputnames',{'y1' 'y2'},...
-    'Format', 'structure');
+    'Format', 'table');
 % Add the 'mio' constructor to 'Evaluator' constructor from OpenCOssan
 XevaluatorPert=opencossan.workers.Evaluator('CXmembers',{XmioPert},'CSmembers',{'XmioPert'});
 % Defining the Physical Model by the 'Model' constructor from OpenCossan
 XmodelPert=opencossan.common.Model('input',XinputPert,'evaluator',XevaluatorPert);
 % Prepare 'MonteCarlo' constructor from OpenCossan
-Xmc=opencossan.simulations.MonteCarlo('Nsamples',100);
+Xmc=opencossan.simulations.MonteCarlo('Nsamples',500);
 % Perform Monte Carlo simulation using 'Apply' method
 XsyntheticData=Xmc.apply(XmodelPert);
 % Display the resulted outputs
@@ -66,7 +67,7 @@ Xinput=opencossan.common.inputs.Input('Members',{F1 F2 k1real k2real},'MembersNa
 display(Xinput);
 Sfolder=fileparts(which('Tutorial2DOFModelUpdatingMatlab.m')); 
 
-Xmio=opencossan.workers.Mio('FunctionHandle',@displacements,...
+Xmio=opencossan.workers.Mio('FunctionHandle',@eigenValues,...
     'IsFunction', true,...
     'inputnames',{'F1' 'F2' 'k1' 'k2'}, ...
     'outputnames',{'y1' 'y2'},...
@@ -100,7 +101,7 @@ XinputBayes = opencossan.common.inputs.Input('Members',{F1, F2, Xrvset},'Members
 display(XinputBayes); 
 Sfolder = fileparts(which('Tutorial2DOFModelUpdatingMatlab.m')); 
 
-XmioBayes = opencossan.workers.Mio('FunctionHandle', @displacements,...
+XmioBayes = opencossan.workers.Mio('FunctionHandle', @eigenValues,...
     'IsFunction', true, ...
     'inputnames',{'F1' 'F2' 'k1' 'k2'}, ...
     'outputnames',{'y1' 'y2'},...
@@ -111,8 +112,42 @@ XevaluatorBayes = opencossan.workers.Evaluator('CXmembers',{XmioBayes},'CSmember
 
 XmodelBayes = opencossan.common.Model('input',XinputBayes,'evaluator',XevaluatorBayes);
 
-LogLike = opencossan.inference.LogLikelihood('Xmodel',XmodelBayes, 'Data', XsyntheticData, 'ShapeParameters', [0.1,0.1]);
+LogLike = opencossan.inference.LogLikelihood('Xmodel',XmodelBayes, 'Data', XsyntheticData, 'ShapeParameters', [2,2]);
 
-Bayes = opencossan.inference.BayesianModelUpdating('Xmodel', XmodelBayes,'Xlog',LogLike ,'CoutputNames', {'k1', 'k2'}, 'Nsamples', 200);
+
+Nsamples = 200;
+Bayes = opencossan.inference.BayesianModelUpdating('Xmodel', XmodelBayes,'Xlog',LogLike ,'CoutputNames', {'k1', 'k2'}, 'Nsamples', Nsamples);
 
 Samps = applyTMCMC(Bayes);
+
+
+
+
+%% Plotting the calibrated input and output
+thetaFinal = Samps.getValues('Cnames',{'k1', 'k2'});
+
+Params = XmodelBayes.Input.Parameters;
+for n = fieldnames(Params)'
+    Params.(n{1}) = repmat(Params.(n{1}).Value, Nsamples, 1);
+end
+
+Tinput = struct2table(Params);
+
+tableTheta = array2table(thetaFinal);
+
+tableTheta.Properties.VariableNames = XmodelBayes.Input.RandomVariableNames;
+
+Tinput = [tableTheta, Tinput];
+Xout = XmodelBayes.apply(Tinput);
+
+yOut = Xout.getValues('Cnames', {'y1', 'y2'});
+
+plotmatrix(thetaFinal);
+
+CalData = XsyntheticData.getValues('Cnames',{'y1' 'y2'});
+
+figure
+pdata = [yOut; CalData];
+groups = [repmat('Calibrated model',size(yOut,1),1);repmat("Calibrated Data",size(CalData,1),1)];
+gplotmatrix(pdata,[],groups,'rb','+o',[1,2]);
+
