@@ -98,7 +98,7 @@ Vw = XsimOutMC.getValues('Sname', 'w');
 histogram(fah, Vw, 50);
 
 %% Close Figures
-%close(f1)
+close(f1)
 
 %% Optimization
 % This tutorial continues with the optimization section

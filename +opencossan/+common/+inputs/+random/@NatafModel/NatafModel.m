@@ -310,16 +310,9 @@ classdef NatafModel
             obj.Correlation = rvset.Correlation .* factors;
             obj.Covariance = rvset.getStd() * rvset.getStd()' .* obj.Correlation;
             
-            [eigvecs, eigvals] = eig(obj.Correlation);
-            
-            Vipos = find(diag(eigvals) > 0);
-            
-            assert(length(Vipos) == rvset.Nrv, ...
-                'OpenCOSSAN:NatafModel', ...
-                ['There are ' num2str(rvset.Nrv - length(Vipos)) ' negative eigenvalues!'])
-            
-            obj.MUY = eigvecs * sqrt(eigvals);
-            obj.MYU = obj.MUY^(-1);
+                        
+            obj.MUY = chol(obj.Correlation, 'lower');
+            obj.MYU = inv(obj.MUY);
         end
     end
 end
