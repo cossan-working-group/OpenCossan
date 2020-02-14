@@ -6,7 +6,7 @@ function [logL] = apply(LogL,theta)
 
     %Here a custom likelihood defined by the user can be used
     
-    model = LogL.model;
+    model = LogL.Model;
     
    
     Params = model.Input.Parameters;
@@ -37,8 +37,8 @@ function [logL] = apply(LogL,theta)
         logL(isinf(logL)) = -1e10;
         
     else
-        if ~isempty(LogL.ShapeParameters)
-            epsilon_r = LogL.ShapeParameters;
+        if ~isempty(LogL.WidthFactor)
+            epsilon_r = LogL.WidthFactor;
         else
             epsilon_r = std(D);
         end

@@ -30,11 +30,11 @@ classdef BayesianModelUpdating
     
     properties
         
-        model(1,1)             %The model to be updated
-        outputnames            %The model outputs to be updated against
-        LogLikelihood                    %The logLikelihood Cossan Object
-        Nsamples=200            %The number of samples from the posterior to be generated
-        Prior                   %The Prior Pdf to be updated, to either be taken from the model or 
+        Model(1,1)  opencossan.common.Model           %The model to be updated
+        OutputNames  (1,:) string         %The model outputs to be updated against
+        LogLikelihood(1,1) opencossan.inference.LogLikelihood                    %The logLikelihood Cossan Object
+        Nsamples(1,1) {mustBeInteger}=200         %The number of samples from the posterior to be generated
+        Prior(1,1)  opencossan.common.inputs.random.RandomVariableSet                 %The Prior Pdf to be updated, to either be taken from the model or 
                                 %To be inputed in case if no model
                                 %provided, is of type RandomVariableSet        
     end
@@ -46,18 +46,18 @@ classdef BayesianModelUpdating
             p = inputParser;
             p.FunctionName = 'opencossan.inference.BayesianModelUpdating';
             
-            p.addParameter('model',obj.model);
-            p.addParameter('LogLikelihood',obj.LogLikelihood);
+            %p.addParameter('model',obj.model);
+            p.addParameter('LogLikelihood',[]);
             p.addParameter('Nsamples',obj.Nsamples);
-            p.addParameter('outputnames',obj.outputnames);
-            p.addParameter('Prior',obj.Prior);
+            p.addParameter('OutputNames',[]);
+            p.addParameter('Prior',[]);
             
             
             
             p.parse(varargin{:});
             
-            obj.model = p.Results.model;
-            obj.outputnames = p.Results.outputnames;
+            %obj.Model = p.Results.Model;
+            obj.OutputNames = p.Results.OutputNames;
             obj.Nsamples = p.Results.Nsamples;
             
             if isempty(p.Results.LogLikelihood)
@@ -67,24 +67,23 @@ classdef BayesianModelUpdating
                 obj.LogLikelihood= p.Results.LogLikelihood;
             end
             
-            %If the model is empty, then a RvSet will be an expected input
-            % for a prior. Otherwise this will be taken from the model
-            if isempty(obj.model)
-                if isempty(p.Results.Prior)
-                    error('openCOSSAN:inference:BayesianModelUpdating',...
-                        'Either a model or a Prior must be passed');
-                end
+            obj.Model = obj.LogLikelihood.Model;
+            % If the Prior is empty, the prior will be taken from the
+            % RvSet of the model.
+            if ~isempty(p.Results.Prior)
                 obj.Prior = p.Results.Prior;
-                obj.outputnames = obj.Prior.Cmembers;
+                obj.OutputNames = obj.Prior.Names;
             else
-                name = obj.model.Input.RandomVariableSetNames;
-                obj.Prior = obj.model.Input.RandomVariableSets.(name{1});
+                name = obj.Model.Input.RandomVariableSetNames;
+                obj.Prior = obj.Model.Input.RandomVariableSets.(name{1});
+                obj.OutputNames = obj.Prior.Names;
             end
             
         end
        
         % This line should return simulation data?
-       Xmodel = applyTMCMC(obj);
+       posterior = applyTMCMC(obj);
+       plotTransitionalSamples(obj,posterior, names, indicies);
        
     end
     

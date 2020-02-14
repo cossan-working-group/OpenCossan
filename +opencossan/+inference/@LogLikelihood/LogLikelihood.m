@@ -19,10 +19,10 @@ classdef LogLikelihood < opencossan.workers.Mio
    
     properties
         
-        model(1,1)          %The model that is to be used in the evaluation
-        Data                %The Data to be used to update
-        ShapeParameters     %The Shape Paramters that can be used in the updating procedure
-        CustomLog           %User can pass custom likelihood function as a function handle
+        Model(1,1)  opencossan.common.Model           %The model that is to be used in the evaluation
+        Data(1,1)   opencossan.common.outputs.SimulationData             %The Data to be used to update
+        WidthFactor (1,:) double     %The Shape Paramters that can be used in the updating procedure
+        CustomLog (1,:) Function         %User can pass custom likelihood function as a function handle
         
     end
     
@@ -33,17 +33,17 @@ classdef LogLikelihood < opencossan.workers.Mio
             p = inputParser;
             p.FunctionName = 'opencossan.inference.LogLikelihood';
 
-            p.addParameter('model',obj.model);
+            p.addParameter('Model',obj.Model);
             p.addParameter('Data',obj.Data);
             p.addParameter('CustomLog',obj.CustomLog)
-            p.addParameter('ShapeParameters', obj.ShapeParameters);
+            p.addParameter('WidthFactor', obj.WidthFactor);
 
             p.parse(varargin{:});
 
-            obj.model = p.Results.model;
+            obj.Model = p.Results.Model;
             obj.Data = p.Results.Data;
             obj.CustomLog = p.Results.CustomLog;
-            obj.ShapeParameters = p.Results.ShapeParameters;
+            obj.WidthFactor = p.Results.WidthFactor;
                 
             
         end

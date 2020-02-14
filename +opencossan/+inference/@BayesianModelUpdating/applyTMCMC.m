@@ -54,7 +54,7 @@ opencossan.OpenCossan.setVerbosityLevel(1);
     %% Initialization of matrices and vectors
     thetaj1   = zeros(N, D);
     
-    names = strcat(Bayes.outputnames,'_',num2str(j));
+    names = strcat(Bayes.OutputNames,'_',num2str(j));
     samplesOut = samplesOut.addVariable('Cnames',names,'Mvalues',thetaj);
     
     %% Main loop
@@ -167,13 +167,13 @@ opencossan.OpenCossan.setVerbosityLevel(1);
         %% Prepare for the next iteration
         thetaj = thetaj1;
         pj     = pj1;
-        names = strcat(Bayes.outputnames,'_',num2str(j));
+        names = strcat(Bayes.OutputNames,'_',num2str(j));
         samplesOut = addVariable(samplesOut,'Cnames',names,'Mvalues',thetaj);
         
     end
     
     opencossan.OpenCossan.setVerbosityLevel(VerboseSave);
-    samplesOut = addVariable(samplesOut,'Cnames',Bayes.outputnames,'Mvalues',thetaj);
+    samplesOut = addVariable(samplesOut,'Cnames',Bayes.OutputNames,'Mvalues',thetaj);
 
 return
 
