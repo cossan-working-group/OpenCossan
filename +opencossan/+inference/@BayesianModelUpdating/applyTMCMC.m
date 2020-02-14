@@ -1,4 +1,4 @@
-function [samplesOut, log_fD] = applyTMCMC(XBayes)
+function [samplesOut, log_fD] = applyTMCMC(Bayes)
 %% Transitional Markov Chain Monte Carlo
 %
 % This program implements a method described in:
@@ -28,9 +28,9 @@ opencossan.OpenCossan.setVerbosityLevel(1);
 
     %% Initialise properties from the XBayes object
     %Taking properties from the BayesianModelUpdating object
-    Prior = XBayes.Prior;
-    log_fD_T = XBayes.XLog;
-    N = XBayes.Nsamples;
+    Prior = Bayes.Prior;
+    log_fD_T = Bayes.LogLikelihood;
+    N = Bayes.Nsamples;
     samplesOut = opencossan.common.outputs.SimulationData;
     
     fprintf('Nsamples TMCMC = %d\n', N);
@@ -42,7 +42,6 @@ opencossan.OpenCossan.setVerbosityLevel(1);
     beta = 0.2; %<-- I think this is a paramter for the gaussian. <--Eq.17 used as the scaling factor in the covarience matrix
     S    = ones(1,50); %<-- read paper for more clarity, it is a vector of the mean wieghts in every step?? Eq.15
     with_replacement = true; % DO NOT CHANGE!!!
-    plot_graphics    = XBayes.PlotGraphics;
     burnin           = 20;
     lastburnin       = 20;  % burnin in the last iteration
 
@@ -54,45 +53,14 @@ opencossan.OpenCossan.setVerbosityLevel(1);
 
     %% Initialization of matrices and vectors
     thetaj1   = zeros(N, D);
-
-    %This is just for visualisation, the -2 here must be changed to
-    %length of Cinputnames - the total number of dimenstions on the outputSpace
-    ext = zeros(9900,length(thetaj(1,:))-2);
     
-    names = strcat(XBayes.Coutputnames,'_',num2str(j));
+    names = strcat(Bayes.outputnames,'_',num2str(j));
     samplesOut = samplesOut.addVariable('Cnames',names,'Mvalues',thetaj);
     
     %% Main loop
     while pj < 1
-        %% Plot the sampled points
-        if (plot_graphics)
-            figure
-            plot(thetaj(:,1), thetaj(:,2), 'b.');
-            hold on;
-            ax = axis;
-            [xx, yy] = meshgrid(linspace(ax(1),ax(2),100), linspace(ax(3), ax(4), 99));
-            if j == 0
-                zz = reshape(fT([xx(:) yy(:) ext]), 99, 100);
-                o=0;
-            else
-                zz = reshape(fj1([xx(:) yy(:) ext]), 99, 100);
-                o=pj1;
-            end
-            contour(xx, yy, zz, 50);
-            grid on;
-            title(sprintf(...
-                'Samples from transition pdf with Pj={%d}',o));
-%             title(sprintf(...
-%                 'Samples of f_{%d} and contour levels of f_{%d} (red) and f_{%d} (black)', ...
-%                 j, j, j+1));
-            drawnow
-%             
-%             figure
-%             surf(xx,yy,zz);
-            
-          
-        end
 
+ 
         j = j+1;
 
         %% Calculate the tempering parameter p(j+1):
@@ -122,15 +90,6 @@ opencossan.OpenCossan.setVerbosityLevel(1);
         % stationary PDF "fj1"
         % fj1 = @(t) fT(t).*log_fD_T(t).^pj1;   % stationary PDF (eq 11) f_{j+1}(theta)
         log_fj1 = @(t) log(fT(t)) + pj1*log_fD_T.apply(t);
-
-        if (plot_graphics)
-            % In the definition of fj1 we are including the normalization
-            % constant prod(S(1:j))
-            fj1 = @(t) exp(log(fT(t)) + pj1*log_fD_T.apply(t)); %- sum(log(S(1:j))));
-%              zz = reshape(fj1([xx(:) yy(:) ext]), 99, 100);
-%             contour(xx, yy, zz, 50, 'k');
-            drawnow
-        end
 
         % and using as proposal PDF a Gaussian centered at thetaj(idx,:) and
         % with covariance matrix equal to an scaled version of the covariance
@@ -208,13 +167,13 @@ opencossan.OpenCossan.setVerbosityLevel(1);
         %% Prepare for the next iteration
         thetaj = thetaj1;
         pj     = pj1;
-        names = strcat(XBayes.Coutputnames,'_',num2str(j));
+        names = strcat(Bayes.outputnames,'_',num2str(j));
         samplesOut = addVariable(samplesOut,'Cnames',names,'Mvalues',thetaj);
         
     end
     
     opencossan.OpenCossan.setVerbosityLevel(VerboseSave);
-    samplesOut = addVariable(samplesOut,'Cnames',XBayes.Coutputnames,'Mvalues',thetaj);
+    samplesOut = addVariable(samplesOut,'Cnames',Bayes.outputnames,'Mvalues',thetaj);
 
 return
 

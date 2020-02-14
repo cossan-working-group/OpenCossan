@@ -19,7 +19,7 @@ classdef LogLikelihood < opencossan.workers.Mio
    
     properties
         
-        Xmodel              %The model that is to be used in the evaluation
+        model(1,1)          %The model that is to be used in the evaluation
         Data                %The Data to be used to update
         ShapeParameters     %The Shape Paramters that can be used in the updating procedure
         CustomLog           %User can pass custom likelihood function as a function handle
@@ -30,26 +30,21 @@ classdef LogLikelihood < opencossan.workers.Mio
            
         function obj = LogLikelihood(varargin)
         
-            if nargin == 0
-                % Create empty object
-                return
-            else
-                p = inputParser;
-                p.FunctionName = 'opencossan.inference.LogLikelihood';
+            p = inputParser;
+            p.FunctionName = 'opencossan.inference.LogLikelihood';
 
-                p.addParameter('Xmodel',obj.Xmodel);
-                p.addParameter('Data',obj.Data);
-                p.addParameter('CustomLog',obj.CustomLog)
-                p.addParameter('ShapeParameters', obj.ShapeParameters);
-                
-                p.parse(varargin{:});
+            p.addParameter('model',obj.model);
+            p.addParameter('Data',obj.Data);
+            p.addParameter('CustomLog',obj.CustomLog)
+            p.addParameter('ShapeParameters', obj.ShapeParameters);
 
-                obj.Xmodel = p.Results.Xmodel;
-                obj.Data = p.Results.Data;
-                obj.CustomLog = p.Results.CustomLog;
-                obj.ShapeParameters = p.Results.ShapeParameters;
+            p.parse(varargin{:});
+
+            obj.model = p.Results.model;
+            obj.Data = p.Results.Data;
+            obj.CustomLog = p.Results.CustomLog;
+            obj.ShapeParameters = p.Results.ShapeParameters;
                 
-            end
             
         end
         

@@ -1,4 +1,4 @@
-function [logL] = apply(XLogL,theta)
+function [logL] = apply(LogL,theta)
 
 
     nSamples = size(theta,1);  
@@ -6,11 +6,10 @@ function [logL] = apply(XLogL,theta)
 
     %Here a custom likelihood defined by the user can be used
     
-    Xmodel = XLogL.Xmodel;
+    model = LogL.model;
     
-    DimOut = length(Xmodel.OutputNames);
    
-    Params = Xmodel.Input.Parameters;
+    Params = model.Input.Parameters;
     for n = fieldnames(Params)'
         Params.(n{1}) = repmat(Params.(n{1}).Value, nSamples, 1);
     end
@@ -19,27 +18,27 @@ function [logL] = apply(XLogL,theta)
     
     tableTheta = array2table(theta);
     
-    tableTheta.Properties.VariableNames = Xmodel.Input.RandomVariableNames;
+    tableTheta.Properties.VariableNames = model.Input.RandomVariableNames;
     
     Tinput = [tableTheta, Tinput];
-    Xout = Xmodel.apply(Tinput);
+    Simout = model.apply(Tinput);
     
-    output  = Xout.TableValues(:, Xmodel.OutputNames);
+    output  = Simout.TableValues(:, model.OutputNames);
     output = output{:, :};
     
-    D = XLogL.Data.TableValues(:, Xmodel.OutputNames);
+    D = LogL.Data.TableValues(:, model.OutputNames);
     D = D{:, :};
     
-    if ~isempty(XLogL.CustomLog)
+    if ~isempty(LogL.CustomLog)
         
-        ft = XLogL.CustomLog;
+        ft = LogL.CustomLog;
         likelihood=ft(theta);
         logL = log(likelihood);
         logL(isinf(logL)) = -1e10;
         
     else
-        if ~isempty(XLogL.ShapeParameters)
-            epsilon_r = XLogL.ShapeParameters;
+        if ~isempty(LogL.ShapeParameters)
+            epsilon_r = LogL.ShapeParameters;
         else
             epsilon_r = std(D);
         end
