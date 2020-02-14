@@ -2,6 +2,7 @@
 
 [![Build Status](https://jenkins.cossan.co.uk/buildStatus/icon?job=OpenCossan%2Fmaster)](https://jenkins.cossan.co.uk/job/OpenCossan/job/master/)
 
+
 OpenCossan is a Matlab-based toolbox for uncertainty quantification and management. The implemented framework includes third-party software integration (e.g. ANSYS), efficient numeric algorithms (e.g. Line Sampling) and parallelization for high performance computing. OpenCossan functionalities can be summarized in:
 
 * Uncertainty Quantification
@@ -21,7 +22,10 @@ https://cossan.co.uk
 
 ## Getting started
 
-If you are unfamiliar with git the stable version (master) can be downloaded by simply clicking the green Download .ZIP button. However, it is recommended to use the repository with git.
+If you are unfamiliar with git the stable version (master) can be downloaded by simply clicking the green Download .ZIP button. You can also install OpenCossan from File Exchange
+[![View OpenCossan on File Exchange](https://www.mathworks.com/matlabcentral/images/matlab-file-exchange.svg)](https://uk.mathworks.com/matlabcentral/fileexchange/72108-opencossan)
+
+However, it is recommended to use the repository with git.
 
 To clone it to your local machine type in the terminal:
 
@@ -44,7 +48,7 @@ Comprehensive documentation is available in the wiki available at https://cossan
 
 ## Project status
 
-At the moment we are migrating from a private repository to GitHub. Some of the OpenCossan functionalities are not available in this repository yet.
+At the moment we are working to the development branch to include the new code sintax and unit testing. Although the refactoring is not completed, most of the funtionalities are supported working. 
 
 ## Support
 
