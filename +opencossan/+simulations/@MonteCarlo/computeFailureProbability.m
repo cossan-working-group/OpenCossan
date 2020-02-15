@@ -35,7 +35,7 @@ simData = obj.apply(model);
 
 % Calculate the failure probability
 g = simData.Samples.(model.PerformanceFunctionVariable);
-pf = sum(g < 0) / obj.Nsimxbatch;
+pf = sum(g < 0) / height(simData.Samples);
 
 pf = FailureProbability('value', pf, 'simulationdata', simData, 'simulation', obj); 
 

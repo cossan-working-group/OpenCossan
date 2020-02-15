@@ -36,8 +36,10 @@ batch = 0;
 while true
      batch = batch + 1;
      
+    classname = split(metaclass(obj).Name, '.');
+    classname = classname{end};
     opencossan.OpenCossan.cossanDisp(...
-        sprintf("Monte Carlo simulation batch #%i (%i samples)", batch, obj.Nsimxbatch), 4);
+        sprintf("[%s] Batch #%i of (%i samples)", classname, batch, obj.Nsimxbatch), 3);
     
     samples = obj.sample('Nsamples',obj.Nsimxbatch,'Xinput',model.Input);
     

@@ -56,11 +56,11 @@ classdef (Abstract) Simulations
         isamples=0                    % Store the current number of samples
     end
     
+    methods 
+        simData = apply(obj, model);
+    end
     
-    methods (Abstract)
-        
-        XsimOut = apply(Xobj,Xtarget) % Perform the simulation
-        
+    methods (Abstract)        
         [Xpf, XsimOut]=computeFailureProbability(Xobj,Xtarget) % Compute the failure
         % probability associated to the
         % ProbabilisticModel/SystemReliability

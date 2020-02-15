@@ -26,9 +26,7 @@ classdef MonteCarlo < opencossan.simulations.Simulations
     % =====================================================================
 
     
-    methods
-       XsimOut = apply(Xmc,Xtarget)     % Performe Monte Carlo Simulation
-             
+    methods             
        [Xpf,XsimOut]=computeFailureProbability(Xobj,Xtarget)      % Esitmate FailureProbability
        
        Xsamples = sample(Xobj,varargin) % Generate samples using MC method

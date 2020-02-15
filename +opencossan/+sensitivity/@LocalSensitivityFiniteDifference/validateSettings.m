@@ -54,7 +54,7 @@ end
 
 % Check the validation point!
 if isempty(Xobj.VreferencePoint)
-    Tdefault=Xobj.Xinput.getDefaultValuesStructure;
+    Tdefault=Xobj.Xinput.getDefaultValues()
     
     CnamesRV=Xobj.Xinput.RandomVariableNames;
     CnamesDV=Xobj.Xinput.DesignVariableNames;
