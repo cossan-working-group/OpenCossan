@@ -1,6 +1,6 @@
 classdef MonteCarlo < opencossan.simulations.Simulations
     %MONTECARLO Monte Carlo simulation method
-    % 
+    %
     % See also: https://cossan.co.uk/wiki/index.php/@MonteCarlo
     %
     % Author: Edoardo Patelli
@@ -24,14 +24,14 @@ classdef MonteCarlo < opencossan.simulations.Simulations
     %  You should have received a copy of the GNU General Public License
     %  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
     % =====================================================================
-
     
-    methods             
-       [Xpf,XsimOut]=computeFailureProbability(Xobj,Xtarget)      % Esitmate FailureProbability
-       
-       Xsamples = sample(Xobj,varargin) % Generate samples using MC method
+    
+    methods
+        [Xpf,XsimOut]=computeFailureProbability(Xobj,Xtarget)      % Esitmate FailureProbability
         
-        %% constructor 
+        Xsamples = sample(Xobj,varargin) % Generate samples using MC method
+        
+        %% constructor
         function Xobj= MonteCarlo(varargin)
             % Validate input arguments
             opencossan.OpenCossan.validateCossanInputs(varargin{:})
@@ -39,21 +39,21 @@ classdef MonteCarlo < opencossan.simulations.Simulations
             for k=1:2:length(varargin)
                 switch lower(varargin{k})
                     case {'sdescription'}
-                        Xobj.Sdescription=varargin{k+1};    
+                        Xobj.Sdescription=varargin{k+1};
                     case {'lverbose'}
                         Xobj.Lverbose=varargin{k+1};
-                     case {'cov'}
+                    case {'cov'}
                         Xobj.CoV=varargin{k+1};
                     case {'timeout'}
-                        Xobj.timeout=varargin{k+1};               
+                        Xobj.timeout=varargin{k+1};
                     case {'nsamples'}
                         Xobj.Nsamples=varargin{k+1};
                     case {'conflevel'}
                         Xobj.confLevel=varargin{k+1};
                     case {'nbatches'}
-                        Xobj.Nbatches=varargin{k+1};          
+                        Xobj.Nbatches=varargin{k+1};
                     case {'sbatchfolder'}
-                        Xobj.SbatchFolder=varargin{k+1};   
+                        Xobj.SbatchFolder=varargin{k+1};
                     case {'lexportsamples'}
                         Xobj.Lexportsamples=varargin{k+1};
                     case {'lintermediateresults'}
@@ -64,26 +64,19 @@ classdef MonteCarlo < opencossan.simulations.Simulations
                             RandStream('mt19937ar','Seed',Nseed);
                     case {'xrandomnumbergenerator'}
                         if isa(varargin{k+1},'RandStream'),
-                            Xobj.XrandomStream  = varargin{k+1};    
+                            Xobj.XrandomStream  = varargin{k+1};
                         else
                             warning('openCOSSAN:simulations:MonteCarlo',...
-                              ['argument associated with (' varargin{k} ') is not a RandStream object']);
+                                ['argument associated with (' varargin{k} ') is not a RandStream object']);
                         end
                     otherwise
                         error('openCOSSAN:simulations:MonteCarlo',...
-                              ['Field name (' varargin{k} ') not allowed']);
+                            ['Field name (' varargin{k} ') not allowed']);
                 end
-            end 
-            
-            if Xobj.Nbatches>Xobj.Nsamples
-                error('openCOSSAN:simulations:MonteCarlo',...
-                      ['The number of batches (' num2str(Xobj.Nbatches) ...
-                      ') can not be greater than the number of samples (' ...
-                      num2str(Xobj.Nsamples) ')' ]);
             end
-        end % constructor
-
-    end % methods 
-        
-end
+            
+        end
+    end % constructor
+    
+end % methods
 

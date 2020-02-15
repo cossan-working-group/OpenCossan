@@ -73,7 +73,7 @@ classdef ModelTest < matlab.mock.TestCase
             
             % I tried to mock the dependent properties on the Input and
             % Evaluator but MATLAB wouldn't let me.
-            testCase.verifyEqual(model.InputNames, cell(1,0));
+            testCase.verifyEqual(model.InputNames, strings(1, 0));
             testCase.verifyEqual(model.OutputNames, {});
         end
         

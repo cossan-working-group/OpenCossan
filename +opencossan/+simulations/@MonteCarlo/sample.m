@@ -30,6 +30,7 @@ function samples = sample(Xobj,varargin)
     %% Validate input arguments
     
     
+    
     %% Process inputs
     
     Nsamples=Xobj.Nsamples;
@@ -54,11 +55,19 @@ function samples = sample(Xobj,varargin)
             'An Input object or a RandomVariableSet is required')
     end
     
+    if ~isempty(Xobj.XrandomStream)
+        prevstream = RandStream.setGlobalStream(Xobj.XrandomStream);
+    end
+    
     %% generate samples
     if exist('Xrvset','var')
         samples = Xrvset.sample('Nsamples',Nsamples);
     else
         samples = sample(Xinput, 'samples', Nsamples);
+    end
+    
+    if ~isempty(Xobj.XrandomStream)
+        RandStream.setGlobalStream(prevstream);
     end
 end
 

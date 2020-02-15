@@ -70,7 +70,7 @@ classdef SimulationData < opencossan.common.CossanObject
         
         function n = get.NumberOfSamples(obj)
             n = height(obj.Samples) / obj.NumberOfBatches;
-        end  
+        end 
         
         function n = get.NumberOfBatches(obj)
             n = numel(unique(obj.Samples.Batch));

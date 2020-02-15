@@ -29,8 +29,6 @@ classdef (Abstract) Simulations
     % =====================================================================
     
     properties (Dependent = true, SetAccess = protected)
-        Nsimxbatch     % number of samples per batch
-        Nlastbatch     % number of samples in the last batch
         SbatchName     % File name of the current batch
     end
     
@@ -70,16 +68,7 @@ classdef (Abstract) Simulations
         
     end % methods
     
-    methods
-        function Nsimxbatch = get.Nsimxbatch(Xobj)
-            Nsimxbatch = floor(Xobj.Nsamples/Xobj.Nbatches);
-        end % Modulus get method
-        
-        function Nlastbatch = get.Nlastbatch(Xobj)
-            %Nlastbatch =  Xobj.Nsimxbatch+rem(Xobj.Nsamples,Xobj.Nbatches);
-            Nlastbatch =  Xobj.Nsamples-Xobj.Nsimxbatch*(Xobj.Nbatches-1);
-        end % Modulus get method
-        
+    methods     
         function SbatchName = get.SbatchName(Xobj)
             SbatchName =  [Xobj.SbatchFileNames ...
                 num2str(Xobj.ibatch) '_of_' num2str(Xobj.Nbatches)];

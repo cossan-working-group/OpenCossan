@@ -56,7 +56,7 @@ assert(XfailureProbMC.Value == 0.06922,...
 % Reset the random number generator to always produce the same results
 opencossan.OpenCossan.resetRandomNumberGenerator(49564);
 
-% Create LatinHypercubeSampling simulation object to run 1e5 samples in 1
+% Create LatinHypercubeSampling simulation object to run 1e4 samples in 1
 % batch
 Xlhs=opencossan.simulations.LatinHypercubeSampling('Nsamples',1e4);
 

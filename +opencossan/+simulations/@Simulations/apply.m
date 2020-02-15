@@ -39,12 +39,12 @@ while true
     classname = split(metaclass(obj).Name, '.');
     classname = classname{end};
     opencossan.OpenCossan.cossanDisp(...
-        sprintf("[%s] Batch #%i of (%i samples)", classname, batch, obj.Nsimxbatch), 3);
+        sprintf("[%s] Batch #%i (%i samples)", classname, batch, obj.Nsamples), 3);
     
-    samples = obj.sample('Nsamples',obj.Nsimxbatch,'Xinput',model.Input);
+    samples = obj.sample('Nsamples',obj.Nsamples,'Xinput',model.Input);
     
     simDataBatch = apply(model,samples);
-    simDataBatch.Samples.Batch = repmat(batch, obj.Nsimxbatch, 1);
+    simDataBatch.Samples.Batch = repmat(batch, obj.Nsamples, 1);
     
     simData = simData + simDataBatch;
     

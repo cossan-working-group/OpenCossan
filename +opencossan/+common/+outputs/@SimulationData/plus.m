@@ -10,6 +10,6 @@ assert(all(ismember(...
     simData1.Samples.Properties.VariableNames, simData2.Samples.Properties.VariableNames)), ...
     'OpenCossan:SimulationData:plus', 'Both SimulationData must contain the same variables.');
 
-simData1.Samples = [simData1.Samples simData2.Samples];
+simData1.Samples = [simData1.Samples; simData2.Samples];
 end
 
