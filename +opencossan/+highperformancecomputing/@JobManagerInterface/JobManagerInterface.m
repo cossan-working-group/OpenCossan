@@ -95,7 +95,6 @@ classdef JobManagerInterface
 
         end
         
-        display(Xobj)
         
         % Methods to retrieve information from grid
         Cmembers = getQueues(Xobj); % Get Queues names

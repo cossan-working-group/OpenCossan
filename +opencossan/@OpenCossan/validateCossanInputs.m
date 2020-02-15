@@ -22,7 +22,7 @@ You should have received a copy of the GNU General Public License
 along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
 %}
 
-warning('This feature is obsolete. Use Validate Property Values. /n Use https://uk.mathworks.com/help/matlab/matlab_oop/validate-property-values.html')
+warning('This feature is obsolete. Use Validate Property Values. \n Use https://uk.mathworks.com/help/matlab/matlab_oop/validate-property-values.html')
 
 %% Check if the arguments has been passed as pairs of PropertyName/Value
 if mod(length(varargin),2)

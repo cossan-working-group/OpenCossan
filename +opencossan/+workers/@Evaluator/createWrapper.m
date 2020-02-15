@@ -42,30 +42,30 @@ fprintf(Nfid,'display([''Finished engine startup on '' system(''hostname'')]');
 fprinff(Nfid,'display([''Execution Time: '' datestr(now,0)]');
 % save output
 fprintf(Nfid,'%% load Input ');
-fprintf(Nfid, ' load %s; \n',Xobj.SwrapperInputName);
+fprintf(Nfid, ' load %s; \n',Xobj.WrapperMatlabInputName);
 
 % Loop around samples
 fprintf(Nfid, ' for n=1:lenght()');
 % Loop around the solvers
-for isol=1:length(Xobj.CXsolvers)
-    fprintf(Nfid,'%% SOLVER %i (Type: %s)\n',isol,class(Xobj.CXsolvers{isol}));
+for isol=1:length(Xobj.Solvers)
+    fprintf(Nfid,'%% SOLVER %i (Type: %s)\n',isol,class(Xobj.Solvers(isol)));
     
     % Define input and output filename 
     Xobj.CXsolvers{n}.SwrapperInputName=sprintf('workerINPUT%i.mat',isol);
     Xobj.CXsolvers{n}.SwrapperOutputName=sprintf('workerOUTPUT%i.mat',isol);
     % Create wrapper for solvers
-    createWrapper(Xobj.CXsolvers{n},Nfid);
+    createWrapper(Xobj.Solvers(n),Nfid);
 end   
 % Merge results
 fprintf(Nfid, 'if n==1, %s=%s; else %s=merge(%s,%s); end',...
-    Xobj.SwrapperOutputName,Xobj.CXsolvers{n}.SwrapperOutputName,...
-    Xobj.SwrapperOutputName,Xobj.SwrapperOutputName,Xobj.CXsolvers{n}.SwrapperOutputName); 
+    Xobj.WrapperMatlabOutputName,Xobj.Solvers(n).WrapperMatlabOutputName,...
+    Xobj.WrapperMatlabOutputName,Xobj.WrapperMatlabOutputName,Xobj.CXsolvers(n).WrapperMatlabOutputName); 
 % Close loop around samples
 fprintf(Nfid, ' end'); 
 
 % save output
 fprintf(Nfid,'%% save output');
-fprintf(Nfid, ' save %s %s; \n',Xobj.SwrapperOutputName, Xobj.SwrapperOutputName);
+fprintf(Nfid, ' save %s %s; \n',Xobj.WrapperMatlabOutputName, Xobj.WrapperMatlabOutputName);
 
 % Catch error
 fprintf(Nfid,'catch ME\n');

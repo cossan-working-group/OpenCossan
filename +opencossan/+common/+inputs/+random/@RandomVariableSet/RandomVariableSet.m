@@ -120,23 +120,30 @@ classdef RandomVariableSet < opencossan.common.CossanObject
     
     methods (Static)
         function obj = fromIidRandomVariables(varargin)
+            % Required input arguments: 
+            % * Number: Number of Random Variable in the set
+            % * RandomVariable: IID Random variable
+            %
+            % Optional arguments
+            %  * NamePrefix: Prefix used to construct IID random variables
+            % 
             import opencossan.common.inputs.random.RandomVariableSet
             
             [required, varargin] = opencossan.common.utilities.parseRequiredNameValuePairs(...
                     ["Number","RandomVariable"], varargin{:});
             
-            [optional, ~] = opencossan.common.utilities.parseOptionalNameValuePairs(...
+            [optional, superArg] = opencossan.common.utilities.parseOptionalNameValuePairs(...
                     "NamePrefix","RV_", varargin{:});
                 
             
-            members(1:p.Results.n) = required.randomvariable;
+            members(1:required.number) = required.randomvariable;
             
-            names = strings(1,n);
-            for i = 1:p.Results.n
-                names(i) = sprintf("%s_%d", optional.nameprefix, i);
+            names = strings(1,required.number);
+            for i = 1:required.number
+                names(i) = sprintf("%s%d", optional.nameprefix, i);
             end
             
-            varargin = [varargin {'members', members, 'names', names}];
+            varargin = [superArg {'members', members, 'names', names}];
             obj = RandomVariableSet(varargin{:});
         end
     end

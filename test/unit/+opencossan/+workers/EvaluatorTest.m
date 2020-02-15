@@ -28,70 +28,71 @@ classdef EvaluatorTest < matlab.unittest.TestCase
     methods (Test)
         %% Constructor
         function emptyConstructor(testCase)
-            Xe = workers.Evaluator;
-            testCase.assertClass(Xe,'workers.Evaluator');
+            Xe = opencossan.workers.Evaluator;
+            testCase.assertClass(Xe,'opencossan.workers.Evaluator');
         end
         
         function constructorShouldSetDescription(testCase)
-            Xe = workers.Evaluator('Sdescription','Evaluator');
-            testCase.assertEqual(Xe.Sdescription,'Evaluator');
+            Xe = workers.Evaluator('Description','Evaluator');
+            testCase.assertEqual(Xe.Description,'Evaluator');
         end
         
-        function constructorShouldSetMio(testCase)
-            Xmio = workers.Mio('Coutputnames',{'output'},...
+        function constructorShouldSetMatlabWorker(testCase)
+            Xmio = workers.MatlabWorker('Coutputnames',{'output'},...
                 'Cinputnames',{'input'},'Sscript','%do nothing');
-            Xe = workers.Evaluator('Xmio',Xmio);
-            testCase.assertEqual(Xe.CXsolvers{1},Xmio);
+            Xe = workers.Evaluator('Solvers',Xmio,'SolversName',"Xmio");
+            testCase.assertEqual(Xe.Solvers{1},Xmio);
         end
         
-        function constructorShouldSetConnector(testCase)
-            Xcon = workers.Connector;
-            Xe = workers.Evaluator('Xconnector',Xcon);
-            testCase.assertEqual(Xe.CXsolvers{1},Xcon);
+        function constructorShouldFail(testCase)
+            Xmio = workers.MatlabWorker('Coutputnames',{'output'},...
+                'Cinputnames',{'input'},'Sscript','%do nothing');
+            
+            Xe = workers.Evaluator('Solvers',Xmio,'SolversName',["MatlabWorker" "ExtraName"]);
+            testCase.assertEqual(Xe.Solvers{1},XMatlabWorker);
         end
+        
+       
         
         function constructorShouldSetJobManagerInterface(testCase)
             Xjmi = highperformancecomputing.JobManagerInterface();
-            Xe = workers.Evaluator('XjobManagerInterface',Xjmi);
-            testCase.assertEqual(Xe.XjobInterface,Xjmi);
-            Xe = workers.Evaluator('CXjobManagerInterface',{Xjmi});
+            Xe = workers.Evaluator('JobManager',Xjmi);
             testCase.assertEqual(Xe.XjobInterface,Xjmi);
         end
         
         function constructorShouldSetLremoteInjectExtract(testCase)
-            Xe = workers.Evaluator('LremoteInjectExtract',true);
-            testCase.assertTrue(Xe.LremoteInjectExtract);
+            Xe = workers.Evaluator('RemoteInjectExtract',true);
+            testCase.assertTrue(Xe.RemoteInjectExtract);
         end
         
         function constructorShouldSetHostNames(testCase)
             Xcon = workers.Connector;
-            Xmio = workers.Mio('Coutputnames',{'output'},...
+            Xmio = workers.MatlabWorker('Coutputnames',{'output'},...
                 'Cinputnames',{'input'},'Sscript','%do nothing');
-            CSqueues = {'Queue1' 'Queue2'};
-            CShostnames = {'Host1','Host2'};
-            Xe = workers.Evaluator('CXmembers',{Xcon Xmio},'CShostnames',CShostnames,...
-                'CSqueues',CSqueues);
-            testCase.assertEqual(Xe.CShostnames,CShostnames);
-            
+            Squeues = ["Queue1" "Queue2"];
+            Shostnames = ["Host1","Host2"];
+            Xe = workers.Evaluator('Solvers',{Xcon Xmio},'Hostnames',Shostnames,...
+                'Queues',Squeues);
+            testCase.assertEqual(Xe.CShostnames,CShostnames);          
         end
         
         function constructorShouldSetQueues(testCase)
             Xcon = workers.Connector;
             Xmio = workers.Mio('Coutputnames',{'output'},...
                 'Cinputnames',{'input'},'Sscript','%do nothing');
-            CSqueues = {'Queue1' 'Queue2'};
+            Squeues = ["Queue1" "Queue2"];
             Xe = workers.Evaluator('Xconnector',Xcon,'Xmio',...
-                Xmio,'CSqueues',CSqueues);
-            testCase.assertEqual(Xe.CSqueues,CSqueues);
+                Xmio,'Queues',Squeues);
+            testCase.assertEqual(Xe.Queues,Squeues);
         end
         
         function constructorShouldSetVconcurrent(testCase)
             Xcon = workers.Connector;
             Xmio = workers.Mio('Coutputnames',{'output'},...
                 'Cinputnames',{'input'},'Sscript','%do nothing');
-            Xe = workers.Evaluator('Xconnector',Xcon,'Xmio',...
-                Xmio,'Vconcurrent',[Inf 4]);
-            testCase.assertEqual(Xe.Vconcurrent,[Inf 4]);
+            Xe = workers.Evaluator('Solvers',{Xcon Xmio},...
+                'Concurrent',[Inf 4]);
+            testCase.assertEqual(Xe.Concurrent,[Inf 4]);
         end
         
         function constructorShouldSetMembers(testCase)

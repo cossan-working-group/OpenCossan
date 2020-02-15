@@ -67,10 +67,10 @@ for irun=1:Njobs
         ' -r workers.remoteWorkerJob -nosplash -nodesktop'];
     %  Copy input table and worker into the new grid folder
     % split table with inputs
-    TableInput  = PinputALL(Vstart(irun):Vend(irun)); %#ok<NASGU>
+    TableInput  = PinputALL(Vstart(irun):Vend(irun)); 
     % get individual solver from Evaluator
     % TODO: how to loop on the available solvers???
-    Xworker = Xobj.CXsolvers{1};    %#ok<NASGU>
+    Xworker = Xobj.Solvers(1);    
     save (fullfile(OpenCossan.getCossanWorkingPath, Sfoldername, 'workerInput.mat'),'TableInput','Xworker');  
 end
 
@@ -97,7 +97,7 @@ while 1
         % Check status of job every second. 
         % TODO: Get this value from JobManager 
         pause(1);
-        Cstatus = Xjob.getJobStatus('CSjobID',CSjobID); %#ok<AGROW> % check the status of the one that are not yet completed only
+        Cstatus = Xjob.getJobStatus('CSjobID',CSjobID); % check the status of the one that are not yet completed only
         
         % TODO: Use properties of JobManagerInterface
         % It should be 
@@ -145,17 +145,17 @@ Vresults   = zeros(Njobs,1);  % vector to define which results have been read so
 %  Load results form output files
 [PoutputALL, Vresults] = Xmio.retrieveResults(Vresults,Vstart,Vend,PoutputALL,Xjob);
 % In case some results are missing, try to reload
-if any(Vresults==0),
+if any(Vresults==0)
     % if not all the simulation were readed correctly try againg
     [PoutputALL(Vresults==0), Vresults] = Xmio.retrieveResults(Vresults,Vstart,Vend,PoutputALL,Xjob);
 end
 % Manage results that could not be loaded
-if any(Vresults==0),
+if any(Vresults==0)
     % Include NaN in the output if the results of the simulation can not be
     % retrieved
     Vpos   = find(Vresults==0);   %determine results that could not be retrieved
-    for ij=1:length(Vpos),
-        if isa(PoutputALL,'struct'),
+    for ij=1:length(Vpos)
+        if isa(PoutputALL,'struct')
             for isim = Vstart(Vpos(ij)):Vend(Vpos(ij))
                 for ifield = 1:length(Xmio.Coutputnames)
                     PoutputALL(isim).(Xmio.Coutputnames{ifield})    = NaN;
@@ -172,10 +172,10 @@ if any(Vresults==0),
 end
 
 %% Export results - create output object
-if isa(PoutputALL,'struct'),
+if isa(PoutputALL,'struct')
     Xsimtmp=SimulationData('Tvalues',PoutputALL);
-elseif isa(PoutputALL,'double'),
-    Xsimtmp=SimulationData('Mvalues',PoutputALL,'Cvariablenames',Xmio.Coutputnames);
+elseif isa(PoutputALL,'double')
+    Xsimtmp=SimulationData('Mvalues',PoutputALL,'Cvariablenames',Xmio.OutputNames);
 else
     error('openCOSSAN:Mio:runJob','The output of a compiled MIO has to be a structure or a matrix');
 end

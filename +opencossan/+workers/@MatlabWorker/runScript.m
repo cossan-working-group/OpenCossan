@@ -50,9 +50,9 @@ switch lower(Xmio.Format)
         Moutput = zeros(size(Minput,1),length(Xmio.OutputNames));
     case 'table'
         % Rename input
-        TableInput=Psamples; 
-       TableOutput=table(zeros(height(TableInput),length(Xmio.OutputNames)),...
-            'VariableNames',Xmio.OutputNames); 
+        TableInput=Psamples;
+        TableOutput = array2table(zeros(height(TableInput),length(Xmio.OutputNames)));
+        TableOutput.Properties.VariableNames = Xmio.OutputNames;
     otherwise
         error('OpenCossan:Mio:runScript:wrongFormat',...
             'Format %s is not valid in runScript',Xmio.Format)
@@ -91,8 +91,8 @@ switch lower(Xmio.Format)
     case 'table'
         Poutput = TableOutput;
     case 'structure'
-        Poutput = Toutput;        
+        Poutput = Toutput;
     case 'matrix'
-        Poutput = Moutput;        
+        Poutput = Moutput;
 end
 

@@ -1,9 +1,9 @@
-classdef Worker < opencossan.common.CossanObject
-    %WORKERS Abstract class to define the COSSAN workers.
+classdef Worker < matlab.mixin.Heterogeneous & opencossan.common.CossanObject
+    %WORKERS Abstract class to define the OpenCossan workers.
     %   The class worker provides a common interface for the Worker
     %   objects.
     %
-    % See Also: http://cossan.co.uk/wiki/index.php/@Worker
+    % See Also: SolutionSequence, Mio, Evaluator, Connector
     %
     %
     % Author: Edoardo Patelli
@@ -31,13 +31,30 @@ classdef Worker < opencossan.common.CossanObject
     properties
         OutputNames cell {opencossan.common.utilities.isunique(OutputNames)}
         InputNames  cell {opencossan.common.utilities.isunique(InputNames)} 
-        IsKeepSimulationFiles(1,1) logical = false % Keep simulation files
+        KeepSimulationFiles(1,1) logical = false % Keep simulation files
     end
     
     methods (Abstract)
         % Evaluate the workerObject based on the realizations provided in a
         % Table object 
         TableOutput=evaluate(workerObject,TableInput);        
-    end    
+    end  
+    
+    methods 
+         function obj = Worker(varargin)
+            
+            [requiredArgs, varargin] = opencossan.common.utilities.parseRequiredNameValuePairs(...
+                    ["InputNames","OutputNames"], varargin{:});
+            
+            [optionalArgs, superArg] = opencossan.common.utilities.parseOptionalNameValuePairs(...
+                    "KeepSimulationFiles",{false}, varargin{:});
+                
+            obj@opencossan.common.CossanObject(superArg{:});
+
+            obj.InputNames=requiredArgs.inputnames;
+            obj.OutputNames=requiredArgs.outputnames;
+            obj.KeepSimulationFiles=optionalArgs.keepsimulationfiles;
+        end     
+    end
 end
 
