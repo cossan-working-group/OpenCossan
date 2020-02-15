@@ -133,8 +133,7 @@ classdef RandomVariableSetTest < matlab.unittest.TestCase
                 'members', [testCase.X1, testCase.X2], 'names', ...
                 ["X1","X2"]);
             samples = rvs.sample(2);
-            testCase.verifyClass(samples,'opencossan.common.Samples');
-            testCase.verifyEqual(2,samples.Nsamples);
+            testCase.verifyEqual(2,height(samples));
         end
         
         function sampleWithCorrelationShouldReturnSampleObject(testCase)
@@ -143,10 +142,9 @@ classdef RandomVariableSetTest < matlab.unittest.TestCase
                 'members', [testCase.X2, testCase.X2], 'names', ...
                 ["X1","X2"], 'Correlation', corr);
             samples = rvs.sample(10000);
-            testCase.verifyClass(samples,'opencossan.common.Samples');
-            testCase.verifyEqual(10000,samples.Nsamples);
+            testCase.verifyEqual(10000,height(samples));
             testCase.verifyEqual(corr, ...
-                corrcoef(samples.MsamplesPhysicalSpace),'RelTol',0.1);
+                corrcoef(samples{:,:}),'RelTol',0.1);
         end
         
         function cdf2physical(testCase)
