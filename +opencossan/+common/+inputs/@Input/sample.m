@@ -68,7 +68,7 @@ function samples = sample(obj,varargin)
     rvs = obj.RandomVariables;
     names = obj.RandomVariableNames;
     for i = 1:obj.NumberOfRandomVariables
-        samples.(names(i)) = sample(rvs(i), p.Results.Sample);
+        samples.(names(i)) = sample(rvs(i), p.Results.Samples);
     end
     
     parameters = obj.Parameters;

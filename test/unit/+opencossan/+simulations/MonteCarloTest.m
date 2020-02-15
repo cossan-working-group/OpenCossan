@@ -22,36 +22,32 @@ classdef MonteCarloTest < matlab.unittest.TestCase
     % =====================================================================
     
     properties
-        Xin;
-        Xmdl;
-        Xpm;
+        input;
+        model;
+        probModel;
     end
     
     methods (TestClassSetup)
         function setupModel(testCase)
-            RV1 = opencossan.common.inputs.random.NormalRandomVariable('mean',0,'std',1);
-            RV2 = opencossan.common.inputs.random.NormalRandomVariable('mean',0,'std',1);
+            x = opencossan.common.inputs.random.UniformRandomVariable('bounds', [0, 1]);
+            y = opencossan.common.inputs.random.UniformRandomVariable('bounds', [0, 1]);
             
-            Xrvs1 = opencossan.common.inputs.random.RandomVariableSet(...
-                'members',[RV1 RV2],'names',["RV1" "RV2"]);
+            limit = opencossan.common.inputs.Parameter('value', 1);
             
-            Xthreshold = opencossan.common.inputs.Parameter('value',1);
-            Xadditionalparameter = opencossan.common.inputs.Parameter('value',[1, 2, 3]);
+            testCase.input = opencossan.common.inputs.Input(...
+                'Members', {x, y, limit}, ...
+                'Names', ["x", "y" "limit"]);
             
-            testCase.Xin = opencossan.common.inputs.Input(...
-                'Members', {Xrvs1, Xthreshold, Xadditionalparameter}, ...
-                'Names', ["Xrvs1", "Xthreshold" "Xadditionalparameter"]);
+            mio = opencossan.workers.Mio('FunctionHandle', @(x) sqrt(x(:,1).^2 + x(:, 2).^2), ...
+                'Format', 'matrix','IsFunction', true, ...
+                'Outputnames',{'radius'},...
+                'Inputnames',{'x','y'});
             
-            Xm = opencossan.workers.Mio('Script','for j=1:length(Tinput), Toutput(j).out1=sqrt(Tinput(j).RV1^2+Tinput(j).RV2^2); end', ...
-                'Format','structure',...
-                'Outputnames',{'out1'},...
-                'Inputnames',{'RV1','RV2'});
-            
-            Xeval = opencossan.workers.Evaluator('Xmio',Xm,'Sdescription','Evaluator xmio');
+            Xeval = opencossan.workers.Evaluator('Xmio',mio);
 
-            testCase.Xmdl = opencossan.common.Model('evaluator', Xeval, 'input', testCase.Xin);
-            Xperffun = opencossan.reliability.PerformanceFunction('OutputName','Vg','Demand', 'out1', 'Capacity', 'Xthreshold');
-            testCase.Xpm = opencossan.reliability.ProbabilisticModel('model', testCase.Xmdl, 'performancefunction', Xperffun);
+            testCase.model = opencossan.common.Model('evaluator', Xeval, 'input', testCase.input);
+            Xperffun = opencossan.reliability.PerformanceFunction('OutputName','Vg','Demand', 'radius', 'Capacity', 'limit');
+            testCase.probModel = opencossan.reliability.ProbabilisticModel('model', testCase.model, 'performancefunction', Xperffun);
         end
     end
     
@@ -87,12 +83,21 @@ classdef MonteCarloTest < matlab.unittest.TestCase
         function sampleShouldOutputTable(testCase)
             Xmc = opencossan.simulations.MonteCarlo('Nsamples', 10);
             
-            inputSamples = testCase.Xin.sample('Samples', 10);
-            mcSamples = Xmc.sample('XInput', testCase.Xin, 'Nsamples', 10);
+            inputSamples = testCase.input.sample('Samples', 10);
+            mcSamples = Xmc.sample('XInput', testCase.input, 'Nsamples', 10);
             
             testCase.verifyEqual(height(mcSamples), 10);
             testCase.verifyEqual(inputSamples.Properties.VariableNames, ...
                 mcSamples.Properties.VariableNames);
+        end
+        
+        %% computeFailureProbability
+        function shouldComputPi(testCase)
+            mc = opencossan.simulations.MonteCarlo('Nsamples', 10000, ...
+                'nseedrandomnumbergenerator', 8128);
+            pf = mc.computeFailureProbability(testCase.probModel);
+            
+            testCase.assertEqual(4 * (1 - pf.Value), pi, 'RelTol', 0.01)
         end
         
     end
