@@ -35,16 +35,20 @@ git clone https://github.com/cossan-working-group/OpenCossan.git
 
 Then navigate to `OpenCossan\doc\GettingStarted.mlx` in Matlab to view further instructions.
 
+The overview of the OpenCossan project is available here:
+https://cossan.co.uk/wiki/index.php/Category:OpenCossan_Getting_Started
+
 ## Usage
 
 Comprehensive documentation is available in the wiki available at https://cossan.co.uk/wiki
 
 ### Case studies 
 
-- [Reliability-based optimization of non linear viscous dampers](https://cossan.co.uk/casestudy/COSSAN_ViscousDampersCaseStudy.pdf)
-- [Analysis of the Grenfell Tower Fire with Bayesian Networks](https://cossan.co.uk/casestudy/COSSAN_FireCaseStudy.pdf)
-- [Baysian Optimisation](https://cossan.co.uk/wiki/index.php/Bayesian_optimisation)
-- [Resilient analysis of power grids]
+- [Reliability-based optimization of non linear viscous dampers (PDF)](https://cossan.co.uk/casestudy/COSSAN_ViscousDampersCaseStudy.pdf)
+- [Analysis of the Grenfell Tower Fire with Bayesian Networks (PDF)](https://cossan.co.uk/casestudy/COSSAN_FireCaseStudy.pdf)
+- [Baysian Optimisation (HTML)](https://cossan.co.uk/wiki/index.php/Bayesian_optimisation)
+- [Using Credal Network to estimate human error probabilities (PDF)](https://cossan.co.uk/casestudy/COSSAN_HumanErrorCaseStudy.pdf)
+- [Resilient analysis of power grids (PDF)](https://cossan.co.uk/casestudy/COSSAN_PowerGrid.pdf)
 
 ## Project status
 
