@@ -27,10 +27,6 @@ classdef MonteCarlo < opencossan.simulations.Simulations
 
     
     methods
-        
-       %% Methods inheritated from the superclass 
-       display(Xobj)    % show object details 
-       
        XsimOut = apply(Xmc,Xtarget)     % Performe Monte Carlo Simulation
              
        [Xpf,XsimOut]=computeFailureProbability(Xobj,Xtarget)      % Esitmate FailureProbability

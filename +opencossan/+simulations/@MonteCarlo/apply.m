@@ -1,4 +1,4 @@
-function XsimOut = apply(Xobj,Xtarget)
+function simData = apply(obj, model)
 %APPLY method. This method applies MonteCarlo object to the object
 %passed as argument. 
 % It perform Monte Carlo simulation 
@@ -27,61 +27,35 @@ function XsimOut = apply(Xobj,Xtarget)
 %  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
 % =====================================================================
 
-import opencossan.OpenCossan
+import opencossan.*
+import opencossan.reliability.*
 
-% Check inputs and initialize variables
-[Xobj, Xinput]=checkInputs(Xobj,Xtarget);
-SexitFlag=[]; % Exit flag
+simData = opencossan.common.outputs.SimulationData();
 
-assert(isa(Xinput,'opencossan.common.inputs.Input'),'openCOSSAN:MonteCarlo:apply:InputObjectNotPresent',...
-        'Input object is required to perform a MonteCarlo analysis!')
-
-%% Start MC simulation
-while isempty(SexitFlag)
-    % Update the current batch counter
-    Xobj.ibatch = Xobj.ibatch + 1;
-
-    % Lap time for each batch
-    OpenCossan.getTimer().lap('description',[' Batch #' num2str(Xobj.ibatch)]);
-  
-    % Number of samples current batch    
-    if Xobj.ibatch==Xobj.Nbatches || Xobj.Nsimxbatch==0
-        Ns=Xobj.Nlastbatch;
-    else
-        Ns=Xobj.Nsimxbatch;
+batch = 0;
+while true
+     batch = batch + 1;
+     
+    opencossan.OpenCossan.cossanDisp(...
+        sprintf("Monte Carlo simulation batch #%i (%i samples)", batch, obj.Nsimxbatch), 4);
+    
+    samples = obj.sample('Nsamples',obj.Nsimxbatch,'Xinput',model.Input);
+    
+    simDataBatch = apply(model,samples);
+    simDataBatch.Samples.Batch = repmat(batch, obj.Nsimxbatch, 1);
+    
+    simData = simData + simDataBatch;
+    
+    % check termination
+    [exit, flag] = obj.checkTermination(simData);
+    
+    if exit
+        simData.ExitFlag = flag;
+        break;
     end
-    
-    % update counter for Nsamples
-    Xobj.isamples = Xobj.isamples + Ns;
-    
-    OpenCossan.cossanDisp(['Monte Carlo Sampling simulation Batch ' num2str(Xobj.ibatch) ...
-            ' ( ' num2str(Ns) ' samples)' ],4)
-        
-    % Generate samples
-    samples = Xobj.sample('Nsamples',Ns,'Xinput',Xinput);    
-    
-    %% evaluate performance function
-    Xout = apply(Xtarget, samples);
-                
-    %% Export results
-    if ~Xobj.Lintermediateresults
-        XsimOut(Xobj.ibatch)=Xout;  %#ok<AGROW>
-    else
-        Xobj.exportResults('XsimulationOutput',Xout);
-        % Keep in memory only the SimulationData of the last batch
-        XsimOut=Xout; 
-    end
-    
-    % check termination criteria
-    SexitFlag=checkTermination(Xobj,XsimOut);
 end
 
-% Add termination criteria to the FailureProbability
-XsimOut(end).SexitFlag=SexitFlag;
-XsimOut(end).SbatchFolder=[OpenCossan.getWorkingPath filesep Xobj.SbatchFolder];
-OpenCossan.getTimer().lap('description','End apply@MonteCarlo');
-
 %% Restore Random Stream
-restoreRandomStream(Xobj);
+restoreRandomStream(obj);
 
 

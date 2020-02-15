@@ -74,7 +74,7 @@ XmodelBeamMatlab = opencossan.common.Model('Input', Xinput, 'Evaluator', Xevalua
 
 % Perform deterministic analysis
 Xout = XmodelBeamMatlab.deterministicAnalysis();
-NominalDisplacement = Xout.getValues('Sname', 'w');
+NominalDisplacement = Xout.Samples.w;
 
 % Validate Solution
 assert(abs(NominalDisplacement - 7.1922e-03) < 1e-6, ...
@@ -91,8 +91,7 @@ XsimOutMC = Xmc.apply(XmodelBeamMatlab);
 % show scatter of the beam tip displacement
 f1 = figure;
 fah = gca(f1);
-Vw = XsimOutMC.getValues('Sname', 'w');
-histogram(fah, Vw, 50);
+histogram(fah, XsimOutMC.Samples.w, 50);
 
 %% Close Figures
 close(f1)

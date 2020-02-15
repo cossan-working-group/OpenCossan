@@ -54,6 +54,8 @@ else
     VX = copularnd('Gaussian', obj.NatafModel.Correlation,Nsamples);
 end
 
+VX = cdf2physical(obj, VX);
+
 samples = array2table(VX);
 samples.Properties.VariableNames = obj.Names;
 

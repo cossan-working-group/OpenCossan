@@ -1,4 +1,4 @@
-classdef Simulations
+classdef (Abstract) Simulations
     % Abstract class for creating simulations methods
     % Subclass constructor should accept
     % property name/property value pairs
@@ -95,7 +95,7 @@ classdef Simulations
         
         [Xobj, Xinput]=checkInputs(Xobj,Xtarget) % Validate the input and initialize the random generator stream (if necessary)
         
-        SexitFlag=checkTermination(Xobj,Xresults) % Check the termination criteria 
+        [exit, flag] = checkTermination(Xobj,Xresults) % Check the termination criteria 
         
         function restoreRandomStream(Xobj) % This method restore the OpenCossan random stream as a global stream
             %% Restore RandomStream
