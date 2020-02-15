@@ -5,12 +5,14 @@
 %Author: Hector Diego Estrada-Lugo
 %Supervisor: Edoardo Patelli
 %
-% Import required packages
+% Import required packages (Need to be in the root of OpenCossan so it works)
+clear all
+
 import opencossan.bayesiannetworks.BayesianNetwork
 import opencossan.bayesiannetworks.EnhancedBayesianNetwork
 import opencossan.bayesiannetworks.ProbabilisticNode
 import opencossan.bayesiannetworks.DiscreteNode
-import opencossan.common.inputs.*
+import opencossan.common.inputs.random.*
 import opencossan.simulations.MonteCarlo %To reduce the network
 
 
@@ -74,10 +76,8 @@ Nodes(1,n)=DiscreteNode('Name','WaterLevel','CPD',CPD_WaterLevel,...
 % Node5: Wave Raising Height (state 1= 10m/s; state 2= 22m/s windspeed)
 n=n+1;
 CPD_WaveRaising=cell(2,1);
-CPD_WaveRaising(1,1)={RandomVariable('Sdescription','WaveRaising','Sdistribution',...
-    'Rayleigh','par1',0.387)}; % Wind speed=10m/s
-CPD_WaveRaising(2,1)={RandomVariable('Sdescription','WaveRaising','Sdistribution',...
-    'Rayleigh','par1',2.068)}; % Wind speed=22m/s
+CPD_WaveRaising(1,1)={RayleighRandomVariable('Description','WaveRaising','Sigma', 0.387)}; % Wind speed=10m/s
+CPD_WaveRaising(2,1)={RayleighRandomVariable('Description','WaveRaising','Sigma',2.068)}; % Wind speed=22m/s
 Nodes(1,n)=ProbabilisticNode('Name','WaveRaising','CPD',CPD_WaveRaising,...
     'Parents',"WindVelocity");
 

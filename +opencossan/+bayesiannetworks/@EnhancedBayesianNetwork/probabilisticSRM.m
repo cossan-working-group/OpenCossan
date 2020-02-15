@@ -137,10 +137,17 @@ for iSRM=1:prod(Vsrm)
     % Build Performance Function
     Xpf=opencossan.reliability.PerformanceFunction('Script',[CSscript{1,:}], ...
                 'Format','table','OutputName','out',...
-                'InputNames', Xinput.Names,'IsFunction',false);
-                    
-    % Build Probabilistic Model    
-    Xpm=opencossan.reliability.ProbabilisticModel('Xinput',Xinput,'Xevaluator',Xev,'XperformanceFunction',Xpf);
+                'InputNames', cellstr(Xinput.Names),'IsFunction',false);
+%     Xpf=PerformanceFunction('Sdescription', 'Performance function', ...
+%                 'Sscript',[CSscript{1,:}],'Sformat','table', ...
+%                 'Outputname','out','Cinputnames', Xinput.Cnames,'Lfunction',false);            
+                
+    % Build Probabilistic Model
+    model = opencossan.common.Model('Input', Xinput, 'Evaluator', Xev);
+    Xpm=opencossan.reliability.ProbabilisticModel('Model',model,...
+        'performanceFunction',Xpf);
+%     XprobModelBeamMatlab = opencossan.reliability.ProbabilisticModel(...
+%     'Model', XmodelBeamMatlab, 'PerformanceFunction', Xperfun);
     
    %% COMPUTE FAILURE PROBABILITY
     if Lform 
