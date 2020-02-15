@@ -30,31 +30,37 @@ classdef Worker < matlab.mixin.Heterogeneous & opencossan.common.CossanObject
     
     properties
         OutputNames cell {opencossan.common.utilities.isunique(OutputNames)}
-        InputNames  cell {opencossan.common.utilities.isunique(InputNames)} 
+        InputNames  cell {opencossan.common.utilities.isunique(InputNames)}
         KeepSimulationFiles(1,1) logical = false % Keep simulation files
     end
     
     methods (Abstract)
         % Evaluate the workerObject based on the realizations provided in a
-        % Table object 
-        TableOutput=evaluate(workerObject,TableInput);        
-    end  
+        % Table object
+        TableOutput=evaluate(workerObject,TableInput);
+    end
     
-    methods 
-         function obj = Worker(varargin)
+    methods
+        function obj = Worker(varargin)
             
-            [requiredArgs, varargin] = opencossan.common.utilities.parseRequiredNameValuePairs(...
-                    ["InputNames","OutputNames"], varargin{:});
-            
-            [optionalArgs, superArg] = opencossan.common.utilities.parseOptionalNameValuePairs(...
-                    "KeepSimulationFiles",{false}, varargin{:});
+            if nargin == 0
+                superArg = {};
+            else
                 
+                [requiredArgs, varargin] = opencossan.common.utilities.parseRequiredNameValuePairs(...
+                    ["InputNames","OutputNames"], varargin{:});
+                
+                [optionalArgs, superArg] = opencossan.common.utilities.parseOptionalNameValuePairs(...
+                    "KeepSimulationFiles",{false}, varargin{:});
+            end
             obj@opencossan.common.CossanObject(superArg{:});
-
-            obj.InputNames=requiredArgs.inputnames;
-            obj.OutputNames=requiredArgs.outputnames;
-            obj.KeepSimulationFiles=optionalArgs.keepsimulationfiles;
-        end     
+            
+            if nargin > 0
+                obj.InputNames=requiredArgs.inputnames;
+                obj.OutputNames=requiredArgs.outputnames;
+                obj.KeepSimulationFiles=optionalArgs.keepsimulationfiles;
+            end
+        end
     end
 end
 

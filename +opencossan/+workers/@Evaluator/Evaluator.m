@@ -24,7 +24,7 @@ along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
     %}
     
     properties
-        JobInterface opencossan.highperformancecomputing.JobManagerInterface  % Define JobManager to submit job to grid/cluster computer
+        JobManager opencossan.highperformancecomputing.JobManagerInterface  % Define JobManager to submit job to grid/cluster computer
         Solvers(1,:) %List of OpenCossan Workers opencossan.workers.Worker
         SolversName(1,:) string    % Names of the workers (optional)
         Queues(1,:) cell                         % Where to submit solvers
@@ -32,7 +32,7 @@ along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
         ParallelEnvironments(:,1) cell  % Name of the parallel environment of each solver
         Slots(1,:) double {mustBeInteger} % Number of slots used in each job
         IsCompiled(1,:) logical         % Number of slots used in each job
-        MaxCuncurrentJobs(1,:) double {mustBeInteger,mustBePositive} = 1  % Number of concurrent execution of each solver
+        MaxCuncurrentJobs(1,:) double {mustBePositive} = 1  % Number of concurrent execution of each solver
         RemoteInjectExtract = false %TODO: make it true by default
         VerticalSplit = false  % if true split the analysis in vertical components (see wiki for more details)
         MaxNumberofJobs double {mustBeInteger,mustBePositive} = 1                % max number of jobs submitted for each analysis
@@ -66,7 +66,7 @@ along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
                 % Define optional arguments and default values
                 
                 OptionalsArguments={...
-                    "JobInterface", opencossan.highperformancecomputing.JobManagerInterface.empty(1,0);...
+                    "JobManager", opencossan.highperformancecomputing.JobManagerInterface.empty(1,0);...
                     "Queues",[];...
                     "Hostnames",[];...
                     "ParallelEnvironments",[];...
@@ -101,13 +101,14 @@ along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
                         numel(obj.Solvers),numel(obj.SolversName));
                 end
                 
-                obj.JobInterface = optionalArg.jobinterface;
+                obj.JobManager = optionalArg.jobmanager;
                 obj.Queues = optionalArg.queues;
                 obj.Hostnames = optionalArg.hostnames;
                 obj.ParallelEnvironments = optionalArg.parallelenvironments;
                 obj.Slots = optionalArg.slots;
                 obj.IsCompiled = optionalArg.iscompiled;
                 obj.MaxCuncurrentJobs = optionalArg.maxcuncurrentjobs;
+                obj.RemoteInjectExtract=optionalArg.remoteinjectextract;
                 obj.VerticalSplit = optionalArg.verticalsplit;
                 obj.MaxNumberofJobs = optionalArg.maxnumberofjobs;
                 obj.WrapperMatlabInputName = optionalArg.wrappermatlabinputname;
@@ -129,7 +130,7 @@ along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
                 OutputNames={};
                 for n=1:length(Xobj.Solvers)
                     if isrow(Xobj.Solvers(n).OutputNames)
-                        Caddoutput=Xobj.Solvers{n}.OutputNames;
+                        Caddoutput=Xobj.Solvers(n).OutputNames;
                     else
                         Caddoutput=transpose(Xobj.Solvers(n).OutputNames);
                     end
@@ -154,10 +155,10 @@ along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
                     end
                     CaddInputs(Vindex)=[];
                     
-                    if isrow(Xobj.CXsolvers(n-1).Coutputnames)
-                        Caddoutput=Xobj.CXsolvers(n-1).Coutputnames;
+                    if isrow(Xobj.Solvers(n-1).OutputNames)
+                        Caddoutput=Xobj.Solvers(n-1).OutputNames;
                     else
-                        Caddoutput=transpose(Xobj.CXsolvers(n-1).Coutputnames);
+                        Caddoutput=transpose(Xobj.Solvers(n-1).OutputNames);
                     end
                     CoutEvaluator=[CoutEvaluator Caddoutput];  %#ok<AGROW>
                     

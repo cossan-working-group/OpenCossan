@@ -2,10 +2,10 @@
 % Perform optimization using Matlab evaluator
 %
 %
-% See Also http://cossan.cfd.liv.ac.uk/wiki/index.php/Cantilever_Beam
+% See Also http://cossan.co.uk/wiki/index.php/Cantilever_Beam
 %
 % <html>
-% <h3 style="color:#317ECC">Copyright 2006-2014: <b> COSSAN working group</b></h3>
+% <h3 style="color:#317ECC">Copyright 2006-2020: <b> COSSAN working group</b></h3>
 % Author: <b>Edoardo-Patelli</b> <br> 
 % <i>Institute for Risk and Uncertainty, University of Liverpool, UK</i>
 % <br>COSSAN web site: <a href="http://www.cossan.co.uk">http://www.cossan.co.uk</a>
@@ -55,11 +55,11 @@ Xmio=Mio('Spath',fullfile(Sfolder,'MatlabModel'),'Sfile','tipDisplacement.m',...
     'Cinputnames',{'I' 'b' 'L' 'h' 'rho' 'P','E'},'Sformat','structure', ...
     'Coutputnames',{'w'});
 % Add the MIO object to an Evaluator object
-Xevaluator=Evaluator('CXmembers',{Xmio},'CSmembers',{'Xmio'});
+Xevaluator=Evaluator('Solvers',Xmio,'SolversName',"Xmio");
 
 %% Preparation of the Physical Model
 % Define the Physical Model
-Xmodel=Model('Xinput',XinputOptimization,'Xevaluator',Xevaluator);
+Xmodel=Model('Input',XinputOptimization,'Evaluator',Xevaluator);
 
 %% Check feasibility of the optimization preoblem
 % The EesignOfExperiment analysis can be used to see if a feasible solution is

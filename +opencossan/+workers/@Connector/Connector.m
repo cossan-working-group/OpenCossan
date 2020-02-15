@@ -110,12 +110,6 @@ classdef Connector < opencossan.workers.Worker
             %  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
             % =====================================================================
 
-            
-            %%  Argument Check
-            if opencossan.OpenCossan.getChecks
-                opencossan.OpenCossan.validateCossanInputs(varargin{:});            
-            end
-            
             if nargin==0
                 return
             end

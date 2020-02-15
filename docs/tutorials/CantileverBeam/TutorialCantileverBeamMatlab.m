@@ -65,11 +65,11 @@ display(Xinput)
 %% Preparation of the Evaluator
 % Use of a matlab script to compute the Beam displacement
 currentFolder = fileparts(mfilename('fullpath'));
-Xmio = opencossan.workers.Mio('FullFileName', fullfile(currentFolder, 'model', 'tipDisplacement.m'), ...
+Xmio = opencossan.workers.MatlabWorker('FullFileName', fullfile(currentFolder, 'model', 'tipDisplacement.m'), ...
     'InputNames', {'I', 'b', 'L', 'h', 'rho', 'P', 'E'}, ...
     'OutputNames', {'w'}, 'Format', 'structure');
 % Add the MIO object to an Evaluator object
-Xevaluator = opencossan.workers.Evaluator('CXmembers', {Xmio}, 'CSmembers', {'Xmio'});
+Xevaluator = opencossan.workers.Evaluator('Solvers', Xmio, 'SolversName',"Xmio");
 
 %% Preparation of the Physical Model
 % Define the Physical Model

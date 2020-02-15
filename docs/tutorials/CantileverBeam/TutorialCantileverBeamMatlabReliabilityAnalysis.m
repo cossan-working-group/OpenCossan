@@ -50,7 +50,7 @@ display(XfailureProbMC);
 % Validate Solution
 assert(XfailureProbMC.pfhat == 0.06922,...
        'CossanX:Tutorials:CantileverBeam',...
-       'Reference Solution pf MCS not matched.');
+       'Computed solution does not match with the reference solution.');
 
 %% Reliability Analysis via Latin Hypercube Sampling
 % Reset the random number generator to always produce the same results

@@ -23,7 +23,29 @@ classdef EvaluatorTest < matlab.unittest.TestCase
     % =====================================================================
     
     properties
+        MatWorker
+        MatWorker2
+        ConWorker
     end
+        methods (TestClassSetup)
+               
+        
+        function defineWorker(testCase)
+            testCase.MatWorker  = opencossan.workers.MatlabWorker( ...
+                'Description','covariance function', ...
+                'Format','structure',...
+                'InputNames',{'TestInput'},... % Define the inputs
+                'Script', "%Do Nothing",'OutputNames',{'TestOutput'}); % Define the outputs
+            
+                 testCase.MatWorker2  = opencossan.workers.MatlabWorker('Script',"Toutput.out2=Tinput.out1+5;", ...
+                'Format',"structure", ...
+                'OutputNames',{'out3'},...
+                'InputNames',{'X1' 'X2' 'X4' 'out1'});
+            
+            testCase.ConWorker=opencossan.workers.Connector;
+        end
+        
+        end
     
     methods (Test)
         %% Constructor
@@ -33,156 +55,123 @@ classdef EvaluatorTest < matlab.unittest.TestCase
         end
         
         function constructorShouldSetDescription(testCase)
-            Xe = workers.Evaluator('Description','Evaluator');
-            testCase.assertEqual(Xe.Description,'Evaluator');
+            Xe = opencossan.workers.Evaluator('Description','Evaluator',...
+                'Solver',testCase.MatWorker );
+            testCase.assertEqual(Xe.Description,"Evaluator");
         end
         
         function constructorShouldSetMatlabWorker(testCase)
-            Xmio = workers.MatlabWorker('Coutputnames',{'output'},...
-                'Cinputnames',{'input'},'Sscript','%do nothing');
-            Xe = workers.Evaluator('Solvers',Xmio,'SolversName',"Xmio");
-            testCase.assertEqual(Xe.Solvers{1},Xmio);
+            Xe = opencossan.workers.Evaluator('Solvers',testCase.MatWorker,...
+                'SolversName',{'Xmio'});
+            testCase.assertEqual(Xe.Solvers(1),testCase.MatWorker);
         end
         
         function constructorShouldFail(testCase)
-            Xmio = workers.MatlabWorker('Coutputnames',{'output'},...
-                'Cinputnames',{'input'},'Sscript','%do nothing');
             
-            Xe = workers.Evaluator('Solvers',Xmio,'SolversName',["MatlabWorker" "ExtraName"]);
-            testCase.assertEqual(Xe.Solvers{1},XMatlabWorker);
+            Xe = opencossan.workers.Evaluator('Solvers',[testCase.MatWorker testCase.MatWorker2],...
+                'SolversName',{'MatlabWorker' 'ExtraName'});
+            testCase.assertEqual(Xe.Solvers(2),testCase.MatWorker2);
         end
         
        
         
         function constructorShouldSetJobManagerInterface(testCase)
-            Xjmi = highperformancecomputing.JobManagerInterface();
-            Xe = workers.Evaluator('JobManager',Xjmi);
-            testCase.assertEqual(Xe.XjobInterface,Xjmi);
+            Xjmi = opencossan.highperformancecomputing.JobManagerInterface();
+            Xe = opencossan.workers.Evaluator('Solvers',testCase.MatWorker,'JobManager',Xjmi);
+            testCase.assertEqual(Xe.JobManager,Xjmi);
         end
         
         function constructorShouldSetLremoteInjectExtract(testCase)
-            Xe = workers.Evaluator('RemoteInjectExtract',true);
+            Xe = opencossan.workers.Evaluator('Solvers',testCase.MatWorker,...
+                'RemoteInjectExtract',true);
             testCase.assertTrue(Xe.RemoteInjectExtract);
         end
         
         function constructorShouldSetHostNames(testCase)
-            Xcon = workers.Connector;
-            Xmio = workers.MatlabWorker('Coutputnames',{'output'},...
-                'Cinputnames',{'input'},'Sscript','%do nothing');
-            Squeues = ["Queue1" "Queue2"];
-            Shostnames = ["Host1","Host2"];
-            Xe = workers.Evaluator('Solvers',{Xcon Xmio},'Hostnames',Shostnames,...
+            
+            Squeues = {'Queue1' 'Queue2'};
+            Shostnames = {'Host1','Host2'};
+            Xe = opencossan.workers.Evaluator('Solvers',[testCase.ConWorker testCase.MatWorker],...
+                'Hostnames',Shostnames,...
                 'Queues',Squeues);
-            testCase.assertEqual(Xe.CShostnames,CShostnames);          
+            testCase.assertEqual(Xe.Hostnames,Shostnames);          
         end
         
         function constructorShouldSetQueues(testCase)
-            Xcon = workers.Connector;
-            Xmio = workers.Mio('Coutputnames',{'output'},...
-                'Cinputnames',{'input'},'Sscript','%do nothing');
-            Squeues = ["Queue1" "Queue2"];
-            Xe = workers.Evaluator('Xconnector',Xcon,'Xmio',...
-                Xmio,'Queues',Squeues);
+            Squeues = {'Queue1' 'Queue2'};
+            Xe = opencossan.workers.Evaluator('Solvers',...
+                [testCase.ConWorker testCase.MatWorker],'Queues',Squeues);
             testCase.assertEqual(Xe.Queues,Squeues);
         end
         
         function constructorShouldSetVconcurrent(testCase)
-            Xcon = workers.Connector;
-            Xmio = workers.Mio('Coutputnames',{'output'},...
-                'Cinputnames',{'input'},'Sscript','%do nothing');
-            Xe = workers.Evaluator('Solvers',{Xcon Xmio},...
-                'Concurrent',[Inf 4]);
-            testCase.assertEqual(Xe.Concurrent,[Inf 4]);
+            Xe = opencossan.workers.Evaluator('Solvers',[testCase.ConWorker testCase.MatWorker],...
+                'MaxCuncurrentJobs',[Inf 4]);
+            testCase.assertEqual(Xe.MaxCuncurrentJobs,[Inf 4]);
         end
         
         function constructorShouldSetMembers(testCase)
-            Xcon = workers.Connector;
-            Xmio = workers.Mio('Coutputnames',{'output'},...
-                'Cinputnames',{'input'},'Sscript','%do nothing');
-            Xe = workers.Evaluator('CXmembers',{Xcon Xmio});
-            testCase.assertEqual(Xe.CXsolvers,{Xcon Xmio});
+            Xe = opencossan.workers.Evaluator('Solvers',[testCase.ConWorker testCase.MatWorker]);
+            testCase.assertEqual(Xe.Solvers,[testCase.ConWorker testCase.MatWorker]);
         end
         
         function constructorShouldSetNames(testCase)
-            Xcon = workers.Connector;
-            Xmio = workers.Mio('Coutputnames',{'output'},...
-                'Cinputnames',{'input'},'Sscript','%do nothing');
-            CSnames = {'Connector Name', 'Mio name'};
-            Xe = workers.Evaluator('Xconnector',Xcon,'Xmio',...
-                Xmio,'CSnames',CSnames);
-            testCase.assertEqual(Xe.CXsolvers,{Xcon Xmio});
-            testCase.assertEqual(Xe.CSnames,CSnames);
+            CSnames = ["Connector Name", "Mio name"];
+            Xe = opencossan.workers.Evaluator('Solvers',[testCase.ConWorker testCase.MatWorker],'SolversName',CSnames);
+            testCase.assertEqual(Xe.Solvers,[testCase.ConWorker  testCase.MatWorker]);
+            testCase.assertEqual(Xe.SolversName,CSnames);
         end
         
         function constructorShouldSetSolutionSequence(testCase)
-            Xss = workers.SolutionSequence();
-            Xe = workers.Evaluator('XsolutionSequence',Xss);
-            testCase.assertEqual(Xe.CXsolvers{1},Xss);
+            Xss = opencossan.workers.SolutionSequence();
+            Xe = opencossan.workers.Evaluator('Solvers',Xss);
+            testCase.assertEqual(Xe.Solvers(1),Xss);
         end
         
         function constructorShouldSetMetaModel(testCase)
-            Xrs = metamodels.ResponseSurface();
-            Xe = workers.Evaluator('XmetaModel',Xrs);
-            testCase.assertEqual(Xe.CXsolvers{1},Xrs);
+            Xrs = opencossan.metamodels.ResponseSurface();
+            Xe = opencossan.workers.Evaluator('Solvers',Xrs);
+            testCase.assertEqual(Xe.Solvers(1),Xrs);
         end
         
         function constructorShouldSetParallelEnvironment(testCase)
-            Xcon = workers.Connector;
-            Xe = workers.Evaluator('Xconnector',Xcon,'CSparallelEnvironments',{'parallel'});
-            testCase.assertEqual(Xe.CSparallelEnvironments,{'parallel'});
+            Xe = opencossan.workers.Evaluator('Solvers',[testCase.ConWorker testCase.MatWorker],...
+                'ParallelEnvironments',{'parallel'});
+            testCase.assertEqual(Xe.ParallelEnvironments,{'parallel'});
         end
         
         function constructorShouldSetVSlots(testCase)
-            Xcon = workers.Connector;
-            Xmio = workers.Mio('Coutputnames',{'output'},...
-                'Cinputnames',{'input'},'Sscript','%do nothing');
-            Xe = workers.Evaluator('Xconnector',Xcon,'Xmio',...
-                Xmio,'Vslots',[1 1]);
-            testCase.assertEqual(Xe.Vslots,[1 1]);
+            Xe = opencossan.workers.Evaluator('Solvers',[testCase.ConWorker testCase.MatWorker],...
+                'Slots',[1 1]);
+            testCase.assertEqual(Xe.Slots,[1 1]);
         end
         
         function constructorTestInputNames(testCase)
-            Xmio1 = workers.Mio('Sscript','Toutput.out1=1;', ...
-                'Sformat','structure', ...
-                'Coutputnames',{'out1' 'out2'},...
-                'Cinputnames',{'X1' 'X2' 'X3'});
+
+            Xe = opencossan.workers.Evaluator('Solvers',[testCase.MatWorker testCase.MatWorker2]);
             
-            Xmio2 = workers.Mio('Sscript','Toutput.out2=Tinput.out1+5;', ...
-                'Sformat','structure', ...
-                'Coutputnames',{'out3'},...
-                'Cinputnames',{'X1' 'X2' 'X4' 'out1'});
-            
-            Xe = workers.Evaluator('CXmembers',{Xmio1 Xmio2});
-            
-            Cinput={'X1' 'X2' 'X3' 'X4'};
-            testCase.assertEqual(Xe.Cinputnames,Cinput);
+            Cinput=[testCase.MatWorker.InputNames testCase.MatWorker2.InputNames];
+            testCase.assertEqual(Xe.InputNames,Cinput);
         end
         
         function constructorTestOutputNames(testCase)
-            Xmio1 = workers.Mio('Sscript','Toutput.out1=1;', ...
-                'Sformat','structure', ...
-                'Coutputnames',{'out1' 'out2'},...
-                'Cinputnames',{'X1' 'X2' 'X3'});
+
             
-            Xmio2 = workers.Mio('Sscript','Toutput.out2=Tinput.out1+5;', ...
-                'Sformat','structure', ...
-                'Coutputnames',{'out3'},...
-                'Cinputnames',{'X1' 'X2' 'X4' 'out1'});
+            Xe = opencossan.workers.Evaluator('Solvers',[testCase.MatWorker testCase.MatWorker2]);
             
-            Xe = workers.Evaluator('CXmembers',{Xmio1 Xmio2});
-            
-            Coutput={'out1' 'out2' 'out3'};
-            testCase.assertEqual(Xe.Coutputnames,Coutput);
+            Coutput=[testCase.MatWorker.OutputNames testCase.MatWorker2.OutputNames];
+            testCase.assertEqual(Xe.OutputNames,Coutput);
         end
         
         %% Deterministic Analysis
         function deterministicAnalyis(testCase)
-            Xmio = workers.Mio('Sscript','Toutput.out1=Tinput.Xpar','CoutputNames',{'out1'},'CinputNames',{'Xpar'},'Sformat','structure');
-            Xpar = common.inputs.Parameter('value',10.2);
-            Xinput = common.inputs.Input('Xparameter',Xpar);
-            Xe  = workers.Evaluator('CXmembers',{Xmio},'CSnames',{'mio Name'});
+            Xmio = opencossan.workers.MatlabWorker('Script',"Toutput.out1=Tinput.Xpar",...
+                'OutputNames',{'out1'},'InputNames',{'Xpar'},'Format',"structure");
+            Xpar = opencossan.common.inputs.Parameter('value',10.2);
+            Xinput = opencossan.common.inputs.Input('Parameter',Xpar);
+            Xe  = opencossan.workers.Evaluator('Solvers',Xmio,'SolversName',"mio Name");
             Xout=Xe.deterministicAnalysis(Xinput);
-            testCase.assertClass(Xout,'common.outputs.SimulationData');
+            testCase.assertClass(Xout,'opencossan.common.outputs.SimulationData');
             testCase.assertEqual(Xout.getValues('Sname','out1'),10.2);
         end
         
