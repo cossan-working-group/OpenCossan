@@ -27,8 +27,6 @@ function out = evaluate(obj, input)
     % Create executable expression by replacing the tokens with the values from the input table
     expression = obj.Expression;
     
-    
-    
     for token = obj.Tokens
         expression = replace(expression, sprintf("<&%s&>", token{1}), sprintf("input.%s", token{1}));
     end
@@ -41,5 +39,4 @@ function out = evaluate(obj, input)
             strjoin("Function could not be evaluated successfully. Syntax may be invalid.\n", ...
             ME.message));
     end
-    
 end

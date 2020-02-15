@@ -145,19 +145,6 @@ classdef Function < opencossan.common.CossanObject
             obj.Expression = Sexpression;
             obj=findToken(obj);
         end
-        
-        function Cinputnames=get.InputNames(obj)
-            if isempty(obj.Tokens)
-                Cinputnames={};
-            else
-                Ntoken=length(obj.Tokens);
-                Cinputnames=cell(Ntoken,1);
-                for n=1:Ntoken
-                    Cinputnames(n)=obj.Tokens(n);
-                end
-            end
-        end
-        
     end
     
     methods (Access=protected)
