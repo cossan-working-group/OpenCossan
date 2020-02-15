@@ -2,13 +2,7 @@ classdef (Abstract) RandomVariable < matlab.mixin.Heterogeneous & opencossan.com
     %RANDOMVARIABLE This class is abstract and defines presettings for
     %   several specializations.
     %
-    %   For more detailed information, see
-    %   <https://cossan.co.uk/wiki/index.php/@RandomVariable>.
-    %
-    %   Properties:
-    %       Mean
-    %       Std
-    %       Shift
+    % See also: RandomVariableSet, Input
     
     %{
     This file is part of OpenCossan <https://cossan.co.uk>.
