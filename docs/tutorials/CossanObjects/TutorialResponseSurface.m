@@ -1,8 +1,7 @@
 %**************************************************************************
 % In this tutorial it is shown how to construct a ResponseSurface object 
 %
-% See Also: 
-% http://cossan.cfd.liv.ac.uk/wiki/index.php/@ResponseSurface
+% See Also: ResponseSurface
 
 % Author: Matteo Broggi & Edoardo Patelli
 % Institute for Risk and Uncertainty, University of Liverpool, UK
@@ -71,13 +70,13 @@ Xin = add(Xin,'Member',Xthreshold2,'Name','Xthreshold2');
 %   displacement = load * length^3 / (3 * Young's modulus * Inertia)
 % 
 %2.1. Definition of MIO object and construction of evaluator
-Xmio = Mio('Description','displacement at tip of cantilever beam', ...
+Xmio = opencossan.workers.MatlabWorker('Description','displacement at tip of cantilever beam', ...
         'Script','for i=1:length(Tinput),    Toutput(i).disp  = Tinput(i).XP*Tinput(1).XL^3/(3*Tinput(1).XE*Tinput(i).XI);end',...
         'InputNames',{'XP','XL','XE','XI'},...
         'OutputNames',{'disp'},...
         'Format','structure');
 %2.2. Add MIO to evaluator
-Xev = opencossan.workers.Evaluator('sdescription','displacement at tip of cantilever beam','XMio',Xmio);
+Xev = opencossan.workers.Evaluator('Description','displacement at tip of cantilever beam','Solver',Xmio);
 %2.3. Add Evaluator to a model
 Xmod = Model('Evaluator',Xev,'Input',Xin);
 
@@ -87,7 +86,7 @@ Xmod = Model('Evaluator',Xev,'Input',Xin);
 Xrs     = opencossan.metamodels.ResponseSurface('sdescription',...
     'response surface of tip displacement of cantilever beam',...
     'XfullModel',Xmod,...   %full model
-    'Cinputnames',{'XP' 'Xh'},... 
+    'Cinputnames',{'XP' 'XI'},... 
     'Coutputnames',{'disp'},...  %response to be extracted from full model
     'Stype','custom',...
     'Nmaximumexponent',4);   %type of response surface
@@ -109,7 +108,7 @@ Xmc=MonteCarlo('Sdescription','Mio evaluation','Nsamples',1000,'Nbatches',1);
 Xo_real = Xpm_real.computeFailureProbability(Xmc)
 
 %% Metamodel can also be also combined and used in a Evaluator
-XevRS=Evaluator('Sdescription','displacement at tip of cantilever beam','Xmetamodel',Xrs);
+XevRS=Evaluator('Description','displacement at tip of cantilever beam','Solver',Xrs);
 XmodRS= Model('Evaluator',XevRS,'Input',Xin);
 Xpm_metamodel = ProbabilisticModel('Model',XmodRS,'PerformanceFunction',Xpf);
 Xo_metamodel = Xpm_metamodel.computeFailureProbability(Xmc)

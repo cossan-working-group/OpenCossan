@@ -9,30 +9,30 @@ function XSimData = apply(Xobj,Pinput)
 %
 %  Usage:  XSimout = Xev.apply(Pinput)
 %
-% See Also: http://cossan.co.uk/wiki/index.php/Apply@Evaluator
+% See Also: Evaluator, Worker
 %
 %
 % Author: Edoardo Patelli
-% Institute for Risk and Uncertainty, University of Liverpool, UK
 % email address: openengine@cossan.co.uk
 % Website: http://www.cossan.co.uk
 
-% =====================================================================
-% This file is part of openCOSSAN.  The open general purpose matlab
-% toolbox for numerical analysis, risk and uncertainty quantification.
-%
-% openCOSSAN is free software: you can redistribute it and/or modify
-% it under the terms of the GNU General Public License as published by
-% the Free Software Foundation, either version 3 of the License.
-%
-% openCOSSAN is distributed in the hope that it will be useful,
-% but WITHOUT ANY WARRANTY; without even the implied warranty of
-% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-% GNU General Public License for more details.
-%
-%  You should have received a copy of the GNU General Public License
-%  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
-% =====================================================================
+    %{
+This file is part of OpenCossan <https://cossan.co.uk>.
+Copyright (C) 2006-2020 COSSAN WORKING GROUP
+
+OpenCossan is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License or,
+(at your option) any later version.
+
+OpenCossan is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
+    %}
 
 import opencossan.common.outputs.SimulationData
 import opencossan.highperformancecomputing.*
@@ -61,7 +61,7 @@ end
 % Add input variables to the SimulationData object
 XSimInp=SimulationData('Table',TableInput);
 
-if isempty(Xobj.Solvers)
+if isempty(Xobj.Solver)
     XSimData=XSimInp;
     % Add input samples to the Simulation output object
     XSimData.Sdescription= 'created by the Evaluator with no workers';
@@ -70,34 +70,18 @@ end
 
 if Xobj.VerticalSplit    
     % Setting the JobManager
-    if ~isempty(Xobj.Queues)
-        % Setting the JobManager
-        Xjob=JobManager('XjobManagerInterface',Xobj.JobInterface, ...
-            'Squeue',Xobj.Queues(1),'Shostname',Xobj.Hostnames(1), ...
-            'SparallelEnvironment',Xobj.ParallelEnvironments{1},...
-            'Nslots',Xobj.Slots(1),...
-            'Nconcurrent',Xobj.MaxCuncurrentJobs(1),...
-            'Sdescription','JobManager created by Evaluator.executeWorkers');
-        
+    if ~isempty(Xobj.JobManager)
         % TODO: Not implemented
-        TableOutput=executeWorkersGrid(Xobj,XSimInp,Xjob);
+        TableOutput=executeWorkersGrid(Xobj,XSimInp);
     else        
         TableOutput=executeWorkersVertical(Xobj,TableInput);
     end
 else
  
     % Setting the JobManager
-    if ~isempty(Xobj.Queues)
-        % Setting the JobManager
-        Xjob=JobManager('XjobManagerInterface',Xobj.XjobInterface, ...
-            'Squeue',Xobj.Queues(1),'Shostname',Xobj.Hostnames{1}, ...
-            'SparallelEnvironment',Xobj.ParallelEnvironments{1},...
-            'Nslots',Xobj.Slots(1),...
-            'Nconcurrent',Xobj.MaxCuncurrentJobs(1),...
-            'Sdescription','JobManager created by Evaluator.executeWorkers');
-        
+    if ~isempty(Xobj.JobManager)
         % TODO: Not implemented
-        TableOutput=executeWorkersGrid(Xobj,XSimInp,Xjob);
+        TableOutput=executeWorkersGrid(Xobj,XSimInp);
     else        
         TableOutput=executeWorkersHorizontal(Xobj,TableInput);  
     end

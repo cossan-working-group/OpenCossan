@@ -25,18 +25,18 @@ along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
     
     properties
         JobManager opencossan.highperformancecomputing.JobManagerInterface  % Define JobManager to submit job to grid/cluster computer
-        Solvers(1,:) %List of OpenCossan Workers opencossan.workers.Worker
-        SolversName(1,:) string    % Names of the workers (optional)
-        Queues(1,:) cell                         % Where to submit solvers
-        Hostnames(1,:) cell             % Names of hostnames where to evaluate workers
-        ParallelEnvironments(:,1) cell  % Name of the parallel environment of each solver
-        Slots(1,:) double {mustBeInteger} % Number of slots used in each job
+        Solver(1,:) %List of OpenCossan Workers opencossan.workers.Worker
+        SolverName(1,:) string    % Names of the workers (optional)
+        Queues(1,:) string                         % Where to submit solvers
+        Hostnames(1,:) string             % Names of hostnames where to evaluate workers
+        ParallelEnvironments(:,1) string  % Name of the parallel environment of each solver
+        Slots(1,:) double {mustBePositive} % Number of slots used in each job
         IsCompiled(1,:) logical         % Number of slots used in each job
         MaxCuncurrentJobs(1,:) double {mustBePositive} = 1  % Number of concurrent execution of each solver
         RemoteInjectExtract = false %TODO: make it true by default
         VerticalSplit = false  % if true split the analysis in vertical components (see wiki for more details)
-        MaxNumberofJobs double {mustBeInteger,mustBePositive} = 1                % max number of jobs submitted for each analysis
-        WrapperMatlabInputName(1,1) string       % Name of the input Matlab file loaded by the job
+        MaxNumberofJobs double {mustBePositive} = 1     % max number of jobs submitted for each analysis
+        WrapperMatlabInputName(1,1) string      % Name of the input Matlab file loaded by the job
         WrapperMatlabOutputName(1,1) string     % Name of the output Matlab file create by the job
     end
     
@@ -61,7 +61,7 @@ along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
                 superArg={};
             else
                 [requiredArgs, varargin] = opencossan.common.utilities.parseRequiredNameValuePairs(...
-                    "Solvers", varargin{:});
+                    "Solver", varargin{:});
                 
                 % Define optional arguments and default values
                 
@@ -78,7 +78,7 @@ along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
                     "MaxNumberofJobs",[];...
                     "WrapperMatlabInputName","";...
                     "WrapperMatlabOutputName","";...
-                    "SolversName",[]};
+                    "SolverName",[]};
                 
                 [optionalArg, superArg] = opencossan.common.utilities.parseOptionalNameValuePairs(...
                     [OptionalsArguments{:,1}],{OptionalsArguments{:,2}}, varargin{:});
@@ -90,15 +90,15 @@ along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
             
             if nargin>0
                 
-                obj.Solvers = requiredArgs.solvers;
+                obj.Solver = requiredArgs.solver;
                 
-                obj.SolversName = optionalArg.solversname;
+                obj.SolverName = optionalArg.solvername;
                 
-                if ~isempty(obj.SolversName)
-                    assert(numel(obj.Solvers) == numel(obj.SolversName),...
+                if ~isempty(obj.SolverName)
+                    assert(numel(obj.Solver) == numel(obj.SolverName),...
                         'Evaluator:IllegalArguments',...
-                        'Number of solvers (%i) specified must be the same size of SolversName (%i)',...
-                        numel(obj.Solvers),numel(obj.SolversName));
+                        'Number of solvers (%i) specified must be the same size of SolverName (%i)',...
+                        numel(obj.Solver),numel(obj.SolverName));
                 end
                 
                 obj.JobManager = optionalArg.jobmanager;
@@ -113,7 +113,11 @@ along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
                 obj.MaxNumberofJobs = optionalArg.maxnumberofjobs;
                 obj.WrapperMatlabInputName = optionalArg.wrappermatlabinputname;
                 obj.WrapperMatlabOutputName = optionalArg.wrappermatlaboutputname;
+                
+                 obj=validateObject(obj);
             end
+            
+           
         end %end constructor
         
         Xout=apply(Xobj,Pinput) % Run the analysis
@@ -124,15 +128,15 @@ along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
         
         function OutputNames=get.OutputNames(Xobj)
             % Extract output names from the target object
-            if isempty(Xobj.Solvers)
+            if isempty(Xobj.Solver)
                 OutputNames={};
             else
                 OutputNames={};
-                for n=1:length(Xobj.Solvers)
-                    if isrow(Xobj.Solvers(n).OutputNames)
-                        Caddoutput=Xobj.Solvers(n).OutputNames;
+                for n=1:length(Xobj.Solver)
+                    if isrow(Xobj.Solver(n).OutputNames)
+                        Caddoutput=Xobj.Solver(n).OutputNames;
                     else
-                        Caddoutput=transpose(Xobj.Solvers(n).OutputNames);
+                        Caddoutput=transpose(Xobj.Solver(n).OutputNames);
                     end
                     OutputNames=[OutputNames Caddoutput]; %#ok<AGROW>
                 end
@@ -141,13 +145,13 @@ along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
         
         function InputNames=get.InputNames(Xobj)
             % Extract output names from the target object
-            if isempty(Xobj.Solvers)
+            if isempty(Xobj.Solver)
                 InputNames={};
             else
-                InputNames=Xobj.Solvers(1).InputNames;
+                InputNames=Xobj.Solver(1).InputNames;
                 CoutEvaluator={};
-                for n=2:length(Xobj.Solvers)
-                    CaddInputs=Xobj.Solvers(n).InputNames; % tmp variable
+                for n=2:length(Xobj.Solver)
+                    CaddInputs=Xobj.Solver(n).InputNames; % tmp variable
                     % Remove already present inputs
                     Vindex=false(length(CaddInputs),1);
                     for j=1:length(CaddInputs)
@@ -155,10 +159,10 @@ along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
                     end
                     CaddInputs(Vindex)=[];
                     
-                    if isrow(Xobj.Solvers(n-1).OutputNames)
-                        Caddoutput=Xobj.Solvers(n-1).OutputNames;
+                    if isrow(Xobj.Solver(n-1).OutputNames)
+                        Caddoutput=Xobj.Solver(n-1).OutputNames;
                     else
-                        Caddoutput=transpose(Xobj.Solvers(n-1).OutputNames);
+                        Caddoutput=transpose(Xobj.Solver(n-1).OutputNames);
                     end
                     CoutEvaluator=[CoutEvaluator Caddoutput];  %#ok<AGROW>
                     

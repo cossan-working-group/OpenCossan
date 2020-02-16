@@ -1,4 +1,4 @@
-classdef (Abstract) StochasticProcess < opencossan.workers.Mio
+classdef (Abstract) StochasticProcess < opencossan.workers.MatlabWorker
     %STOCHASTICPROCESS The abstract class defines a random process (or a
     %random field) to represent the evolution of some random value, or
     %system, over time or space     

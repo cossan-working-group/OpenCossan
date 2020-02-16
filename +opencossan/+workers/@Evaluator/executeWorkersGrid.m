@@ -1,4 +1,4 @@
-function XSimOut = executeWorkersGrid(Xobj,XSimInp,Xjob)
+function SimOut = executeWorkersGrid(Xobj,PinputALL)
 % EXECUTEWORKERSGRID  This is a protected method of evaluator to run the
 % analysis in vertical chunks using the Job Manager.
 %
@@ -6,7 +6,7 @@ function XSimOut = executeWorkersGrid(Xobj,XSimInp,Xjob)
 %
 %  Usage:  XSimout = executeWorkersGrid(Xobj,XSimInp,Xjob)
 %
-% See Also: http://cossan.co.uk/wiki/index.php/executeWorkers@Evaluator
+% See Also: Evaluator, JobManager
 %
 %
 % Author: Edoardo Patelli
@@ -35,14 +35,14 @@ function XSimOut = executeWorkersGrid(Xobj,XSimInp,Xjob)
 
 % split input samples between jobs
 
-if (Xjob.Nconcurrent == Inf)     % checks whether or not Njobs has been defined
+if (Xobj.MaxCuncurrentJobs == Inf)     % checks whether or not Njobs has been defined
     Njobs      = size(PinputALL,1);   % sets number of jobs equal to number of simulations to be performed
     Vsimxjobs  = ones(size(PinputALL))';    % obviously, there is one simulation per job
 else
-    Njobs      = min(Xjob.Nconcurrent,size(PinputALL,1)); % re-adjusts number of jobs (if required)
-    Vsimxjobs = floor(size(PinputALL,1)/Xjob.Nconcurrent)*ones(1,Xjob.Nconcurrent);
-    Vsimxjobs(1:rem(size(PinputALL,1),Xjob.Nconcurrent)) = ...
-        Vsimxjobs(1:rem(size(PinputALL,1),Xjob.Nconcurrent)) + 1; % sets number of simulations per job
+    Njobs      = min(Xobj.MaxCuncurrentJobs,size(PinputALL,1)); % re-adjusts number of jobs (if required)
+    Vsimxjobs = floor(size(PinputALL,1)/Xobj.Nconcurrent)*ones(1,Xobj.MaxCuncurrentJobs);
+    Vsimxjobs(1:rem(size(PinputALL,1),Xobj.MaxCuncurrentJobs)) = ...
+        Vsimxjobs(1:rem(size(PinputALL,1),Xobj.MaxCuncurrentJobs)) + 1; % sets number of simulations per job
     % if there are less samples than concurrent jobs remove jobs with no samples
     Vsimxjobs(Vsimxjobs==0) = [];
 end
@@ -58,11 +58,11 @@ for irun=1:Njobs
     %  If required, displays information on which job is being processed
     OpenCossan.cossanDisp(['Preparing input file for Worker job #' num2str(irun) ' of ' num2str(Njobs) ],2);
     %  Creates folder where the job will be executed
-    Sfoldername    = [Xjob.Sfoldername '_job_' num2str(irun)];  % defines name of folder where the job will be executed
+    Sfoldername    = [Xobj.JobManager.Sfoldername '_job_' num2str(irun)];  % defines name of folder where the job will be executed
     mkdir(fullfile(OpenCossan.getCossanWorkingPath,Sfoldername));    % creates the folder
     % set the execution command. This is a method/property depending on
     % whether you run worker compiled or not
-    Xjob.Sexecmd = ['cd ' fullfile(OpenCossan.getCossanWorkingPath,Sfoldername) '; '...
+    Xobj.JobManager.Sexecmd = ['cd ' fullfile(OpenCossan.getCossanWorkingPath,Sfoldername) '; '...
         strrep(fullfile(OpenCossan.getMatlabPath,'bin','matlab'),' ','\\ ') ...
         ' -r workers.remoteWorkerJob -nosplash -nodesktop'];
     %  Copy input table and worker into the new grid folder
@@ -181,9 +181,9 @@ else
 end
 
 if  exist('XSimOut','var')
-    XSimOut=XSimOut.merge(Xsimtmp);
+    SimOut=SimOut.merge(Xsimtmp);
 else
-    XSimOut=Xsimtmp;
+    SimOut=Xsimtmp;
 end
 
 

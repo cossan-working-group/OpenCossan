@@ -38,8 +38,8 @@ classdef MatlabWorkerTest < matlab.unittest.TestCase
     
     methods (TestMethodSetup)
         function createInput(testCase)
-            Xrv1 = opencossan.common.inputs.RandomVariable('Sdistribution','uniform','par1',9,'par2',11);
-            Xrv2 = opencossan.common.inputs.RandomVariable('Sdistribution','uniform','par1',14,'par2',16);
+            Xrv1 = opencossan.common.inputs.random.Uniform('par1',9,'par2',11);
+            Xrv2 = opencossan.common.inputs.Uniform('par1',14,'par2',16);
             Xrvs = opencossan.common.inputs.RandomVariableSet('CSMembers',{'Xrv1','Xrv2'},'CXmembers',{Xrv1,Xrv2});
             testCase.Xin = opencossan.common.inputs.Input('CXmembers',{Xrvs},'CSmembers',{'Xrvs'});
         end

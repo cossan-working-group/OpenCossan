@@ -54,14 +54,14 @@ Xin         = Input;
 Xin         = add(Xin,'Member',Xrvset,'Name','Xrvset');
 
 %%  Create Mio to Rosenbrock function
-Xmio = Mio('FullFileName',[fullfile(opencossan.OpenCossan.getRoot),'/lib/MatlabFunctions/Rosenbrock/Rosenbrock.m'],...
+Xmio = opencossan.workers.MatlabWorker('FullFileName',[fullfile(opencossan.OpenCossan.getRoot),'/lib/MatlabFunctions/Rosenbrock/Rosenbrock.m'],...
     'IsFunction',true,...
     'Format','matrix',...
     'Inputnames',{'X1','X2','X3'},...
     'Outputnames',{'out'});
 
 %% Construct the Model
-Xev = Evaluator('Xmio',Xmio);
+Xev = Evaluator('Solver',Xmio);
 Xmod = Model('Evaluator',Xev,'Input',Xin);
 
 %% Construction and Calibration of Polyharmonic Splines

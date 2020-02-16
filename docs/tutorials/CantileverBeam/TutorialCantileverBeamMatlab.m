@@ -69,7 +69,7 @@ Xmio = opencossan.workers.MatlabWorker('FullFileName', fullfile(currentFolder, '
     'InputNames', {'I', 'b', 'L', 'h', 'rho', 'P', 'E'}, ...
     'OutputNames', {'w'}, 'Format', 'structure');
 % Add the MIO object to an Evaluator object
-Xevaluator = opencossan.workers.Evaluator('Solvers', Xmio, 'SolversName',"Xmio");
+Xevaluator = opencossan.workers.Evaluator('Solver', Xmio, 'SolverName',"Xmio");
 
 %% Preparation of the Physical Model
 % Define the Physical Model

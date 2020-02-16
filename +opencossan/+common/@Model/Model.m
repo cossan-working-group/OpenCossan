@@ -62,11 +62,11 @@ classdef Model < opencossan.common.CossanObject
         obj = setGridProperties(obj, varargin);     % Add execution details (i.e. Grid configuration)
         
         function names = get.OutputNames(obj)
-            names = obj.Evaluator.Coutputnames;
+            names = obj.Evaluator.OutputNames;
         end
         
         function names = get.InputNames(obj)
-            names = obj.Input.Names;
+            names = obj.Evaluator.InputNames;
         end
     end
 end

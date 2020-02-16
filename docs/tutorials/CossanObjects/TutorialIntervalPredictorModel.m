@@ -63,13 +63,13 @@ Xin =add(Xin,'Member',Xthreshold2,'Name','Xthreshold2');
 %   displacement = load * length^3 / (3 * Young's modulus * Inertia)
 % 
 %2.1. Definition of MIO object and construction of evaluator
-Xmio = opencossan.workers.Mio('description','displacement at tip of cantilever beam', ...
+Xmio = opencossan.workers.MatlabWorker('description','displacement at tip of cantilever beam', ...
         'Script','for i=1:length(Tinput),    Toutput(i).disp  = Tinput(i).XP*Tinput(1).XL^3/(3*Tinput(1).XE*Tinput(i).XI);end',...
         'InputNames',{'XP','XL','XE','XI'},...
         'OutputNames',{'disp'},...
         'Format','structure');
 %2.2. Add MIO to evaluator
-Xev = opencossan.workers.Evaluator('Sdescription','displacement at tip of cantilever beam','XMio',Xmio);
+Xev = opencossan.workers.Evaluator('Description','displacement at tip of cantilever beam','Solver',Xmio);
 %2.3. Add Evaluator to a model
 Xmod = opencossan.common.Model('Evaluator',Xev,'Input',Xin);
 
@@ -108,7 +108,7 @@ Xmc=opencossan.simulations.MonteCarlo('Sdescription','Mio evaluation','Nsamples'
 Xo_real = Xpm_real.computeFailureProbability(Xmc);
 
 %% Metamodel can also be also combined and used in a Evaluator
-XevRS=opencossan.workers.Evaluator('Sdescription','displacement at tip of cantilever beam','Xmetamodel',Xipm);
+XevRS=opencossan.workers.Evaluator('Description','displacement at tip of cantilever beam','Solver',Xipm);
 XmodRS= opencossan.common.Model('Evaluator',XevRS,'Input',Xin);
 Xpm_metamodel =opencossan.reliability.ProbabilisticModel('Model',XmodRS,'PerformanceFunction',Xpf);
 Xo_metamodel = Xpm_metamodel.computeFailureProbability(Xmc);
@@ -116,7 +116,7 @@ Xo_metamodel = Xpm_metamodel.computeFailureProbability(Xmc);
 assert(Xo_metamodel.pfhat>Xo_real.pfhat,'Upperbound on failure probability should be above the actual value')
 
 %Retry with the chance constraints
-XevRS2=opencossan.workers.Evaluator('Sdescription','displacement at tip of cantilever beam','Xmetamodel',Xipm2);
+XevRS2=opencossan.workers.Evaluator('Description','displacement at tip of cantilever beam','Solver',Xipm2);
 XmodRS2= opencossan.common.Model('Evaluator',XevRS2,'Input',Xin);
 Xpm_metamodel2 = opencossan.reliability.ProbabilisticModel('Model',XmodRS2,'PerformanceFunction',Xpf);
 Xo_metamodel2 = Xpm_metamodel2.computeFailureProbability(Xmc);
