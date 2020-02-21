@@ -5,12 +5,14 @@ classdef FailureProbability < opencossan.common.CossanObject
     
     properties (SetAccess = protected)
         Value(1,1) double {mustBeNonnegative, mustBeLessThanOrEqual(Value, 1)};
+        Variance(1,1) double {mustBeNonnegative};
         SimulationData opencossan.common.outputs.SimulationData;
         Simulation
     end
     
     properties (Dependent)
         ExitFlag;
+        CoV;
     end
     
     methods
@@ -28,7 +30,7 @@ classdef FailureProbability < opencossan.common.CossanObject
                 super_args = {};
             else
                 [required, super_args] = opencossan.common.utilities.parseRequiredNameValuePairs(...
-                    ["value", "simulationdata", "simulation"], varargin{:});
+                    ["value", "simulationdata", "simulation", "variance"], varargin{:});
             end
             
             obj@opencossan.common.CossanObject(super_args{:});
@@ -37,90 +39,17 @@ classdef FailureProbability < opencossan.common.CossanObject
                 obj.Value = required.value;
                 obj.SimulationData = required.simulationdata;
                 obj.Simulation = required.simulation;
+                obj.Variance = required.variance;
             end
         end
         
-        function flag = get.ExitFlag(obh)
+        function flag = get.ExitFlag(obj)
             flag = obj.SimulationData.ExitFlag;
-        end
-%         
-%         function Nlines = get.Nlines(Xobj)
-%             Nlines = sum(Xobj.Vlines);
-%         end % Modulus get method
-%         
-%         function pfhat = get.pfhat(Xobj)
-%             if strcmpi(Xobj.Smethod,'LineSampling')
-%                 Vweigths=Xobj.Vlines/Xobj.Nlines;
-%             else
-%                 Vweigths=Xobj.Vsamples/Xobj.Nsamples;
-%             end
-%             pfhat=sum(Vweigths.*Xobj.Vpf);
-%         end % Modulus get method
-%         
-%         function variancePfhat = get.variancePfhat(Xobj)
-%             % The variance of the estimator of the pfhat
-%             
-%             if length(Xobj.Vsamples)==1
-%                 variancePfhat=Xobj.VvariancePf(1);
-%             else
-%                 %Vweights=Xobj.Vsamples/Xobj.Nsamples; % Weights
-%                 
-%                 %V2 = sum(Vweights.^2); % Correction factor for the Variance
-%                 
-%                 %varMeans = 1/(1-V2)*sum(Vweights.*(Xobj.Vpf - Xobj.pfhat).^2);
-%                 % This is the variance of the estimator of the pfhat and
-%                 % not the second moment.
-%                 %variancePfhat = varMeans/Xobj.Nbatches;
-%                 
-%                 %meanVariances = nansum(Vweights.*Xobj.VsecondMoment);
-%                 S1 = sum(Xobj.Vsamples.*Xobj.Vpf);
-%                 S2 = sum(Xobj.VvariancePf.*Xobj.Vsamples.*(Xobj.Vsamples-1)+ Xobj.Vsamples.*Xobj.Vpf.^2);
-%                 
-%                 %variancePfhat = meanVariances/Xobj.Nbatches;
-%                 variancePfhat=(S2-S1^2/Xobj.Nsamples)/(Xobj.Nsamples-1);
-%                 variancePfhat=variancePfhat/Xobj.Nsamples;
-%             end
-%         end
-%         
-%         function variance = get.variance(Xobj)
-%             % The variance of the total group is equal to the mean of
-%             % the variances of the subgroups plus the variance of the means
-%             % of the subgroups. This property is known as variance
-%             % decomposition or the law of total variance.
-%             % If the batches have unequal sizes, then they must be
-%             % weighted proportionally to their size in the computations of
-%             % the means and variances. The formula is also valid with any
-%             % numbers of batch.
-%             
-%             if length(Xobj.Vsamples)==1
-%                 %variance = Xobj.VcovPf.*Xobj.Vpf;
-%                 variance=Xobj.VsecondMoment;
-%             else
-%                 Vweights=Xobj.Vsamples/Xobj.Nsamples; % Weights
-%                 
-%                 V2 = sum(Vweights.^2); % Correction factor for the Variance
-%                 
-%                 % Retrive the values of the variance for each batch
-%                 %VarianceBatch=(Xobj.VcovPf.*Xobj.Vpf).^2;
-%                 
-%                 meanVariances = nansum(Vweights.*Xobj.VsecondMoment);
-%                 varMeans = 1/(1-V2)*sum(Vweights.*(Xobj.Vpf - Xobj.pfhat).^2);
-%                 
-%                 % This is the variance (i.e. the second moment)
-%                 variance = (meanVariances + varMeans);
-%             end
-%         end
-%         
-%         function cov = get.cov(Xobj)
-%             % Compute the Coefficient of Variation
-%             cov=Xobj.stdPfhat/Xobj.pfhat;
-%         end
-%         
-%         function stdPfhat= get.stdPfhat(Xobj)
-%             % Compute teh standard deviation of the pf estimator
-%             stdPfhat=sqrt(Xobj.variancePfhat);
-%         end
+        end      
         
+        function variance = get.CoV(obj)
+            variance = sqrt(obj.Variance)/obj.Value;
+        end
     end
 end
 

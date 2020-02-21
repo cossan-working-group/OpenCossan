@@ -33,22 +33,23 @@ classdef SubsetOriginal < opencossan.simulations.Simulations
     % =====================================================================
     
     properties (SetAccess = protected)
-        target_pf=0.1           % target intermediate pF (default: 1e-1)
-        maxlevels=10            % maximum no. of levels (default: 10)
-        deltaxi=0.5,            % vector of width parameters for proposal distribution
+        % Target intermediate pf
+        TargetProbabilityOfFailure(1,1) double {mustBePositive, ...
+            mustBeLessThanOrEqual(TargetProbabilityOfFailure, 1)} = 0.1
+        % Maximum number of levels
+        MaxLevels(1,1) {mustBeInteger} = 10;
+        % Width for the uniform proposal distribution bounds = [-deltaxi, deltaxi]
+        deltaxi(1,1) double {mustBePositive} = 0.5
         proposedDistributionSet % RandomVariableSet with proposal distribution
-        initialSamples          % initial samples
-        initialSimxBatch        % number of initial samples per batch
-        initialSimLastBatch     % number of initial samples in the last batch
+        InitialSamples          % initial samples
         exportSamples           % Flag to export the computed samples
         KeepSeeds = true;       % if true, keeps the seeds for the next level
     end
     
     properties (Dependent = true, SetAccess = protected)
-        target_cov              % target coefficient of variation (CoV) of the intermediate results
-        markovchainssimxbatch   % Number of Markov Chains per batch
-        markovchainslastbatch   % Number of Markov Chains in the last batch
-        markovchainsamples      % Number of states for each  Markov Chain
+        TargetCoV              % target coefficient of variation (CoV) of the intermediate results
+        MarkovChains   % Number of Markov Chains in the last batch
+        MarkovChainSamples      % Number of states for each  Markov Chain
     end
     
     methods
@@ -131,11 +132,11 @@ classdef SubsetOriginal < opencossan.simulations.Simulations
                     case {'lintermediateresults'}
                         Xobj.Lintermediateresults=varargin{k+1};
                     case {'target_pf','targetfailureprobability'}
-                        Xobj.target_pf=varargin{k+1};
+                        Xobj.TargetProbabilityOfFailure=varargin{k+1};
                     case {'maxlevels'}
-                        Xobj.maxlevels=varargin{k+1};
+                        Xobj.MaxLevels=varargin{k+1};
                     case {'initialsamples'}
-                        Xobj.initialSamples =varargin{k+1};
+                        Xobj.InitialSamples =varargin{k+1};
                     case {'deltaxi'}
                         Xobj.deltaxi=varargin{k+1};
                     case {'proposeddistributionset'}
@@ -158,26 +159,7 @@ classdef SubsetOriginal < opencossan.simulations.Simulations
                         error('openCOSSAN:SubsetOriginal:wrongArgument',...
                             'Propety name %s is not allowed in Subset',varargin{k});
                 end
-            end 
-            
-            if isempty(Xobj.initialSamples)
-                error('openCOSSAN:SubsetOriginal:missingArgument',...
-                    'SubsetOriginal needs an initial number of samples');
             end
-            
-            %% Define simulation parameters
-
-            % Initial samples 
-            if isempty(Xobj.initialSamples)
-                Xobj.initialSamples=floor(1/(Xobj.target_pf^2)*Xobj.Nbatches);
-            end
-            
-            % Initial samples for each batch
-            Xobj.initialSimxBatch = floor(Xobj.initialSamples/Xobj.Nbatches);
-            % Initial samples for the last batch
-            Xobj.initialSimLastBatch =  Xobj.initialSamples-Xobj.initialSimxBatch*(Xobj.Nbatches-1);
-            
-            
             
             %compute no. of samples based on specified pF of each level, pFl, and on associated CoV
             %
@@ -188,68 +170,26 @@ classdef SubsetOriginal < opencossan.simulations.Simulations
             %                warning('openCOSSAN:simulations:SubsetOriginal',...
             %                     'Nsamples is lower then initialSamples*maxlevels. \n Nsamples will be not used as Termination Criteria ');
             %             end
-            
-            %% Verify consistency of the inputs
-            
-            % Check initialSimxBatch
-            if Xobj.target_pf*Xobj.initialSimxBatch<1
-                Xobj.initialSimxBatch=1/Xobj.target_pf;
-                warning('openCOSSAN:simulations:SubsetOriginal',...
-                    ['The number of initial samples  (initialSimxBatch) has been reset to '...
-                    num2str(Xobj.initialSamples) ]);
-            end
-                        
-            %set number of initial samples in order to have an inter number
-            %of Markov Chain
-            if floor(Xobj.target_pf*Xobj.initialSimxBatch) ~= Xobj.target_pf*Xobj.initialSimxBatch
-                Xobj.initialSimxBatch=floor(ceil(Xobj.initialSimxBatch*Xobj.target_pf)/Xobj.target_pf);
-                warning('openCOSSAN:simulations:SubsetOriginal',...
-                    ['The parameter initialsamples has been reset to ' ...
-                    num2str(Xobj.initialSimxBatch*(Xobj.Nbatches-1)+Xobj.initialSimLastBatch) ...
-                    ' (initialSimxBatch']);
-            end
-            
-            % Check initialSimLastBatch
-            if Xobj.target_pf*Xobj.initialSimLastBatch<1
-                Xobj.initialSimLastBatch=1/Xobj.target_pf;
-                warning('openCOSSAN:simulations:SubsetOriginal',...
-                    ['The number of initial samples has been reset to '...
-                    num2str(Xobj.initialSimxBatch*(Xobj.Nbatches-1)+Xobj.initialSimLastBatch) ...
-                    ' (initialSimLastBatch) ']);
-            end
-            
-            if floor(Xobj.target_pf*Xobj.initialSimLastBatch) ~= Xobj.target_pf*Xobj.initialSimLastBatch
-                Xobj.initialSimLastBatch=floor(ceil(Xobj.initialSimLastBatch*Xobj.target_pf)/Xobj.target_pf);
-                warning('openCOSSAN:simulations:SubsetOriginal',...
-                    ['The parameter initialsamples has been reset to ' ...
-                    num2str(Xobj.initialSimxBatch*(Xobj.Nbatches-1)+Xobj.initialSimLastBatch) ...
-                    ' (initialSimLastBatch) ']);
-            end
-            
         end % constructor
         
     end % methods
     
     
-    methods
-        function markovchainslastbatch = get.markovchainslastbatch(Xobj)
-            markovchainslastbatch=max(1,ceil(Xobj.initialSimLastBatch*Xobj.target_pf));
-        end % end function get markovchainslastbatch
+    methods        
+        function chains = get.MarkovChains(obj)
+            chains = max(1, ceil(obj.InitialSamples * obj.TargetProbabilityOfFailure));
+        end
         
-        function markovchainssimxbatch = get.markovchainssimxbatch(Xobj)
-            markovchainssimxbatch=max(1,ceil(Xobj.initialSimxBatch*Xobj.target_pf));
-        end % end function get markovchains
+        function samples = get.MarkovChainSamples(Xobj)
+            samples = floor(Xobj.InitialSamples / Xobj.MarkovChains);
+        end
         
-        function markovchainsamples = get.markovchainsamples(Xobj)
-            markovchainsamples=floor(Xobj.initialSimxBatch/Xobj.markovchainssimxbatch);
-        end % end function get markovchainsamples
-        
-        function target_cov = get.target_cov(Xobj)
-            target_cov=sqrt( (1-Xobj.target_pf)/(Xobj.target_pf*Xobj.initialsamples) );
-        end % end function get target_cov
+        function target_cov = get.TargetCoV(Xobj)
+            target_cov = sqrt((1-Xobj.TargetProbabilityOfFailure)/(Xobj.TargetProbabilityOfFailure*Xobj.Initialsamples) );
+        end
         
         function Xobj =setinitialsample(Xobj,Nvalue)
-            Xobj.Nsamples=Nvalue*Xobj.maxlevels;
+            Xobj.Nsamples = Nvalue * Xobj.maxlevels;
         end
     end
 end

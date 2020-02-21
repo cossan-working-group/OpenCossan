@@ -1,10 +1,16 @@
-function simData = apply(obj, model)
-    %APPLY method. This method applies MonteCarlo object to the object
-    %passed as argument.
-    % It perform Monte Carlo simulation
+function obj = reject(obj,varargin)
+    %REMOVE  Remove samples from the Markov Chains
     %
-    % See also: http://cossan.co.uk/wiki/index.php/Apply@Simulations
+    % This method remove samples from specific Markov Chains. The length of the
+    % chains is restored comping the latest valid sample of the chain.
     %
+    % The optional inputs is:
+    % * Npoints  = length of the chain
+    % * Vchain   = Specific with chain must be dropped
+    %
+    % See also: https://cossan.co.uk/wiki/index.php/remove@MarkovChain
+    %
+    % ==================================================================
     % Author: Edoardo Patelli
     % Institute for Risk and Uncertainty, University of Liverpool, UK
     % email address: openengine@cossan.co.uk
@@ -27,37 +33,18 @@ function simData = apply(obj, model)
     %  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
     % =====================================================================
     
-    import opencossan.*
-    import opencossan.reliability.*
+    [required, varargin] = opencossan.common.utilities.parseRequiredNameValuePairs(...
+        "chains", varargin{:});
+    optional = opencossan.common.utilities.parseOptionalNameValuePairs(...
+        "points", {1}, varargin{:});
     
-    simData = opencossan.common.outputs.SimulationData();
+    validateattributes(optional.points, {'numeric'}, {'integer'});
     
-    batch = 0;
-    while true
-        batch = batch + 1;
-        
-        classname = split(metaclass(obj).Name, '.');
-        classname = classname{end};
-        opencossan.OpenCossan.cossanDisp(...
-            sprintf("[%s] Batch #%i (%i samples)", classname, batch, obj.Nsamples), 3);
-        
-        samples = obj.sample('Nsamples',obj.Nsamples,'Xinput',model.Input);
-        
-        simDataBatch = apply(model,samples);
-        simDataBatch.Samples.Batch = repmat(batch, obj.Nsamples, 1);
-        
-        simData = simData + simDataBatch;
-        
-        % check termination
-        [exit, flag] = obj.checkTermination(simData);
-        
-        if exit
-            simData.ExitFlag = flag;
-            break;
-        end
+    chains = required.chains;
+    points = optional.points;
+    
+    for i = 0:points-1
+        % Reset the samples of the chains to the values in obj.Samples{end-points}
+        obj.Samples{end-0}(chains, :) = obj.Samples{end-points}(chains, :);
     end
-    
-    %% Restore Random Stream
-    restoreRandomStream(obj);
-    
 end

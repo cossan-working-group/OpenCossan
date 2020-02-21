@@ -29,19 +29,10 @@ classdef SubsetOutput < opencossan.common.outputs.SimulationData
     
     
     properties (SetAccess = protected)
-        subsetFailureProbability % array containing the intermediary failure probabilities
-        subsetCoV                % array containing the intermediary CoV
-        rejectionRates           % array containing the rejection rates
-        performanceFunctionName  % name of the output of the PerformanceFunction
-        subsetThreshold          % array containing the intermediary performance function thresholds
-        subsetPerformance        % array containing the values of the performance functions (only accepted samples)
-        seedsIndices             % Indices of the performance function used as seeds
-        subsetSamples            % Array of only the accepted samples
-        chainIndices             % Array of Markov Chain indices
-        rejectedSamplesIndices   % Vector containing the position of rejected samples
-        initialSamples           % Number of initial samples
-        markovchainsamples       % Number of states for each  Markov Chain
-        markovchains             % Number of Markov Chains
+        IntermediateFailureProbabilites(1,:) double;
+        IntermediateCoVs(1,:) double;
+        RejectionRates(1,:) double;
+        Thresholds(1,:) double;
     end
     
     properties (Dependent = true, SetAccess = protected)
@@ -51,7 +42,7 @@ classdef SubsetOutput < opencossan.common.outputs.SimulationData
     
     methods
         
-        function Xobj=SubsetOutput(varargin)
+        function obj=SubsetOutput(varargin)
             %SUBSETOUTPUT This method constructs an object of class
             %SubsetOutput that is a subclass of a SimulationData object
             %
@@ -100,7 +91,7 @@ classdef SubsetOutput < opencossan.common.outputs.SimulationData
                 end
             end
             
-            Xobj=Xobj@opencossan.common.outputs.SimulationData(varargin{LargSimulationData});
+            obj=obj@opencossan.common.outputs.SimulationData(varargin{LargSimulationData});
             
             %% Process inputs for the subclass 
             % Removed already processed inputs 
@@ -110,49 +101,49 @@ classdef SubsetOutput < opencossan.common.outputs.SimulationData
             for k=1:2:length(varargin)
                 switch lower(varargin{k})
                     case {'performancefunctionname'}
-                        Xobj.performanceFunctionName=varargin{k+1};
+                        obj.performanceFunctionName=varargin{k+1};
                     case {'subsetfailureprobability'}
-                        Xobj.subsetFailureProbability = varargin{k+1};
+                        obj.subsetFailureProbability = varargin{k+1};
                     case {'subsetperformance'}
-                         Xobj.subsetPerformance = varargin{k+1};
+                         obj.subsetPerformance = varargin{k+1};
                     case {'subsetcov'}
-                         Xobj.subsetCoV = varargin{k+1};
+                         obj.subsetCoV = varargin{k+1};
                     case {'subsetthreshold'}
-                        Xobj.subsetThreshold = varargin{k+1};
+                        obj.subsetThreshold = varargin{k+1};
                     case {'subsetsamples'}
-                        Xobj.subsetSamples = varargin{k+1}; 
+                        obj.subsetSamples = varargin{k+1}; 
                     case {'rejectionrates'}
-                        Xobj.rejectionRates = varargin{k+1};                    
+                        obj.rejectionRates = varargin{k+1};                    
                     case {'rejectedsamplesindices'}
-                        Xobj.rejectedSamplesIndices = varargin{k+1};
+                        obj.rejectedSamplesIndices = varargin{k+1};
                     case {'replacedsamplesindices'}
-                        Xobj.replacedSamplesIndices = varargin{k+1};
+                        obj.replacedSamplesIndices = varargin{k+1};
                     case {'seedsindices'}
-                        Xobj.seedsIndices = varargin{k+1};
+                        obj.seedsIndices = varargin{k+1};
                     case {'initialsamples'}
-                        Xobj.initialSamples = varargin{k+1};
+                        obj.initialSamples = varargin{k+1};
                     case {'markovchainsamples'}
-                        Xobj.markovchainsamples = varargin{k+1};
+                        obj.markovchainsamples = varargin{k+1};
                     case {'chainindices'}
-                        Xobj.chainIndices=varargin{k+1};
+                        obj.chainIndices=varargin{k+1};
                     case {'markovchains'}    
-                        Xobj.markovchains = varargin{k+1};
+                        obj.markovchains = varargin{k+1};
                     otherwise
                         error('openCOSSAN:SubsetOutput:wrongArgmument',...
                             'The argument %s is not valid!',varargin{k})
                 end
-            end 
+            end
 
             % Validate inputs
             
-            assert(all([length(Xobj.subsetFailureProbability)==length(Xobj.subsetCoV), ... 
-                  length(Xobj.subsetFailureProbability)==length(Xobj.subsetThreshold), ...
-                  length(Xobj.subsetFailureProbability)==length(Xobj.rejectionRates)]), ...
+            assert(all([length(obj.subsetFailureProbability)==length(obj.subsetCoV), ... 
+                  length(obj.subsetFailureProbability)==length(obj.subsetThreshold), ...
+                  length(obj.subsetFailureProbability)==length(obj.rejectionRates)]), ...
                   'openCOSSAN:SubsetOutput',...
                   ['The fields subsetFailureProbability, subsetCoV, subsetThreshold and ',...
                   ' rejectionRates must be vectors of same length.\n* Defined lengths: %i %i %i %i'],...
-                  length(Xobj.subsetFailureProbability),length(Xobj.subsetCoV),...
-                  length(Xobj.subsetThreshold),length(Xobj.rejectionRates));
+                  length(obj.subsetFailureProbability),length(obj.subsetCoV),...
+                  length(obj.subsetThreshold),length(obj.rejectionRates));
             
         end % end constructor
         
@@ -161,7 +152,6 @@ classdef SubsetOutput < opencossan.common.outputs.SimulationData
         % Plot Subset levels
         varargout=plotMarkovChains(Xobj,varargin)
         varargout=plotLevels(Xobj,varargin)
-        
         
         function VsamplesLevel =get.VsamplesLevel(Xobj)
             % New samples generated x level 

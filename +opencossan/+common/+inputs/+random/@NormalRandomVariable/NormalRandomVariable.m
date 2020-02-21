@@ -29,8 +29,8 @@ classdef NormalRandomVariable < opencossan.common.inputs.random.RandomVariable
     %}
     
     properties (Access = private)
-        Mean_ double = 1;
-        Std_ double  {mustBeNonnegative} = 0;
+        Mean_ double = 0;
+        Std_ double  {mustBeNonnegative} = 1;
     end
     
     properties (Dependent)

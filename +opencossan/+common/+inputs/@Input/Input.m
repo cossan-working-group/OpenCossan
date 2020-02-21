@@ -199,8 +199,11 @@ classdef Input < opencossan.common.CossanObject
         end
         
         %% Dependent RandomVariableSet properties
-        function dvs = get.RandomVariableSets(obj)
-            dvs = obj.filterMembers('opencossan.common.inputs.random.RandomVariableSet');
+        function rvsets = get.RandomVariableSets(obj)
+            rvsets = obj.filterMembers('opencossan.common.inputs.random.RandomVariableSet');
+            if isempty(rvsets)
+                rvsets = opencossan.common.inputs.random.RandomVariableSet.empty(0, 0);
+            end
         end
         
         function n = get.NumberOfRandomVariableSets(obj)
@@ -248,15 +251,30 @@ classdef Input < opencossan.common.CossanObject
             names(idx) = [];
         end
         
-        function discrete = get.AreDesignVariablesDiscrete(Xobj)
+        function discrete = get.AreDesignVariablesDiscrete(obj)
             discrete = any(arrayfun(@(dv) isa(dv, 'opencossan.optimization.DiscreteDesignVariable'), ...
                 obj.DesignVariablesdescrete));
+        end
+        
+        function samples = addParametersToSamples(obj, samples)
+            pars = obj.Parameters;
+            names = obj.ParameterNames;
+            for i = 1:obj.NumberOfParameters
+                samples.(names(i)) = repmat(pars(i).Value, height(samples), 1);
+            end
+        end
+        
+        function samples = evaluateFunctionsOnSamples(obj, samples)
+            funs = obj.Functions;
+            names = obj.FunctionNames;
+            for i = 1:obj.NumberOfFunctions
+                samples.(names(i)) = evaluate(funs(i), samples);
+            end
         end
         
         
         values = getDefaultValues(obj);
         checkFunction(obj);
-        
     end
     
     %% Private Methods

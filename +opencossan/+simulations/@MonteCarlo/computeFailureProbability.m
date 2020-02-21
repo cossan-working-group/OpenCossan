@@ -36,8 +36,9 @@ simData = obj.apply(model);
 % Calculate the failure probability
 g = simData.Samples.(model.PerformanceFunctionVariable);
 pf = sum(g < 0) / height(simData.Samples);
+variance = (pf - pf^2) / height(simData.Samples);
 
-pf = FailureProbability('value', pf, 'simulationdata', simData, 'simulation', obj); 
+pf = FailureProbability('value', pf, 'variance', variance, 'simulationdata', simData, 'simulation', obj); 
 
 if ~isdeployed
     % add entries in simulation and analysis database at the end of the
