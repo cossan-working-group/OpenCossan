@@ -1,4 +1,4 @@
-function pf = computeFailureProbability(obj, target)
+function [pf, out] = computeFailureProbability(obj, target)
     %COMPUTEFAILUREPROBABILITY method. This method computes the Failure Probability (pf) associate
     %to a ProbabilisticModel / SystemReliability / MetaModel by means of SubSet Simulation methods.
     %
@@ -54,6 +54,7 @@ function pf = computeFailureProbability(obj, target)
     thresholds = zeros(obj.MaxLevels, 1); % Threshould of each level
     performances = cell(obj.MaxLevels, 1);  % Value of performance function at each level
     rejectionRates = zeros(obj.MaxLevels, 1); % rejection rate each level
+    markovchains = MarkovChain.empty(obj.MaxLevels, 0);
     
     % Initialize Variable This variable stores the indices of the Markov Chains. It is used to
     % reconstruct and plot the Markov Chains.  The corresponding realizations are store in the
@@ -66,7 +67,7 @@ function pf = computeFailureProbability(obj, target)
     [initial, MU] = initialSamples(obj, input);
     
     simData = apply(target, initial);    % Evaluate the model
-    
+    simData.Samples.Level = repmat(0, height(simData.Samples), 1);
     % Extract the values of the performance function
     subsetPerformances = simData.Samples.(target.PerformanceFunctionVariable);
     
@@ -231,7 +232,7 @@ function pf = computeFailureProbability(obj, target)
             
             % Evaluate perfomance function
             simDataChain = target.apply(markovChainSamples);
-            
+            simDataChain.Samples.Level = repmat(ilevel, height(simDataChain.Samples), 1);
             % Merge SimulationData objectd rejected values are saved nevertheless
             simData = simData + simDataChain;
             
@@ -272,7 +273,9 @@ function pf = computeFailureProbability(obj, target)
             gAllLevels = [gAllLevels; Vg_temp]; %#ok<AGROW>
             samplesAllLevels = [samplesAllLevels; markovChains.ChainEnd{:,:}]; %#ok<AGROW>
             
-        end % end Markov chains
+        end
+        
+        markovchains(ilevel) = markovChains;
     end % end SubSet levels
     
     
@@ -300,6 +303,8 @@ function pf = computeFailureProbability(obj, target)
     covpF = sqrt( sum( coefficientsOfVariation.^2 ));
     
     pf = FailureProbability('value', pF, 'variance', covpF^2*pF^2, 'simulationdata', simData, 'simulation', obj);
+    out = SubsetOutput('failureprobabilities', failureProbabilities, 'covs', coefficientsOfVariation, ...
+        'rejectionrates', rejectionRates, 'thresholds', thresholds, 'markovchains', markovchains);
     
     if ~isdeployed
         % add entries in simulation and analysis database at the end of the computation when not

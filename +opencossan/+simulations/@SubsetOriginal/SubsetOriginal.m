@@ -46,7 +46,6 @@ classdef SubsetOriginal < opencossan.simulations.Simulations
     end
     
     methods
-        
         %% Methods inheritated from the superclass
         
         %APPLY This method can not be used with SubSet simulation
@@ -110,6 +109,8 @@ classdef SubsetOriginal < opencossan.simulations.Simulations
         
         function samples = sample(obj, varargin)
         end
+        
+        fh = plotMarkovChains(obj, simData, thresholds);
     end
 end
 
