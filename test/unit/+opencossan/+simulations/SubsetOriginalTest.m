@@ -53,19 +53,18 @@ classdef SubsetOriginalTest < matlab.unittest.TestCase
     methods (Test)
      
         function constructorFull(testCase)
-            SubS = opencossan.simulations.SubsetOriginal('Sdescription','Unit Test SubsetOriginal',...
-                'initialSamples',100,...
-                'target_pf', 0.2,...
+            SubS = opencossan.simulations.SubsetOriginal(...
+                'initialsamples',100,...
+                'targetprobabilityoffailure', 0.2,...
                 'maxlevels', 7,...
                 'deltaxi', 0.6,...
-                'KeepSeeds', false);
+                'keepseeds', false);
             
-            testCase.assertEqual(SubS.Sdescription,'Unit Test SubsetOriginal');
-            testCase.assertEqual(SubS.InitialSamples,100);
-            testCase.assertEqual(SubS.TargetProbabilityOfFailure, 0.2);
-            testCase.assertEqual(SubS.MaxLevels, 7);
-            testCase.assertEqual(SubS.deltaxi, 0.6);
-            testCase.assertFalse(SubS.KeepSeeds);
+            testCase.verifyEqual(SubS.InitialSamples,100);
+            testCase.verifyEqual(SubS.TargetProbabilityOfFailure, 0.2);
+            testCase.verifyEqual(SubS.MaxLevels, 7);
+            testCase.verifyEqual(SubS.DeltaXi, 0.6);
+            testCase.verifyFalse(SubS.KeepSeeds);
         end
         
         %% apply
@@ -73,14 +72,6 @@ classdef SubsetOriginalTest < matlab.unittest.TestCase
             SubS = opencossan.simulations.SubsetOriginal('initialSamples', 1000);
             testCase.assertError(@() SubS.apply(testCase.Xmdl),...
                 'openCOSSAN:simulations:subsetoriginal:apply');
-        end
-        
-        %% sample
-        function sampleShouldNotBeImplementedForSubset(testCase)
-            SubS = opencossan.simulations.SubsetOriginal('initialSamples', 1000);
-            Nsamples = randi(50,1);
-            testCase.assertError(@() SubS.sample('Nsamples', Nsamples, 'Xinput', testCase.Xin),...
-                'MATLAB:class:undefinedMethod');
         end
         
         %% computeFailureProbabiliy

@@ -59,7 +59,7 @@ function pf = computeFailureProbability(obj, target)
     % reconstruct and plot the Markov Chains.  The corresponding realizations are store in the
     % SubSetOutput object in the Tvalue field.
     
-    chainIndices = zeros(obj.MarkovChains, obj.MarkovChainSamples, obj.MaxLevels);
+    chainIndices = zeros(obj.NumberOfChains, obj.SamplesPerChain, obj.MaxLevels);
     
     % The samples are gerenated in the standard normal space and automatically mapped in the
     % physical space
@@ -83,7 +83,7 @@ function pf = computeFailureProbability(obj, target)
         [sortedPerformances, performanceIndices] = sort(subsetPerformances, 1, 'ascend');
         
         % Compute intermediary threshold level (defines) the current subset
-        thresholds(ilevel) = sortedPerformances(obj.MarkovChains);
+        thresholds(ilevel) = sortedPerformances(obj.NumberOfChains);
         [failureProbabilities(ilevel), performances{ilevel}] = ...
             intermediateFailureProbability(obj, sortedPerformances, thresholds(ilevel));
         
@@ -93,14 +93,14 @@ function pf = computeFailureProbability(obj, target)
         
         % SubSim-MCMC
         if obj.KeepSeeds
-            rejectionRates(ilevel) = rejection/(length(subsetPerformances) - obj.MarkovChains);
+            rejectionRates(ilevel) = rejection/(length(subsetPerformances) - obj.NumberOfChains);
         else
             rejectionRates(ilevel) = rejection/(length(subsetPerformances));
         end
         
         % Prepare message output
-        k = min(length(obj.deltaxi), ilevel);
-        SmessagePropLevel=['Proposal PDF: uniform , window size: ' num2str(obj.deltaxi(k))];
+        k = min(length(obj.DeltaXi), ilevel);
+        SmessagePropLevel=['Proposal PDF: uniform , window size: ' num2str(obj.DeltaXi(k))];
         
         % Store information of each level Show partial results
         if ilevel > 1
@@ -128,18 +128,18 @@ function pf = computeFailureProbability(obj, target)
         end
         
         % keep only those samples (sorted) corresponding to the smallest performance function values
-        Msort = MU(performanceIndices(1:obj.MarkovChains),:); %sort samples
+        Msort = MU(performanceIndices(1:obj.NumberOfChains),:); %sort samples
         
         %% SubSim-MCMC
         % use the original implementation of SubSet simulation (based on Monte Carlo Markov Chains).
         
         if ilevel==1
-            VindexAbsolute=performanceIndices(1:obj.MarkovChains);
-            MindexAbsolute=reshape(1:obj.MarkovChains*(obj.MarkovChainSamples-1),obj.MarkovChains,[])+obj.InitialSamples;
+            VindexAbsolute=performanceIndices(1:obj.NumberOfChains);
+            MindexAbsolute=reshape(1:obj.NumberOfChains*(obj.SamplesPerChain-1),obj.NumberOfChains,[])+obj.InitialSamples;
         else
             MpreviousChain=chainIndices(:,:,(ilevel-1));
-            VindexAbsolute=MpreviousChain(performanceIndices(1:obj.MarkovChains));
-            MindexAbsolute=reshape(1:obj.MarkovChains*(obj.MarkovChainSamples-1),obj.MarkovChains,[])+obj.InitialSamples+(ilevel-1)*(obj.MarkovChainSamples-1)*obj.MarkovChains;
+            VindexAbsolute=MpreviousChain(performanceIndices(1:obj.NumberOfChains));
+            MindexAbsolute=reshape(1:obj.NumberOfChains*(obj.SamplesPerChain-1),obj.NumberOfChains,[])+obj.InitialSamples+(ilevel-1)*(obj.SamplesPerChain-1)*obj.NumberOfChains;
         end
         
         chainIndices(:,:,ilevel) = [VindexAbsolute MindexAbsolute];
@@ -147,10 +147,10 @@ function pf = computeFailureProbability(obj, target)
         % Initialize Markov Chains
         
         %set proposal PDF
-        if length(obj.deltaxi) >= ilevel
-            deltaxi = obj.deltaxi(ilevel);
+        if length(obj.DeltaXi) >= ilevel
+            deltaxi = obj.DeltaXi(ilevel);
         else
-            deltaxi = obj.deltaxi(end);
+            deltaxi = obj.DeltaXi(end);
         end
         
         % Create Proposal distribution for the Markov Chain Different proposal distributions are
@@ -195,7 +195,7 @@ function pf = computeFailureProbability(obj, target)
         % Npoints=0 forces the Markov Chain constructur to not generate new states of the chains)
         % The samples object is used to define the initial seeds
         
-        initialMarkovChainSamples = initial(performanceIndices(1:obj.MarkovChains), contains(initial.Properties.VariableNames, names));
+        initialMarkovChainSamples = initial(performanceIndices(1:obj.NumberOfChains), contains(initial.Properties.VariableNames, names));
         
         % Build Markov Chains
         markovChains = MarkovChain(...
@@ -206,14 +206,14 @@ function pf = computeFailureProbability(obj, target)
         % Vg_subset contains the values that have been kept to build the SubSet
         
         % Reset variables (new and independent Markov Chains are constructed for each level)
-        subsetPerformances = zeros(obj.MarkovChainSamples * obj.MarkovChains,1);
+        subsetPerformances = zeros(obj.SamplesPerChain * obj.NumberOfChains,1);
         rejection = 0;
         MU = zeros(obj.InitialSamples, size(MU, 2));
         
         % Performance function of the SubSet (Vsort) and the corresponding samples (Msort) of the
         % SubSet
-        subsetPerformances(1:obj.MarkovChains) = sortedPerformances(1:obj.MarkovChains);
-        MU(1:obj.MarkovChains,:) = Msort;
+        subsetPerformances(1:obj.NumberOfChains) = sortedPerformances(1:obj.NumberOfChains);
+        MU(1:obj.NumberOfChains,:) = Msort;
         
         %% Generate Markov Chains
         if obj.KeepSeeds == true
@@ -222,7 +222,7 @@ function pf = computeFailureProbability(obj, target)
             chainStart = 1;
         end
         
-        for iBuildChain = chainStart:obj.MarkovChainSamples
+        for iBuildChain = chainStart:obj.SamplesPerChain
             markovChains = markovChains.sample(); % add 1 new state
             
             markovChainSamples = markovChains.Samples{end};
@@ -243,19 +243,19 @@ function pf = computeFailureProbability(obj, target)
             % of the chain are set equal to the previous ones)
             Vreject = find(Vg_temp > thresholds(ilevel));
             if iBuildChain == 1
-                VrejectAbsPosition=(iBuildChain-1) * obj.MarkovChains+Vreject;
+                VrejectAbsPosition=(iBuildChain-1) * obj.NumberOfChains+Vreject;
                 %does it only once and only if the seeds will be discarded
             else
-                VrejectAbsPosition=(iBuildChain-2)*obj.MarkovChains+Vreject;
+                VrejectAbsPosition=(iBuildChain-2)*obj.NumberOfChains+Vreject;
             end
-            rejectedSamples=[rejectedSamples; VrejectAbsPosition+(ilevel-1)*(obj.MarkovChains-1)*obj.MarkovChains + obj.InitialSamples]; %#ok<AGROW>
+            rejectedSamples=[rejectedSamples; VrejectAbsPosition+(ilevel-1)*(obj.NumberOfChains-1)*obj.NumberOfChains + obj.InitialSamples]; %#ok<AGROW>
             
             % Update the vector of the performance function Please note that the MarkovChain object
             % does not store any information of the performance function
             Vg_temp(Vreject)=subsetPerformances(VrejectAbsPosition);
             
             % Identify current set of samples
-            Vposition=(iBuildChain-1)*obj.MarkovChains+1:iBuildChain*obj.MarkovChains;
+            Vposition=(iBuildChain-1)*obj.NumberOfChains+1:iBuildChain*obj.NumberOfChains;
             % Update Vg_subset and the corresponding samples MU
             subsetPerformances(Vposition)=Vg_temp;
             
@@ -360,14 +360,14 @@ function cov = coefficientOfVariation(obj, level, performances, threshold, pf)
     else
         % Correlation of the states of the markov chain
         g = reshape(performances ...
-            (end - obj.MarkovChainSamples * obj.MarkovChains + 1:end), ...
-            [], obj.MarkovChainSamples);
+            (end - obj.SamplesPerChain * obj.NumberOfChains + 1:end), ...
+            [], obj.SamplesPerChain);
         gIndicator = g < threshold;
-        correlation = zeros(obj.MarkovChains, obj.MarkovChainSamples);
+        correlation = zeros(obj.NumberOfChains, obj.SamplesPerChain);
         
-        for isample=1:obj.MarkovChains
+        for isample=1:obj.NumberOfChains
             v = gIndicator(isample,:);
-            for deltak = 0:obj.MarkovChainSamples-1
+            for deltak = 0:obj.SamplesPerChain-1
                 v1 = v(1:end-deltak);
                 v2 = v(1+deltak:end);
                 correlation(deltak+1,isample) = (1/length(v1))*sum(v1.*v2);
@@ -375,13 +375,13 @@ function cov = coefficientOfVariation(obj, level, performances, threshold, pf)
         end % end correlation estimation
         
         %Eq. (25)
-        VIcorr = sum(correlation,2) / obj.MarkovChains - pf^2;
+        VIcorr = sum(correlation,2) / obj.NumberOfChains - pf^2;
         
         % Eq. 27
         Vrho = VIcorr / VIcorr(1);
-        gammal = 2*sum((1-(1:obj.MarkovChainSamples-1)* ...
-            obj.MarkovChains / obj.InitialSamples).* ...
-            Vrho(1:obj.MarkovChainSamples-1)');
+        gammal = 2*sum((1-(1:obj.SamplesPerChain-1)* ...
+            obj.NumberOfChains / obj.InitialSamples).* ...
+            Vrho(1:obj.SamplesPerChain-1)');
         % Eq. 28
         cov = sqrt((1 - pf) / (pf * obj.InitialSamples) * (1 + gammal));
     end
