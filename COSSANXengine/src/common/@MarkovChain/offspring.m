@@ -45,7 +45,7 @@ for n=1:Xmkv.Nsets
     % proposal distribution
     MUlast=Xmkv.Mlast(:,NinitialRVindex:NendRVindex); % Retrive matrix for speed up (1 call instead of 3 calls)
     
-    Mxi = MX_pert.MsamplesStandardNormalSpace + MUlast;
+    Mxi = MX_pert.MsamplesPhysicalSpace + MUlast;
     
     % [EP] evaluate the log of the pdf
     [~, Mrvi]=evalpdf(Xmkv.Xbase(n),'Musamples', Mxi);
@@ -58,7 +58,7 @@ for n=1:Xmkv.Nsets
     %% Sample the component to be perturbed
     MU_index=(rand(size(Mrv)) < min(Mrv,1));    
     
-    MU =MUlast + MX_pert.MsamplesStandardNormalSpace.*MU_index;
+    MU =MUlast + MX_pert.MsamplesPhysicalSpace.*MU_index;
     
     NinitialRVindex=NendRVindex+1;
     
