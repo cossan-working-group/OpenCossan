@@ -1,0 +1,5 @@
+
+RP24
+\eqalign{
+       & {g_{\mathrm{comp}}}({\bf X}) = 2.5 - 0.2357 \cdot ({X_1} - {X_2}) + 0.00463 \cdot {({X_1} + {X_2} - 20)^4}  \cr
+       & {g_{\mathrm{sys}}}({\bf X}) = {g_{\mathrm{comp}}}({\bf X}) \cr}
