@@ -2,6 +2,7 @@
 
 [![Build Status](https://jenkins.cossan.co.uk/buildStatus/icon?job=OpenCossan%2Fmaster)](https://jenkins.cossan.co.uk/job/OpenCossan/job/master/)
 
+
 OpenCossan is a Matlab-based toolbox for uncertainty quantification and management. The implemented framework includes third-party software integration (e.g. ANSYS), efficient numeric algorithms (e.g. Line Sampling) and parallelization for high performance computing. OpenCossan functionalities can be summarized in:
 
 * Uncertainty Quantification
@@ -21,7 +22,10 @@ https://cossan.co.uk
 
 ## Getting started
 
-If you are unfamiliar with git the stable version (master) can be downloaded by simply clicking the green Download .ZIP button. However, it is recommended to use the repository with git.
+If you are unfamiliar with git the stable version (master) can be downloaded by simply clicking the green Download .ZIP button. You can also install OpenCossan from File Exchange
+[![View OpenCossan on File Exchange](https://www.mathworks.com/matlabcentral/images/matlab-file-exchange.svg)](https://uk.mathworks.com/matlabcentral/fileexchange/72108-opencossan)
+
+However, it is recommended to use the repository with git.
 
 To clone it to your local machine type in the terminal:
 
@@ -31,20 +35,24 @@ git clone https://github.com/cossan-working-group/OpenCossan.git
 
 Then navigate to `OpenCossan\doc\GettingStarted.mlx` in Matlab to view further instructions.
 
+The overview of the OpenCossan project is available here:
+https://cossan.co.uk/wiki/index.php/Category:OpenCossan_Getting_Started
+
 ## Usage
 
 Comprehensive documentation is available in the wiki available at https://cossan.co.uk/wiki
 
 ### Case studies 
 
-- [Reliability-based optimization of non linear viscous dampers](https://cossan.co.uk/casestudy/COSSAN_ViscousDampersCaseStudy.pdf)
-- [Analysis of the Grenfell Tower Fire with Bayesian Networks](https://cossan.co.uk/casestudy/COSSAN_FireCaseStudy.pdf)
-- [Baysian Optimisation](https://cossan.co.uk/wiki/index.php/Bayesian_optimisation)
-- [Resilient analysis of power grids]
+- [Reliability-based optimization of non linear viscous dampers (PDF)](https://cossan.co.uk/casestudy/COSSAN_ViscousDampersCaseStudy.pdf)
+- [Analysis of the Grenfell Tower Fire with Bayesian Networks (PDF)](https://cossan.co.uk/casestudy/COSSAN_FireCaseStudy.pdf)
+- [Baysian Optimisation (HTML)](https://cossan.co.uk/wiki/index.php/Bayesian_optimisation)
+- [Using Credal Network to estimate human error probabilities (PDF)](https://cossan.co.uk/casestudy/COSSAN_HumanErrorCaseStudy.pdf)
+- [Resilient analysis of power grids (PDF)](https://cossan.co.uk/casestudy/COSSAN_PowerGrid.pdf)
 
 ## Project status
 
-At the moment we are migrating from a private repository to GitHub. Some of the OpenCossan functionalities are not available in this repository yet.
+At the moment we are working to the development branch to include the new code sintax and unit testing. Although the refactoring is not completed, most of the funtionalities are supported working. 
 
 ## Support
 

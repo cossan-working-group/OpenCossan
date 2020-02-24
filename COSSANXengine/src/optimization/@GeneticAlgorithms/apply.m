@@ -245,7 +245,11 @@ if ~isempty(Xop.Xconstraint)
     Vindex=all(XoptGlobal.TablesValues.DesignVariables==XoptGlobal.VoptimalDesign,2);
     Mdataout=XoptGlobal.TablesValues.Constraints(Vindex);
     Vpos=find(all(~isnan(Mdataout),2));
-    XoptGlobal.VoptimalConstraints=Mdataout(Vpos(1),:);
+    if ~isempty(Vpos) > 0
+        XoptGlobal.VoptimalConstraints = Mdataout(Vpos(1),:);
+    else
+        XoptGlobal.VoptimalConstraints = NaN(1, length(Xop.Xconstraint));
+    end
 end
 
 Xoptimum=XoptGlobal;

@@ -22,7 +22,7 @@ end
 
 %% Input Definition
 % In this example, the external solver computes the value of the Ishigami
-% function, a classical example for testin sensitivity analysis algorithms.
+% function, a classical example for testing sensitivity analysis algorithms.
 % The Ishigami function gets as input three random variables uniformly
 % distributed in [-pi,pi] and 2 shape parameters.
 Xrv1=RandomVariable('Sdistribution','uniform','lowerbound',-pi,'upperbound',pi);
