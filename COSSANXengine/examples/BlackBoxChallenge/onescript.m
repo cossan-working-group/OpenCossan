@@ -7,7 +7,8 @@ Sfolder = fileparts(mfilename('fullpath'));% returns the current folder
 
 %% Monte Carlo
 % Calculare reference solution
-Xsimulator=MonteCarlo('Nsamples',500000);
+Nsamples=500000;
+Xsimulator=MonteCarlo('Nsamples',Nsamples);
 % Define the model
 run(fullfile(Sfolder,'RP14','RP14.m'))
 % Here we go
@@ -16,6 +17,16 @@ sprintf('Failure probability %6.2e (Beta: %4.2f)',XpF.pfhat,XpF.reliabilityIndex
 
 makePlots(Xoutput,'mc')
 
+% test with MATLAB functions only - reference solution
+Minput = [unifrnd(70,80,Nsamples*40,1)...
+    normrnd(39,0.1,Nsamples*40,1)...
+    -evrnd(-1342,272.9,Nsamples*40,1)...
+    normrnd(400,0.1,Nsamples*40,1),...
+    normrnd(250000,35000,Nsamples*40,1)];
+Moutput = gRP14(Minput);
+pf = sum(Moutput<0)/(Nsamples*40);
+std_pf = sqrt(pf/(Nsamples*40)); CoV_pf = std_pf/pf;
+sprintf('Failure probability %6.2e (Beta: %4.2f)',pf,-norminv(pf))
 
 %%%% END OF THE EXAMPLE with readeable format %%%%
 

@@ -79,13 +79,18 @@ switch lower(Xrv.Sdistribution)
     case {'rayleigh'}
         VX = raylrnd(Xrv.Cpar{1,2},m,n) + Xrv.shift*ones(m,n);
     case {'small-i','sml','small1'}
-        small_alpha = pi/(sqrt(6)*Xrv.std);
-        small_u = Xrv.mean-Xrv.shift+0.5772156/small_alpha;
+        if ~isempty([Xrv.Cpar{:}])
+            small_u=Xrv.Cpar{1,2};
+            small_alpha=Xrv.Cpar{2,2};
+        else  
+            small_alpha = pi/(sqrt(6)*Xrv.std);
+            small_u = Xrv.mean-Xrv.shift+0.5772156/small_alpha;
+        end
         VX = small_u+log(-log(1-rand(m,n)))/small_alpha + Xrv.shift*ones(m,n);
     case {'large-i','lar','gumbel-i','gumbeli','gumbel-max'}
-        if isempty(Xobj.Cpar)
-            large_alpha=Xobj.Cpar{1,2};
-            large_u=Xobj.Cpar{2,2};
+        if ~isempty([Xrv.Cpar{:}])
+            large_u=Xrv.Cpar{1,2};
+            large_alpha=Xrv.Cpar{2,2};
         else    
             large_alpha = pi/(sqrt(6)*Xrv.std);
             large_u = Xrv.mean-Xrv.shift-0.5772156/large_alpha;
