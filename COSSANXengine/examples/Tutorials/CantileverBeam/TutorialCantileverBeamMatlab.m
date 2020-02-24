@@ -73,8 +73,7 @@ Mcorrelation = eye(4);
 Mcorrelation(3,4) = 0.8; % Add correlation between rho and E
 Mcorrelation(4,3) = 0.8; % Add correlation between rho and E
 
-Xrvset = RandomVariableSet('CXrandomVariables',{P h rho E},'CSmembers',{'P' 'h' 'rho' 'E'},'Mcorrelation',Mcorrelation);
-
+Xr
 %% Definition of the Input: Input
 % Construct the |Input| object grouping the input objects together.
 Xinput = Input('CXmembers',{L b Xrvset I maxDisplacement},'CSmembers',{'L' 'b' 'Xrvset' 'I' 'maxDisplacement'});

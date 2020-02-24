@@ -82,10 +82,15 @@ switch lower(Xrv.Sdistribution)
         small_alpha = pi/(sqrt(6)*Xrv.std);
         small_u = Xrv.mean-Xrv.shift+0.5772156/small_alpha;
         VX = small_u+log(-log(1-rand(m,n)))/small_alpha + Xrv.shift*ones(m,n);
-    case {'large-i','lar','gumbel-i','gumbeli'}
-        large_alpha = pi/(sqrt(6)*Xrv.std);
-        large_u = Xrv.mean-Xrv.shift-0.5772156/large_alpha;
-        VX = large_u-log(-log(rand(m,n)))/large_alpha + Xrv.shift*ones(m,n);
+    case {'large-i','lar','gumbel-i','gumbeli','gumbel-max'}
+        if isempty(Xobj.Cpar)
+            large_alpha=Xobj.Cpar{1,2};
+            large_u=Xobj.Cpar{2,2};
+        else    
+            large_alpha = pi/(sqrt(6)*Xrv.std);
+            large_u = Xrv.mean-Xrv.shift-0.5772156/large_alpha;
+        end
+        VX = large_u-log(-log(rand(m,n)))/large_alpha + Xrv.shift*ones(m,n);     
     case {'large-ii','frechet'}
         VX = Xrv.shift*ones(m,n) + Xrv.Cpar{2,2}*(-log(rand(m,n))).^(-1/Xrv.Cpar{1,2});
     case {'weibull'}

@@ -119,8 +119,10 @@ classdef Mio
                         Xobj.Lfunction = varargin{k+1};
                     case 'liostructure'
                         Xobj.Liostructure = varargin{k+1};
+                        Xobj.Liomatrix=false;
                     case 'liomatrix'
                         Xobj.Liomatrix = varargin{k+1};
+                        Xobj.Liostructure=false;
                     case 'sadditionalpath'
                         Xobj.Sadditionalpath = varargin{k+1};
                     case 'soutputname'

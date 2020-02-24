@@ -60,6 +60,8 @@ classdef ProbabilisticModel
         Xo=deterministicAnalysis(Xobj)  % Performe deterministi analysis
         % of the ProbabilisticModel
         
+        % of the ProbabilisticModel
+        
         %Exact line search
         %locate the possible point on the limit state for the simulated directions
         [beta, MPoints, VpfValues] = lineSearch(Xobj,varargin)
@@ -137,7 +139,7 @@ classdef ProbabilisticModel
         
         
         function Cinputnames=get.Cinputnames(Xobj)
-            Cinputnames=Xobj.Xmodel.Cinputnames;
+            Cinputnames=unique([Xobj.Xmodel.Cinputnames Xobj.XperformanceFunction.Cinputnames]);
         end
         
         function Coutputnames=get.Coutputnames(Xobj)

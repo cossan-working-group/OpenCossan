@@ -33,7 +33,7 @@ disp('| |  | || ''_ \  / _ \| ''_ \ | |     / _ \ / __|/ __| / _` || ''_  \ ');
 disp('| |__| || |_) ||  __/| | | || |____| (_) |\__ \\__ \| (_| || | | |');
 disp(' \____/ | .__/  \___||_| |_| \_____|\___/ |___/|___/ \__,_||_| |_|');
 disp('        | |                                                       ');
-disp('        |_|                            STABLE Version (July 2019) ');
+disp('        |_|                            STABLE Version (February 2020) ');
 disp('');
 disp('----------------------------------------------------------------------------------------------------------');
 disp('The open general purpose software for numerical analysis, risk and uncertainty quantification');

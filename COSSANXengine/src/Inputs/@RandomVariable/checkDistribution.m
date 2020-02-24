@@ -1,9 +1,9 @@
-    function Xobj=checkDistribution(Xobj)   
+function Xobj=checkDistribution(Xobj)   
 % Private function of RandomVariable
 %
-%  See Also: http://cossan.cfd.liv.ac.uk/wiki/index.php/@RandomVariable
+%  See Also: http://cossan.co.uk/wiki/index.php/@RandomVariable
 %
-% $Copyright~1993-2013,~COSSAN~Working~Group,~University~of~Liverpool,~UK$
+% $Copyright~1993-2020,~COSSAN~Working~Group,~University~of~Liverpool,~UK$
 % Author: Edoardo Patelli and Pierre Beaurepiere
 % Institute for Risk and Uncertainty, University of Liverpool, UK
 % email address: openengine@cossan.co.uk
@@ -44,7 +44,7 @@ assert(~isempty(Xobj.Sdistribution), ...
             Xobj=rayleigh(Xobj);
         case {'small-i','sml','small1'}
             Xobj=small_I(Xobj);
-        case {'large-i','gumbel','lar','gumbel-i','gumbeli'}
+        case {'large-i','gumbel','lar','gumbel-i','gumbeli','gumbel-max'}
             Xobj=large_I(Xobj);
         case {'large-ii','frechet'}
             Xobj=large_II(Xobj);

@@ -33,7 +33,8 @@ classdef FailureProbability
         stdPfhat                  % Standard Deviation of the pfhat estimator
         cov                       % Coefficient of variation
         variance                  % Estimated second moment
-    end
+        reliabilityIndex          % Reliability index as -norminv(pfhat)
+    end 
     
     methods
         
@@ -278,6 +279,10 @@ classdef FailureProbability
             % Compute teh standard deviation of the pf estimator
             stdPfhat=sqrt(Xobj.variancePfhat);
         end
+        
+        function reliabilityIndex = get.reliabilityIndex(Xobj)
+            reliabilityIndex=-norminv(Xobj.pfhat);
+        end % Modulus get method
         
         display(Xobj);                  % Display method
         

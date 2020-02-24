@@ -40,6 +40,10 @@ classdef PerformanceFunction
         % and the std. deviation equal to stdDeviationIndicatorFunction
     end
     
+    properties (Dependent)
+        Cinputnames
+    end
+    
     methods % Public access
         
         varargout=apply(Xobj,varargin) % Compute the performance function
@@ -147,6 +151,14 @@ classdef PerformanceFunction
             end
             
         end % constructor
+        
+        function Cinputnames=get.Cinputnames(Xobj)
+             if isempty(Xobj.Xmio)
+                 Cinputnames={Xobj.Scapacity Xobj.Sdemand};
+             else
+                 Cinputnames=Xobj.Xmio.Cinputnames;
+             end
+        end
         
     end % methods
     

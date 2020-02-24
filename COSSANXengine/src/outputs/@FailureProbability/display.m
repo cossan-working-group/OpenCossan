@@ -20,7 +20,8 @@ if Xobj(n).Nbatches==0
 else
     OpenCossan.cossanDisp(['* Results obtained with ' Xobj(n).Smethod ' method' ],2);
     OpenCossan.cossanDisp( '** First Moment',2);
-    OpenCossan.cossanDisp(['*** Pfhat     = ' sprintf('%9.3e',Xobj(n).pfhat)],2);
+    OpenCossan.cossanDisp(['*** Pfhat     = ' sprintf('%9.3e',Xobj(n).pfhat) ...
+                    sprintf(' (Beta: %6.3f)',Xobj(n).reliabilityIndex)],2);
     OpenCossan.cossanDisp(['*** Std       = ' sprintf('%9.3e',Xobj(n).stdPfhat)],2)
     OpenCossan.cossanDisp(['*** CoV       = ' sprintf('%9.3e',Xobj(n).cov)],2);
     OpenCossan.cossanDisp( '** Second Moment',2);
