@@ -110,20 +110,20 @@ classdef LineData
                         Xobj.Sdescription = varargin{k+1};
                     case {'sperformancefunctionname'}
                         Xobj.SperformanceFunctionName = varargin{k+1};
-                    case {'xals','xls'}
+                    case {'xals','xls','xlinesampling'}
                         Xobj.Xals = varargin{k+1};
                     case 'xinput'
                         Xobj.Xinput = varargin{k+1};
                     case 'ldeleteresults'
                         Xobj.LdeleteResults = varargin{k+1};
                     otherwise
-                        error('openCOSSAN:LineData',...
+                        error('OpenCossan:wrongInput',...
                             'PropertyName %s not allowed', varargin{k})
                 end
             end
             
             %% assign the working path
-            Xobj.SmainPath=Xobj.Xals.StempPath;
+            Xobj.SmainPath=OpenCossan.getCossanWorkingPath;
             %% Validate Constructor
             % check if main path where results are stored exists
             assert(~isempty(Xobj.SmainPath),...

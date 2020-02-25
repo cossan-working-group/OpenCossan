@@ -4,7 +4,7 @@ classdef OpenCossan < handle
     % See also: https://cossan.co.uk/wiki/index.php/@OpenCossan
     %
     % Author: Edoardo Patelli
-    % Institute for Risk and Uncertainty, University of Liverpool, UK
+    % Cossan Working Group
     % email address: openengine@cossan.co.uk
     % Website: http://www.cossan.co.uk
     
@@ -91,7 +91,8 @@ classdef OpenCossan < handle
             fullfile('examples','Tutorials','IshigamiFunction'), ...
             fullfile('examples','Tutorials','ParallelSystem'), ...
             fullfile('examples','Tutorials','SmallSatellite'), ...
-            fullfile('examples','Tutorials','TrussBridgeStructure')}
+            fullfile('examples','Tutorials','TrussBridgeStructure'),...
+            fullfile('examples','BlackBoxChallenge')}
         
         % List of jar files to be included in the path
         CjarFileName={'mysql-connector-java-5.1.18-bin.jar',... % MySQL JDBC
@@ -144,7 +145,7 @@ classdef OpenCossan < handle
             for k=1:2:length(varargin)
                 switch lower(varargin{k})
                     case {'scossanroot','scossanpath'}
-                        assert (isdir(varargin{k+1}), ...
+                        assert (isfolder(varargin{k+1}), ...
                             'OpenCossan:wrongPath',...
                             'please provide a valid directory name after Scossanpath')
                         Sroot=varargin{k+1};

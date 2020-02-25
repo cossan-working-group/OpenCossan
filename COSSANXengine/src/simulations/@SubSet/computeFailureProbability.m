@@ -53,7 +53,7 @@ Nrv =  Xinput.NrandomVariables; % Number of random variables
 if isempty(Xobj.VproposalStd)
     Lstandard=true;  % Original implementation of SubSet (SubSim-MCMC)
 else
-    Lstandard=false; % Canonical  implementation of SubSet (SubSim-\infty)
+    Lstandard=false; % Canonical  implementation of SubSet (SubSim-infinity)
 end
 
 %% Start SubSet simulation

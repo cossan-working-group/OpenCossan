@@ -58,6 +58,7 @@ classdef AdaptiveLineSampling < Simulations
         minStep=1                   % minimum step adopted to move along the line
         maxStep=3                   % maximum step adopted to move along the line
         reliabilityIndex            % norm of the most probable point on the state boundary
+        SFolderPrefix = 'ALStemporary#1' %
 %        VworkingAlpha               % working important direction in SNS
     end
     
@@ -74,7 +75,7 @@ classdef AdaptiveLineSampling < Simulations
         
         XsimOut=apply(Xobj,Xtarget)                             % Performe Monte Carlo Simulation
         
-        [Xpf,XsimOut]=computeFailureProbability(Xobj,Xtarget)   % Esitmate FailureProbability
+        [Xpf,XsimOut,XlineData]=computeFailureProbability(Xobj,Xtarget)   % Esitmate FailureProbability
         
         Xsamples = sample(Xobj,varargin)                        % Generate samples using IS method
         
@@ -168,7 +169,7 @@ classdef AdaptiveLineSampling < Simulations
             %% check if temporary directory already exists
             
             if isempty(Xobj.StempPath)
-                Xobj.StempPath=fullfile(OpenCossan.getCossanWorkingPath,'ALStemporary#1');
+                Xobj.StempPath=fullfile(OpenCossan.getCossanWorkingPath,Xobj.SFolderPrefix);
                 
                 [~,mess]=mkdir(Xobj.StempPath);
                 

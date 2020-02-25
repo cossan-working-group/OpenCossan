@@ -1,4 +1,4 @@
-function [Xpf,XsimOut] = computeFailureProbability(Xobj,Xtarget)
+function [Xpf,XsimOut,XlineData] = computeFailureProbability(Xobj,Xtarget)
 % COMPUTEFAILUREPROBABILITY method. This method compute the
 % FailureProbability associate to a ProbabilisticModel/SystemReliability/MetaModel
 % by means of the AdvancedLineSampling object
@@ -223,7 +223,7 @@ while isempty(SexitFlag)
     
     %% Export SimulationData
     if ~Xobj.Lintermediateresults
-        XsimOut(Xobj.ibatch)=XpartialSimOut; %#ok<AGROW>
+        XsimOut(Xobj.ibatch)=XpartialSimOut; 
     else
         Xobj.exportResults('Xsimulationoutput',XpartialSimOut);
         % Keep in memory only the SimulationData of the last batch
@@ -264,5 +264,12 @@ OpenCossan.setLaptime('Sdescription','End computeFailureProbability@AdaptiveLine
 
 % Restore Global Random Stream
 restoreRandomStream(Xobj);
+
+if nargout>2
+    XlineData = LineData('Sdescription','My first Line Data object',...
+            'Xals',Xobj,'LdeleteResults',false,...
+            'Sperformancefunctionname',Xtarget.XperformanceFunction.Soutputname,...
+            'Xinput',Xtarget.Xmodel.Xinput);
+end
 
 

@@ -2,9 +2,9 @@ function [Mout,varargout] = getValues(Xobj,varargin)
 %getValues Retrieve the values of a variable present in the
 %           SimulationData Object
 %
-% See Also: http://cossan.cfd.liv.ac.uk/wiki/index.php/getValues@SimulationData
+% See Also: http://cossan.co.uk/wiki/index.php/getValues@SimulationData
 %
-% $Copyright~1993-2015,~COSSAN~Working~Group,~University~of~Liverpool,~UK$
+% $Copyright~1993-2020,~COSSAN~Working~Group$
 % $Author: Edoardo-Patelli$
 
 % =====================================================================
@@ -29,16 +29,11 @@ if OpenCossan.getChecks
     OpenCossan.validateCossanInputs(varargin{:})
 end
 
-if Xobj.Nsamples>1e5
-    warning('openCOSSAN:outputs:SimulationData:getValues',...
-        'Please use Batches... this operation may become very slow')
-end
-
 Vsize=[];
 Sname='';
 Cnames=Xobj.Cnames;
 
-for k=1:2:nargin-1,
+for k=1:2:nargin-1
     switch lower(varargin{k})
         case 'sname'
             %check input

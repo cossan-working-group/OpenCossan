@@ -1,7 +1,7 @@
 function [Xobj, Xinput]=checkInputs(Xobj,Xtarget)
 %CHECKINPUTS This is a private function of the Simulation class. 
 %
-% See Also http://cossan.cfd.liv.ac.uk/wiki/index.php/@Simulations
+% See Also http://cossan.co.uk/wiki/index.php/@Simulations
 %
 % Author: Edoardo Patelli
 % Institute for Risk and Uncertainty, University of Liverpool, UK
