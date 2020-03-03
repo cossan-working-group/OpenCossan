@@ -20,8 +20,6 @@
 
 opencossan.OpenCossan.getVerbosityLevel
 
-F1=opencossan.common.inputs.Parameter('value',2.0,'description','Applied Load in node 1');
-F2=opencossan.common.inputs.Parameter('value',1.0,'description','Applied Load in node 2');
 k1real=opencossan.common.inputs.Parameter('value',1.0,'description','Stiffness of spring 1');
 k2real=opencossan.common.inputs.Parameter('value',1.0,'description','Stiffness of spring 2');
 
@@ -38,7 +36,7 @@ Xrvset=opencossan.common.inputs.random.RandomVariableSet('members',[p1; p2],'nam
 % Create a new model to simulate perturbed data, inputs forces, stiffness and randon displacement
 % output values with random noise
 % Create Input values using 'Input' constructor from OpenCossan
-XinputPert=opencossan.common.inputs.Input('Members',{F1, F2, k1real, k2real, Xrvset},'MembersNames',{'F1', 'F2', 'k1', 'k2', 'Xrvset'});
+XinputPert=opencossan.common.inputs.Input('Members',{k1real, k2real, Xrvset},'MembersNames',{'k1', 'k2', 'Xrvset'});
 display(XinputPert); %It could also be:  Xinput.display
 Sfolder=fileparts(which('Tutorial2DOFModelUpdatingMatlab.m')); % returns the current folder
 % Prepare the perturbed Model by 'mio' constructor from OpenCossan using a
@@ -46,7 +44,7 @@ Sfolder=fileparts(which('Tutorial2DOFModelUpdatingMatlab.m')); % returns the cur
 % displacements (to simulate synthetic data)
 XmioPert=opencossan.workers.Mio('FunctionHandle', @eigenValuesPerturbs,...
     'IsFunction', true, ...
-    'inputnames',{'F1' 'F2' 'k1' 'k2', 'p1','p2'}, ...
+    'inputnames',{'k1' 'k2', 'p1','p2'}, ...
     'outputnames',{'y1' 'y2'},...
     'Format', 'table');
 % Add the 'mio' constructor to 'Evaluator' constructor from OpenCOssan
@@ -58,18 +56,18 @@ Xmc=opencossan.simulations.MonteCarlo('Nsamples',500);
 % Perform Monte Carlo simulation using 'Apply' method
 XsyntheticData=Xmc.apply(XmodelPert);
 % Display the resulted outputs
-XsyntheticData.getValues('Cnames',{ 'F1' 'F2' 'y1' 'y2' });
+XsyntheticData.getValues('Cnames',{'y1' 'y2' });
 
 %% --------------------------Deterministic Analysys------------------------
 %  ------------------------------------------------------------------------
 
-Xinput=opencossan.common.inputs.Input('Members',{F1 F2 k1real k2real},'MembersNames',{'F1' 'F2' 'k1' 'k2'});
+Xinput=opencossan.common.inputs.Input('Members',{k1real k2real},'MembersNames',{'k1' 'k2'});
 display(Xinput);
 Sfolder=fileparts(which('Tutorial2DOFModelUpdatingMatlab.m')); 
 
 Xmio=opencossan.workers.Mio('FunctionHandle',@eigenValues,...
     'IsFunction', true,...
-    'inputnames',{'F1' 'F2' 'k1' 'k2'}, ...
+    'inputnames',{'k1' 'k2'}, ...
     'outputnames',{'y1' 'y2'},...
     'Format', 'table');
 
@@ -87,23 +85,19 @@ ActualDisplacements=Xout.getValues('Cnames',{'y1' 'y2'});
 %% ---------------------------Model Updating-------------------------------
 %  ------------------------------------------------------------------------
 
-
-F1 = opencossan.common.inputs.Parameter('value',2.0,'description','Applied Load in node 1');
-F2 = opencossan.common.inputs.Parameter('value',1.0,'description','Applied Load in node 2');
-
-k1 = opencossan.common.inputs.random.UniformRandomVariable('bounds',[0.01,4],'description','Stiffness of spring 1');
-k2 = opencossan.common.inputs.random.UniformRandomVariable('bounds',[0.01,4],'description','Stiffness of spring 2');
+k1 = opencossan.common.inputs.random.UniformRandomVariable('bounds',[0.01,4],'description','Prior k1');
+k2 = opencossan.common.inputs.random.UniformRandomVariable('bounds',[0.01,4],'description','Prior k2');
 
 
 Xrvset = opencossan.common.inputs.random.RandomVariableSet('members',[k1; k2],'names',['k1'; 'k2']);
 
-XinputBayes = opencossan.common.inputs.Input('Members',{F1, F2, Xrvset},'MembersNames',{'F1', 'F2','Xrvset'});
+XinputBayes = opencossan.common.inputs.Input('Members',{Xrvset},'MembersNames',{'Xrvset'});
 display(XinputBayes); 
 Sfolder = fileparts(which('Tutorial2DOFModelUpdatingMatlab.m')); 
 
 XmioBayes = opencossan.workers.Mio('FunctionHandle', @eigenValues,...
     'IsFunction', true, ...
-    'inputnames',{'F1' 'F2' 'k1' 'k2'}, ...
+    'inputnames',{'k1' 'k2'}, ...
     'outputnames',{'y1' 'y2'},...
     'Format', 'table');
 
@@ -114,7 +108,6 @@ XmodelBayes = opencossan.common.Model('input',XinputBayes,'evaluator',Xevaluator
 
 
 LogLike = opencossan.inference.LogLikelihood('Model',XmodelBayes, 'Data', XsyntheticData, 'WidthFactor', [2,2]);
-
 
 Nsamples = 600;
 Bayes = opencossan.inference.BayesianModelUpdating('LogLikelihood',LogLike ,'OutputNames', ["k1", "k2"], 'Nsamples', Nsamples);
@@ -154,7 +147,7 @@ groups = [repmat('Calibrated model',size(yOut,1),1);repmat("Calibrated Data",siz
 
 gplotmatrix(pdata,[],groups,lines(2),[],[],[],'grpbars',["k1", "k2"]);
 
-Bayes.plotTransitionalSamples(Samps, ["k1", "k2"])
+Bayes.plotTransitionalSamples(Samps, ["k1", "k2"],[0,2])
 
 
 
