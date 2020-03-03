@@ -22,7 +22,7 @@ classdef LogLikelihood < opencossan.workers.Mio
         Model(1,1)  opencossan.common.Model           %The model that is to be used in the evaluation
         Data(1,1)   opencossan.common.outputs.SimulationData             %The Data to be used to update
         WidthFactor (1,:) double     %The Shape Paramters that can be used in the updating procedure
-        CustomLog (1,:) Function         %User can pass custom likelihood function as a function handle
+        CustomLog (1,:) function_handle       %User can pass custom likelihood function as a function handle
         
     end
     
