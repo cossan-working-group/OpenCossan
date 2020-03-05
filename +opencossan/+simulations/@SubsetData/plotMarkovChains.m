@@ -34,7 +34,13 @@ function fh = plotMarkovChains(obj, names)
     if length(names) == 2
         fh = plotMarkovChains2D(obj, names);
     else
-        fh = parallelplot(obj.Samples, "CoordinateVariables", names, 'GroupVariable', 'Level', 'LineAlpha', 0.5);
+        tbl = obj.Samples;
+        for i = 1:obj.NumberOfLevels
+            % Remove rejected values
+            indices = (tbl.Level == i) & (tbl.Vg > obj.Thresholds(i));
+            tbl(indices, :) = [];
+        end
+        fh = parallelplot(tbl, "CoordinateVariables", names, 'GroupVariable', 'Level', 'LineAlpha', 0.5);
     end
 end
 
