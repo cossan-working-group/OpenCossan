@@ -136,12 +136,15 @@ for nout=1:Noutputs
         % Compute main effects
         MfirstOrder(nin,nout)=hcomputeindices(Mx(:,nin),Mout(:,nout));
         
-        % Compute CoV
-        Dybs=bootstrp(Xobj.Nbootstrap,hcomputeindices,Mx(:,nin),Mout(:,nout));
-        MfirstOrderCoV(nin,nout)=std(Dybs)./MfirstOrder(nin,nout);
+        statoptions = statset(@bootstrp);
+        statoptions.UseParallel = 1;
         
         % Compute CI
-        MfirstOrderCI(:,nin,nout)=bootci(Xobj.Nbootstrap,{hcomputeindices,Mx(:,nin),Mout(:,nout)},'type','per');
+        [MfirstOrderCI(:,nin,nout), Dybs]=bootci(Xobj.Nbootstrap,{hcomputeindices,Mx(:,nin),Mout(:,nout)},'type','per','Options',statoptions);
+        
+        % Compute CoV
+        MfirstOrderCoV(nin,nout)=std(Dybs)./MfirstOrder(nin,nout);
+        
     end
 end
 
