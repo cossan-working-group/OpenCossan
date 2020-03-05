@@ -407,10 +407,10 @@ end
             Dz(irv,:)=hindices_total(MoutA,MoutC);
             
             if Xobj.Nbootstrap>0
-                Dybs(irv,:,:)=bootstrp(Xobj.Nbootstrap,hindices_first,MoutB,MoutC);
-                Dzbs(irv,:,:)=bootstrp(Xobj.Nbootstrap,hindices_total,MoutA,MoutC);
-                MfirstOrderCI(:,irv,:)=bootci(Xobj.Nbootstrap,{hindices_first,MoutB,MoutC},'type','per');
-                MtotalCI(:,irv,:)=bootci(Xobj.Nbootstrap,{hindices_total,MoutA,MoutC},'type','per');
+                statoptions = statset(@bootstrp);
+                statoptions.UseParallel = 1;
+                [MfirstOrderCI(:,irv,:), Dybs(irv,:,:)]=bootci(Xobj.Nbootstrap,{hindices_first,MoutB,MoutC},'type','per','Options',statoptions);
+                [MtotalCI(:,irv,:), Dzbs(irv,:,:)]=bootci(Xobj.Nbootstrap,{hindices_total,MoutA,MoutC},'type','per','Options',statoptions);
             end
         end
         
