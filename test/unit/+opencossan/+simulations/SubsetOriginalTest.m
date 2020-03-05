@@ -81,14 +81,5 @@ classdef SubsetOriginalTest < matlab.unittest.TestCase
 
             testCase.verifyClass(pf, 'opencossan.reliability.FailureProbability');
         end
-        
-        function computeFailureProbabilityDiscardSeedsShouldOutputSampleData(testCase)
-            SubS = opencossan.simulations.SubsetOriginal('initialSamples', 100, 'KeepSeeds', false);
-            pf = SubS.computeFailureProbability(testCase.Xpm);
-            testCase.verifyClass(pf, 'opencossan.reliability.FailureProbability');
-            testCase.verifyNotEmpty(pf.Value);
-            testCase.verifyNotEmpty(pf.Variance);
-            testCase.verifyNotEmpty(pf.SimulationData);
-        end
     end
 end
