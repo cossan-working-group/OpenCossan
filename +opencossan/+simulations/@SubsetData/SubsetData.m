@@ -1,4 +1,4 @@
-classdef SubsetOutput
+classdef SubsetData < opencossan.common.outputs.SimulationData
     %SubsetOutput class containing speific outputs of the
     %Subset simulation method
     %
@@ -27,13 +27,11 @@ classdef SubsetOutput
     %  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
     % =====================================================================
     
-    
-    properties (SetAccess = protected)
+    properties
         FailureProbabilites(1,:) double;
         CoVs(1,:) double;
         RejectionRates(1,:) double;
         Thresholds(1,:) double;
-        MarkovChains(1,:) opencossan.common.MarkovChain;
     end
     
     properties (Dependent)
@@ -41,21 +39,21 @@ classdef SubsetOutput
     end
     
     methods
-        function obj = SubsetOutput(varargin)
+        function obj = SubsetData(varargin)
             if nargin == 0
-                return;
+                super_args = {};
             else
-                required = opencossan.common.utilities.parseRequiredNameValuePairs(...
-                    ["failureprobabilities", "covs", "rejectionrates", "thresholds", ...
-                     "markovchains"], varargin{:});
+                [required, super_args] = opencossan.common.utilities.parseRequiredNameValuePairs(...
+                    ["failureprobabilities", "covs", "rejectionrates", "thresholds"], varargin{:});
             end
+            
+            obj@opencossan.common.outputs.SimulationData(super_args{:});
             
             if nargin > 0
                 obj.FailureProbabilites = required.failureprobabilities;
                 obj.CoVs = required.covs;
                 obj.RejectionRates = required.rejectionrates;
                 obj.Thresholds = required.thresholds;
-                obj.MarkovChains = required.markovchains;
             end
         end
         

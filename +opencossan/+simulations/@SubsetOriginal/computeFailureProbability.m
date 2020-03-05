@@ -1,4 +1,4 @@
-function [pf, out] = computeFailureProbability(obj, target)
+function pf = computeFailureProbability(obj, target)
     %COMPUTEFAILUREPROBABILITY method. This method computes the Failure Probability (pf) associate
     %to a ProbabilisticModel / SystemReliability / MetaModel by means of SubSet Simulation methods.
     %
@@ -38,7 +38,7 @@ function [pf, out] = computeFailureProbability(obj, target)
     import opencossan.common.inputs.random.UniformRandomVariable
     import opencossan.common.Samples
     import opencossan.common.MarkovChain
-    import opencossan.simulations.SubsetOutput
+    import opencossan.simulations.SubsetData
     import opencossan.reliability.FailureProbability
     
     %% Check inputs
@@ -67,7 +67,7 @@ function [pf, out] = computeFailureProbability(obj, target)
     [initial, MU] = initialSamples(obj, input);
     
     simData = apply(target, initial);    % Evaluate the model
-    simData.Samples.Level = repmat(0, height(simData.Samples), 1);
+    simData.Samples.Level = zeros(height(simData.Samples), 1);
     % Extract the values of the performance function
     subsetPerformances = simData.Samples.(target.PerformanceFunctionVariable);
     
@@ -302,9 +302,14 @@ function [pf, out] = computeFailureProbability(obj, target)
     end
     covpF = sqrt( sum( coefficientsOfVariation.^2 ));
     
+    simData = SubsetData('failureprobabilities', failureProbabilities, ...
+                           'covs', coefficientsOfVariation, ...
+                           'rejectionrates', rejectionRates, ...
+                           'thresholds', thresholds, ...
+                           'samples', simData.Samples, ...
+                           'exitflag', simData.ExitFlag);
+    
     pf = FailureProbability('value', pF, 'variance', covpF^2*pF^2, 'simulationdata', simData, 'simulation', obj);
-    out = SubsetOutput('failureprobabilities', failureProbabilities, 'covs', coefficientsOfVariation, ...
-        'rejectionrates', rejectionRates, 'thresholds', thresholds, 'markovchains', markovchains);
     
     if ~isdeployed
         % add entries in simulation and analysis database at the end of the computation when not

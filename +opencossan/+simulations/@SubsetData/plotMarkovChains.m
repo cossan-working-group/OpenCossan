@@ -32,21 +32,28 @@ function fh = plotMarkovChains(obj)
     box on;
     grid on;
     
-    chains = obj.MarkovChains;
-    labels = strings(obj.NumberOfLevels + 1, 0);
+    initialSamples = obj.Samples(obj.Samples.Level == 0, :);
     
+    levels = length(unique(obj.Samples.Level));
+    labels = strings(levels * 2 + 1, 0);
     
-    scatter(chains(1).ChainStart{:,1}, chains(1).ChainStart{:,2}, 'filled');
+    scatter(initialSamples{:,1}, initialSamples{:,2}, '.');
     labels(1) = "Initial Samples";
     
     for i = 1:obj.NumberOfLevels
-        scatter(chains(i).ChainEnd{:,1}, chains(i).ChainEnd{:,2}, 'filled');
-        labels(i + 1) = sprintf("Level_%i", i);
+        levelSamples = obj.Samples(obj.Samples.Level == i, :);
+        indices = levelSamples.Vg < obj.Thresholds(i);
+        accepted = levelSamples(indices, 1:2);
+        rejected = levelSamples(~indices, 1:2);
+        
+        scatter(accepted{:,1}, accepted{:, 2}, 'o');
+        scatter(rejected{:, 1}, rejected{:, 2}, '*');
+        
+        labels((i-1) * 2 + 2) = sprintf("Level_%i (accepted)", i);
+        labels((i-1) * 2 + 3) = sprintf("Level_%i (rejected)", i);
     end
     
-    legend(labels);
+    legend(labels, 'location', 'bestoutside');
     
     hold off;
 end
-
-
