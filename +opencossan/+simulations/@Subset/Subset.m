@@ -1,4 +1,4 @@
-classdef SubsetOriginal < opencossan.simulations.Simulations
+classdef Subset < opencossan.simulations.Simulations
     % SUBSET simulation class.  Subset Simulation is a simulation method to compute small (i.e.,
     % rare event) failure probabilities encountered in engineering systems. The basic idea is to
     % express a small failure probability as a product of larger conditional probabilities by
@@ -59,7 +59,7 @@ classdef SubsetOriginal < opencossan.simulations.Simulations
         [Xpf,XsimOut] = computeFailureProbability(Xobj,Xtarget)
         
         %% constructor
-        function obj = SubsetOriginal(varargin)
+        function obj = Subset(varargin)
             % SUBSET constructor. This function constructs a Subset Simulation object.
             %
             % Subset object is used to compute small (i.e., rare event) failure probabilities
@@ -107,7 +107,7 @@ classdef SubsetOriginal < opencossan.simulations.Simulations
             target_cov = sqrt((1-obj.TargetProbabilityOfFailure)/(obj.TargetProbabilityOfFailure*obj.Initialsamples) );
         end
         
-        function samples = sample(obj, varargin)
+        function samples = sample(~, varargin)
         end
         
         fh = plotMarkovChains(obj, simData, thresholds);
