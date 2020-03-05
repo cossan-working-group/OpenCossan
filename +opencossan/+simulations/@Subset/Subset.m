@@ -56,7 +56,7 @@ classdef Subset < opencossan.simulations.Simulations
                 'Please use computeFailureProbability to estimate the failure probability'))
         end
         
-        [Xpf,XsimOut] = computeFailureProbability(Xobj,Xtarget)
+        pf = computeFailureProbability(obj, model)
         
         %% constructor
         function obj = Subset(varargin)
@@ -110,7 +110,7 @@ classdef Subset < opencossan.simulations.Simulations
         function samples = sample(~, varargin)
         end
         
-        fh = plotMarkovChains(obj, simData, thresholds);
+        [subsetPerformances, simDataLevel, rejection] = nextLevelSamples(obj, level, threshold, seeds, model);
     end
 end
 

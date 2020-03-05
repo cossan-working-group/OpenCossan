@@ -1,4 +1,4 @@
-function pf = computeFailureProbability(obj, target)
+function pf = computeFailureProbability(obj, model)
     %COMPUTEFAILUREPROBABILITY method. This method computes the Failure Probability (pf) associate
     %to a ProbabilisticModel / SystemReliability / MetaModel by means of SubSet Simulation methods.
     %
@@ -36,16 +36,12 @@ function pf = computeFailureProbability(obj, target)
     
     import opencossan.common.inputs.random.RandomVariableSet
     import opencossan.common.inputs.random.UniformRandomVariable
-    import opencossan.common.Samples
     import opencossan.common.MarkovChain
     import opencossan.simulations.SubsetData
     import opencossan.reliability.FailureProbability
     
-    %% Check inputs
-    [obj, input] = checkInputs(obj,target);
-    
+   
     %%  Initialize variables
-    rejectedSamples = [];
     rejection = 0;
     
     % Preallocate memory
@@ -54,260 +50,94 @@ function pf = computeFailureProbability(obj, target)
     thresholds = zeros(obj.MaxLevels, 1); % Threshould of each level
     performances = cell(obj.MaxLevels, 1);  % Value of performance function at each level
     rejectionRates = zeros(obj.MaxLevels, 1); % rejection rate each level
-    markovchains = MarkovChain.empty(obj.MaxLevels, 0);
-    
-    % Initialize Variable This variable stores the indices of the Markov Chains. It is used to
-    % reconstruct and plot the Markov Chains.  The corresponding realizations are store in the
-    % SubSetOutput object in the Tvalue field.
-    
-    chainIndices = zeros(obj.NumberOfChains, obj.SamplesPerChain, obj.MaxLevels);
     
     % The samples are gerenated in the standard normal space and automatically mapped in the
     % physical space
-    [initial, MU] = initialSamples(obj, input);
+    initial = initialSamples(obj, model.Input);
     
-    simData = apply(target, initial);    % Evaluate the model
-    simData.Samples.Level = ones(height(simData.Samples), 1);
-    % Extract the values of the performance function
-    subsetPerformances = simData.Samples.(target.PerformanceFunctionVariable);
+    simData = opencossan.common.outputs.SimulationData();
     
-    gAllLevels = subsetPerformances;
-    samplesAllLevels = MU;
+    simDataLevel = apply(model, initial);    % Evaluate the model
+    simDataLevel.Samples.Level = ones(obj.InitialSamples, 1);
+    subsetPerformances = simDataLevel.Samples.(model.PerformanceFunctionVariable);
     
     opencossan.OpenCossan.cossanDisp('Initial samples generated and evaluated',3)
     
     %% Level of Subset simulations
-    for	ilevel = 1:obj.MaxLevels
-        opencossan.OpenCossan.cossanDisp(['Processing Level #' num2str(ilevel) '/' num2str(obj.MaxLevels)] ,3)
+    for	level = 1:obj.MaxLevels
+        opencossan.OpenCossan.cossanDisp(sprintf("\n[Subset] Level %i/%i", level, obj.MaxLevels), 3)
+        
+        simData = simData + simDataLevel;
         
         % Sort performances
-        [sortedPerformances, performanceIndices] = sort(subsetPerformances, 1, 'ascend');
+        [sortedPerformances, performanceIndices] = sort(subsetPerformances);
         
         % Compute intermediary threshold level (defines) the current subset
-        thresholds(ilevel) = sortedPerformances(obj.NumberOfChains);
-        [failureProbabilities(ilevel), performances{ilevel}] = ...
-            intermediateFailureProbability(obj, sortedPerformances, thresholds(ilevel));
+        thresholds(level) = sortedPerformances(obj.NumberOfChains);
+        [failureProbabilities(level), performances{level}] = ...
+            intermediateFailureProbability(obj, sortedPerformances, thresholds(level));
         
         % Compute the CoV for this level
-        coefficientsOfVariation(ilevel) = coefficientOfVariation(obj, ilevel, ...
-            subsetPerformances, thresholds(ilevel), failureProbabilities(ilevel));
+        coefficientsOfVariation(level) = coefficientOfVariation(obj, level, ...
+            subsetPerformances, thresholds(level), failureProbabilities(level));
         
-        % SubSim-MCMC
         if obj.KeepSeeds
-            rejectionRates(ilevel) = rejection/(length(subsetPerformances) - obj.NumberOfChains);
+            rejectionRates(level) = rejection/(length(subsetPerformances) - obj.NumberOfChains);
         else
-            rejectionRates(ilevel) = rejection/(length(subsetPerformances));
+            rejectionRates(level) = rejection/(length(subsetPerformances));
         end
         
-        % Prepare message output
-        k = min(length(obj.DeltaXi), ilevel);
-        SmessagePropLevel=['Proposal PDF: uniform , window size: ' num2str(obj.DeltaXi(k))];
+        opencossan.OpenCossan.cossanDisp(sprintf("[Subset] Estimated pf < %d", prod(failureProbabilities(1:level))), 3);
+        opencossan.OpenCossan.cossanDisp(sprintf(...
+            "[Subset] Performance Function = %d, Failure probability = %d", thresholds(level), ...
+            failureProbabilities(level)), 3);
+        opencossan.OpenCossan.cossanDisp(sprintf(...
+            "[Subset] CoV = %d, Rejection rate = %d", coefficientsOfVariation(level), ...
+            rejectionRates(level)), 3);
         
-        % Store information of each level Show partial results
-        if ilevel > 1
-            Smessage = num2str(rejectionRates(ilevel));
-        else
-            Smessage = '0 (MCS)';
-        end
-        
-        opencossan.OpenCossan.cossanDisp(['* Estimated probability < ',num2str(prod(failureProbabilities(1:ilevel)))],2)
-        opencossan.OpenCossan.cossanDisp(['* Performance Function = ' num2str(thresholds(ilevel)) ...
-            ', Failure probability (Pfl)= ' num2str(failureProbabilities(ilevel)) ...
-            ', CoVPfl = ' num2str(coefficientsOfVariation(ilevel)) ...
-            ', Rejection rate = ' Smessage ],2);
-        
-        opencossan.OpenCossan.cossanDisp(SmessagePropLevel,3);
-        opencossan.OpenCossan.cossanDisp(' ',3);
-        
-        if thresholds(ilevel) <= 0
+        if thresholds(level) <= 0
             % Stop the simulation once failure has been estimated
-            opencossan.OpenCossan.cossanDisp( '* Failure region identified',2)
+            opencossan.OpenCossan.cossanDisp("[Subset] Failure region identified", 3);
+            simData.ExitFlag = "Failure region identified";
             break;
-        elseif ilevel == obj.MaxLevels
+        elseif level == obj.MaxLevels
             % Skip MCMC in the last level
+            simData.ExitFlag = "Maximum number of levels reached.";
             continue;
         end
         
-        % keep only those samples (sorted) corresponding to the smallest performance function values
-        Msort = MU(performanceIndices(1:obj.NumberOfChains),:); %sort samples
-        
-        %% SubSim-MCMC
-        % use the original implementation of SubSet simulation (based on Monte Carlo Markov Chains).
-        
-        if ilevel==1
-            VindexAbsolute=performanceIndices(1:obj.NumberOfChains);
-            MindexAbsolute=reshape(1:obj.NumberOfChains*(obj.SamplesPerChain-1),obj.NumberOfChains,[])+obj.InitialSamples;
-        else
-            MpreviousChain=chainIndices(:,:,(ilevel-1));
-            VindexAbsolute=MpreviousChain(performanceIndices(1:obj.NumberOfChains));
-            MindexAbsolute=reshape(1:obj.NumberOfChains*(obj.SamplesPerChain-1),obj.NumberOfChains,[])+obj.InitialSamples+(ilevel-1)*(obj.SamplesPerChain-1)*obj.NumberOfChains;
-        end
-        
-        chainIndices(:,:,ilevel) = [VindexAbsolute MindexAbsolute];
-        
-        % Initialize Markov Chains
-        
-        %set proposal PDF
-        if length(obj.DeltaXi) >= ilevel
-            deltaxi = obj.DeltaXi(ilevel);
-        else
-            deltaxi = obj.DeltaXi(end);
-        end
-        
-        % Create Proposal distribution for the Markov Chain Different proposal distributions are
-        % created for each RandomVariableSet defined in the Input object
-        
-        nrvsets = input.NumberOfRandomVariableSets;
-        if input.NumberOfRandomVariables > 0
-            nrvsets = nrvsets + 1;
-        end
-        
-        %% Proposed rvsets
-        proposedSets = opencossan.common.inputs.random.RandomVariableSet.empty(nrvsets, 0);
-        
-        names = [];
-        % Add random variable sets
-        for i = 1:input.NumberOfRandomVariableSets
-            proposedSets(i) = RandomVariableSet.fromIidRandomVariables(...
-                UniformRandomVariable('bounds', [-deltaxi, deltaxi]),...
-                input.RandomVariableSets(i).Nrv);
-            names = [names input.RandomVariableSets(i).Names];
-        end
-        
-        % If separate rvs exists add a proposal set for them as well
-        if input.NumberOfRandomVariables > 0
-            proposedSets(end+1) = RandomVariableSet.fromIidRandomVariables(...
-                UniformRandomVariable('bounds', [-deltaxi, deltaxi]),...
-                input.NumberOfRandomVariables);
-            names = [names input.RandomVariableNames];
-        end
-        
-        %% Target rvsets
-        targetSets = input.RandomVariableSets;
-        
-        % If separate rvs exists add a target set for them as well
-        if input.NumberOfRandomVariables > 0
-            targetSets(end+1) = RandomVariableSet('Members', input.RandomVariables, ...
-                'Names', input.RandomVariableNames);
-        end
-        
-        % Build MarkovCain: Initial points (seeds) are the points above the gFl(ilevel). The
-        % constructor automatically generate Npoints states of the Markov Chain (The option
-        % Npoints=0 forces the Markov Chain constructur to not generate new states of the chains)
-        % The samples object is used to define the initial seeds
-        
-        initialMarkovChainSamples = initial(performanceIndices(1:obj.NumberOfChains), contains(initial.Properties.VariableNames, names));
-        
-        % Build Markov Chains
-        markovChains = MarkovChain(...
-            'TargetDistribution', targetSets, ...
-            'ProposalDistribution', proposedSets, ...
-            'Samples', initialMarkovChainSamples);
-        
-        % Vg_subset contains the values that have been kept to build the SubSet
-        
-        % Reset variables (new and independent Markov Chains are constructed for each level)
-        subsetPerformances = zeros(obj.SamplesPerChain * obj.NumberOfChains,1);
-        rejection = 0;
-        MU = zeros(obj.InitialSamples, size(MU, 2));
-        
-        % Performance function of the SubSet (Vsort) and the corresponding samples (Msort) of the
-        % SubSet
-        subsetPerformances(1:obj.NumberOfChains) = sortedPerformances(1:obj.NumberOfChains);
-        MU(1:obj.NumberOfChains,:) = Msort;
-        
-        %% Generate Markov Chains
-        if obj.KeepSeeds == true
-            chainStart = 2;
-        else
-            chainStart = 1;
-        end
-        
-        for iBuildChain = chainStart:obj.SamplesPerChain
-            markovChains = markovChains.sample(); % add 1 new state
-            
-            markovChainSamples = markovChains.Samples{end};
-            markovChainSamples = input.addParametersToSamples(markovChainSamples);
-            markovChainSamples = input.evaluateFunctionsOnSamples(markovChainSamples);
-            
-            % Evaluate perfomance function
-            simDataChain = target.apply(markovChainSamples);
-            simDataChain.Samples.Level = repmat(ilevel + 1, height(simDataChain.Samples), 1);
-            % Merge SimulationData objectd rejected values are saved nevertheless
-            simData = simData + simDataChain;
-            
-            % Get the new values of the performance function
-            Vg_temp = simDataChain.Samples.(target.PerformanceFunctionVariable);
-            
-            % Identify the samples that have to be rejected. The rejected points correspond to the
-            % samples whose performance function value is below the subset value (the removed states
-            % of the chain are set equal to the previous ones)
-            Vreject = find(Vg_temp > thresholds(ilevel));
-            if iBuildChain == 1
-                VrejectAbsPosition=(iBuildChain-1) * obj.NumberOfChains+Vreject;
-                %does it only once and only if the seeds will be discarded
-            else
-                VrejectAbsPosition=(iBuildChain-2)*obj.NumberOfChains+Vreject;
-            end
-            rejectedSamples=[rejectedSamples; VrejectAbsPosition+(ilevel-1)*(obj.NumberOfChains-1)*obj.NumberOfChains + obj.InitialSamples]; %#ok<AGROW>
-            
-            % Update the vector of the performance function Please note that the MarkovChain object
-            % does not store any information of the performance function
-            Vg_temp(Vreject)=subsetPerformances(VrejectAbsPosition);
-            
-            % Identify current set of samples
-            Vposition=(iBuildChain-1)*obj.NumberOfChains+1:iBuildChain*obj.NumberOfChains;
-            % Update Vg_subset and the corresponding samples MU
-            subsetPerformances(Vposition)=Vg_temp;
-            
-            if ~isempty(Vreject)
-                % Remove points from Markov Chain
-                markovChains = markovChains.reject('chains', Vreject);
-                initial{Vposition, names} = markovChains.ChainEnd{:,:};
-            end
-            
-            % Store the number of rejected samples
-            rejection = rejection+length(Vreject);
-            
-            % Collect results
-            gAllLevels = [gAllLevels; Vg_temp]; %#ok<AGROW>
-            samplesAllLevels = [samplesAllLevels; markovChains.ChainEnd{:,:}]; %#ok<AGROW>
-            
-        end
-        
-        markovchains(ilevel) = markovChains;
-    end % end SubSet levels
-    
+        seeds = simDataLevel.Samples(performanceIndices(1:obj.NumberOfChains), :);
+        [subsetPerformances, simDataLevel, rejection] = obj.nextLevelSamples(level, thresholds(level), seeds, model);
+    end
     
     %% Compute failure probability
-    % Remove not used levels
-    failureProbabilities = failureProbabilities(1:ilevel);
-    coefficientsOfVariation = coefficientsOfVariation(1:ilevel);
-    rejectionRates = rejectionRates(1:ilevel);
-    thresholds = thresholds(1:ilevel);
+    failureProbabilities = failureProbabilities(1:level);
+    coefficientsOfVariation = coefficientsOfVariation(1:level);
+    rejectionRates = rejectionRates(1:level);
+    thresholds = thresholds(1:level);
     
     % Compute the failure probability and the CoV
-    if target.StdDeviationIndicatorFunction == 0    %in case smooth performance function is not applied, calculate Pf in usual way
+    if model.StdDeviationIndicatorFunction == 0    %in case smooth performance function is not applied, calculate Pf in usual way
         pF = prod(failureProbabilities);
     else    %in case smooth performance function is applied, calculate Pf using special formula
         p0 = obj.target_pf;  %target failure probability for each Subset
-        Vweights = cumprod([1-p0,ones(1,ilevel-1)*p0]);  %compute weights associated with each Subset
+        Vweights = cumprod([1-p0,ones(1,level-1)*p0]);  %compute weights associated with each Subset
         Vweights(end) = 1-sum(Vweights(1:end-1));         %correct weights to they add up to one
         pF = 0;    %initialize failure probability to zero
-        for countLevel=1:ilevel
-            gFSmoothInd     = normcdf(-performances{countLevel}, 0, ...
-                target.StdDeviationIndicatorFunction);  %smooth indicator function
+        for countLevel=1:level
+            gFSmoothInd = normcdf(-performances{countLevel}, 0, ...
+                model.StdDeviationIndicatorFunction);  %smooth indicator function
             pF = pF + mean(gFSmoothInd) * Vweights(countLevel);    %compute contribution to pF of each Subset
         end
     end
     covpF = sqrt( sum( coefficientsOfVariation.^2 ));
     
     simData = SubsetData('failureprobabilities', failureProbabilities, ...
-                           'covs', coefficientsOfVariation, ...
-                           'rejectionrates', rejectionRates, ...
-                           'thresholds', thresholds, ...
-                           'samples', simData.Samples, ...
-                           'exitflag', simData.ExitFlag);
+        'covs', coefficientsOfVariation, ...
+        'rejectionrates', rejectionRates, ...
+        'thresholds', thresholds, ...
+        'samples', simData.Samples, ...
+        'exitflag', simData.ExitFlag);
     
     pf = FailureProbability('value', pF, 'variance', covpF^2*pF^2, 'simulationdata', simData, 'simulation', obj);
     
@@ -329,7 +159,7 @@ function pf = computeFailureProbability(obj, target)
     restoreRandomStream(obj);
 end
 
-function [samples, sns] = initialSamples(obj, input)
+function samples = initialSamples(obj, input)
     % INITIALSAMPLES Creates the intial samples for subset simulation in standard normal space and
     % maps them to the physical space.
     
@@ -366,7 +196,7 @@ end
 function cov = coefficientOfVariation(obj, level, performances, threshold, pf)
     if level == 1
         % Monte Carlo CoV
-        cov = sqrt((1 - pf) / (pf * obj.InitialSamples ));  %Eq. (28)
+        cov = sqrt((1 - pf) / (pf * obj.InitialSamples));  %Eq. (28)
     else
         % Correlation of the states of the markov chain
         g = reshape(performances ...
