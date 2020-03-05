@@ -58,7 +58,7 @@ classdef SubsetData < opencossan.common.outputs.SimulationData
         end
         
         function levels = get.NumberOfLevels(obj)
-            levels = length(obj.FailureProbabilites) - 1;
+            levels = length(obj.FailureProbabilites);
         end
     end
     

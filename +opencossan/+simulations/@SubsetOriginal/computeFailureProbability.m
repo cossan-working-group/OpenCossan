@@ -67,7 +67,7 @@ function pf = computeFailureProbability(obj, target)
     [initial, MU] = initialSamples(obj, input);
     
     simData = apply(target, initial);    % Evaluate the model
-    simData.Samples.Level = zeros(height(simData.Samples), 1);
+    simData.Samples.Level = ones(height(simData.Samples), 1);
     % Extract the values of the performance function
     subsetPerformances = simData.Samples.(target.PerformanceFunctionVariable);
     
@@ -232,7 +232,7 @@ function pf = computeFailureProbability(obj, target)
             
             % Evaluate perfomance function
             simDataChain = target.apply(markovChainSamples);
-            simDataChain.Samples.Level = repmat(ilevel, height(simDataChain.Samples), 1);
+            simDataChain.Samples.Level = repmat(ilevel + 1, height(simDataChain.Samples), 1);
             % Merge SimulationData objectd rejected values are saved nevertheless
             simData = simData + simDataChain;
             

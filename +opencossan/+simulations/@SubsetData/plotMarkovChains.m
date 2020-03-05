@@ -1,4 +1,4 @@
-function fh = plotMarkovChains(obj)
+function fh = plotMarkovChains(obj, names)
     %PLOTMARKOVCHAIN This method plots the markov chains for each level of the
     %subset simulation
     %
@@ -27,30 +27,45 @@ function fh = plotMarkovChains(obj)
     %  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
     % =====================================================================
     
+    if ~exist('names', 'var')
+        names = obj.Samples.Properties.VariableNames(1:2);
+    end
+    
+    if length(names) == 2
+        fh = plotMarkovChains2D(obj, names);
+    else
+        fh = parallelplot(obj.Samples, "CoordinateVariables", names, 'GroupVariable', 'Level', 'LineAlpha', 0.5);
+    end
+end
+
+function fh = plotMarkovChains2D(obj, names)
     fh = figure();
     hold on;
     box on;
     grid on;
     
-    initialSamples = obj.Samples(obj.Samples.Level == 0, :);
+    x = names(1);
+    y = names(2);
+    
+    initialSamples = obj.Samples(obj.Samples.Level == 1, :);
     
     levels = length(unique(obj.Samples.Level));
     labels = strings(levels * 2 + 1, 0);
     
-    scatter(initialSamples{:,1}, initialSamples{:,2}, '.');
-    labels(1) = "Initial Samples";
+    scatter(initialSamples{:, x}, initialSamples{:, y}, '.');
+    labels(1) = "Level_1";
     
-    for i = 1:obj.NumberOfLevels
+    for i = 2:obj.NumberOfLevels
         levelSamples = obj.Samples(obj.Samples.Level == i, :);
         indices = levelSamples.Vg < obj.Thresholds(i);
-        accepted = levelSamples(indices, 1:2);
-        rejected = levelSamples(~indices, 1:2);
+        accepted = levelSamples(indices, :);
+        rejected = levelSamples(~indices, :);
         
-        scatter(accepted{:,1}, accepted{:, 2}, 'o');
-        scatter(rejected{:, 1}, rejected{:, 2}, '*');
+        scatter(accepted{:, x}, accepted{:, y}, 'o');
+        scatter(rejected{:, x}, rejected{:, y}, '*');
         
-        labels((i-1) * 2 + 2) = sprintf("Level_%i (accepted)", i);
-        labels((i-1) * 2 + 3) = sprintf("Level_%i (rejected)", i);
+        labels((i-2) * 2 + 2) = sprintf("Level_%i (accepted)", i);
+        labels((i-2) * 2 + 3) = sprintf("Level_%i (rejected)", i);
     end
     
     legend(labels, 'location', 'bestoutside');
