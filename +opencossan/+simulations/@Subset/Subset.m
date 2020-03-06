@@ -110,7 +110,7 @@ classdef Subset < opencossan.simulations.Simulations
         function samples = sample(~, varargin)
         end
         
-        [subsetPerformances, simDataLevel, rejection] = nextLevelSamples(obj, level, threshold, seeds, model);
+        [subsetPerformances, rejection, samples, simDataLevel] = nextLevelSamples(obj, level, threshold, seeds, model);
     end
 end
 

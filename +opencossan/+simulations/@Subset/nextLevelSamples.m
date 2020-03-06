@@ -1,7 +1,8 @@
-function [subsetPerformances, simDataLevel, rejection] = nextLevelSamples(obj, level, threshold, seeds, model)
+function [performances, samples, rejection, simDataLevel] = nextLevelSamples(obj, level, threshold, seeds, model)
     
-    subsetPerformances = zeros(obj.SamplesPerChain * obj.NumberOfChains,1);
-    subsetPerformances(1:obj.NumberOfChains) = seeds.(model.PerformanceFunctionVariable);
+    performances = zeros(obj.SamplesPerChain * obj.NumberOfChains,1);
+    performances(1:obj.NumberOfChains) = seeds.(model.PerformanceFunctionVariable);
+    
     rejection = 0;
     
     % set proposal PDF
@@ -17,12 +18,12 @@ function [subsetPerformances, simDataLevel, rejection] = nextLevelSamples(obj, l
     
     if obj.KeepSeeds == true
         chainStart = 2;
-        simDataLevel = opencossan.common.outputs.SimulationData('samples', ...
-            seeds(:, ~contains(seeds.Properties.VariableNames, "Level")));
+        samples = seeds(:, ~contains(seeds.Properties.VariableNames, "Level"));
     else
         chainStart = 1;
-        simDataLevel = opencossan.common.outputs.SimulationData();
     end
+    
+    simDataLevel = opencossan.common.outputs.SimulationData();
     
     for chainIndex = chainStart:obj.SamplesPerChain
         markovChains = markovChains.sample(); % add 1 new state
@@ -48,10 +49,14 @@ function [subsetPerformances, simDataLevel, rejection] = nextLevelSamples(obj, l
         else
             globalRejectionIndices = (chainIndex - 2) * obj.NumberOfChains + samplesToReject;
         end
-        chainPerformance(samplesToReject) = subsetPerformances(globalRejectionIndices);
+        chainPerformance(samplesToReject) = performances(globalRejectionIndices);
         
-        globalPerformanceIndices = (chainIndex - 1) * obj.NumberOfChains + 1:chainIndex * obj.NumberOfChains;
-        subsetPerformances(globalPerformanceIndices) = chainPerformance;
+        chainSamples = simDataChain.Samples;
+        chainSamples(samplesToReject, :) = samples(globalRejectionIndices, :);
+        samples = [samples; chainSamples];
+        
+        globalIndices = (chainIndex - 1) * obj.NumberOfChains + 1:chainIndex * obj.NumberOfChains;
+        performances(globalIndices) = chainPerformance;
         
         if ~isempty(samplesToReject)
             % Remove points from Markov Chain

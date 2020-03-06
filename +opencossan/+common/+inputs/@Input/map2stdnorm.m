@@ -17,6 +17,10 @@ function stdnorm = map2stdnorm(obj, physical)
         stdnorm.(names(i)) = map2stdnorm(rvs(i), physical.(names(i)));
     end
     
+    for rvset = obj.RandomVariableSets
+        stdnorm = [stdnorm map2stdnorm(rvset, physical(:, rvset.Names))];
+    end
+    
     % TODO: map random variable sets
     
     % temporary fix, I think it is better to use Samples...

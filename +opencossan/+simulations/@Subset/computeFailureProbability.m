@@ -55,19 +55,16 @@ function pf = computeFailureProbability(obj, model)
     % physical space
     initial = initialSamples(obj, model.Input);
     
-    simData = opencossan.common.outputs.SimulationData();
-    
-    simDataLevel = apply(model, initial);    % Evaluate the model
-    simDataLevel.Samples.Level = ones(obj.InitialSamples, 1);
-    subsetPerformances = simDataLevel.Samples.(model.PerformanceFunctionVariable);
+    simData = apply(model, initial);    % Evaluate the model
+    simData.Samples.Level = ones(obj.InitialSamples, 1);
+    subsetPerformances = simData.Samples.(model.PerformanceFunctionVariable);
+    samples = simData.Samples;
     
     opencossan.OpenCossan.cossanDisp('Initial samples generated and evaluated',3)
     
     %% Level of Subset simulations
     for	level = 1:obj.MaxLevels
         opencossan.OpenCossan.cossanDisp(sprintf("\n[Subset] Level %i/%i", level, obj.MaxLevels), 3)
-        
-        simData = simData + simDataLevel;
         
         % Sort performances
         [sortedPerformances, performanceIndices] = sort(subsetPerformances);
@@ -106,8 +103,11 @@ function pf = computeFailureProbability(obj, model)
             continue;
         end
         
-        seeds = simDataLevel.Samples(performanceIndices(1:obj.NumberOfChains), :);
-        [subsetPerformances, simDataLevel, rejection] = obj.nextLevelSamples(level, thresholds(level), seeds, model);
+        seeds = samples(performanceIndices(1:obj.NumberOfChains), :);
+        
+        [subsetPerformances, samples, rejection, simDataLevel] = obj.nextLevelSamples(level, thresholds(level), seeds, model);
+        
+        simData = simData + simDataLevel;
     end
     
     %% Compute failure probability

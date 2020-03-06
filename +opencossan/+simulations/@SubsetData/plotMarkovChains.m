@@ -53,25 +53,20 @@ function fh = plotMarkovChains2D(obj, names)
     x = names(1);
     y = names(2);
     
-    initialSamples = obj.Samples(obj.Samples.Level == 1, :);
-    
     levels = length(unique(obj.Samples.Level));
     labels = strings(levels * 2 + 1, 0);
     
-    scatter(initialSamples{:, x}, initialSamples{:, y}, '.');
-    labels(1) = "Level_1";
-    
-    for i = 2:obj.NumberOfLevels
+    for i = 1:obj.NumberOfLevels
         levelSamples = obj.Samples(obj.Samples.Level == i, :);
         indices = levelSamples.Vg < obj.Thresholds(i);
         accepted = levelSamples(indices, :);
         rejected = levelSamples(~indices, :);
         
-        scatter(accepted{:, x}, accepted{:, y}, 'o');
-        scatter(rejected{:, x}, rejected{:, y}, '*');
+        scatter(accepted{:, x}, accepted{:, y}, 'o', 'LineWidth', 1.5);
+        scatter(rejected{:, x}, rejected{:, y}, '.');
         
-        labels((i-2) * 2 + 2) = sprintf("Level_%i (accepted)", i);
-        labels((i-2) * 2 + 3) = sprintf("Level_%i (rejected)", i);
+        labels((i-1) * 2 + 1) = sprintf("Level_{%i} (accepted)", i);
+        labels((i-1) * 2 + 2) = sprintf("Level_{%i} (rejected)", i);
     end
     
     legend(labels, 'location', 'bestoutside');
