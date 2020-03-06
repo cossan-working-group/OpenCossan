@@ -31,7 +31,7 @@ for k=1:2:length(varargin)
             else
                 Xsimulator  = varargin{k+1};
             end
-            assert(strcmp(superclasses(Xsimulator),'opencossan.simulations.Simulations'), ...
+            assert(isa(Xsimulator, 'opencossan.simulations.Simulations'), ...
                 'openCOSSAN:MetaModel:validate',...
                 'PropertyName %s must be an object of the subclasses of Simulations',varargin{k});
            
@@ -131,9 +131,8 @@ end
 
 if exist('Xsimulator','var')
     Xs  = Xsimulator.sample('Xinput',Xobj.XFullmodel.Input);
-    Xobj.XvalidationInput = Xobj.XFullmodel.Input;
-    Xobj.XvalidationInput.Samples = Xs;
-    Xobj.XvalidationOutput =apply(Xobj.XFullmodel,Xobj.XvalidationInput);
+    Xobj.XvalidationInput = Xs;
+    Xobj.XvalidationOutput = apply(Xobj.XFullmodel,Xobj.XvalidationInput);
 else
     assert(~isempty(Xobj.XvalidationInput)||~isempty(Xobj.TvalidationData),...
         'openCOSSAN:MetaModel:validate',...
@@ -149,9 +148,9 @@ if ~isempty(Xobj.TvalidationData)
     TableInput=Xobj.TvalidationData(:,Xobj.Cinputnames);
     Ttargets=Xobj.TvalidationData(:,Xobj.Coutputnames);
 else
-    TempTableInput=Xobj.XvalidationInput.getTable;
+    TempTableInput=Xobj.XvalidationInput;
     TableInput=TempTableInput(:,Xobj.InputNames);
-    Ttargets = Xobj.XvalidationOutput.TableValues(:,Xobj.OutputNames);
+    Ttargets = Xobj.XvalidationOutput.Samples(:,Xobj.OutputNames);
 end
 
 XOutput  = evaluate(Xobj,TableInput);

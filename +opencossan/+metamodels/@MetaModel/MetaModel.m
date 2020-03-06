@@ -51,7 +51,7 @@ classdef MetaModel < opencossan.workers.Worker
         
         function McalibrationTarget=get.McalibrationTarget(Xobj)
             if ~isempty(Xobj.XcalibrationOutput)
-                McalibrationTarget=getValues(Xobj.XcalibrationOutput,'Cnames',Xobj.OutputNames);
+                McalibrationTarget = Xobj.XcalibrationOutput.Samples{:, Xobj.OutputNames};
             else
                 McalibrationTarget=[];
             end
