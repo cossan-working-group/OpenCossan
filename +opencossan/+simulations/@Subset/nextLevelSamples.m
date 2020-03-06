@@ -91,7 +91,7 @@ function markovChains = buildMarkovChains(deltaxi, seeds, model)
     for i = 1:model.Input.NumberOfRandomVariableSets
         proposedSets(i) = RandomVariableSet.fromIidRandomVariables(...
             UniformRandomVariable('bounds', [-deltaxi, deltaxi]),...
-            input.RandomVariableSets(i).Nrv);
+            model.Input.RandomVariableSets(i).Nrv);
         names = [names model.Input.RandomVariableSets(i).Names];
     end
     

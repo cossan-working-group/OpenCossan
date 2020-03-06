@@ -1,4 +1,4 @@
-classdef SubsetOriginalTest < matlab.unittest.TestCase
+classdef SubsetTest < matlab.unittest.TestCase
     % SubsetOriginalTest Unit tests for the class simulations.SubsetOriginal
     % see http://cossan.co.uk/wiki/index.php/@SubsetOriginal
     %
@@ -53,7 +53,7 @@ classdef SubsetOriginalTest < matlab.unittest.TestCase
     methods (Test)
      
         function constructorFull(testCase)
-            SubS = opencossan.simulations.SubsetOriginal(...
+            SubS = opencossan.simulations.Subset(...
                 'initialsamples',100,...
                 'targetprobabilityoffailure', 0.2,...
                 'maxlevels', 7,...
@@ -69,14 +69,14 @@ classdef SubsetOriginalTest < matlab.unittest.TestCase
         
         %% apply
         function assertNotUsableWithSubsetSimulation(testCase)
-            SubS = opencossan.simulations.SubsetOriginal('initialSamples', 1000);
+            SubS = opencossan.simulations.Subset('initialSamples', 1000);
             testCase.assertError(@() SubS.apply(testCase.Xmdl),...
                 'openCOSSAN:simulations:subsetoriginal:apply');
         end
         
         %% computeFailureProbabiliy
         function computeFailureProbabilityShouldOutputSampleData(testCase)
-            SubS = opencossan.simulations.SubsetOriginal('initialSamples', 100);
+            SubS = opencossan.simulations.Subset('initialSamples', 100);
             pf = SubS.computeFailureProbability(testCase.Xpm);
 
             testCase.verifyClass(pf, 'opencossan.reliability.FailureProbability');
