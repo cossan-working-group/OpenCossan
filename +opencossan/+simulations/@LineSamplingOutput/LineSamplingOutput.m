@@ -71,7 +71,7 @@ classdef LineSamplingOutput < opencossan.common.outputs.SimulationData
     
     methods
         
-        function Xobj=LineSamplingOutput(varargin)
+        function Xobj = LineSamplingOutput(varargin)
             %LINESAMPLINGOUTPUT
             % This object stores the results of the simulation performed by
             % LineSampling

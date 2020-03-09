@@ -47,11 +47,10 @@ classdef LineSampling < opencossan.simulations.Simulations
     
     methods
         %% Methods inheritated from the superclass
-        display(Xobj)    % show object details
         
-        XsimOut=apply(Xobj,Xtarget)      % Performe Monte Carlo Simulation
+        XsimOut = apply(Xobj,Xtarget)      % Performe Monte Carlo Simulation
         
-        [Xpf,XsimData,varargout]=computeFailureProbability(Xobj,Xtarget)   % Esitmate FailureProbability
+        [Xpf,XsimData,varargout] = computeFailureProbability(Xobj,Xtarget)   % Esitmate FailureProbability
         
         Xsamples = sample(Xobj,varargin) % Generate samples using IS method
         

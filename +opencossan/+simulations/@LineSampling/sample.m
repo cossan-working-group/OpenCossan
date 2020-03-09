@@ -1,4 +1,4 @@
-function Xsamples  = sample(Xobj,varargin)
+function samples = sample(Xobj,varargin)
 %SAMPLE
 % This method generate a Samples object for the LineSampling.
 %
@@ -71,7 +71,7 @@ assert(logical(exist('Xinput','var')), ...
 % check the Gradient object (check if the components defined in the
 % Gradient object (Cnames) correspond to the variables defined in the Input
 % object
-Cnameinput=Xinput.RandomVariableNames;
+Cnameinput=Xinput.RandomInputNames;
 
 if isempty(Xobj.CalphaNames)
     VmapImportantDirection=true(1,length(Cnameinput));
@@ -87,11 +87,11 @@ end
 
 
 %% Check number of variables
-assert(Nvars==Xinput.NrandomVariables, ...
+assert(Nvars==Xinput.NumberOfRandomInputs, ...
     'openCOSSAN:LineSampling:sample', ...
     ['Number of random variable in the Input (%i)', ...
     'does not match with the size of the important direction (%i)'], ...
-    Xinput.NrandomVariables,Nvars)
+    Xinput.NumberOfRandomInputs,Nvars)
 
 %% Generate samples
 % sample points in a plane orthogonal to the important direction
@@ -119,6 +119,9 @@ MlineSamplingPoints     = reshape(MhyperPlanePoints(:)+MalphaSet(:),...
     Nvars,Npoints*Nlines);
 
 % Create the sample set
-Xsamples = Samples('MsamplesStandardNormalSpace',MlineSamplingPoints',...
-    'Xinput',Xinput);
+samples = array2table(MlineSamplingPoints');
+samples.Properties.VariableNames = Xinput.RandomInputNames;
+samples = Xinput.map2physical(samples);
+samples = Xinput.addParametersToSamples(samples);
+samples = Xinput.evaluateFunctionsOnSamples(samples);
 

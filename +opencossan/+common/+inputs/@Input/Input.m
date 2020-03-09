@@ -61,6 +61,8 @@ classdef Input < opencossan.common.CossanObject
         AreDesignVariablesDiscrete
         
         InputNames
+        RandomInputNames
+        NumberOfRandomInputs
     end
     
     methods
@@ -249,6 +251,20 @@ classdef Input < opencossan.common.CossanObject
             end
             [~, idx] = ismember(obj.RandomVariableSetNames, names);
             names(idx) = [];
+        end
+        
+        function names = get.RandomInputNames(obj)
+            names = obj.RandomVariableNames;
+            for set = obj.RandomVariableSets
+                names = [names set.Names]; %#ok<AGROW>
+            end
+        end
+        
+        function n = get.NumberOfRandomInputs(obj)
+            n = obj.NumberOfRandomVariables;
+            for set = obj.RandomVariableSets
+                n = n + set.Nrv;
+            end
         end
         
         function discrete = get.AreDesignVariablesDiscrete(obj)

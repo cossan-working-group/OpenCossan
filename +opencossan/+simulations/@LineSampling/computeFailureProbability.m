@@ -1,4 +1,4 @@
-function [Xpf,XlineSamplingOutput] = computeFailureProbability(Xobj,Xtarget)
+function pf = computeFailureProbability(Xobj,Xtarget)
 %computeFailureProbability method. This method compute the FailureProbability associate to a
 % ProbabilisticModel/SystemReliability/MetaModel by means of a
 % LineSampling object
@@ -72,11 +72,14 @@ SexitFlag=[];           % Exit flag
 
 opencossan.OpenCossan.cossanDisp('[LineSampling:pf] Start LineSampling analysis',3)
 
+simData = opencossan.common.outputs.SimulationData();
+batch = 0;
+pf = 0;
+variance = 0;
 %% BEGIN LineSampling simulation
 while isempty(SexitFlag)
     % Reset Variables
-    
-    Xobj.ibatch = Xobj.ibatch + 1;
+    batch = batch + 1;
     
     % Lap time for each batch
     opencossan.OpenCossan.getTimer().lap('description',[' Batch #' num2str(Xobj.ibatch)]);
@@ -94,19 +97,21 @@ while isempty(SexitFlag)
     NlinePoints=length(Xobj.Vset);
     
     % Gererate all samples at once
-    Xs=Xobj.sample('Nlines',Nlines,'Xinput',Xinput);
+    samples = Xobj.sample('Nlines',Nlines,'Xinput',Xinput);
     
-    Xanalysis=Xinput;
-    Xanalysis.Samples=Xs;
     % Evaluate the model
-    XpartialSimOut= apply(Xtarget,Xanalysis);
+    XpartialSimOut= apply(Xtarget, samples);
+    XpartialSimOut.Samples.Batch = repmat(batch, XpartialSimOut.NumberOfSamples, 1);
+    
+    simData = simData + XpartialSimOut;
     
     % Extract the values of the performance function
-    Vg=XpartialSimOut.getValues('Sname',Xtarget.PerformanceFunctionVariable);
+    Vg=XpartialSimOut.Samples.(Xtarget.PerformanceFunctionVariable);
     Mg=reshape(Vg,NlinePoints,Nlines);
     
     % Compute coordinates of points on the hyperplane
-    Msamples=transpose(Xs.MsamplesStandardNormalSpace);
+    Msamples = Xinput.map2stdnorm(samples);
+    Msamples = Msamples{:,:};
     
     VpfLine=zeros(1,Nlines);
     VdistanceLimitState=zeros(1,Nlines);
@@ -150,49 +155,42 @@ while isempty(SexitFlag)
         
     end % loop over lines
     
-    XlineSamplingOutput=LineSamplingOutput('SperformanceFunctionName',SperformanceFunctionName,...
-        'VnumPointLine',VnumPointsLine,...
-        'Vnorm',sqrt(sum(Msamples.^2,1)),...
-        'VdistanceOrthogonalPlane',repmat(Xobj.Vset(:),Nlines,1),...
-        'VinitialDirectionSNS',Xobj.Valpha,...
-        'VlimitStateDistance',VdistanceLimitState,...
-        'XsimulationData',XpartialSimOut,...
-        'Xinput',Xinput);
+%     XlineSamplingOutput=LineSamplingOutput('SperformanceFunctionName',SperformanceFunctionName,...
+%         'VnumPointLine',VnumPointsLine,...
+%         'Vnorm',sqrt(sum(Msamples.^2,1)),...
+%         'VdistanceOrthogonalPlane',repmat(Xobj.Vset(:),Nlines,1),...
+%         'VinitialDirectionSNS',Xobj.Valpha,...
+%         'VlimitStateDistance',VdistanceLimitState,...
+%         'XsimulationData',XpartialSimOut,...
+%         'Xinput',Xinput);
     
     % Increment counters
-    Xobj.isamples = Xobj.isamples+Nlines*length(Xobj.Vset); % number of samples
+%     Xobj.isamples = Xobj.isamples+Nlines*length(Xobj.Vset); % number of samples
     
     %% Export SimulationData
-    if ~Xobj.Lintermediateresults
-        XsimOut(Xobj.ibatch)=XpartialSimOut;  %#ok<AGROW>
-    else
-        Xobj.exportResults('XlineSamplingOutput',XlineSamplingOutput);
-        % Keep in memory only the SimulationData of the last batch
-        XsimOut=XpartialSimOut;
-    end
+%     if ~Xobj.Lintermediateresults
+%         XsimOut(Xobj.ibatch)=XpartialSimOut;  %#ok<AGROW>
+%     else
+%         Xobj.exportResults('XlineSamplingOutput',XlineSamplingOutput);
+%         % Keep in memory only the SimulationData of the last batch
+%         XsimOut=XpartialSimOut;
+%     end
     
     %% Compute Failure Probability
     pfhat = mean(VpfLine);
-    variancepf=sum((VpfLine-pfhat).^2)/(Nlines*(Nlines-1));
+    variancepf = sum((VpfLine-pfhat).^2)/(Nlines*(Nlines-1));
     
-    if Xobj.ibatch==1
-        % Initialize FailureProbability object
-        Xpf=FailureProbability('CXmembers',{Xtarget},...
-            'Smethod','LineSampling', ...
-            'Nlines',Nlines,...
-            'pf',pfhat,'variancepf',variancepf,...
-            'Nsamples',Xobj.isamples);
-    else
-        Xpf=Xpf.addBatch('pf',pfhat,'variancepf',variancepf,...
-            'Nsamples',Nlines*length(Xobj.Vset));
-    end
-    
+    pf = pf + pfhat;
+    variance = variance + variancepf;
     % check termination criteria
-    SexitFlag=checkTermination(Xobj,Xpf);
+    SexitFlag = checkTermination(Xobj, simData);
 end
 
 % Add termination criteria to the FailureProbability
-Xpf.SexitFlag=SexitFlag;
+simData.ExitFlag = SexitFlag;
+
+pf = opencossan.reliability.FailureProbability('value', pf, 'variance', variance, ...
+    'simulationdata', simData, 'simulation', Xobj);
 
 if ~isdeployed
     % add entries in simulation and analysis database at the end of the
@@ -202,14 +200,10 @@ if ~isdeployed
     if ~isempty(XdbDriver)
         XdbDriver.insertRecord('StableType','Result',...
             'Nid',getNextPrimaryID(OpenCossan.getDatabaseDriver,'Result'),...
-            'CcossanObjects',{Xpf},...
+            'CcossanObjects',{pf},...
             'CcossanObjectsNames',{'Xpf'});
     end
 end
-
-XsimOut(end).SexitFlag=SexitFlag;
-XsimOut(end).SbatchFolder=...
-    [opencossan.OpenCossan.getWorkingPath filesep Xobj.SbatchFolder];
 
 opencossan.OpenCossan.getTimer().lap('description','End computeFailureProbability@LineSampling');
 

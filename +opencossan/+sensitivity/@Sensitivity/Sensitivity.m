@@ -26,26 +26,26 @@ classdef Sensitivity < opencossan.common.CossanObject
     % =====================================================================
     
     properties (SetAccess=protected,GetAccess=public)
-        Xtarget
+        Target
         LperformanceFunction
-        Cinputnames
-        Coutputnames
-        Xinput
+        InputNames
+        OutputNames
+        Input
     end
     
     properties (SetAccess=protected,GetAccess=public)
         Sevaluatedobjectname='N/A'
-        Xsamples0
-        fx0
+        Samples0
+        Fx0
     end    
        
     methods (Abstract)
-        varargout=computeIndices(Xobj,varargin)  % Perform Sensitivity on the Target object
-        Xobj=validateSettings(Xobj)     % Perform Sensitivity
+        varargout = computeIndices(Xobj,varargin)  % Perform Sensitivity on the Target object
+        Xobj = validateSettings(Xobj)     % Perform Sensitivity
     end
     
     methods (Access=protected)
-        Xobj=addModel(Xobj,Xtarget) 
+        Xobj = addModel(Xobj,Xtarget) 
         setAnalysisName(Xobj)
     end
     

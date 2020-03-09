@@ -78,7 +78,7 @@ opencossan.OpenCossan.resetRandomNumberGenerator(49564);
 % here the gradient in standard normal space is computed.
 
 XlsFD = opencossan.sensitivity.LocalSensitivityFiniteDifference(...
-    'Xmodel', XprobModelBeamMatlab, 'Coutputname', {'Vg'});
+    'Xmodel', XprobModelBeamMatlab, 'Coutputname', "Vg");
 XlocalSensitivity = XlsFD.computeGradientStandardNormalSpace();
 
 % Use sensitivity information to define the important direction for LineSampling
@@ -87,23 +87,22 @@ XLS=opencossan.simulations.LineSampling(...
     'Vset', 0.5:0.5:3.5);
 
 % Run reliability analysis
-[XfailureProbLS, Xout]=XLS.computeFailureProbability(XprobModelBeamMatlab);
+XfailureProbLS = XLS.computeFailureProbability(XprobModelBeamMatlab);
 
 % Show Results
 display(XfailureProbLS);
-display(Xout);
 
 % Validate Solution
-assert(abs(XfailureProbLS.pfhat-0.069097)<1e-4*0.069097,...
+assert(abs(XfailureProbLS.Value-0.069097)<1e-4*0.069097,...
     'CossanX:Tutorials:CantileverBeam',...
     'Estimated failure probability (%e) does not match the reference Solution (%e)',...
-    XfailureProbLS.pfhat, 0.069097)
+    XfailureProbLS.Value, 0.069097)
 
 %% Plot Results
-f1 = Xout.plotLines;
+% f1 = Xout.plotLines;
 
 %% Close figure
-close(f1);
+% close(f1);
 
 %% Optimization
 % This tutorial continues with the optimization section

@@ -55,8 +55,6 @@ classdef Gradient
             if nargin==0
                 return
             end
-            %% Validate input arguments
-            opencossan.OpenCossan.validateCossanInputs(varargin{:})
             
             for k=1:2:length(varargin)
                 switch lower(varargin{k})
@@ -97,10 +95,6 @@ classdef Gradient
             end
             
         end
-        
-        % show summary of the object
-        display(Xobj)
-        
         [varargout]=plotComponents(Xobj,varargin) % Show the components in a bar figure
         
         [varargout]=plotPie(Xobj,varargin) % Show the components in a pie char

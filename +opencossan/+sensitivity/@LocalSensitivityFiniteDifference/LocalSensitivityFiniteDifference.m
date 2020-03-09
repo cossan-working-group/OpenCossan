@@ -68,9 +68,9 @@ classdef LocalSensitivityFiniteDifference < opencossan.sensitivity.Sensitivity
                     case {'sdescription'}
                         Xobj.Sdescription=varargin{k+1};
                     case {'coutputnames' 'csoutputnames','coutputname','csoutputname'}
-                        Xobj.Coutputnames=varargin{k+1};
+                        Xobj.OutputNames = varargin{k+1};
                     case {'cinputnames' 'csinputnames' }
-                        Xobj.Cinputnames=varargin{k+1};
+                        Xobj.InputNames = varargin{k+1};
                     case {'sevaluatedobjectname'}
                         Xobj.Sevaluatedobjectname=varargin{k+1};
                     case {'lperformancefunction'}
