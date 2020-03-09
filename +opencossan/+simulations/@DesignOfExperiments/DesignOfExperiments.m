@@ -44,9 +44,7 @@ classdef DesignOfExperiments < opencossan.simulations.Simulations
     
     methods
         
-        %% Methods inheritated from the superclass
-        display(Xobj)             % This method shows the summary of the Xobj
-        
+        %% Methods inheritated from the superclass        
         function computeFailureProbability(Xobj,~)
             error('openCOSSAN:DesignOfExperiments:DesignOfExperiments',...
                 ['method computeFailureProbability not available for the ' class(Xobj) ' object \n'])

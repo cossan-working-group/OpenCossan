@@ -15,7 +15,6 @@ classdef HaltonSampling < opencossan.simulations.Simulations
     methods
         
         %% Methods inheritated from the superclass
-        display(Xobj)             % This method shows the summary of the Xobj
         
         Xo=apply(Xobj,varargin)   % Perform the simulation
         

@@ -40,10 +40,6 @@ classdef RadialBasedImportanceSampling < opencossan.simulations.Simulations
     
     methods
         
-        %Display
-        %show object details
-        display(Xobj)
-        
         % compute failure probability
         Xpf = computeFailureProbability(Xobj,Xpm)
         

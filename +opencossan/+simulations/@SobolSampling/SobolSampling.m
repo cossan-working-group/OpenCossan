@@ -46,8 +46,6 @@ classdef SobolSampling < opencossan.simulations.Simulations
         % probability associated to the
         % ProbabilisticModel/SystemReliability
         
-        display(Xobj)   % This method shows the summary of the Xobj
-        
         %% constructor
         function Xobj= SobolSampling(varargin)
             %SOBOLSAMPLING This is the constructor of the SobolSampling object

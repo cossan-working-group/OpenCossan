@@ -70,8 +70,6 @@ classdef AdaptiveLineSampling < opencossan.simulations.Simulations
     
     methods
         %% Methods inheritated from the superclass
-        display(Xobj)                                           % show object details
-        
         XsimOut=apply(Xobj,Xtarget)                             % Performe Monte Carlo Simulation
         
         [Xpf,XsimOut]=computeFailureProbability(Xobj,Xtarget)   % Esitmate FailureProbability

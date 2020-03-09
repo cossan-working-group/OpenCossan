@@ -36,9 +36,7 @@ classdef ImportanceSampling < opencossan.simulations.Simulations
     end
     
     methods
-        %% Methods inheritated from the superclass
-        display(Xobj)
-        
+        %% Methods inheritated from the superclass        
         Xo=computeProposalDistribution(Xobj,varargin)  % Calculate Proposal Distribution based on the
         
         Xo=apply(Xobj,varargin)  % Evaluate the Model/ProbabilisticModel
