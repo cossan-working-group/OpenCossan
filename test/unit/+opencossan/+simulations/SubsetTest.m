@@ -76,7 +76,7 @@ classdef SubsetTest < matlab.unittest.TestCase
         
         %% computeFailureProbabiliy
         function computeFailureProbabilityShouldOutputSampleData(testCase)
-            SubS = opencossan.simulations.Subset('initialSamples', 100);
+            SubS = opencossan.simulations.Subset('initialSamples', 100, 'seed', 8128);
             pf = SubS.computeFailureProbability(testCase.Xpm);
 
             testCase.verifyClass(pf, 'opencossan.reliability.FailureProbability');
