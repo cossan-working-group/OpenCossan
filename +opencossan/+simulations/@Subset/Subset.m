@@ -70,15 +70,14 @@ classdef Subset < opencossan.simulations.Simulations
             % See also: https://cossan.co.uk/wiki/index.php/@Subset
             
             if nargin == 0
-                return
+                super_args = {};
             else
-                [optional, ~] = opencossan.common.utilities.parseOptionalNameValuePairs(...
+                [optional, super_args] = opencossan.common.utilities.parseOptionalNameValuePairs(...
                     ["initialsamples", "targetprobabilityoffailure", "maxlevels", "deltaxi", ...
                      "exportsamples", "keepseeds"], {[], 0.1, 10, 0.5, false, true}, varargin{:});
             end
-            
-            % TODO: Call super constructor once it exists
-            % obj@opencossan.simulations.Simulations(super_args{:});
+
+            obj@opencossan.simulations.Simulations(super_args{:});
             
             if nargin > 0
                 obj.TargetProbabilityOfFailure = optional.targetprobabilityoffailure;

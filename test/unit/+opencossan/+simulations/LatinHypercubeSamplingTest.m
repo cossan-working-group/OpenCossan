@@ -56,45 +56,13 @@ classdef LatinHypercubeSamplingTest < matlab.unittest.TestCase
         function constructorEmpty(testCase)
             Xmc = opencossan.simulations.LatinHypercubeSampling();
             testCase.assertClass(Xmc,'opencossan.simulations.LatinHypercubeSampling');
-            testCase.assertEqual(Xmc.Nsamples, 1);
-        end
-        
-        function constructorFull(testCase)
-            Xmc = opencossan.simulations.LatinHypercubeSampling('Sdescription','Unit Test LatinHypercubeSampling',...
-                'Nsamples',100,...
-                'Nbatches',5,...
-                'cov',1,...
-                'timeout',10,...
-                'confLevel',0.95,...
-                'Lintermediateresults',false,...
-                'SbatchFolder',fullfile(opencossan.OpenCossan.getRoot(),'tmp','data'));
-            
-            testCase.assertEqual(Xmc.Sdescription,'Unit Test LatinHypercubeSampling');
-            testCase.assertEqual(Xmc.Nsamples,100);
-            testCase.assertEqual(Xmc.Nbatches,5);
-            testCase.assertEqual(Xmc.CoV,1);
-            testCase.assertEqual(Xmc.timeout,10);
-            testCase.assertEqual(Xmc.confLevel,0.95);
-            testCase.assertFalse(Xmc.Lintermediateresults);
-            testCase.assertEqual(Xmc.SbatchFolder,fullfile(opencossan.OpenCossan.getRoot(),'tmp','data'));
-        end
-        
-        %% sample
-        function sampleShouldOutputTable(testCase)
-            Xmc = opencossan.simulations.LatinHypercubeSampling('Nsamples', 10);
-            
-            inputSamples = testCase.input.sample('Samples', 10);
-            mcSamples = Xmc.sample('Xinput', testCase.input, 'Nsamples', 10);
-            
-            testCase.verifyEqual(height(mcSamples), 10);
-            testCase.verifyEqual(inputSamples.Properties.VariableNames, ...
-                mcSamples.Properties.VariableNames);
+            testCase.assertEqual(Xmc.NumberOfSamples, 1);
         end
         
         %% computeFailureProbability
         function shouldComputPi(testCase)
-            mc = opencossan.simulations.LatinHypercubeSampling('Nsamples', 10000, ...
-                'nseedrandomnumbergenerator', 8128);
+            mc = opencossan.simulations.LatinHypercubeSampling('samples', 10000, ...
+                'seed', 8128);
             pf = mc.computeFailureProbability(testCase.probModel);
             
             testCase.assertEqual(4 * (1 - pf.Value), pi, 'RelTol', 0.01)

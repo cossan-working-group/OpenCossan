@@ -1,4 +1,4 @@
-function samples = sample(Xobj,varargin)
+function samples = sample(obj, varargin)
     %SAMPLE
     % This method generate a Samples object using Monte Carlo method. This
     % method relies on the method sample of the Input Object.
@@ -27,47 +27,12 @@ function samples = sample(Xobj,varargin)
     %  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
     % =====================================================================
     
-    %% Validate input arguments
     
+    [required, varargin] = opencossan.common.utilities.parseRequiredNameValuePairs("input", varargin{:});
+    optional = opencossan.common.utilities.parseOptionalNameValuePairs("samples", {obj.NumberOfSamples}, varargin{:});
     
+    validateattributes(required.input, {'opencossan.common.inputs.Input'}, {'scalar'});
     
-    %% Process inputs
-    
-    Nsamples=Xobj.Nsamples;
-    
-    for k=1:2:length(varargin)
-        switch lower(varargin{k})
-            case {'nsamples'}
-                Nsamples=varargin{k+1};
-            case 'xinput'
-                Xinput=varargin{k+1};
-            case 'xrandomvariableset'
-                Xrvset=varargin{k+1};
-            otherwise
-                error('openCOSSAN:MonteCarlo',...
-                    ['Input parameter ' varargin{k} ' not allowed '])
-        end
-        
-    end
-    
-    if ~exist('Xrvset','var') && ~exist('Xinput','var') && ~exist('Xinput','var')
-        error('openCOSSAN:MonteCarlo:sample',...
-            'An Input object or a RandomVariableSet is required')
-    end
-    
-    if ~isempty(Xobj.XrandomStream)
-        prevstream = RandStream.setGlobalStream(Xobj.XrandomStream);
-    end
-    
-    %% generate samples
-    if exist('Xrvset','var')
-        samples = Xrvset.sample('Nsamples',Nsamples);
-    else
-        samples = sample(Xinput, 'samples', Nsamples);
-    end
-    
-    if ~isempty(Xobj.XrandomStream)
-        RandStream.setGlobalStream(prevstream);
-    end
+    samples = sample(required.input, 'samples', optional.samples);
 end
 

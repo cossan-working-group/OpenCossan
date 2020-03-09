@@ -121,7 +121,7 @@ if ~isempty(Xobj.XcalibrationData)
 end
 
 if exist('Xsimulator','var')
-    Xs  = Xsimulator.sample('Xinput', Xobj.XFullmodel.Input);
+    Xs  = Xsimulator.sample('input', Xobj.XFullmodel.Input);
     
     Xobj.XcalibrationInput = Xs;
     Xobj.XcalibrationOutput = apply(Xobj.XFullmodel, Xs);

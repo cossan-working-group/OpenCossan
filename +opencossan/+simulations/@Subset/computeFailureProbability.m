@@ -44,6 +44,10 @@ function pf = computeFailureProbability(obj, model)
     %%  Initialize variables
     rejection = 0;
     
+    if ~isempty(obj.RandomStream)
+        prevstream = RandStream.setGlobalStream(obj.RandomStream);
+    end
+    
     % Preallocate memory
     failureProbabilities = zeros(obj.MaxLevels, 1); % Failure Probability of each level
     coefficientsOfVariation = zeros(obj.MaxLevels, 1); % CoV of the Pf of each level
@@ -141,6 +145,10 @@ function pf = computeFailureProbability(obj, model)
     
     pf = FailureProbability('value', pF, 'variance', covpF^2*pF^2, 'simulationdata', simData, 'simulation', obj);
     
+    if ~isempty(obj.RandomStream)
+        RandStream.setGlobalStream(prevstream);
+    end
+    
     if ~isdeployed
         % add entries in simulation and analysis database at the end of the computation when not
         % deployed. The deployed version does this with the finalize command
@@ -154,9 +162,6 @@ function pf = computeFailureProbability(obj, model)
     end
     
     opencossan.OpenCossan.getTimer().lap('description','End computeFailureProbability@SubsetOrigin');
-    
-    % Restore Global Random Stream
-    restoreRandomStream(obj);
 end
 
 function samples = initialSamples(obj, input)

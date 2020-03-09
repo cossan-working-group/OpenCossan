@@ -34,13 +34,13 @@ function samples = sample(Xobj,varargin)
     import opencossan.common.Samples
     
     %% Process inputs
-    Nsamples=Xobj.Nsamples;
+    Nsamples=Xobj.NumberOfSamples;
     
     for k=1:2:length(varargin)
         switch lower(varargin{k})
-            case {'nsamples'}
+            case {'samples'}
                 Nsamples=varargin{k+1};
-            case 'xinput'
+            case 'input'
                 Xinput=varargin{k+1};
                 Nrv=Xinput.NumberOfRandomVariables;
                 Ndv=Xinput.NumberOfDesignVariables;
@@ -108,25 +108,12 @@ function samples = sample(Xobj,varargin)
         
         % Map the hypercube samples to the physical space of rvs, doe space of dvs
         samples = Xinput.hypercube2physical(samples);
-        
-        % Add parameters to the table
-        pars = Xinput.Parameters;
-        names = Xinput.ParameterNames;
-        for i = 1:Xinput.NumberOfParameters
-            samples.(names(i)) = repmat(pars(i).Value, Nsamples, 1);
-        end
-        
-        % Evaluate functions
-        funs = Xinput.Functions;
-        names = Xinput.FunctionNames;
-        for i = 1:Xinput.NumberOfFunctions
-            samples.(names(i)) = funs(i).evaluate(samples);
-        end
+        samples = Xinput.addParametersToSamples(samples);
+        samples = Xinput.evaluateFunctionsOnSamples(samples);
         
 %         if ~isempty(Xinput.StochasticProcesses)
 %             % TODO: Sample stochastic processes
 %         end
-        
     end
 end
 

@@ -72,10 +72,10 @@ Xps1 = PolyharmonicSplines('Description','quadratic spline of Rosenbrock functio
     'Stype','quadratic',...
     'Sextrapolationtype','quadratic');
 
-Xlhs= LatinHypercubeSampling('Nsamples',400); % simulation obecjt for calibration samples
+Xlhs= LatinHypercubeSampling('samples',400); % simulation obecjt for calibration samples
 Xps1 = Xps1.calibrate('XSimulator',Xlhs); % calibrate spline
 
-Xmc=LatinHypercubeSampling('Nsamples',20); % simulation object for validation samples
+Xmc=LatinHypercubeSampling('samples',20); % simulation object for validation samples
 Xps1 = Xps1.validate('XSimulator',Xlhs); % validate spline
 
 % regression plots for calibration and validation

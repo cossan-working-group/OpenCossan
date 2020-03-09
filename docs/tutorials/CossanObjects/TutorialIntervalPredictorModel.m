@@ -88,7 +88,7 @@ Xipm2     = opencossan.metamodels.IntervalPredictorModel('description',...
     'Nmaximumexponent',2,...%type of Interval Predictor Model
     'chanceConstraint',0.9);   %fraction of data to include in model
 
-Xmc= opencossan.simulations.MonteCarlo('Nsamples',200);
+Xmc= opencossan.simulations.MonteCarlo('samples',200);
 
 Xipm = Xipm.calibrate('XSimulator',Xmc);
 Xipm2 = Xipm2.calibrate('XSimulator',Xmc);
@@ -100,7 +100,7 @@ Xipm2 = Xipm2.calibrate('XSimulator',Xmc);
 Xpf = opencossan.reliability.PerformanceFunction('OutputName','Vg','Demand','disp','Capacity','Xthreshold1');
 Xpm_real = opencossan.reliability.ProbabilisticModel('Model',Xmod,'PerformanceFunction',Xpf);
 
-Xmc=opencossan.simulations.MonteCarlo('Sdescription','Mio evaluation','Nsamples',1000,'Nbatches',1);
+Xmc=opencossan.simulations.MonteCarlo('Description','Mio evaluation','samples',1000,'batches',1);
 Xo_real = Xpm_real.computeFailureProbability(Xmc);
 
 %% Metamodel can also be also combined and used in a Evaluator

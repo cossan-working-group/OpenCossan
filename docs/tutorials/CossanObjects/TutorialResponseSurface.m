@@ -89,10 +89,10 @@ Xrs     = opencossan.metamodels.ResponseSurface('sdescription',...
     'Stype','custom',...
     'Nmaximumexponent',4);   %type of response surface
 
-Xmc=LatinHypercubeSampling('Nsamples',200);
+Xmc=LatinHypercubeSampling('samples',200);
 Xrs = Xrs.calibrate('XSimulator',Xmc);
 
-Xmc=MonteCarlo('Nsamples',40);
+Xmc=MonteCarlo('samples',40);
 Xrs = Xrs.validate('XSimulator',Xmc);
 
 %%  Apply trained response surface meta-model
@@ -102,7 +102,7 @@ Xrs = Xrs.validate('XSimulator',Xmc);
 Xpf = PerformanceFunction('OutputName','Vg','Demand','disp','Capacity','Xthreshold1');
 Xpm_real = ProbabilisticModel('Model',Xmod,'PerformanceFunction',Xpf);
 
-Xmc=MonteCarlo('Sdescription','Mio evaluation','Nsamples',1000);
+Xmc=MonteCarlo('Description','Mio evaluation','samples',1000);
 Xo_real = Xpm_real.computeFailureProbability(Xmc)
 
 %% Metamodel can also be also combined and used in a Evaluator

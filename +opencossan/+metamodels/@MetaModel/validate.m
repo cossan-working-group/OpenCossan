@@ -130,7 +130,7 @@ end
 
 
 if exist('Xsimulator','var')
-    Xs  = Xsimulator.sample('Xinput',Xobj.XFullmodel.Input);
+    Xs  = Xsimulator.sample('input',Xobj.XFullmodel.Input);
     Xobj.XvalidationInput = Xs;
     Xobj.XvalidationOutput = apply(Xobj.XFullmodel,Xobj.XvalidationInput);
 else

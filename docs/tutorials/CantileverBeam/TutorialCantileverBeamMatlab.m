@@ -83,7 +83,7 @@ assert(abs(NominalDisplacement - 7.1922e-03) < 1e-6, ...
 
 %% Uncertainty Quantification
 % Define simulation method
-Xmc = opencossan.simulations.MonteCarlo('Nsamples', 1000);
+Xmc = opencossan.simulations.MonteCarlo('samples', 1000);
 % preform Analysis
 XsimOutMC = Xmc.apply(XmodelBeamMatlab);
 
