@@ -1,4 +1,4 @@
-function fh = plotMarkovChains(obj, names)
+function fh = plot(obj, names)
     %PLOTMARKOVCHAIN This method plots the markov chains for each level of the
     %subset simulation
     %

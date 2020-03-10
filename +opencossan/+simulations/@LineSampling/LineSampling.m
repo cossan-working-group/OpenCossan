@@ -32,6 +32,7 @@ classdef LineSampling < opencossan.simulations.Simulations
     properties
         Valpha          % Important Direction (pointing to the failure area)
         CalphaNames     % Names of the corresponding directions (i.e. RandomVariable)
+        NumberOfBatches(1,1) {mustBeInteger, mustBeNonnegative} = 1;
     end
        
     properties (Dependent = true, SetAccess = protected)
@@ -83,8 +84,8 @@ classdef LineSampling < opencossan.simulations.Simulations
                         Xobj.confLevel=varargin{k+1};
                     case {'sbatchfolder'}
                         Xobj.SbatchFolder=varargin{k+1};
-                    case {'nbatches'}
-                        Xobj.Nbatches=varargin{k+1};
+                    case {'batches'}
+                        Xobj.NumberOfBatches=varargin{k+1};
                     case {'lintermediateresults'}
                         Xobj.Lintermediateresults=varargin{k+1};
                     case {'xgradient','xlocalsensitivitymeasures'}
@@ -152,7 +153,7 @@ classdef LineSampling < opencossan.simulations.Simulations
                     end
                     Xobj.Nlines=NlinesUD;
                 else
-                    Xobj.Nsamples=NlinesUD*length(Xobj.Vset);
+                    Xobj.NumberOfSamples=NlinesUD*length(Xobj.Vset);
                     Xobj.Nlines=NlinesUD;
                 end
             else
@@ -167,7 +168,7 @@ classdef LineSampling < opencossan.simulations.Simulations
                 
             end
             
-            if Xobj.Nbatches>Xobj.Nlines
+            if Xobj.NumberOfBatches>Xobj.Nlines
                 error('openCOSSAN:simulations:LineSampling',...
                     ['The number of batches (' num2str(Xobj.Nbatches) ...
                     ') can not be greater than the number of Lines (' ...
@@ -178,17 +179,19 @@ classdef LineSampling < opencossan.simulations.Simulations
             
         end % end constructor
         
-        
         function Nlinexbatch = get.Nlinexbatch(Xobj)
-            Nlinexbatch = floor(Xobj.Nlines/Xobj.Nbatches);
+            Nlinexbatch = floor(Xobj.Nlines/Xobj.NumberOfBatches);
         end % Modulus get method
         
         function Nlinelastbatch = get.Nlinelastbatch(Xobj)
-            Nlinelastbatch =  Xobj.Nlinexbatch+rem(Xobj.Nlines,Xobj.Nbatches);
+            Nlinelastbatch =  Xobj.Nlinexbatch+rem(Xobj.Nlines,Xobj.NumberOfBatches);
         end % Modulus get method
         
         
     end % methods
     
+    methods (Access = protected)
+        [exit, flag] = checkTermination(obj, varargin) % Check the termination criteria 
+    end
 end
 

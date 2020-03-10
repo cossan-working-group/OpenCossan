@@ -1,4 +1,4 @@
-function [Xobj, Xinput]=checkInputs(Xobj,Xtarget)
+function obj = initialize(obj)
 %CHECKINPUTS This is a private function of the Simulation class.
 %
 % See Also http://cossan.cfd.liv.ac.uk/wiki/index.php/@Simulations
@@ -27,37 +27,14 @@ function [Xobj, Xinput]=checkInputs(Xobj,Xtarget)
 
 import opencossan.OpenCossan
 
-% Retrieve information of the caller
-ST = dbstack(1);
+obj.StartTime = tic;
+obj.ResultFolder = fullfile(OpenCossan.getWorkingPath(), datestr(now, 30));
 
-% set the analyis ID
-% OpenCossan.setAnalysisID; % TODO Fix!
-% set the Analysis name if not already set
 if ~isdeployed && isempty(OpenCossan.getAnalysisName)
-    OpenCossan.setAnalysisName(class(Xobj));
+    OpenCossan.setAnalysisName(class(obj));
 end
 
-ScallerDescription=['Start Simulation: ' ST(1).name '@' class(Xobj) ' ' Xobj.Sdescription];
-
-% Initialize Timer
-Xobj.initialLaptime = OpenCossan.getTimer().lap('description',ScallerDescription);
-% insert entry in Analysis DB
 if ~isempty(OpenCossan.getDatabaseDriver)
     insertRecord(OpenCossan.getDatabaseDriver,'StableType','Analysis',...
-        'Nid',OpenCossan.getAnalysisID);
-end
-
-Xinput  = Xtarget.Input;         
-
-%% Initialize variables
-if isempty(Xobj.SbatchFolder)
-    Xobj.SbatchFolder=datestr(now,30);
-end
-
-Xobj.isamples = 0; % Number of samples processed
-Xobj.ibatch = 0;   % Number of batches processed
-
-%% Set random stream
-if ~isempty(Xobj.XrandomStream)
-    RandStream.setGlobalStream(Xobj.XrandomStream);
+        'Nid',OpenCossan.getAnalysisID());
 end

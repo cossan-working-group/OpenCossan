@@ -41,6 +41,7 @@ classdef (Abstract) Simulations < opencossan.common.CossanObject
     
     properties (Hidden, SetAccess = protected)
         StartTime; % Store the start time of the simulation
+        ResultFolder;
     end
     
     methods
@@ -78,13 +79,10 @@ classdef (Abstract) Simulations < opencossan.common.CossanObject
         samples = sample(obj, varargin)
     end
     
-    methods        
-        exportResults(Xobj,varargin) % This method is used to export the SimulationData
-    end
-    
     methods (Access = protected)
-        [obj, input] = checkInputs(Xobj,Xtarget) % Validate the input and initialize the random generator stream (if necessary)
-        [exit, flag] = checkTermination(obj, varargin) % Check the termination criteria 
+        [exit, flag] = checkTermination(obj, varargin);
+        exportResult(obj, pf);
+        obj = initialize(obj);
     end
 end
 

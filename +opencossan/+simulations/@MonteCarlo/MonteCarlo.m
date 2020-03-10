@@ -27,6 +27,7 @@ classdef MonteCarlo < opencossan.simulations.Simulations
     
     properties
         NumberOfBatches(1,1) {mustBeInteger} = 1;
+        ExportBatches(1,1) logical = false;
     end
     
     methods        
@@ -35,13 +36,14 @@ classdef MonteCarlo < opencossan.simulations.Simulations
                 super_args = {};
             else
                 [optional, super_args] = opencossan.common.utilities.parseOptionalNameValuePairs(...
-                    "batches", {1}, varargin{:});
+                    ["batches", "exportbatches"], {1, false}, varargin{:});
             end
             
             obj@opencossan.simulations.Simulations(super_args{:});
             
             if nargin > 0
                 obj.NumberOfBatches = optional.batches;
+                obj.ExportBatches = optional.exportbatches;
             end
         end
         
@@ -52,6 +54,7 @@ classdef MonteCarlo < opencossan.simulations.Simulations
     
     methods (Access = protected)
         [exit, flag] = checkTermination(obj, varargin) % Check the termination criteria 
+        exportBatch(obj, data, batch);
     end
 end
 

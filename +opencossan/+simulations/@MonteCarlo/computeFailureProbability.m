@@ -32,6 +32,8 @@ function pf = computeFailureProbability(obj, model)
     import opencossan.*
     import opencossan.reliability.*
     
+    obj = obj.initialize();
+    
     if ~isempty(obj.RandomStream)
         prevstream = RandStream.setGlobalStream(obj.RandomStream);
     end
@@ -52,6 +54,10 @@ function pf = computeFailureProbability(obj, model)
         
         simDataBatch = model.apply(samples);
         simDataBatch.Samples.Batch = repmat(batch, simDataBatch.NumberOfSamples, 1);
+        
+        if ~isdeployed && obj.ExportBatches
+            obj.exportBatch(simDataBatch, batch);
+        end
         
         simData = simData + simDataBatch;
         
@@ -75,16 +81,7 @@ function pf = computeFailureProbability(obj, model)
     end
     
     if ~isdeployed
-        % add entries in simulation and analysis database at the end of the
-        % computation when not deployed. The deployed version does this with
-        % the finalize command
-        XdbDriver = opencossan.OpenCossan.getDatabaseDriver;
-        if ~isempty(XdbDriver)
-            XdbDriver.insertRecord('StableType','Result',...
-                'Nid',getNextPrimaryID(OpenCossan.getDatabaseDriver,'Result'),...
-                'CcossanObjects',{Xpf},...
-                'CcossanObjectsNames',{'Xpf'});
-        end
+        obj.exportResult(pf);
     end
 end
 
