@@ -33,7 +33,7 @@ import opencossan.reliability.FailureProbability
 import opencossan.sensitivity.*
 
 %% Check inputs
-Xobj.initialize();
+Xobj = Xobj.initialize();
 
 %% Initialize variables
 % Get name of the performance function
@@ -67,8 +67,6 @@ end
 
 % Make sure the important direction is a column vector
 Xobj.Valpha=Xobj.Valpha(:)/norm(Xobj.Valpha);
-
-SexitFlag=[];           % Exit flag
 
 opencossan.OpenCossan.cossanDisp('[LineSampling:pf] Start LineSampling analysis',3)
 

@@ -1,4 +1,4 @@
-function samples = sample(Xobj,varargin)
+function samples = sample(obj, varargin)
     %SAMPLE
     % This method generate a Samples object using the LatinHypercube algorithms
     %
@@ -33,88 +33,34 @@ function samples = sample(Xobj,varargin)
     import opencossan.*
     import opencossan.common.Samples
     
-    %% Process inputs
-    Nsamples=Xobj.NumberOfSamples;
+    [required, varargin] = opencossan.common.utilities.parseRequiredNameValuePairs("input", varargin{:});
+    optional = opencossan.common.utilities.parseOptionalNameValuePairs("samples", {obj.NumberOfSamples}, varargin{:});
     
-    for k=1:2:length(varargin)
-        switch lower(varargin{k})
-            case {'samples'}
-                Nsamples=varargin{k+1};
-            case 'input'
-                Xinput=varargin{k+1};
-                Nrv=Xinput.NumberOfRandomVariables;
-                Ndv=Xinput.NumberOfDesignVariables;
-                for set = Xinput.RandomVariableSets
-                    Nrv = Nrv + set.Nrv;
-                end
-            case 'xrandomvariableset'
-                Xrvset=varargin{k+1};
-                Nrv=length(Xrvset.Cmembers);
-                Ndv=0;
-            case 'xgaussianrandomvariableset'
-                Xgrvset=varargin{k+1};
-                Nrv=length(Xrvset.Cmembers);
-                Ndv=0;
-            otherwise
-                error('openCOSSAN:LatinHypercubeSampling:sample',...
-                    ['Input parameter ' varargin{k} ' not allowed '])
-        end
-        
-    end
+    validateattributes(required.input, {'opencossan.common.inputs.Input'}, {'scalar'});
     
-    if ~exist('Xrvset','var') && ~exist('Xinput','var') && ~exist('Xgrvset','var')
-        error('openCOSSAN:LatinHypercubeSampling:sample',...
-            'An Input object or a RandomVariableSet/GaussianRandomVariableSet is required')
-    end
-    
-    %% generate samples
     % The Latin Hypercube Sample method generates values in uncorrelated unit hypercube Show values
     % of the variable passed to lhsdesign
     
-    opencossan.OpenCossan.cossanDisp('calling lhsdesign',3)
-    opencossan.OpenCossan.cossanDisp(['* Nsamples: ' num2str(Nsamples)],3)
-    opencossan.OpenCossan.cossanDisp(['* Nrv: ' num2str(Nrv)],3)
-    opencossan.OpenCossan.cossanDisp(['* iteration: ' num2str(Xobj.Iterations)],3)
-    opencossan.OpenCossan.cossanDisp(['* criterion: ' Xobj.Criterion],3)
-    opencossan.OpenCossan.cossanDisp(['* smooth: ' Xobj.Smooth_],3)
+    opencossan.OpenCossan.cossanDisp(sprintf("[LatinHypercubeSampling] Samples: (%i, %i)", ...
+        optional.samples, required.input.NumberOfRandomInputs),3);
+    opencossan.OpenCossan.cossanDisp(sprintf("[LatinHypercubeSampling] Iterations: %i", ...
+        obj.Iterations),3);
+    opencossan.OpenCossan.cossanDisp(sprintf("[LatinHypercubeSampling] Criterion: %s", ...
+        obj.Criterion),3);
+    opencossan.OpenCossan.cossanDisp(sprintf("[LatinHypercubeSampling] Smooth: %s", ...
+        string(obj.Smooth)),3);
     
-    
-    if exist('Xrvset','var')
-        samples=lhsdesign(double(Nsamples),double(Nrv),...
-            'iteration',Xobj.Iterations, ...
-            'criterion',Xobj.Criterion, ...
-            'smooth',Xobj.Smooth_);
-        
-        % Map the samples in the Standard Normal Space
-        MsamplesSNS=norminv(samples);
-        Xsamples = Samples('Xrvset',Xrvset,'MsamplesStandardNormalSpace',MsamplesSNS);
-    elseif exist('Xgrvset','var')
-        % Generate Samples in a N+1 dimensional space
-        samples=lhsdesign(double(Nsamples),double(Nrv+1),...
-            'iteration',Xobj.NIterations, ...
-            'criterion',Xobj.Criterion, ...
-            'smooth',Xobj.Smooth_);
-        MphysicalSpace=Xgrvset.uncorrelatedCDF2PhysicalSpace(samples);
-        
-        Xsamples = Samples('Xgrvset',Xgrvset,'MsamplesPhysicalSpace',MphysicalSpace);
-    else
-        % Input object passed
-        Cgrvs=Xinput.GaussianMixtureRandomVariableSetNames;
-        % Generate samples Generate uncorrelated samples in the hypercube
-        samples = lhsdesign(double(Nsamples),double(Nrv)+length(Cgrvs)+double(Ndv),...
-            'iteration',Xobj.Iterations, ...
-            'criterion',Xobj.Criterion, ...
-            'smooth',Xobj.Smooth_);
-        
-        % Map the hypercube samples to the physical space of rvs, doe space of dvs
-        samples = Xinput.hypercube2physical(samples);
-        samples = Xinput.addParametersToSamples(samples);
-        samples = Xinput.evaluateFunctionsOnSamples(samples);
-        
-%         if ~isempty(Xinput.StochasticProcesses)
-%             % TODO: Sample stochastic processes
-%         end
+    smooth = 'on';
+    if ~obj.Smooth
+        smooth = off;
     end
+    
+    samples = lhsdesign(optional.samples, required.input.NumberOfRandomInputs, ...
+        'iteration', obj.Iterations, 'criterion', obj.Criterion, 'smooth', smooth);
+    
+    samples = required.input.hypercube2physical(samples);
+    samples = required.input.addParametersToSamples(samples);
+    samples = required.input.evaluateFunctionsOnSamples(samples);
 end
 
 
