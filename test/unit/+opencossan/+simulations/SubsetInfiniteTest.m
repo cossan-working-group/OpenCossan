@@ -72,7 +72,7 @@ classdef SubsetInfiniteTest < matlab.unittest.TestCase
         
         %% computeFailureProbabiliy
         function computeFailureProbabilityShouldOutputSampleData(testCase)
-            SubS = opencossan.simulations.SubsetInfinite('initialSamples', 100, 'proposalStd', 0.5);
+            SubS = opencossan.simulations.SubsetInfinite('initialSamples', 100, 'proposalStd', 0.5, 'seed', 8128);
             pf = SubS.computeFailureProbability(testCase.Xpm);
             
             testCase.assertClass(pf, 'opencossan.reliability.FailureProbability');
