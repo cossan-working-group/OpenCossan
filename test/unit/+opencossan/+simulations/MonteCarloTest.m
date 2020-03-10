@@ -129,5 +129,25 @@ classdef MonteCarloTest < matlab.unittest.TestCase
             testCase.assertEqual(pf.ExitFlag, "Target CoV reached.");
         end
         
+        %% exportBatch
+        function shouldExportBatchAndResult(testCase)
+            oldPath = opencossan.OpenCossan.getWorkingPath();
+            newPath = tempname;
+            opencossan.OpenCossan.setWorkingPath(newPath);
+            
+            mc = opencossan.simulations.MonteCarlo('samples', 1000, 'exportbatches', true, 'seed', 8128);
+            mc.computeFailureProbability(testCase.probModel);
+            
+            
+            listing = dir(newPath);
+            testCase.verifySize(listing, [3, 1]);
+            
+            listing = dir(fullfile(newPath, listing(3).name));
+            testCase.verifyEqual(listing(3).name, 'batch_001.mat');
+            testCase.verifyEqual(listing(4).name, 'pf.mat');
+            
+            opencossan.OpenCossan.setWorkingPath(oldPath);
+        end
+        
     end
 end
