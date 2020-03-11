@@ -70,6 +70,25 @@ classdef LatinHypercubeSamplingTest < matlab.unittest.TestCase
             testCase.assertEqual(lhs.Iterations, 10);
         end
         
+        %% sample
+        function shouldProduceRoughSamples(testCase)
+            lhs = opencossan.simulations.LatinHypercubeSampling('samples', 5, 'smooth', false, ...
+                'criterion', 'maximin', 'iterations', 10);
+            samples = lhs.sample('input', testCase.input);
+            
+            testCase.assertEqual(samples.x, round(samples.x, 1), 'AbsTol', eps);
+            testCase.assertEqual(samples.y, round(samples.y, 1), 'AbsTol', eps);
+        end
+        
+        function shouldProduceSmoothSamples(testCase)
+            lhs = opencossan.simulations.LatinHypercubeSampling('samples', 5, 'smooth', true, ...
+                'criterion', 'maximin', 'iterations', 10);
+            samples = lhs.sample('input', testCase.input);
+            
+            testCase.assertNotEqual(samples.x, round(samples.x, 1));
+            testCase.assertNotEqual(samples.y, round(samples.y, 1));
+        end
+        
         %% computeFailureProbability
         function shouldComputPi(testCase)
             mc = opencossan.simulations.LatinHypercubeSampling('samples', 10000, ...

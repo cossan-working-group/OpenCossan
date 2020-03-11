@@ -49,7 +49,7 @@ function samples = sample(obj, varargin)
     
     smooth = 'on';
     if ~obj.Smooth
-        smooth = off;
+        smooth = 'off';
     end
     
     samples = lhsdesign(optional.samples, required.input.NumberOfRandomInputs, ...
