@@ -8,75 +8,38 @@
 % $Copyright~1993-2011,~COSSAN~Working~Group,~University~of~Innsbruck,~Austria$
 % $Author: Edoardo-Patelli$ 
 
-clear
-close all
-clc;
 %% Problem Definition
 % Here we define our problem. It does not represent any physical problem.
 
 %% Define the Input
 % Define RandomVariable
-RV1=opencossan.common.inputs.random.NormalRandomVariable('mean',2,'std',1); %#ok<SNASGU>
-RV2=opencossan.common.inputs.random.NormalRandomVariable('mean',0,'std',2); %#ok<SNASGU>
-% Define the RandomVariableSet
-Xrvs1=opencossan.common.inputs.random.RandomVariableSet('names',{'RV1', 'RV2'},'members',[RV1; RV2]);
-% Construct Input Object
-Xin = opencossan.common.inputs.Input('description','Input Object of our model');
-Xin = add(Xin,'member',Xrvs1,'name','Xrvs1');
-Xthreshold=opencossan.common.inputs.Parameter('value',1);
-Xin = add(Xin,'member',Xthreshold,'name','Xthreshold');
+rv1 = opencossan.common.inputs.random.NormalRandomVariable('mean',2,'std',1);
+rv2 = opencossan.common.inputs.random.NormalRandomVariable('mean',0,'std',2);
 
+threshold = opencossan.common.inputs.Parameter('value',1);
+
+Xin = opencossan.common.inputs.Input('Members', {rv1 rv2 threshold}, 'Names', ["rv1" "rv2" "threshold"]);
 
 %% Define the Evaluator (i.e. how our model is evaluate)
 % Construct a Mio object
 Xm=opencossan.workers.Mio( 'description', 'This is our Model', ...
-    'Script','for j=1:length(Tinput), Toutput(j).out=-Tinput(j).RV1+Tinput(j).RV2; end', ...
-...    'Liostructure',true,...
+    'Script','for j=1:length(Tinput), Toutput(j).out=-Tinput(j).rv1+Tinput(j).rv2; end', ...
+    'format','structure',...
     'OutputNames',{'out'},...
-    'InputNames',{'RV1','RV2'},...
+    'InputNames',{'rv1','rv2'},...
     'IsFunction',false); % This flag specify if the .m file is a script or a function.
 % Construct the Evaluator
+
 Xeval = opencossan.workers.Evaluator('Xmio',Xm,'Sdescription','Evaluator for the IS tutorial');
 
 %% Define the Physical Model based on the Input and the Evaluator
-Xmdl=opencossan.common.Model('Xevaluator',Xeval,'Xinput',Xin);
+Xmdl = opencossan.common.Model('Evaluator',Xeval,'Input',Xin);
 
-%% Test the Model
-% Generate 10 random realization of the input
-Xin = sample(Xin,'Nsamples',10);
-
-% Evaluate the model
-Xo = apply(Xmdl,Xin);
-
-% Show Results
-display(Xo)
-
-%% Here we go!!!
-% Now we define the HaltonSampling object and try to generate samples from
-% this object
-
-%% Define HaltonSampling object
-% Can the HaltonSampling class be constructed and used like the
-% MonteCarlo class?
-
-try
-    % Let's try
-    Xhs=HaltonSampling('Nsamples',10,'Nbatches',2);
-catch ME
-    opencossan.OpenCossan.cossanDisp(ME.message)
-    % It is mandatory to define the field Leap and Skip
-    Xhs=opencossan.simulations.HaltonSampling('Nsamples',10,'Nbatches',2,'NLeap',100,'NSkip',10);
-end
+Xhs = opencossan.simulations.HaltonSampling('samples',5,'leap',100,'skip',10, 'seed', 51125);
 
 %% Generate samples with HaltonSampling object
-% The method samples accept as input also Input object or RandomVariableSet object
-% These object are only used to retrieve the number of random variable
-% (Nrv)
 
-Xsmp=Xhs.sample('Nsamples',5,'Xinput',Xin);
-display(Xsmp)
-
-Xsmp=Xhs.sample('Nsamples',7,'Xrandomvariableset',Xrvs1);
+Xsmp = Xhs.sample('input',Xin);
 display(Xsmp)
 
 
@@ -88,7 +51,7 @@ display(Xsmp)
 Xo=Xhs.apply(Xmdl);
 display(Xo)
 
-Xhs.Nsamples=200;
+Xhs.NumberOfSamples = 100;
 Xo=Xhs.apply(Xmdl);
 display(Xo)
 
@@ -97,10 +60,10 @@ display(Xo)
 % Define a probabilistic model (Requires a Model object and a PerfomanceFunction object
 % Construct the performance function
 %% Construct the performance function
-Xpf=PerformanceFunction('OutputName','Vg','Capacity','Xthreshold','Demand','out');
+Xpf = opencossan.reliability.PerformanceFunction('OutputName','Vg','Capacity','threshold','Demand','out');
 
 % Construct a ProbabilisticModel Object
-Xpm=ProbabilisticModel('Xmodel',Xmdl,'XperformanceFunction',Xpf);
+Xpm = opencossan.reliability.ProbabilisticModel('model',Xmdl,'performanceFunction',Xpf);
 % now we can apply the ImportanceSampling object to the
 % ProbabilisticModel
 Xo=Xhs.apply(Xpm);
@@ -110,17 +73,15 @@ display(Xo)
 
 % In order to estimate the failure probability the method pf of the
 % ProbabilisticModel object should be used
-Xpf=Xpm.computeFailureProbability(Xhs);
-display(Xpf)
+pf = Xpm.computeFailureProbability(Xhs);
+display(pf)
 
 % Change Flag of the generation of the samples
-Xhs.Nskip=25;
+Xhs.Skip = 25;
 
 % Set RandomNumber stream
-OpenCossan.resetRandomNumberGenerator(51125)
-[Xpf, Xo]=Xpm.computeFailureProbability(Xhs);
-display(Xo)
-display(Xpf)
+pf = Xpm.computeFailureProbability(Xhs);
+display(pf)
 
 %% Validate Solutions
-assert(abs(Xpf.pfhat-0.08)<1e-4,'openCOSSAN:Tutorials','Wrong results')
+assert(abs(pf.Value-0.08) < 1e-4,'openCOSSAN:Tutorials','Wrong results')
