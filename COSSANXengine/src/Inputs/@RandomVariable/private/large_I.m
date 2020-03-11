@@ -33,7 +33,7 @@ end
 if ~isempty([Xobj.Cpar{:}])
     Xobj.Cpar{1,1}='mu (location parameter)';
     Xobj.Cpar{2,1}='alpha (scale parameter)';
-    Xobj.mean=Xobj.Cpar{1,2} + 0.5772/Xobj.Cpar{2,2};
+    Xobj.mean=Xobj.Cpar{1,2} + 0.5772156/Xobj.Cpar{2,2};
     Xobj.std=pi/sqrt(6)/Xobj.Cpar{2,2};
 elseif ~isempty(Xobj.std) && ~isempty(Xobj.mean)
     return
