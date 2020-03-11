@@ -3,7 +3,7 @@ function [PoutputALL, Vresults] = retrieveResults(Xobj,Vresults,Vstart,Vend,Pout
 %   object on a grid using a JobManager object
 %
 %
-% Copyright~1993-2013, COSSAN Working Group
+% Copyright~1993-2020, COSSAN Working Group
 %
 % Author: Edoardo Patelli, Matteo Broggi, Marco De Angelis
 % Institute for Risk and Uncertainty, University of Liverpool, UK
@@ -38,41 +38,60 @@ end
     
 
 %% 2.   Iterate over results which have not ben read
-for i=1:length(Vpos),
+for i=1:length(Vpos)
     %2.1.   Define some variables
-    ij      = Vpos(i);     %determine job that has not been read
+    currentJob      = Vpos(i);     %determine job that has not been processed yet.
     Toutput = []; %% Clear variables
     Moutput = []; %% Clear variables
     %2.2.   Try to load results from corresponding folder
     try
-        load(fullfile(OpenCossan.getCossanWorkingPath,[Xjob.Sfoldername '_sim_' num2str(ij)],'mioOUTPUT.mat'));
-        if ~isempty(Toutput)
+        Tloaded=load(fullfile(OpenCossan.getCossanWorkingPath,[Xjob.Sfoldername '_sim_' num2str(currentJob)],'mioOUTPUT.mat'));
+        if ~isempty(Tloaded.Toutput)
+            
             % if the Toutput is not a column vector, transpose it
-            if size(Toutput,2)>size(Toutput,1)
-                Toutput = Toutput';
+            if ~iscolumn(Tloaded.Toutput)
+                Tloaded.Toutput = transpose(Tloaded.Toutput);
             end
-        elseif ~isempty(Moutput)
-            OpenCossan.cossanDisp(['Output of sim # ' num2str(ij) ' loaded'],1);
+            
+            %Assure that only required output are collected in the exported
+            %variable PoutputALL
+
+            SextractedVariables=fieldnames(Tloaded.Toutput);
+            [isPresent,idx] = ismember(SextractedVariables,Xobj.Coutputnames);
+           
+            if sum(isPresent)==length(Xobj.Coutputnames) 
+                
+            elseif sum(isPresent)<length(Xobj.Coutputnames) 
+                warning(['Not all the required variable are present in the output file\n'...
+                    '* Required outputs : %s\n* Available outputs: %s'],...
+                    sprintf(' %s;',Xobj.Coutputnames{:}),sprintf(' %s;',SextractedVariables{:}))
+            else
+                % More output than required
+                Tloaded.Toutput=rmfield(Tloaded.Toutput,SextractedVariables(~isPresent));
+            end
+            
+        elseif ~isempty(Tloaded.Moutput)
+            OpenCossan.cossanDisp(['Output of sim # ' num2str(currentJob) ' loaded'],2);
         else
             exception = MException('OpenCossan:Mio', ...
-                'Output of sim # %i is not available', ij);
+                'Output of sim # %i is not available', currentJob);
             throw(exception)
         end
         
         %continue in case file was read
         
         %Delete files of simulation
-        if ~Xobj.Lkeepsimfiles,  %in case files of simulation must be deleted
+        if ~Xobj.Lkeepsimfiles  %in case files of simulation must be deleted
             %try to delete
             try
-                SfullFilename=fullfile(OpenCossan.getCossanWorkingPath,[Xjob.SjobScriptName num2str(ij) '.sh']);
+                SfullFilename=fullfile(OpenCossan.getCossanWorkingPath,[Xjob.SjobScriptName num2str(currentJob) '.sh']);
                 delete(SfullFilename);
             catch ME
                 OpenCossan.cossanDisp(['The job script ' SfullFilename ' can not be removed'],1);
                 OpenCossan.cossanDisp(ME.message,1);
             end
             % Clean the directory
-            Scleanfolder = fullfile(OpenCossan.getCossanWorkingPath,[Xjob.Sfoldername '_sim_' num2str(ij)]);    %folder to be deleted
+            Scleanfolder = fullfile(OpenCossan.getCossanWorkingPath,[Xjob.Sfoldername '_sim_' num2str(currentJob)]);    %folder to be deleted
             %try to delete directory
             try
                 [Lstatus,Smessage]=rmdir(Scleanfolder,'s');
@@ -86,13 +105,13 @@ for i=1:length(Vpos),
                 OpenCossan.cossanDisp(ME.message,1)
             end
         end
-        %2.4.   Change status of job to read
-        Vresults(ij)   = 1;
-        %2.5.   Append results that were read to structure Tsim
+        %  Change status of job to read
+        Vresults(currentJob)   = 1;
+        %  Append results that were read to structure Tsim
         if ~isempty(Toutput)
-            PoutputALL(Vstart(ij):Vend(ij),1)  = Toutput;     %append as structure
+            PoutputALL(Vstart(currentJob):Vend(currentJob),1)  = Tloaded.Toutput;     %append as structure
         else
-            PoutputALL(Vstart(ij):Vend(ij),:)  = Moutput;     %append as matrix
+            PoutputALL(Vstart(currentJob):Vend(currentJob),:)  = Tloaded.Moutput;     %append as matrix
         end
         
     catch exception
