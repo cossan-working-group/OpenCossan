@@ -54,9 +54,20 @@ classdef LatinHypercubeSamplingTest < matlab.unittest.TestCase
     methods (Test)
         %% constructor
         function constructorEmpty(testCase)
-            Xmc = opencossan.simulations.LatinHypercubeSampling();
-            testCase.assertClass(Xmc,'opencossan.simulations.LatinHypercubeSampling');
-            testCase.assertEqual(Xmc.NumberOfSamples, 1);
+            lhs = opencossan.simulations.LatinHypercubeSampling();
+            testCase.assertClass(lhs,'opencossan.simulations.LatinHypercubeSampling');
+            testCase.assertEqual(lhs.NumberOfSamples, 1);
+        end
+        
+        function constructorFull(testCase)
+            lhs = opencossan.simulations.LatinHypercubeSampling('samples', 100, 'smooth', false, ...
+                'criterion', 'maximin', 'iterations', 10);
+            testCase.assertClass(lhs,'opencossan.simulations.LatinHypercubeSampling');
+            
+            testCase.assertEqual(lhs.NumberOfSamples, 100);
+            testCase.assertFalse(lhs.Smooth);
+            testCase.assertEqual(lhs.Criterion, 'maximin');
+            testCase.assertEqual(lhs.Iterations, 10);
         end
         
         %% computeFailureProbability

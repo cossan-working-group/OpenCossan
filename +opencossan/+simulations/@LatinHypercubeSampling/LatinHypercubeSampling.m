@@ -41,10 +41,6 @@ classdef LatinHypercubeSampling < opencossan.simulations.MonteCarlo
         % the design according to the specified criterion.
     end
     
-    properties (Hidden, Dependent)
-        Smooth_;
-    end
-    
     methods       
         function obj = LatinHypercubeSampling(varargin)
             %COMPUTEFAILUREPROBABILITY method. This method compute the FailureProbability associate to a
@@ -72,13 +68,6 @@ classdef LatinHypercubeSampling < opencossan.simulations.MonteCarlo
                 obj.Smooth = optional.smooth;
                 obj.Criterion = optional.criterion;
                 obj.Iterations = optional.iterations;
-            end
-        end
-        
-        function s = get.Smooth_(obj)
-            s = 'on';
-            if ~obj.Smooth
-                s = 'off';
             end
         end
     end

@@ -30,9 +30,6 @@ function samples = sample(obj, varargin)
     %  not, see <http://www.gnu.org/licenses/>.
     % =====================================================================
     
-    import opencossan.*
-    import opencossan.common.Samples
-    
     [required, varargin] = opencossan.common.utilities.parseRequiredNameValuePairs("input", varargin{:});
     optional = opencossan.common.utilities.parseOptionalNameValuePairs("samples", {obj.NumberOfSamples}, varargin{:});
     
