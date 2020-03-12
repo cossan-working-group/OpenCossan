@@ -33,7 +33,7 @@ classdef (Abstract) Simulations < opencossan.common.CossanObject
         CoV(1,1) double {mustBeNonnegative} = 0;    
         % Termination criteria Time in seconds  (0= no termination criteria adopted)
         Timeout(1,1) double {mustBeNonnegative} = 0;           
-        % Termination criteria Nsamples (0= no termination criteria adopted)
+        % Termination criteria Nsamples
         NumberOfSamples(1,1) {mustBeInteger} = 1;
         % RandStream to use for the simulation
         RandomStream; 

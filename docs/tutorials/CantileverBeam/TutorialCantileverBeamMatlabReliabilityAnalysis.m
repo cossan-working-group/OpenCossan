@@ -41,7 +41,7 @@ XprobModelBeamMatlab = opencossan.reliability.ProbabilisticModel(...
 opencossan.OpenCossan.resetRandomNumberGenerator(51125);
 
 % Create MonteCarlo simulation object to run 1e5 samples in 1 batch
-Xmc = opencossan.simulations.MonteCarlo('Nsamples',1e5,'Nbatches',1);
+Xmc = opencossan.simulations.MonteCarlo('samples', 1e5, 'batches', 1);
 
 % Run reliability analysis
 XfailureProbMC = Xmc.computeFailureProbability(XprobModelBeamMatlab);
@@ -58,7 +58,7 @@ opencossan.OpenCossan.resetRandomNumberGenerator(49564);
 
 % Create LatinHypercubeSampling simulation object to run 1e4 samples in 1
 % batch
-Xlhs=opencossan.simulations.LatinHypercubeSampling('Nsamples',1e4);
+Xlhs=opencossan.simulations.LatinHypercubeSampling('samples', 1e4);
 
 % Run reliability analysis
 XfailureProbLHS = Xlhs.computeFailureProbability(XprobModelBeamMatlab);
@@ -70,9 +70,6 @@ assert(XfailureProbLHS.Value == 0.06840,...
        'Reference Solution pf LHS not matched.');
 
 %% Reliability Analysis via LineSampling
-% Reset the random number generator to always produce the same results
-opencossan.OpenCossan.resetRandomNumberGenerator(49564);
-
 % Line Sampling requires the definition of the so-called important 
 % direction. It can be compute using sensitivity methods. For instance,
 % here the gradient in standard normal space is computed.
@@ -83,8 +80,8 @@ XlocalSensitivity = XlsFD.computeGradientStandardNormalSpace();
 
 % Use sensitivity information to define the important direction for LineSampling
 XLS=opencossan.simulations.LineSampling(...
-    'XlocalSensitivityMeasures', XlocalSensitivity,'Nlines', 50,...
-    'Vset', 0.5:0.5:3.5);
+    'gradient', XlocalSensitivity,'lines', 25, 'batches', 2, ...
+    'points', 0.5:0.5:3.5, 'seed', 49564);
 
 % Run reliability analysis
 XfailureProbLS = XLS.computeFailureProbability(XprobModelBeamMatlab);
@@ -93,7 +90,7 @@ XfailureProbLS = XLS.computeFailureProbability(XprobModelBeamMatlab);
 display(XfailureProbLS);
 
 % Validate Solution
-assert(abs(XfailureProbLS.Value-0.069097)<1e-4*0.069097,...
+assert(abs(XfailureProbLS.Value-0.069097) < 1e-4 * 0.069097,...
     'CossanX:Tutorials:CantileverBeam',...
     'Estimated failure probability (%e) does not match the reference Solution (%e)',...
     XfailureProbLS.Value, 0.069097)

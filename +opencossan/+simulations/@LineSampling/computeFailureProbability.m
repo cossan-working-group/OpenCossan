@@ -1,193 +1,148 @@
-function pf = computeFailureProbability(Xobj,Xtarget)
-%computeFailureProbability method. This method compute the FailureProbability associate to a
-% ProbabilisticModel/SystemReliability/MetaModel by means of a
-% LineSampling object
-%
-% See also:
-% https://cossan.co.uk/wiki/index.php/computeFailureProbability@LineSampling
-%
-% Author: Edoardo Patelli and Marco de Angelis
-% Institute for Risk and Uncertainty, University of Liverpool, UK
-% email address: openengine@cossan.co.uk
-% Website: http://www.cossan.co.uk
-
-% =====================================================================
-% This file is part of openCOSSAN.  The open general purpose matlab
-% toolbox for numerical analysis, risk and uncertainty quantification.
-%
-% openCOSSAN is free software: you can redistribute it and/or modify
-% it under the terms of the GNU General Public License as published by
-% the Free Software Foundation, either version 3 of the License.
-%
-% openCOSSAN is distributed in the hope that it will be useful,
-% but WITHOUT ANY WARRANTY; without even the implied warranty of
-% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-% GNU General Public License for more details.
-%
-%  You should have received a copy of the GNU General Public License
-%  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
-% =====================================================================
-
-import opencossan.simulations.LineSamplingOutput
-import opencossan.reliability.FailureProbability
-import opencossan.sensitivity.*
-
-%% Check inputs
-Xobj = Xobj.initialize();
-
-%% Initialize variables
-% Get name of the performance function
-SperformanceFunctionName=Xtarget.PerformanceFunctionVariable;
-
-% %standard deviation associated with smooth performance function
-% if ~isempty(Xtarget.XperformanceFunction.stdDeviationIndicatorFunction),
-%     stdDev = Xtarget.XperformanceFunction.stdDeviationIndicatorFunction;
-% else
-%     stdDev=[];
-% end
-
-% Store the important direction locally (for performance improvment since
-% the Valpha is a dependent field of Gradient object)
-import opencossan.OpenCossan
-% If the important direction does not exist, compute the gradient in SNS to
-% create one
-if isempty(Xobj.Valpha)
+function pf = computeFailureProbability(obj, model)
+    %computeFailureProbability method. This method compute the FailureProbability associate to a
+    % ProbabilisticModel/SystemReliability/MetaModel by means of a LineSampling object
+    %
+    % See also: https://cossan.co.uk/wiki/index.php/computeFailureProbability@LineSampling
+    %
+    % Author: Edoardo Patelli and Marco de Angelis Institute for Risk and Uncertainty, University of
+    % Liverpool, UK email address: openengine@cossan.co.uk Website: http://www.cossan.co.uk
     
-    OpenCossan.cossanDisp('[LineSampling:pf] Recompute important direction',3)
+    % ===================================================================== This file is part of
+    % openCOSSAN.  The open general purpose matlab toolbox for numerical analysis, risk and
+    % uncertainty quantification.
+    %
+    % openCOSSAN is free software: you can redistribute it and/or modify it under the terms of the
+    % GNU General Public License as published by the Free Software Foundation, either version 3 of
+    % the License.
+    %
+    % openCOSSAN is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+    % without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See
+    % the GNU General Public License for more details.
+    %
+    %  You should have received a copy of the GNU General Public License along with openCOSSAN.  If
+    %  not, see <http://www.gnu.org/licenses/>.
+    % =====================================================================
     
-    Xlsfd=LocalSensitivityFiniteDifference('Xtarget',Xtarget, ...
-        'Coutputnames',{Xtarget.XperformanceFunction.Soutputname});
+    import opencossan.OpenCossan
+    import opencossan.simulations.LineSamplingOutput
+    import opencossan.reliability.FailureProbability
+    import opencossan.sensitivity.*
     
-    XlocalSensitivity=Xlsfd.computeIndices;
+    obj = obj.initialize();
     
-    % The performance function decreases towards failure
-    Xobj.Valpha=-XlocalSensitivity.Valpha;
-    Xobj.CalphaNames=XlocalSensitivity.Cnames;
-end
-
-% Make sure the important direction is a column vector
-Xobj.Valpha=Xobj.Valpha(:)/norm(Xobj.Valpha);
-
-opencossan.OpenCossan.cossanDisp('[LineSampling:pf] Start LineSampling analysis',3)
-
-simData = opencossan.common.outputs.SimulationData();
-batch = 0;
-pf = 0;
-variance = 0;
-%% BEGIN LineSampling simulation
-while true
-    % Reset Variables
-    batch = batch + 1;
-    
-    % Lap time for each batch
-    opencossan.OpenCossan.getTimer().lap('description',[' Batch #' num2str(batch)]);
-    
-    % Compute the number of lines for each batch
-    if batch == Xobj.NumberOfBatches || Xobj.Nlinexbatch == 0
-        Nlines=Xobj.Nlinelastbatch;
-    else
-        Nlines=Xobj.Nlinexbatch;
+    % Compute alpha on demand if it was not given
+    if isempty(obj.Alpha)
+        OpenCossan.cossanDisp("[LineSampling] Computing important direction", 3);
+        
+        lsfd = LocalSensitivityFiniteDifference('Xmodel', model, ...
+            'Coutputname', model.PerformanceFunctionVariable);
+        
+        localSensitivity = lsfd.computeGradientStandardNormalSpace();
+        
+        % The performance function decreases towards failure
+        obj.Valpha= -localSensitivity.Valpha;
     end
     
-    %% Simulation with standard Line sampling
-    % Standard LineSampling uses a fixed direction and a fixed grid of
-    % points (Vset) where the performance function is evaluated.
-    NlinePoints=length(Xobj.Vset);
+    % Make sure the important direction is a column vector
+    obj.Alpha = obj.Alpha ./ norm(obj.Alpha);
     
-    % Gererate all samples at once
-    samples = Xobj.sample('Nlines',Nlines,'Xinput',Xtarget.Input);
+    simData = opencossan.common.outputs.SimulationData();
+    batch = 0;
+    pf = 0;
+    variance = 0;
     
-    % Evaluate the model
-    XpartialSimOut= apply(Xtarget, samples);
-    XpartialSimOut.Samples.Batch = repmat(batch, XpartialSimOut.NumberOfSamples, 1);
+    if ~isempty(obj.RandomStream)
+        prevstream = RandStream.setGlobalStream(obj.RandomStream);
+    end
     
-    simData = simData + XpartialSimOut;
-    
-    % Extract the values of the performance function
-    Vg=XpartialSimOut.Samples.(Xtarget.PerformanceFunctionVariable);
-    Mg=reshape(Vg,NlinePoints,Nlines);
-    
-    % Compute coordinates of points on the hyperplane
-    Msamples = Xtarget.Input.map2stdnorm(samples);
-    Msamples = Msamples{:,:};
-    
-    VpfLine=zeros(1,Nlines);
-    VdistanceLimitState=zeros(1,Nlines);
-    VnumPointsLine=zeros(1,Nlines);
-    
-    VdistancePlaneFine  = linspace(min(Xobj.Vset), max(Xobj.Vset), Xobj.Ncfine)';
-    
-    % Process lines
-    for iLine=1:Nlines
+    %% BEGIN LineSampling simulation
+    while true
+        % Reset Variables
+        batch = batch + 1;
         
-        % Interpolate for better accuracy
-        VgFine  = interp1(Xobj.Vset,Mg(:,iLine),VdistancePlaneFine,'spline');
+        opencossan.OpenCossan.cossanDisp(...
+            sprintf("[LineSampling] Batch #%i (%i lines)", batch, obj.NumberOfLines), 3);
         
-        [~,indexRoot] = min(abs(VgFine));
-        if min(VgFine)>0 % line is all in the survival domain
-            distanceLimitState = Inf;
-            opencossan.OpenCossan.cossanDisp(strcat(...
-                'Intersection with the limit state function not found on Line: #',...
-                num2str(iLine)),2);
+        %% Simulation with standard Line sampling
+        % Standard LineSampling uses a fixed direction and a fixed grid of points (Vset) where the
+        % performance function is evaluated.
+        
+        % Gererate all samples at once
+        samples = obj.sample('input', model.Input);
+        
+        % Evaluate the model
+        XpartialSimOut= apply(model, samples);
+        XpartialSimOut.Samples.Batch = repmat(batch, XpartialSimOut.NumberOfSamples, 1);
+        
+        simData = simData + XpartialSimOut;
+        
+        % Extract the values of the performance function
+        Vg = XpartialSimOut.Samples.(model.PerformanceFunctionVariable);
+        Mg = reshape(Vg, length(obj.PointsOnLine), obj.NumberOfLines);
+        
+        % Compute coordinates of points on the hyperplane
+        %     Msamples = model.Input.map2stdnorm(samples); Msamples = Msamples{:,:};
+        
+        pfLine = zeros(1, obj.NumberOfLines);
+        distanceLimitState = zeros(1, obj.NumberOfLines);
+        numPointsLine = zeros(1, obj.NumberOfLines);
+        
+        distancePlaneFine = linspace(min(obj.PointsOnLine), max(obj.PointsOnLine), obj.NumberOfInterpolationPoints)';
+        
+        % Process lines
+        for iLine = 1:obj.NumberOfLines
             
-            opencossan.OpenCossan.cossanDisp(strcat(...
-                'Line: #',num2str(iLine),'is entirely in the survival domain'),3);
-        elseif max(VgFine)<0 % line is all in the failure domain
-            distanceLimitState = -Inf;
-            opencossan.OpenCossan.cossanDisp(strcat(...
-                'Intersection with the limit state function not found on Line: #',...
-                num2str(iLine)),2);
+            % Interpolate for better accuracy
+            VgFine  = interp1(obj.PointsOnLine, Mg(:,iLine), distancePlaneFine, 'spline');
             
-            opencossan.OpenCossan.cossanDisp(strcat(...
-                'Line: #',num2str(iLine),'is entirely in the failure domain'),3);
-        else % limit state met regurarly on the positive half-space
-            distanceLimitState = VdistancePlaneFine(indexRoot);
+            [~,indexRoot] = min(abs(VgFine));
+            if min(VgFine) > 0 % line is all in the survival domain
+                distanceLimitState = Inf;
+                opencossan.OpenCossan.cossanDisp(...
+                    sprintf("[LineSampling] Line %i is entirely in the survival domain.", ...
+                    iLine), 3);
+                
+            elseif max(VgFine) < 0 % line is all in the failure domain
+                distanceLimitState = -Inf;
+                opencossan.OpenCossan.cossanDisp(...
+                    sprintf("[LineSampling] Line %i is entirely in the failure domain.", ...
+                    iLine), 3);
+            else % limit state met regurarly on the positive half-space
+                distanceLimitState = distancePlaneFine(indexRoot);
+            end
+            
+            numPointsLine(iLine) = length(obj.PointsOnLine);
+            
+            % Compute conditional probability on the current line
+            pfLine(iLine) = normcdf(-distanceLimitState);
+            distanceLimitState(iLine) = distanceLimitState;
             
         end
         
-        VnumPointsLine(iLine)=length(Xobj.Vset);
+        %% Compute Failure Probability
+        pfhat = mean(pfLine);
+        variancepf = sum((pfLine-pfhat).^2)/(obj.NumberOfLines*(obj.NumberOfLines-1));
         
-        % Compute conditional probability on the current line
-        VpfLine(iLine) = normcdf(-distanceLimitState);
-        VdistanceLimitState(iLine)=distanceLimitState;
+        pf = (pf * (batch - 1) + pfhat) / batch;
+        variance = (variance * (batch - 1) + variancepf) / batch;
         
-    end % loop over lines
+        % check termination criteria
+        [exit, flag] = checkTermination(obj, 'cov', sqrt(variance) * pf, 'batch', batch);
+        if exit
+            % Add termination criteria to the FailureProbability
+            simData.ExitFlag = flag;
+            break;
+        end
+    end
     
-%     XlineSamplingOutput=LineSamplingOutput('SperformanceFunctionName',SperformanceFunctionName,...
-%         'VnumPointLine',VnumPointsLine,...
-%         'Vnorm',sqrt(sum(Msamples.^2,1)),...
-%         'VdistanceOrthogonalPlane',repmat(Xobj.Vset(:),Nlines,1),...
-%         'VinitialDirectionSNS',Xobj.Valpha,...
-%         'VlimitStateDistance',VdistanceLimitState,...
-%         'XsimulationData',XpartialSimOut,...
-%         'Xinput',Xinput);
+    pf = opencossan.reliability.FailureProbability('value', pf, 'variance', variance, ...
+        'simulationdata', simData, 'simulation', obj);
     
-    % Increment counters
-%     Xobj.isamples = Xobj.isamples+Nlines*length(Xobj.Vset); % number of samples
+    if ~isempty(obj.RandomStream)
+        RandStream.setGlobalStream(prevstream);
+    end
     
-    %% Compute Failure Probability
-    pfhat = mean(VpfLine);
-    variancepf = sum((VpfLine-pfhat).^2)/(Nlines*(Nlines-1));
-    
-    pf = pf + pfhat;
-    variance = variance + variancepf;
-    
-    % check termination criteria
-    [exit, flag] = checkTermination(Xobj, 'cov', sqrt(variance) * pf, 'batch', batch);
-    if exit
-        break;
+    if ~isdeployed
+        obj.exportResult(pf);
     end
 end
-
-% Add termination criteria to the FailureProbability
-simData.ExitFlag = flag;
-
-pf = opencossan.reliability.FailureProbability('value', pf, 'variance', variance, ...
-    'simulationdata', simData, 'simulation', Xobj);
-
-if ~isdeployed
-    Xobj.exportResult(pf);
-end
-
-opencossan.OpenCossan.getTimer().lap('description','End computeFailureProbability@LineSampling');
-
