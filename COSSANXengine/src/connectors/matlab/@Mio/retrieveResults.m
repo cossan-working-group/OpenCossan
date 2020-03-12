@@ -35,39 +35,48 @@ if Xobj.Liostructure
 elseif Xobj.Liomatrix
     PoutputALL = nan(length(Vpos),length(Xobj.Coutputnames));
 end
-    
 
-%% 2.   Iterate over results which have not ben read
+
+%%  Iterate over results which have not ben read
 for i=1:length(Vpos)
-    %2.1.   Define some variables
-    currentJob      = Vpos(i);     %determine job that has not been processed yet.
-    Toutput = []; %% Clear variables
-    Moutput = []; %% Clear variables
-    %2.2.   Try to load results from corresponding folder
+    
+    currentJob      = Vpos(i); %Index of job that has not been processed yet.
+    
+    % Load results from corresponding folder
     try
-        Tloaded=load(fullfile(OpenCossan.getCossanWorkingPath,[Xjob.Sfoldername '_sim_' num2str(currentJob)],'mioOUTPUT.mat'));
+        Tloaded=load(fullfile(OpenCossan.getCossanWorkingPath,...
+            [Xjob.Sfoldername '_sim_' num2str(currentJob)],'mioOUTPUT.mat'));
+        
         if ~isempty(Tloaded.Toutput)
-            
             % if the Toutput is not a column vector, transpose it
             if ~iscolumn(Tloaded.Toutput)
                 Tloaded.Toutput = transpose(Tloaded.Toutput);
             end
             
             %Assure that only required output are collected in the exported
-            %variable PoutputALL
-
-            SextractedVariables=fieldnames(Tloaded.Toutput);
-            [isPresent,idx] = ismember(SextractedVariables,Xobj.Coutputnames);
-           
-            if sum(isPresent)==length(Xobj.Coutputnames) 
-                
-            elseif sum(isPresent)<length(Xobj.Coutputnames) 
+            
+            SavailableVariables=fieldnames(Tloaded.Toutput);
+            
+            if length(Xobj.Coutputnames)>length(SavailableVariables)
                 warning(['Not all the required variable are present in the output file\n'...
                     '* Required outputs : %s\n* Available outputs: %s'],...
-                    sprintf(' %s;',Xobj.Coutputnames{:}),sprintf(' %s;',SextractedVariables{:}))
+                    sprintf(' %s;',Xobj.Coutputnames{:}),...
+                    sprintf(' %s;',SavailableVariables{:})) %#ok<SPWRN>
             else
-                % More output than required
-                Tloaded.Toutput=rmfield(Tloaded.Toutput,SextractedVariables(~isPresent));
+                [isRequired,~] = ismember(SavailableVariables,Xobj.Coutputnames);
+                
+                if sum(isRequired)==length(Xobj.Coutputnames)
+                    OpenCossan.cossanDisp('All required outputs are available',4);
+                elseif sum(isRequired)<length(Xobj.Coutputnames)
+                    warning(['Not all the required variable are present in the output file\n'...
+                        '* Required outputs : %s\n* Available outputs: %s'],...
+                        sprintf(' %s;',Xobj.Coutputnames{:}),...
+                        sprintf(' %s;',SavailableVariables{:})) %#ok<SPWRN>
+                else
+                    % More output than required
+                    Tloaded.Toutput=rmfield(Tloaded.Toutput,SavailableVariables(~isRequired));
+                end
+                
             end
             
         elseif ~isempty(Tloaded.Moutput)
@@ -98,7 +107,7 @@ for i=1:length(Vpos)
                 
                 if ~Lstatus
                     warning('OpenCossan:Mio', ...
-                    'Folder %s can not be deleted\n%s', Scleanfolder,Smessage);
+                        'Folder %s can not be deleted\n%s', Scleanfolder,Smessage);
                 end
             catch ME
                 OpenCossan.cossanDisp(['Error cleaning the results of ' Scleanfolder],1)
@@ -108,7 +117,7 @@ for i=1:length(Vpos)
         %  Change status of job to read
         Vresults(currentJob)   = 1;
         %  Append results that were read to structure Tsim
-        if ~isempty(Toutput)
+        if Xobj.Liostructure
             PoutputALL(Vstart(currentJob):Vend(currentJob),1)  = Tloaded.Toutput;     %append as structure
         else
             PoutputALL(Vstart(currentJob):Vend(currentJob),:)  = Tloaded.Moutput;     %append as matrix
