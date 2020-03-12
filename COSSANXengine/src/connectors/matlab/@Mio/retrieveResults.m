@@ -57,27 +57,20 @@ for i=1:length(Vpos)
             
             SavailableVariables=fieldnames(Tloaded.Toutput);
             
-            if length(Xobj.Coutputnames)>length(SavailableVariables)
-                warning(['Not all the required variable are present in the output file\n'...
-                    '* Required outputs : %s\n* Available outputs: %s'],...
-                    sprintf(' %s;',Xobj.Coutputnames{:}),...
-                    sprintf(' %s;',SavailableVariables{:})) %#ok<SPWRN>
-            else
-                [isRequired,~] = ismember(SavailableVariables,Xobj.Coutputnames);
-                
-                if sum(isRequired)==length(Xobj.Coutputnames)
-                    OpenCossan.cossanDisp('All required outputs are available',4);
-                elseif sum(isRequired)<length(Xobj.Coutputnames)
-                    warning(['Not all the required variable are present in the output file\n'...
-                        '* Required outputs : %s\n* Available outputs: %s'],...
-                        sprintf(' %s;',Xobj.Coutputnames{:}),...
-                        sprintf(' %s;',SavailableVariables{:})) %#ok<SPWRN>
-                else
-                    % More output than required
-                    Tloaded.Toutput=rmfield(Tloaded.Toutput,SavailableVariables(~isRequired));
-                end
-                
+            [isRequired,~] = ismember(SavailableVariables,Xobj.Coutputnames);
+            
+            assert(sum(isRequired)==length(Xobj.Coutputnames),...
+                'OpenCossan:extractJob',...
+                ['Not all the required variable are present in the output file\n'...
+                '* Required outputs : %s\n* Available outputs: %s'],...
+                sprintf(' %s;',Xobj.Coutputnames{:}),...
+                sprintf(' %s;',SavailableVariables{:}))
+            
+            if sum(~isRequired)>0
+                Tloaded.Toutput=rmfield(Tloaded.Toutput,SavailableVariables(~isRequired));
             end
+            OpenCossan.cossanDisp('All required outputs are available',4);
+            
             
         elseif ~isempty(Tloaded.Moutput)
             OpenCossan.cossanDisp(['Output of sim # ' num2str(currentJob) ' loaded'],2);
