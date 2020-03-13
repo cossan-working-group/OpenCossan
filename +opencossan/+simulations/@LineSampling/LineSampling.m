@@ -37,8 +37,7 @@ classdef LineSampling < opencossan.simulations.Simulations
         NumberOfLines(1,1) {mustBeInteger, mustBePositive} = 1;
         % Evaluation points along the line
         PointsOnLine(1, :) double = 1:6;
-        % Number of iterpolation points of the values along each line
-        NumberOfInterpolationPoints(1,1) {mustBeInteger, mustBePositive} = 1000;
+        ExportBatches(1,1) logical = false;
     end
     
     methods
@@ -57,8 +56,8 @@ classdef LineSampling < opencossan.simulations.Simulations
                 [required, varargin] = opencossan.common.utilities.parseRequiredNameValuePairs(...
                     "lines", varargin{:});
                 [optional, super_args] = opencossan.common.utilities.parseOptionalNameValuePairs(...
-                    ["alpha", "gradient", "points", "batches", "samples", "interpolationpoints"], ...
-                    {[], [], 1:6, 1, [], 1000}, varargin{:});
+                    ["alpha", "gradient", "points", "batches", "samples", ...
+                    "exportbatches"], {[], [], 1:6, 1, [], false}, varargin{:});
             end
             
             obj@opencossan.simulations.Simulations(super_args{:});
@@ -67,7 +66,7 @@ classdef LineSampling < opencossan.simulations.Simulations
                 obj.NumberOfLines = required.lines;
                 obj.NumberOfBatches = optional.batches;
                 obj.PointsOnLine = optional.points;
-                obj.NumberOfInterpolationPoints = optional.interpolationpoints;
+                obj.ExportBatches = optional.exportbatches;
                 
                 if ~isempty(optional.alpha)
                     assert(isempty(optional.gradient), 'OpenCossan:LineSampling', ...

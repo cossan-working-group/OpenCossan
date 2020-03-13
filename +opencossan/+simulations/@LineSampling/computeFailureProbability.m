@@ -24,7 +24,7 @@ function pf = computeFailureProbability(obj, model)
     % =====================================================================
     
     import opencossan.OpenCossan
-    import opencossan.simulations.LineSamplingOutput
+    import opencossan.simulations.LineSamplingData
     import opencossan.reliability.FailureProbability
     import opencossan.sensitivity.*
     
@@ -40,7 +40,7 @@ function pf = computeFailureProbability(obj, model)
         localSensitivity = lsfd.computeGradientStandardNormalSpace();
         
         % The performance function decreases towards failure
-        obj.Valpha= -localSensitivity.Valpha;
+        obj.Alpha= -localSensitivity.Valpha;
     end
     
     % Make sure the important direction is a column vector
@@ -55,6 +55,7 @@ function pf = computeFailureProbability(obj, model)
         prevstream = RandStream.setGlobalStream(obj.RandomStream);
     end
     
+    limitState = [];
     %% BEGIN LineSampling simulation
     while true
         % Reset Variables
@@ -71,53 +72,44 @@ function pf = computeFailureProbability(obj, model)
         samples = obj.sample('input', model.Input);
         
         % Evaluate the model
-        XpartialSimOut= apply(model, samples);
-        XpartialSimOut.Samples.Batch = repmat(batch, XpartialSimOut.NumberOfSamples, 1);
+        simDataBatch = apply(model, samples);
+        simDataBatch.Samples.Batch = repmat(batch, simDataBatch.NumberOfSamples, 1);
         
-        simData = simData + XpartialSimOut;
+        if ~isdeployed && obj.ExportBatches
+            obj.exportBatch(simDataBatch, batch);
+        end
+        
+        simData = simData + simDataBatch;
         
         % Extract the values of the performance function
-        Vg = XpartialSimOut.Samples.(model.PerformanceFunctionVariable);
+        Vg = simDataBatch.Samples.(model.PerformanceFunctionVariable);
         Mg = reshape(Vg, length(obj.PointsOnLine), obj.NumberOfLines);
         
-        % Compute coordinates of points on the hyperplane
-        %     Msamples = model.Input.map2stdnorm(samples); Msamples = Msamples{:,:};
-        
         pfLine = zeros(1, obj.NumberOfLines);
-        distanceLimitState = zeros(1, obj.NumberOfLines);
-        numPointsLine = zeros(1, obj.NumberOfLines);
-        
-        distancePlaneFine = linspace(min(obj.PointsOnLine), max(obj.PointsOnLine), obj.NumberOfInterpolationPoints)';
         
         % Process lines
         for iLine = 1:obj.NumberOfLines
-            
-            % Interpolate for better accuracy
-            VgFine  = interp1(obj.PointsOnLine, Mg(:,iLine), distancePlaneFine, 'spline');
-            
-            [~,indexRoot] = min(abs(VgFine));
-            if min(VgFine) > 0 % line is all in the survival domain
+            if all(Mg(:, iLine) > 0)
                 distanceLimitState = Inf;
                 opencossan.OpenCossan.cossanDisp(...
                     sprintf("[LineSampling] Line %i is entirely in the survival domain.", ...
                     iLine), 3);
-                
-            elseif max(VgFine) < 0 % line is all in the failure domain
+            elseif all(Mg(:, iLine) < 0)
                 distanceLimitState = -Inf;
                 opencossan.OpenCossan.cossanDisp(...
                     sprintf("[LineSampling] Line %i is entirely in the failure domain.", ...
                     iLine), 3);
-            else % limit state met regurarly on the positive half-space
-                distanceLimitState = distancePlaneFine(indexRoot);
+            else
+                % Interpolate intersection with the failure domain
+                spl = @(x) interp1(obj.PointsOnLine, Mg(:, iLine), x,  'spline');
+                distanceLimitState = fzero(spl, [min(obj.PointsOnLine) max(obj.PointsOnLine)]);
             end
             
-            numPointsLine(iLine) = length(obj.PointsOnLine);
-            
             % Compute conditional probability on the current line
-            pfLine(iLine) = normcdf(-distanceLimitState);
-            distanceLimitState(iLine) = distanceLimitState;
-            
+            pfLine(iLine) = normcdf(-distanceLimitState);            
         end
+        
+        limitState = [limitState pfLine];
         
         %% Compute Failure Probability
         pfhat = mean(pfLine);
@@ -135,8 +127,13 @@ function pf = computeFailureProbability(obj, model)
         end
     end
     
+    lineSamplingData = opencossan.simulations.LineSamplingData('samples', simData.Samples, ...
+        'input', model.Input, 'lines', batch * obj.NumberOfLines, 'points', obj.PointsOnLine, ...
+        'limit', -norminv(limitState), 'performance', model.PerformanceFunctionVariable, ...
+        'alpha', obj.Alpha);
+    
     pf = opencossan.reliability.FailureProbability('value', pf, 'variance', variance, ...
-        'simulationdata', simData, 'simulation', obj);
+        'simulationdata', lineSamplingData, 'simulation', obj);
     
     if ~isempty(obj.RandomStream)
         RandStream.setGlobalStream(prevstream);
