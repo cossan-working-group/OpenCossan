@@ -28,8 +28,8 @@ classdef Sensitivity < opencossan.common.CossanObject
     properties (SetAccess=protected,GetAccess=public)
         Target
         LperformanceFunction
-        InputNames
-        OutputNames
+        InputNames(1, :) string;
+        OutputNames(1,:) string;
         Input
     end
     
