@@ -73,8 +73,6 @@ classdef DesignOfExperiments < opencossan.simulations.Simulations
                 
                 obj.LevelValues = optional.levelvalues;
             end
-            
-            
         end
         
         function computeFailureProbability(Xobj,~)
