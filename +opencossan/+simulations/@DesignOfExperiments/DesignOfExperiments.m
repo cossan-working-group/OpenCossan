@@ -26,94 +26,60 @@ classdef DesignOfExperiments < opencossan.simulations.Simulations
     %  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
     % =====================================================================
     properties
-        SdesignType            = '2LevelFactorial';  % Type of DOE
-        ScentralCompositeType  = 'faced';            % Type of the Central-Composite Design
-        MdoeFactors                                  % Matrix containing the coordinates of the input samples
-        perturbanceParameter   = 1;                  % Parameter multiplied with the Mdoefactors matrix
-        LuseCurrentValues      = true;               % Parameter to use the current values of the DV's or not
-        VlevelValues           = [];                 % Levels for the continous DVs (required only for FULLFACTORIAL)
-        ClevelNames                                  % Corresponding DV names to the values defined in Vlevelvalues vector
-    end
-    
-    properties (SetAccess = private)
-        CdesignTypeAvailable={'2LevelFactorial' 'FullFactorial' 'BoxBehnken'  ...
-            'CentralComposite' 'UserDefined'}
-        
-        CcentralCompositeTypeAvailable={'faced' 'inscribed'}
+        % Type of DOE
+        DesignType(1,1) string {mustBeMember(DesignType, {...
+            '2LevelFactorial', 'FullFactorial', 'BoxBehnken', 'CentralComposite', ...
+            'UserDefined'})} = "2LevelFactorial";
+        % Type of the Central-Composite Design
+        CentralCompositeType(1,1) string {mustBeMember(CentralCompositeType, {...
+            'faced', 'inscribed'})} = 'faced';
+        % Matrix containing the coordinates of the input samples
+        Factors
+        % Parameter multiplied with the Factors matrix
+        Perturbance(1,1) double {mustBePositive} = 1;
+        % Parameter to use the current values of the DV's or not
+        UseCurrentValues(1,1) logical = true;
+        % Levels for the continous DVs (required only for FULLFACTORIAL)
+        LevelValues = [];
     end
     
     methods
         
-        %% Methods inheritated from the superclass        
+        function obj = DesignOfExperiments(varargin)
+            %DESIGNOFEXPERIMENTS
+            
+            if nargin == 0
+                super_args = {};
+            else
+                [optional, super_args] = opencossan.common.utilities.parseOptionalNameValuePairs(...
+                    ["designtype", "centralcompositetype", "factors", "perturbance", ...
+                    "usecurrentvalues", "levelvalues"], {"2LevelFactorial", "faced", ...
+                    [], 1, true, []}, varargin{:});
+            end
+            
+            obj@opencossan.simulations.Simulations(super_args{:});
+            
+            if nargin > 0
+                obj.DesignType = optional.designtype;
+                obj.CentralCompositeType = optional.centralcompositetype;
+                obj.Perturbance = optional.perturbance;
+                obj.UseCurrentValues = optional.usecurrentvalues;
+                
+                if strcmp(obj.DesignType, "UserDefined")
+                    assert(~isempty(optional.factors), 'OpenCossan:DesignOfExperiments', ...
+                        "Must supply factors for 'UserDefined' design type.");
+                    obj.Factors = optional.factors;
+                end
+                
+                obj.LevelValues = optional.levelvalues;
+            end
+            
+            
+        end
+        
         function computeFailureProbability(Xobj,~)
             error('openCOSSAN:DesignOfExperiments:DesignOfExperiments',...
                 ['method computeFailureProbability not available for the ' class(Xobj) ' object \n'])
-        end
-        
-        Xo=apply(Xobj,varargin)   % Perform the simulations
-        
-        %% constructor
-        function Xobj= DesignOfExperiments(varargin)
-            %DESIGNOFEXPERIMENTS constructor
-
-            for k=1:2:length(varargin)
-                switch lower(varargin{k})
-                    case {'sdescription'}
-                        Xobj.Sdescription=varargin{k+1};
-                    case {'sdesigntype'}
-                        assert(ismember(varargin{k+1},Xobj.CdesignTypeAvailable), ...
-                            'openCOSSAN:DesignOfExperiments', ...
-                            strcat('Available options for SdesignType are: ',sprintf('\n* %s', Xobj.CdesignTypeAvailable{:})))
-                        Xobj.SdesignType=varargin{k+1};
-                    case {'scentralcompositetype'}
-                        assert(ismember(lower(varargin{k+1}),Xobj.CcentralCompositeTypeAvailable), ...
-                            'openCOSSAN:DesignOfExperiments', ...
-                            strcat('Available options for %s are: ',sprintf('\n* %s', Xobj.CcentralCompositeTypeAvailable{:})),varargin{k})
-                        Xobj.ScentralCompositeType=lower(varargin{k+1});
-                    case {'mdoefactors'}
-                        Xobj.MdoeFactors=varargin{k+1};
-                    case {'vlevelvalues'}
-                        Xobj.VlevelValues=varargin{k+1};
-                    case {'clevelnames'}
-                        Xobj.ClevelNames=varargin{k+1};
-                    case {'perturbanceparameter'}
-                        Xobj.perturbanceParameter=varargin{k+1};
-                    case {'lusecurrentvalues'}
-                        Xobj.LuseCurrentValues=varargin{k+1};
-                    case {'timeout'}
-                        Xobj.timeout=varargin{k+1};
-                    case {'nbatches'}
-                        Xobj.Nbatches=varargin{k+1};
-                    case {'lexportsamples'}
-                        Xobj.Lexportsamples=varargin{k+1};
-                    case {'lintermediateresults'}
-                        Xobj.Lintermediateresults=varargin{k+1};
-                    case {'sbatchfolder'}
-                        Xobj.SbatchFolder=varargin{k+1};
-                    otherwise
-                        error('openCOSSAN:DesignOfExperiments',...
-                            'Property name %s not allowed', varargin{k});
-                end
-            end
-            
-            % if userdefined DOE is selected, the user has to provide the input samples, i.e. Mfactors matrix
-            if strcmp(Xobj.SdesignType,'UserDefined') && isempty(Xobj.MdoeFactors)
-                error('openCOSSAN:DesignOfExperiments',...
-                    'If the Design Type is selected as UserDefined, MdoeFactors matrix has to be provided')
-            end
-            
-            
-            % perturbance parameter should be positive
-            assert(Xobj.perturbanceParameter > 0, ...
-                'openCOSSAN:DesignOfExperiments',...
-                'Please provide a positive value for the perturbance parameter (%e)',Xobj.perturbanceParameter)
-            
-            if ~isempty(Xobj.VlevelValues)
-                assert(length(Xobj.VlevelValues)==length(Xobj.ClevelNames),...
-                    'openCOSSAN:DesignOfExperiments',...
-                    'The length of level values (%i) must be equal to the length of levelNames (%i)',...
-                    length(Xobj.VlevelValues),length(Xobj.ClevelNames))
-            end
         end
     end
 end

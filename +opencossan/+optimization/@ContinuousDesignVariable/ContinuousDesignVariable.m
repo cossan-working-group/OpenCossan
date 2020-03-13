@@ -19,8 +19,8 @@ classdef ContinuousDesignVariable < opencossan.optimization.DesignVariable
     %}
 
     properties
-        LowerBound(1,1) double = -Inf;
-        UpperBound(1,1) double = Inf;
+        LowerBound = -Inf;
+        UpperBound = Inf;
     end
 
     methods
