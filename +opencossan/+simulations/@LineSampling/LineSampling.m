@@ -73,9 +73,6 @@ classdef LineSampling < opencossan.simulations.Simulations
                     "Only specify either the important direction alpha or a gradient object.");
                     obj.Alpha = optional.alpha;
                 elseif ~isempty(optional.gradient)
-                    assert(isempty(optional.alpha), 'OpenCossan:LineSampling', ...
-                    "Only specify either the important direction alpha or a gradient object.");
-                    
                     validateattributes(optional.gradient, {'opencossan.sensitivity.Gradient', ...
                         'opencossan.sensitivity.LocalSensitivityMeasures'}, {'scalar'});
                     % It is necessary to go in the opposite direction of the Gradient or the 
@@ -84,7 +81,7 @@ classdef LineSampling < opencossan.simulations.Simulations
                 end
                 
                 if ~isempty(optional.samples)
-                    waring('OpenCossan:LineSampling', ...
+                    warning('OpenCossan:LineSampling', ...
                         "Argument 'samples' is ignored for LineSampling. Use 'lines'.");
                 end
             end

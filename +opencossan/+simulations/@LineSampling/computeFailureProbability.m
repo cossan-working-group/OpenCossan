@@ -40,7 +40,7 @@ function pf = computeFailureProbability(obj, model)
         localSensitivity = lsfd.computeGradientStandardNormalSpace();
         
         % The performance function decreases towards failure
-        obj.Alpha= -localSensitivity.Valpha;
+        obj.Alpha = -localSensitivity.Valpha;
     end
     
     % Make sure the important direction is a column vector
@@ -121,8 +121,6 @@ function pf = computeFailureProbability(obj, model)
         % check termination criteria
         [exit, flag] = checkTermination(obj, 'cov', sqrt(variance) * pf, 'batch', batch);
         if exit
-            % Add termination criteria to the FailureProbability
-            simData.ExitFlag = flag;
             break;
         end
     end
@@ -130,7 +128,7 @@ function pf = computeFailureProbability(obj, model)
     lineSamplingData = opencossan.simulations.LineSamplingData('samples', simData.Samples, ...
         'input', model.Input, 'lines', batch * obj.NumberOfLines, 'points', obj.PointsOnLine, ...
         'limit', -norminv(limitState), 'performance', model.PerformanceFunctionVariable, ...
-        'alpha', obj.Alpha);
+        'alpha', obj.Alpha, 'exitflag', flag);
     
     pf = opencossan.reliability.FailureProbability('value', pf, 'variance', variance, ...
         'simulationdata', lineSamplingData, 'simulation', obj);
