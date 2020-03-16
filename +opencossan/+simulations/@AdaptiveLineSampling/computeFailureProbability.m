@@ -104,17 +104,9 @@ function k = getNextLineIndex(u, k, i)
         uk = u(:, k(i));
     end
     
-    lines = 1:size(u, 2);
-    lines(ismember(lines, k)) = []; % Remove visited lines
+    distances = sqrt(sum((u - uk).^2,1));
+    distances(ismember(1:size(u, 2), k)) = Inf;
     
-    d = Inf;
-    k = 0;
-    
-    for j = lines
-        dj = norm(u(:, j) - uk);
-        if dj < d
-            d = dj;
-            k = j;
-        end
-    end
+    [~, k] = sort(distances);
+    k = k(1);
 end
