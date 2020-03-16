@@ -38,6 +38,23 @@ function pf = computeFailureProbability(obj, model)
     
     %% Initialize
     alpha = obj.Alpha;
+    simData = opencossan.common.outputs.SimulationData();
+    
+    function c = evaluatePointOnLine(c, u, alpha, model)
+        samples = array2table(u + c * alpha);
+        samples.Properties.VariableNames = model.Input.RandomInputNames;
+        
+        samples = model.Input.map2physical(samples);
+        samples = model.Input.addParametersToSamples(samples);
+        samples = model.Input.evaluateFunctionsOnSamples(samples);
+        
+        out = model.apply(samples);
+        
+        simData = simData + out;
+        
+        c = out.Samples.(model.PerformanceFunctionVariable);
+    end
+    
     k = zeros(obj.NumberOfLines, 1);
     
     u = randn(model.Input.NumberOfRandomInputs, obj.NumberOfLines);
@@ -51,7 +68,7 @@ function pf = computeFailureProbability(obj, model)
     cBase = fzero(@(c) evaluatePointOnLine(c, zeros(size(alpha')), alpha', model), 0);
     c0 = cBase;
     
-    for i = 1:obj.NumberOfLines        
+    for i = 1:obj.NumberOfLines
         cstar = fzero(@(c) evaluatePointOnLine(c, u(:, k(i))', alpha', model), c0);
         pfLines(i) = normcdf(-1 * cstar);
         
@@ -76,25 +93,12 @@ function pf = computeFailureProbability(obj, model)
     variance = sum((pfLines-pf).^2)/(obj.NumberOfLines*(obj.NumberOfLines-1));
     
     pf = opencossan.reliability.FailureProbability('value', pf, 'variance', variance, ...
-        'simulation', obj, 'simulationdata', opencossan.common.outputs.SimulationData());
+        'simulation', obj, 'simulationdata', simData);
     
     if ~isempty(obj.RandomStream)
         RandStream.setGlobalStream(prevstream);
     end
     
-end
-
-function c = evaluatePointOnLine(c, u, alpha, model)
-    samples = array2table(u + c * alpha);
-    samples.Properties.VariableNames = model.Input.RandomInputNames;
-    
-    samples = model.Input.map2physical(samples);
-    samples = model.Input.addParametersToSamples(samples);
-    samples = model.Input.evaluateFunctionsOnSamples(samples);
-    
-    out = model.apply(samples);
-    
-    c = out.Samples.(model.PerformanceFunctionVariable);
 end
 
 function k = getNextLineIndex(u, k, i)
