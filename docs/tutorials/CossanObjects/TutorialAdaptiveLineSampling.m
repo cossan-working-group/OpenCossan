@@ -1,104 +1,58 @@
-%% Tutorial for the Adaptive Line Sampling Object
+%% TutorialAdaptiveLineSampling
 %
-% This tutorial tests the use of the Adaptive Line Sampling method.
+% This tutorial shows how to apply AdaptiveLineSampling to find the probability of failure of a
+% nonlinear limit state with a saddle point defined by the following equation:
 %
-% See Also: http://cossan.cfd.liv.ac.uk/wiki/index.php/@AdvancedLineSampling
+%     f(x1, x2) = 2 - x2 - 0.1 * x1^2 + 0.06 * x1^3.
 %
-% $Author:~Marco~de~Angelis$ 
+% See also: opencossan.simulations.AdaptiveLineSampling
 
-clear;
-close all
-clc;
-%% Example 3: Nonlinear limit state with saddle point
-% Define the random variables of the problem
-X1=opencossan.common.inputs.random.NormalRandomVariable('mean',0,'std',1);    
-X2=opencossan.common.inputs.random.NormalRandomVariable('mean',0,'std',1);
+%{
+This file is part of OpenCossan <https://cossan.co.uk>. Copyright (C) 2006-2018 COSSAN WORKING GROUP
+OpenCossan is free software: you can redistribute it and/or modify it under the terms of the GNU
+General Public License as published by the Free Software Foundation, either version 3 of the License
+or, (at your option) any later version.
+	
+OpenCossan is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even
+the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+Public License for more details. You should have received a copy of the GNU General Public License
+along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
+%}
 
-% Define the RandomVariableSet
-Xrvs=opencossan.common.inputs.random.RandomVariableSet('members',[X1;X2],...
-    'names',{"X1","X2"});
-% Define the input object
-Xinput = opencossan.common.inputs.Input('Members',{Xrvs},'MembersNames',{'Xrvs'});
+%%  Define the inputs
+x1 = opencossan.common.inputs.random.NormalRandomVariable('mean',0,'std',1);
+x2 = opencossan.common.inputs.random.NormalRandomVariable('mean',0,'std',1);
 
-%% Define the Evaluator (i.e. how our model is evaluated)
-% Construct a Mio object
-Xmio_model=opencossan.workers.Mio('Description', 'Matlab I-O for the performance model',...
-    'Script',...
-    'Moutput=2-Minput(:,2)-0.1*Minput(:,1).^2+0.06*Minput(:,1).^3;',...
-    'Format','matrix',...
-...    'Liostructure',false,...
-...    'Liomatrix',true,...
-    'IsFunction',false,...
-    'OutputNames',{'performance_function'},...
-    'InputNames',{'X1' 'X2'});
-% Construct the evaluator object
-Xevaluator = opencossan.workers.Evaluator('Xmio',Xmio_model);
+input = opencossan.common.inputs.Input('members',{x1 x2},'names',["x1" "x2"]);
+
 %% Define the physical model
-Xmodel=opencossan.common.Model('Xevaluator',Xevaluator,'Xinput',Xinput);
-% Test the Model
-% Generate 10 random realization of the input
-Xinput = sample(Xinput,'Nsamples',10);
-% Check the Model object
-Xo = apply(Xmodel,Xinput);
-% Show Results
-display(Xo);
+mio = opencossan.workers.Mio(...
+    'FunctionHandle', @(x) 2 - x(:, 2) - 0.1 * x(:, 1).^2 + 0.06 * x(:, 1).^3, ...
+    'Format', 'matrix', ...
+    'IsFunction', true, ...
+    'OutputNames', {'y'}, ...
+    'InputNames', {'x1' 'x2'});
+
+evaluator = opencossan.workers.Evaluator('Xmio', mio);
+
+model = opencossan.common.Model('evaluator',evaluator,'input',input);
+
 %% Define the Probabilistic Model
-Xmio_performance=opencossan.reliability.PerformanceFunction('Description', 'Matlab I-O for the performance function',...
-    'Script','Moutput=Minput;',...
-    'Format','matrix',...
-...     'Liostructure',false,...
-...     'Liomatrix',true,...
-    'IsFunction',false,...
-    'Inputnames',{'performance_function'},...
-    'OutputName',{'Vg'});
-% % Create the performance function object
-% Xperformance=PerformanceFunction('Sdescription','My Performance Function', ...
-%     'Xmio',Xmio_performance);
-% Construct the Probabilisti Model object
-XprobModel=opencossan.reliability.ProbabilisticModel('Xmodel',Xmodel,'XperformanceFunction',Xmio_performance);
-%% Define an Important Direction
-% Construct the Local Sensitivity by Finite Difference
-Xlsfd=opencossan.sensitivity.LocalSensitivityFiniteDifference('Xtarget',XprobModel, ...
-    'Coutputnames',{'Vg'});
-% Compute the Gradient
-Xgrad = Xlsfd.computeGradient;
-ValphaGRA= -Xgrad.Valpha;
-% Compute the Indeces
-Xinde = Xlsfd.computeIndices;
-ValphaLSM= -Xinde.Valpha;
-%% Create the Advanced Line Sampling object
-% Use direction computed in the standard normal space
-% Xals1 = AdaptiveLineSampling('Nlines',30,...
-%     'Vdirectionstandardspace',[-1;1]);
-% Xals1 = AdaptiveLineSampling('Nlines',10,...
-%     'Vdirectionphysical',[-1,1]);
-Xals1 = opencossan.simulations.AdaptiveLineSampling('Nlines',10,...
-    'VimportantTails',[-1,1]);
-%% Compute Reference Solution
-% % This can take a little while
-% Xmc=MonteCarlo('Nsamples',1e5);
-% [Xpfmc,Xoutmc]=XprobModel.computeFailureProbability(Xmc);
-% display(Xpfmc)
-%% Reference solution
-% pF_ref = 3.47e-2; (Der Kiureghian and Lin, 1987. J Eng Mech Div ASCE)
-%% Estimate the Failure Probability
-% Reset random number stream
-% OpenCossan.resetRandomNumberGenerator(51125) 
-[Xpf,XlsOut]=XprobModel.computeFailureProbability(Xals1);
-display(Xpf)
-XlsOut.plotLimitState
-% %% Post process the results
-% % Create Line Data output object
-% SperfName=XprobModel.XperformanceFunction.Soutputname;
-% XlineData=LineData('Sdescription','My first Line Data object',...
-%     'Xals',Xals1,'LdeleteResults',false,...
-%     'Sperformancefunctionname',SperfName,...
-%     'Xinput',Xinput);
-% % plot limit state
-% XlineData.plotLimitState('XsimulationData',Xout,'Xmodel',XprobModel);
-% XlineData.plotLines
-% %% Plot results
-% % plot lines
-% Xout.plotLines('Stitle','Lines of the Performance Function');
-% % plot limit state function
-% Xout.plotLimitState('Stitle','','Vsupport',[-5,5],'Xmodel',XprobModel);
+performance = opencossan.reliability.PerformanceFunction(...
+    'FunctionHandle', @(y) y, ...
+    'Format','matrix', ...
+    'IsFunction', true, ...
+    'Inputnames', {'y'}, ...
+    'OutputName', {'Vg'});
+
+probModel = opencossan.reliability.ProbabilisticModel('model', model, 'performancefunction', performance);
+
+%% Estimate the failure probability using AdaptiveLineSampling
+als = opencossan.simulations.AdaptiveLineSampling('lines', 30, 'alpha', [-1, 1], 'seed', 51125);
+
+pf = als.computeFailureProbability(probModel);
+display(pf);
+
+% Compare to the reference solution
+reference = 3.47e-2; %(Der Kiureghian and Lin, 1987. J Eng Mech Div ASCE);
+assert(norm(reference - pf.Value) < 1e-3, 'Solution does not match reference');
