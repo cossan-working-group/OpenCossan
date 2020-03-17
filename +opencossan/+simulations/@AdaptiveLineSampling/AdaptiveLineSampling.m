@@ -29,9 +29,28 @@ classdef AdaptiveLineSampling < opencossan.simulations.LineSampling
     
     
     properties
+        % Function value tolerance for the line search
+        Tolerance(1,1) double {mustBePositive} = eps;
     end
     
     methods
+        function obj = AdaptiveLineSampling(varargin)
+            if nargin == 0
+                super_args = {};
+            else
+                [optional, super_args] = opencossan.common.utilities.parseOptionalNameValuePairs(...
+                    ["tolerance", "points"], {eps, []}, varargin{:});
+            end
+            
+            obj@opencossan.simulations.LineSampling(super_args{:});
+            
+            if nargin > 0
+                obj.Tolerance = optional.tolerance;
+                if ~isempty(optional.points)
+                    warning("Input 'points' will be ignored for AdaptiveLineSampling.");
+                end
+            end
+        end
     end
 end
 

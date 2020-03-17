@@ -37,6 +37,7 @@ function pf = computeFailureProbability(obj, model)
     end
     
     %% Initialize
+    fzeroOptions = optimset('TolX', obj.Tolerance);
     alpha = obj.Alpha;
     simData = opencossan.common.outputs.SimulationData();
     
@@ -65,11 +66,11 @@ function pf = computeFailureProbability(obj, model)
     pfLines = zeros(obj.NumberOfLines, 1);
     
     %% Find c0
-    cBase = fzero(@(c) evaluatePointOnLine(c, zeros(size(alpha')), alpha', model), 0);
+    cBase = fzero(@(c) evaluatePointOnLine(c, zeros(size(alpha')), alpha', model), 0, fzeroOptions);
     c0 = cBase;
     
     for i = 1:obj.NumberOfLines
-        cstar = fzero(@(c) evaluatePointOnLine(c, u(:, k(i))', alpha', model), c0);
+        cstar = fzero(@(c) evaluatePointOnLine(c, u(:, k(i))', alpha', model), c0, fzeroOptions);
         pfLines(i) = normcdf(-1 * cstar);
         
         if i < obj.NumberOfLines

@@ -21,7 +21,7 @@ probModel = opencossan.reliability.ProbabilisticModel(...
 mc = opencossan.simulations.MonteCarlo('samples', 10e6);
 pf_mc = mc.computeFailureProbability(probModel);
 
-als = opencossan.simulations.AdaptiveLineSampling('lines', 30);
+als = opencossan.simulations.AdaptiveLineSampling('lines', 30, 'alpha', [-1, 1]);
 pf_als = als.computeFailureProbability(probModel);
 
 ls = opencossan.simulations.LineSampling('lines', 30, 'points', 1:7);
