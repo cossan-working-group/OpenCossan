@@ -45,7 +45,8 @@ function pf = computeFailureProbability(obj, model)
     while true
         batch = batch + 1;
         
-        classname = split(metaclass(obj).Name, '.');
+        classes = metaclass(obj);
+        classname = split(classes.Name, '.');
         classname = classname{end};
         opencossan.OpenCossan.cossanDisp(...
             sprintf("[%s] Batch #%i (%i samples)", classname, batch, obj.NumberOfSamples), 3);
