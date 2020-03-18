@@ -50,7 +50,6 @@ function pf = computeFailureProbability(obj, model)
         samples = model.Input.evaluateFunctionsOnSamples(samples);
         
         out = model.apply(samples);
-        
         simData = simData + out;
         
         c = out.Samples.(model.PerformanceFunctionVariable);
@@ -69,9 +68,13 @@ function pf = computeFailureProbability(obj, model)
     cBase = fzero(@(c) evaluatePointOnLine(c, zeros(size(alpha')), alpha', model), 0, fzeroOptions);
     c0 = cBase;
     
+    lineData = table(zeros(size(alpha')), cBase, alpha', 'VariableNames', {'u', 'c', 'alpha'});
+    
     for i = 1:obj.NumberOfLines
         cstar = fzero(@(c) evaluatePointOnLine(c, u(:, k(i))', alpha', model), c0, fzeroOptions);
-        pfLines(i) = normcdf(-1 * cstar);
+        pfLines(i) = normcdf(-1 * abs(cstar));
+        
+        lineData = [lineData; {u(:, k(i))', cstar, alpha'}];
         
         if i < obj.NumberOfLines
             k(i + 1) = getNextLineIndex(u, k, i);
@@ -91,10 +94,14 @@ function pf = computeFailureProbability(obj, model)
     fprintf("[AdaptiveLineSampling] Final c0: %g\n", cBase);
     
     pf = mean(pfLines);
-    variance = sum((pfLines-pf).^2)/(obj.NumberOfLines*(obj.NumberOfLines-1));
+    variance = sum((pfLines-pf).^2)  /(obj.NumberOfLines * (obj.NumberOfLines-1));
+    
+    lineSamplingData = opencossan.simulations.AdaptiveLineSamplingData(...
+        'samples', simData.Samples, 'input', model.Input, 'linedata', lineData, ...
+        'performance', model.PerformanceFunctionVariable, 'alpha', alpha, 'exitflag', 'Done.');
     
     pf = opencossan.reliability.FailureProbability('value', pf, 'variance', variance, ...
-        'simulation', obj, 'simulationdata', simData);
+        'simulation', obj, 'simulationdata', lineSamplingData);
     
     if ~isempty(obj.RandomStream)
         RandStream.setGlobalStream(prevstream);

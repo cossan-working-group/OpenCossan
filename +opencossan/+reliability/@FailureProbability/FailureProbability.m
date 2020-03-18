@@ -48,7 +48,7 @@ classdef FailureProbability < opencossan.common.CossanObject
         end      
         
         function variance = get.CoV(obj)
-            variance = sqrt(obj.Variance)/obj.Value;
+            variance = sqrt(obj.Variance) / obj.Value;
         end
     end
 end

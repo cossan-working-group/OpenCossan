@@ -48,7 +48,7 @@ performance = opencossan.reliability.PerformanceFunction(...
 probModel = opencossan.reliability.ProbabilisticModel('model', model, 'performancefunction', performance);
 
 %% Estimate the failure probability using AdaptiveLineSampling
-als = opencossan.simulations.AdaptiveLineSampling('lines', 30, 'alpha', [-1, 1], 'seed', 51125);
+als = opencossan.simulations.AdaptiveLineSampling('lines', 60, 'tolerance', 1e-4);
 
 pf = als.computeFailureProbability(probModel);
 display(pf);

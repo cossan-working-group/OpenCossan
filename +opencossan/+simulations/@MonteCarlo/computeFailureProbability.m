@@ -67,7 +67,7 @@ function pf = computeFailureProbability(obj, model)
         variance = (pf - pf^2) / height(simData.Samples);
         
         % check termination
-        [exit, flag] = obj.checkTermination('batch', batch, 'cov', sqrt(variance) * pf);
+        [exit, flag] = obj.checkTermination('batch', batch, 'cov', sqrt(variance) / pf);
         
         if exit
             simData.ExitFlag = flag;

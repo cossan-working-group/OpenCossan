@@ -33,5 +33,8 @@ function fh = plot2DLimitState(obj, names)
     xlabel(names{1});
     ylabel(names{2});
     
+    axis equal;
+    axis square;
+    
     hold off;
 end
