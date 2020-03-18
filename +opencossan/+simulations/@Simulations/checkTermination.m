@@ -31,7 +31,8 @@ function [exit, flag] = checkTermination(obj, varargin)
     end
     
     if exit
-        classname = split(metaclass(obj).Name, '.');
+        classes = metaclass(obj);
+        classname = split(classes.Name, '.');
         classname = classname{end};
         OpenCossan.cossanDisp(sprintf("[%s] %s\n", classname, flag), 1);
     end
