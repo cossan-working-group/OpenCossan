@@ -270,27 +270,11 @@ classdef Input < opencossan.common.CossanObject
         function discrete = get.AreDesignVariablesDiscrete(obj)
             discrete = any(arrayfun(@(dv) isa(dv, 'opencossan.optimization.DiscreteDesignVariable'), ...
                 obj.DesignVariablesdescrete));
-        end
-        
-        function samples = addParametersToSamples(obj, samples)
-            pars = obj.Parameters;
-            names = obj.ParameterNames;
-            for i = 1:obj.NumberOfParameters
-                samples.(names(i)) = repmat(pars(i).Value, height(samples), 1);
-            end
-        end
-        
-        function samples = evaluateFunctionsOnSamples(obj, samples)
-            funs = obj.Functions;
-            names = obj.FunctionNames;
-            for i = 1:obj.NumberOfFunctions
-                samples.(names(i)) = evaluate(funs(i), samples);
-            end
-        end
-        
+        end       
         
         values = getDefaultValues(obj);
         checkFunction(obj);
+        samples = completeSamples(obj, samples);
     end
     
     %% Private Methods

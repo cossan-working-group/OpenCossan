@@ -25,7 +25,5 @@ function samples = sample(obj, varargin)
     samplesInHyperCube = net(qmc, optional.samples);
     
     samples = required.input.hypercube2physical(samplesInHyperCube);
-    samples = required.input.addParametersToSamples(samples);
-    samples = required.input.evaluateFunctionsOnSamples(samples);
-    
+    samples = required.input.completeSamples(samples);    
 end

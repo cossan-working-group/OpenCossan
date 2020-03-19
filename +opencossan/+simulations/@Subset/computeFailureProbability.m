@@ -182,9 +182,8 @@ function samples = initialSamples(obj, input)
     samples = array2table(sns);
     samples.Properties.VariableNames = names;
     
-    samples = map2physical(input, samples);
-    samples = input.addParametersToSamples(samples);
-    samples = input.evaluateFunctionsOnSamples(samples);
+    samples = input.map2physical(samples);
+    samples = input.completeSamples(samples);
 end
 
 function [pf, g] = intermediateFailureProbability(obj, performances, threshold)

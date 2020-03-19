@@ -66,7 +66,6 @@ function samples = sample(obj, varargin)
     samples = array2table(lineSamplingPoints');
     samples.Properties.VariableNames = required.input.RandomInputNames;
     samples = required.input.map2physical(samples);
-    samples = required.input.addParametersToSamples(samples);
-    samples = required.input.evaluateFunctionsOnSamples(samples);
+    samples = required.input.completeSamples(samples);
     
 end

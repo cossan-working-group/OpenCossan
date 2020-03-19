@@ -52,8 +52,7 @@ function [subsetPerformances, samples, rejection, simDataLevel] = nextLevelSampl
             currentSamples.Properties.VariableNames = seedsInStdNorm.Properties.VariableNames;
             
             currentSamples = model.Input.map2physical(currentSamples);
-            currentSamples = model.Input.addParametersToSamples(currentSamples);
-            currentSamples = model.Input.evaluateFunctionsOnSamples(currentSamples);
+            currentSamples = model.Input.completeSamples(currentSamples);
             
             % Evaluate the model
             currentSimData = model.apply(currentSamples);
@@ -107,8 +106,7 @@ function [subsetPerformances, samples, rejection, simDataLevel] = nextLevelSampl
         proposedSamples.Properties.VariableNames = seedsInStdNorm.Properties.VariableNames;
         
         proposedSamples = model.Input.map2physical(proposedSamples);
-        proposedSamples = model.Input.addParametersToSamples(proposedSamples);
-        proposedSamples = model.Input.evaluateFunctionsOnSamples(proposedSamples);
+        proposedSamples = model.Input.completeSamples(proposedSamples);
         
         % Evaluate the model
         simDataLevel = model.apply(proposedSamples);

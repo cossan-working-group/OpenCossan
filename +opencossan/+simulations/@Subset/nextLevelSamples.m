@@ -29,8 +29,7 @@ function [performances, samples, rejection, simDataLevel] = nextLevelSamples(obj
         markovChains = markovChains.sample(); % add 1 new state
         
         markovChainSamples = markovChains.Samples{end};
-        markovChainSamples = model.Input.addParametersToSamples(markovChainSamples);
-        markovChainSamples = model.Input.evaluateFunctionsOnSamples(markovChainSamples);
+        markovChainSamples = model.Input.completeSamples(markovChainSamples);
         
         % Evaluate perfomance function
         simDataChain = model.apply(markovChainSamples);

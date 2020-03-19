@@ -46,8 +46,7 @@ function pf = computeFailureProbability(obj, model)
         samples.Properties.VariableNames = model.Input.RandomInputNames;
         
         samples = model.Input.map2physical(samples);
-        samples = model.Input.addParametersToSamples(samples);
-        samples = model.Input.evaluateFunctionsOnSamples(samples);
+        samples = model.Input.completeSamples(samples);
         
         out = model.apply(samples);
         simData = simData + out;

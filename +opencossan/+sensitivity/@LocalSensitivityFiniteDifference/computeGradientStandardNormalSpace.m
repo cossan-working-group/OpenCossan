@@ -79,8 +79,7 @@ if isempty(Xobj.Samples0)
         ' the sum of the number of random variables (%i)'), ...
         width(Xobj.VreferencePoint), Nrv)
     
-    Xobj.Samples0 = Xobj.Input.addParametersToSamples(Xobj.VreferencePoint);
-    Xobj.Samples0 = Xobj.Input.evaluateFunctionsOnSamples(Xobj.Samples0);
+    Xobj.Samples0 = Xobj.Input.completeSamples(Xobj.VreferencePoint);
 else
     Xobj.VreferencePoint = Xobj.Input.map2stdnorm(Xobj.Samples0);
 end
@@ -109,8 +108,7 @@ samplesInStdNorm = array2table(samplesInStdNorm{:,:} + Xobj.perturbation * eye(N
 samplesInStdNorm.Properties.VariableNames = Xobj.Input.RandomInputNames;
 
 samplesInPhysical = Xobj.Input.map2physical(samplesInStdNorm);
-samplesInPhysical = Xobj.Input.addParametersToSamples(samplesInPhysical);
-samplesInPhysical = Xobj.Input.evaluateFunctionsOnSamples(samplesInPhysical);
+samplesInPhysical = Xobj.Input.completeSamples(samplesInPhysical);
 
 % Evaluate the model
 fxInPhysical = Xobj.Target.apply(samplesInPhysical);

@@ -61,7 +61,6 @@ switch obj.DesignType
         [samples, obj] = obj.userdefined(input);
 end
 
-samples = input.addParametersToSamples(samples);
-samples = input.evaluateFunctionsOnSamples(samples);
+samples = input.completeSamples(samples);
 
 return

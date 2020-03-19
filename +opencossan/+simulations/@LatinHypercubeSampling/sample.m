@@ -56,8 +56,7 @@ function samples = sample(obj, varargin)
         'iteration', obj.Iterations, 'criterion', obj.Criterion, 'smooth', smooth);
     
     samples = required.input.hypercube2physical(samples);
-    samples = required.input.addParametersToSamples(samples);
-    samples = required.input.evaluateFunctionsOnSamples(samples);
+    samples = required.input.completeSamples(samples);
 end
 
 
