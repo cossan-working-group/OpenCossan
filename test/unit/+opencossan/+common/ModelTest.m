@@ -50,8 +50,6 @@ classdef ModelTest < matlab.mock.TestCase
             [inputStub, inputBehavior] = ...
                 testCase.createMock(?opencossan.common.inputs.Input);
             
-            testCase.assignOutputsWhen(...
-                withAnyInputs(inputBehavior.set), inputStub);
             testCase.InputStub = inputStub;
             testCase.InputBehavior = inputBehavior;
         end

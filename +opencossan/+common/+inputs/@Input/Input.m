@@ -67,40 +67,21 @@ classdef Input < opencossan.common.CossanObject
     
     methods
         
-        varargout=sample(Xobj,varargin)         % Generate samples from the Input object
-        Xobj=add(Xobj,varargin)                 % Add an object to the Input object
+        samples = sample(obj, varargin)             % Generate samples from the Input object
         
-        Xobj=merge(Xobj,XobjectToBeAdded)       % Merge 2 input objects
+        obj = add(obj, varargin)                    % Add an object to the Input object
+        obj = remove(obj, varargin)                 % Remove an object from the Input object
         
-        varargout=evalpdf(Xobj,varargin)        % evaluate pdf of samples passed as argument
-        
-        Xo=remove(Xobj,varargin)                % Remove an object from the Input object
-        
-        Xo=jacobianNataf(Xobj,varargin)         % calculates jacobian matrix associated with point in standard normal space
-        
-        Tout=getStructure(Xobj)                 % Generate matlab structure with the realizations of input objecs
-        
-        TableOutput=getTable(Xobj)              % Generate matlab table with the realizations of input objecs
-        
-        Poutput=getValues(Xobj,varargin)        % Retrieve the value(s) of a single variable
-        
-        varargout = getMoments(Xobj,varargin)   % Retrive the moments of Random Variables
-        varargout = getStatistics(Xobj,varargin)% Retrieve the Statistic of interest
-        varargout = getBounds(Xobj,varargin)    % Retrive the bounds  of Input variables
+        varargout = getMoments(obj, varargin)       % Retrive the moments of Random Variables
+        varargout = getStatistics(obj, varargin)    % Retrieve the Statistic of interest
+        varargout = getBounds(obj, varargin)        % Retrive the bounds  of Input variables
         
         %mapping between spaces
-        varargout=cdf2physical(Xobj,varargin)
-        varargout=cdf2stdnorm(Xobj,varargin)
-        varargout=map2physical(Xobj,varargin)
-        varargout=map2stdnorm(Xobj,varargin)
-        varargout=map2uspace(Xobj,varargin)
-        varargout=map2deltaSpace(Xobj,varargin)
-        
-        [MphysicalSpace, Msamplesdoe] = hypercube2physical(Xinput,MsamplesHypercube)
-        
-        % Set methods
-        Xobj=setDesignVariable(Xobj,varargin)
-        Xobj=setDesignOfExperiments(Xobj,varargin)
+        samples = cdf2physical(obj, samples)
+        samples = cdf2stdnorm(obj, samples)
+        samples = map2physical(obj, samples)
+        samples = map2stdnorm(obj, samples)
+        samples = hypercube2physical(obj, samples)
         
         %% constructor
         function obj = Input(varargin)
@@ -110,11 +91,7 @@ classdef Input < opencossan.common.CossanObject
             %
             % Author: Edoardo Patelli Institute for Risk and Uncertainty, University of Liverpool,
             % UK email address: openengine@cossan.co.uk Website: http://www.cossan.co.uk
-            
-            import opencossan.common.Samples
-            import opencossan.common.inputs.*
-            import opencossan.optimization.DesignVariable
-            
+                       
             if nargin == 0
                 super_args = {};
             else
@@ -278,10 +255,7 @@ classdef Input < opencossan.common.CossanObject
     end
     
     %% Private Methods
-    methods (Access=private)
-        % Estimate the function defined in the Input Object and return a cell array
-        Cout=evaluateFunctions(Xobj,varargin)
-        
+    methods (Access=private)        
         function members = filterMembers(obj, type)
             idx = cellfun(@(m) isa(m, type), obj.Members);
             members = [obj.Members{idx}];
