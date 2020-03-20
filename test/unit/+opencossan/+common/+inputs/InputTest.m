@@ -29,7 +29,7 @@ classdef InputTest < matlab.unittest.TestCase
         
         r = opencossan.common.inputs.random.ExponentialRandomVariable('lambda', 1);
         a = opencossan.common.inputs.random.ExponentialRandomVariable('lambda', 2);
-        b = opencossan.common.inputs.random.NormalRandomVariable('mean', 1, 'std', 0);
+        b = opencossan.common.inputs.random.NormalRandomVariable('mean', 0, 'std', 1);
         
         c = opencossan.optimization.ContinuousDesignVariable('Value', 5, 'LowerBound', 0);
         d = opencossan.optimization.ContinuousDesignVariable('Value', 3, 'UpperBound', 10);
@@ -115,8 +115,8 @@ classdef InputTest < matlab.unittest.TestCase
                 {testCase.r, testCase.set}, 'Names', ["r", "set"]);
             
             [mean, std] = input.getMoments();
-            testCase.assertEqual(mean{:,:}, [1 .5 1]);
-            testCase.assertEqual(std{:,:}, [1 .5 0]);
+            testCase.assertEqual(mean{:,:}, [1 .5 0]);
+            testCase.assertEqual(std{:,:}, [1 .5 1]);
         end
         
         %% getStatistics
@@ -125,7 +125,7 @@ classdef InputTest < matlab.unittest.TestCase
                 {testCase.r, testCase.set}, 'Names', ["r", "set"]);
             
             median = input.getStatistics();
-            testCase.assertEqual(median{:,:}, [0.69315, 0.34657, 1], 'RelTol', 1e-4);
+            testCase.assertEqual(median{:,:}, [0.69315, 0.34657, 0], 'RelTol', 1e-4);
         end
         
         function shouldThrowErrorForSkewnessAndCurtosis(testCase)
@@ -171,6 +171,23 @@ classdef InputTest < matlab.unittest.TestCase
                 {testCase.set}, 'Names', "set");
             testCase.assertError(@() input.remove('name', 'r'), ...
                 'OpenCossan:Input:remove');
+        end
+        
+        %% hypercube2physical
+        function shouldMapSamplesToPhysicalSpace(testCase)
+            input = opencossan.common.inputs.Input('Members', ...
+                {testCase.r, testCase.set}, 'Names', ["r", "set"]);
+            
+            s = rng(); rng(8128); % Set random seed
+            
+            hypercube = lhsdesign(1e5, 3);
+            
+            physical = input.hypercube2physical(hypercube);
+            testCase.assertEqual(mean(physical.r), 1, 'RelTol', 1e-4);
+            testCase.assertEqual(mean(physical.a), .5, 'RelTol', 1e-4);
+            testCase.assertEqual(mean(physical.b), 0, 'AbsTol', 1e-4);
+            
+            rng(s); % Restore default random number generator
         end
     end
 end

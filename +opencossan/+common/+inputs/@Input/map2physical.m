@@ -13,7 +13,6 @@ function physical = map2physical(obj, stdnorm)
     end
     
     % Map Rvsets
-    
     for set = obj.RandomVariableSets
         physical = [physical map2physical(set, stdnorm(:, set.Names))];
     end

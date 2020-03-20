@@ -21,8 +21,6 @@ function stdnorm = map2stdnorm(obj, physical)
         stdnorm = [stdnorm map2stdnorm(rvset, physical(:, rvset.Names))];
     end
     
-    % TODO: map random variable sets
-    
     % temporary fix, I think it is better to use Samples...
     %     maxSNSvalue = norminv(1-0.5*eps(1)); stdnorm(stdnorm>maxSNSvalue) = maxSNSvalue;
     %     stdnorm(stdnorm<-maxSNSvalue) = -maxSNSvalue;
