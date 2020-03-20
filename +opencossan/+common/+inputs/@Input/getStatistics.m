@@ -1,100 +1,42 @@
-function varargout = getStatistics(Xobj,varargin)
-%getMoments  Retrieve the first two moments of the Random Variables present
-%in the Input object.
-%
-% See Also: http://cossan.cfd.liv.ac.uk/wiki/index.php/getMoments@Input
-%
-% $Author:~Marco~de~Angelis$
+function [median, skewness, curtosis] = getStatistics(obj)
+    %GETSTATISTICS Retrieve median, skewness and curtosis for the random inputs contained in the
+    %Input object.
+    %
+    % Note: Skewness and curtosis not yet implemented.
+    
+    %{
+    This file is part of OpenCossan <https://cossan.co.uk>.
+    Copyright (C) 2006-2018 COSSAN WORKING GROUP
 
-%%  Argument Check
-opencossan.OpenCossan.validateCossanInputs(varargin{:});
+    OpenCossan is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License or,
+    (at your option) any later version.
 
-Cnames = Xobj.RandomVariableSetNames;
-Crvset = Cnames;
+    OpenCossan is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU General Public License for more details.
 
-%TODO: use new input parser
-LrvNotSet=true;
-for k=1:2:nargin-1,
-    switch lower(varargin{k})
-        case {'sname', 'sobjectname'}
-            %check input
-            assert(LrvNotSet,'openCOSSAN:Input:getValues:MultipleDeclarationVariableName',...
-                'One and only one of the fields ''Cnames'' and ''Sname'' can be used')
-            LrvNotSet=false;
-            Cnames = varargin(k+1);
-        case {'csnames'}
-            %check input
-            assert(LrvNotSet,'openCOSSAN:Input:getValues:MultipleDeclarationVariableName',...
-                'One and only one of the fields ''Cnames'' and ''Sname'' can be used')
-            LrvNotSet=false;
-            Cnames = varargin{k+1};
-        case {'csstatistics','csstatistic'}
-            CSstat=varargin{k+1};
-        otherwise
-            error('openCOSSAN:Input:getStatistics:wrongArgument',...
-                'The field (%s) is not valid for this function!',varargin{k})
+    You should have received a copy of the GNU General Public License
+    along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
+    %}
+    median = table();
+    
+    if nargout > 1
+        error('OpenCossan:Input:getStatistics', 'Skewness and curtosis not yet implemented');
     end
-end
-
-
-%% Check if the variable Sname is present in the Input object
-
-VindexRVS=ismember(Crvset,Cnames); %
-VpositRVS=find(VindexRVS);         % positions where the rvsets are located
-Nrv=length(Cnames)-length(VpositRVS);
-%% Compute total number or RandomVariables
-for n=1:length(VpositRVS)
-    Nrv=Nrv+Xobj.Xrvset.(Cnames{n}).Nrv;
-end
-
-% Preallocate memory
-Moutput=zeros(length(CSstat),Nrv);
-Istart=1;
-for k=1:length(Cnames)
-    %% check if the variable is a RandomVariableSet
-    if VindexRVS(k)
-        NrvCurrentSet=Xobj.Xrvset.(Cnames{k}).Nrv;
-        for h=1:length(CSstat)
-            switch lower(CSstat{h})
-                case 'median'
-                    VoutMedian=Xobj.Xrvset.(Cnames{k}).map2physical(zeros(1,NrvCurrentSet));
-                    Iend=Istart+length(VoutMedian)-1;
-                    Moutput(h,Istart:Iend) = VoutMedian;
-                case 'skewness'
-                    %TODO
-                case 'kurtosis'
-                    %TODO
-            end
-        end
-    else
-        Iend=Istart;
-        %% check if the variable is a RandomVariable
-        for n=1:length(Crvset)
-            position=find(ismember(Xobj.Xrvset.(Crvset{n}).Cmembers,Cnames{k}), 1);
-            NrvCurrentSet=Xobj.Xrvset.(Crvset{n}).Nrv;
-            if ~isempty(position)
-                for h=1:length(CSstat)
-                    switch lower(CSstat{h})
-                        case 'median'
-                            Vmedian=(Xobj.Xrvset.(Crvset{n}).map2physical(zeros(1,NrvCurrentSet)));
-                            Moutput(h,Istart) = Vmedian(index);
-                            Istart=Istart+1;
-                        case 'skewness'
-                            %TODO
-                        case 'kurtosis'
-                            %TODO
-                    end
-                end
-            end
-        end
-        
+    
+    % RandomVariables
+    rvs = obj.RandomVariables;
+    names = obj.RandomVariableNames;
+    for i = 1:numel(rvs)
+        median.(names(i)) = rvs(i).map2physical(0);
     end
-    Istart=Iend+1;
-end
-
-% Assign the output
-for h=1:length(CSstat)
-    varargout{h}=Moutput(h,:);
-end
-
+    
+    % RandomVariableSets
+    for set = obj.RandomVariableSets
+        median(:, set.Names) = num2cell(set.map2physical(zeros(1, set.Nrv)));
+    end
+    
 end
