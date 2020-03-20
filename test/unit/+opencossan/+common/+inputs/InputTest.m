@@ -138,5 +138,39 @@ classdef InputTest < matlab.unittest.TestCase
             
             testCase.assertError(@() skewnessAndCurtosis(), 'OpenCossan:Input:getStatistics');
         end
+        
+        %% add
+        function shouldAddMemberToInput(testCase)
+            input = opencossan.common.inputs.Input('Members', ...
+                {testCase.set}, 'Names', "set");
+            input = input.add('member', testCase.r, 'name', 'r');
+            
+            testCase.assertEqual(input.Members, {testCase.set, testCase.r});
+            testCase.assertEqual(input.Names, ["set", "r"]);
+        end
+        
+        function shouldThrowErrorForDuplicateInput(testCase)
+            input = opencossan.common.inputs.Input('Members', ...
+                {testCase.r, testCase.set}, 'Names', ["r", "set"]);
+            testCase.assertError(@() input.add('member', testCase.r, 'name', 'r'), ...
+                'OpenCossan:Input:add');
+        end
+        
+         %% remove
+        function shouldRemoveMemberFromInput(testCase)
+            input = opencossan.common.inputs.Input('Members', ...
+                {testCase.r, testCase.set}, 'Names', ["r", "set"]);
+            input = input.remove('name', 'r');
+            
+            testCase.assertEqual(input.Members, {testCase.set});
+            testCase.assertEqual(input.Names, "set");
+        end
+        
+        function shouldThrowErrorForMissingInput(testCase)
+            input = opencossan.common.inputs.Input('Members', ...
+                {testCase.set}, 'Names', "set");
+            testCase.assertError(@() input.remove('name', 'r'), ...
+                'OpenCossan:Input:remove');
+        end
     end
 end
