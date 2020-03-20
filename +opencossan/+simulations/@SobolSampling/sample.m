@@ -24,6 +24,9 @@ function samples = sample(obj, varargin)
     
     samplesInHyperCube = net(qmc, optional.samples);
     
-    samples = required.input.hypercube2physical(samplesInHyperCube);
+    samples = array2table(norminv(samplesInHyperCube));
+    samples.Properties.VariableNames = required.input.RandomInputNames;
+    
+    samples = required.input.map2physical(samples);
     samples = required.input.completeSamples(samples);    
 end

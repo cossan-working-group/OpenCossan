@@ -55,7 +55,10 @@ function samples = sample(obj, varargin)
     samples = lhsdesign(optional.samples, required.input.NumberOfRandomInputs, ...
         'iteration', obj.Iterations, 'criterion', obj.Criterion, 'smooth', smooth);
     
-    samples = required.input.hypercube2physical(samples);
+    samples = array2table(norminv(samples));
+    samples.Properties.VariableNames = required.input.RandomInputNames;
+    
+    samples = required.input.map2physical(samples);
     samples = required.input.completeSamples(samples);
 end
 

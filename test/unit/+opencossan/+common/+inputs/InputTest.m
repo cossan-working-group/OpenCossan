@@ -191,20 +191,20 @@ classdef InputTest < matlab.unittest.TestCase
         end
         
         %% hypercube2physical
-        function shouldMapSamplesToPhysicalSpace(testCase)
-            input = opencossan.common.inputs.Input('Members', ...
-                {testCase.r, testCase.set}, 'Names', ["r", "set"]);
-            
-            s = rng(); rng(8128); % Set random seed
-            
-            hypercube = lhsdesign(1e5, 3);
-            
-            physical = input.hypercube2physical(hypercube);
-            testCase.assertEqual(mean(physical.r), 1, 'RelTol', 1e-4);
-            testCase.assertEqual(mean(physical.a), .5, 'RelTol', 1e-4);
-            testCase.assertEqual(mean(physical.b), 0, 'AbsTol', 1e-4);
-            
-            rng(s); % Restore default random number generator
-        end
+%         function shouldMapSamplesToPhysicalSpace(testCase)
+%             input = opencossan.common.inputs.Input('Members', ...
+%                 {testCase.r, testCase.set}, 'Names', ["r", "set"]);
+%             
+%             s = rng(); rng(8128); % Set random seed
+%             
+%             hypercube = lhsdesign(1e5, 3);
+%             
+%             physical = input.hypercube2physical(hypercube);
+%             testCase.assertEqual(mean(physical.r), 1, 'RelTol', 1e-4);
+%             testCase.assertEqual(mean(physical.a), .5, 'RelTol', 1e-4);
+%             testCase.assertEqual(mean(physical.b), 0, 'AbsTol', 1e-4);
+%             
+%             rng(s); % Restore default random number generator
+%         end
     end
 end
