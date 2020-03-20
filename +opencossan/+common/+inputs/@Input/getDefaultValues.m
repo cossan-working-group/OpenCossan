@@ -4,40 +4,24 @@ function values = getDefaultValues(obj)
     values = table();
     % Parameters
     if obj.NumberOfParameters > 0
-        parameterTable = array2table([obj.Parameters.Value]);
-        parameterTable.Properties.VariableNames = obj.ParameterNames;
-        
-        values = [values parameterTable];
+        values(:, obj.ParameterNames) = {obj.Parameters.Value};
     end
     
     % DesignVariables
     if obj.NumberOfDesignVariables > 0
-        designVariableTable = array2table([obj.DesignVariables.Value]);
-        designVariableTable.Properties.VariableNames = obj.DesignVariableNames;
-    
-        values = [values designVariableTable];
+        values(:, obj.DesignVariableNames) = {obj.DesignVariables.Value};
     end
     
     % RandomVariables
     if obj.NumberOfRandomVariables > 0
-        randomVariableTable = array2table([obj.RandomVariables.Mean]);
-        randomVariableTable.Properties.VariableNames = obj.RandomVariableNames;
-    
-        values = [values randomVariableTable]; 
+        values(:, obj.RandomVariableNames) = {obj.RandomVariables.Mean};
     end
     
     % RandomVariableSets
     if obj.NumberOfRandomVariableSets > 0
-        means = [];
-        names = [];
-        for rvset = obj.RandomVariableSets
-            means = [means rvset.Members.Mean]; %#ok<AGROW>
-            names = [names rvset.Names]; %#ok<AGROW>
+        for set = obj.RandomVariableSets
+            values(:, set.Names) = {set.Members.Mean};
         end
-        randomVariableSetTable = array2table(means);
-        randomVariableSetTable.Properties.VariableNames = names;
-        
-        values = [values randomVariableSetTable];
     end
     
     % Functions

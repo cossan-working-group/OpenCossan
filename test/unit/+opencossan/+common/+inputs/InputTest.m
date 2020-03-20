@@ -109,6 +109,23 @@ classdef InputTest < matlab.unittest.TestCase
             testCase.verifyEqual(input.NumberOfStochasticProcesses, 1);
         end
         
+        %% getDefaultValues
+        function shouldReturnDefaultValues(testCase)
+            input = opencossan.common.inputs.Input('Members', ...
+                {testCase.f1, testCase.f2, testCase.set, testCase.r, testCase.x, testCase.y, ...
+                testCase.c, testCase.d}, 'Names', ["f1" "f2" "set" "r" "x" "y" "c" "d"]);
+            defaults = input.getDefaultValues();
+            
+            testCase.assertEqual(defaults.x, 10);
+            testCase.assertEqual(defaults.y, -10);
+            testCase.assertEqual(defaults.f1, 100);
+            testCase.assertEqual(defaults.f2, 20);
+            testCase.assertEqual(defaults.a, .5);
+            testCase.assertEqual(defaults.b, 0);
+            testCase.assertEqual(defaults.c, 5);
+            testCase.assertEqual(defaults.d, 3);
+        end
+        
         %% getMoments
         function shouldReturnMeanAndStd(testCase)
             input = opencossan.common.inputs.Input('Members', ...
