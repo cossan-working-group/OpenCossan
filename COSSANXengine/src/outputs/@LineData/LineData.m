@@ -123,7 +123,7 @@ classdef LineData
             end
             
             %% assign the working path
-            Xobj.SmainPath=OpenCossan.getCossanWorkingPath;
+            Xobj.SmainPath=Xobj.Xals.StempPath;
             %% Validate Constructor
             % check if main path where results are stored exists
             assert(~isempty(Xobj.SmainPath),...

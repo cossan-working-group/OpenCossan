@@ -155,7 +155,7 @@ CMsLines=cell(1,Nlines);
 MX(1,:)=transpose(XsimulationData.getValues('Sname',Cnames{1}));
 MX(2,:)=transpose(XsimulationData.getValues('Sname',Cnames{2}));
 istart=1;
-for iLine=1:Nlines
+for iLine=1:Nlines-1
     iend=istart+Xobj.VNlineEvaluations(iLine)-1;
     Mx=MX(:,istart:iend);
     Ms=Xobj.Xinput.map2stdnorm(Mx);
@@ -208,7 +208,7 @@ hstartDir=line([Xrvs.Xrv{1}.mean,VstartDirPhy(1)],...
 % Mline0=CMxLines{1};
 % hstartDir=line(Mline0(1,:),Mline0(2,:));
 set(hstartDir,'color','red','linewidth',2,'linestyle','--');
-for iLine=2:Nlines
+for iLine=1:Nlines-1
     Mlines=CMxLines{iLine};
     hl=line(Mlines(1,:)',Mlines(2,:)');
     set(hl,'color',[rand,rand,rand]);
@@ -275,7 +275,7 @@ VstartDirSns=Valpha_start*max(Vsupport);
 hstartDir=line([0;VstartDirSns(1)],[0;VstartDirSns(2)]);
 set(hstartDir,'color','red','linewidth',2,'linestyle','--');
 % Mline0=CMsLines{1};
-for iLine=2:Nlines
+for iLine=1:Nlines-1
     Mlines=CMsLines{iLine};
     hl=line(Mlines(1,:),Mlines(2,:));
     set(hl,'color',[rand,rand,rand]);
