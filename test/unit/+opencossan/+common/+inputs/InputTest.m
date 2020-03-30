@@ -42,7 +42,8 @@ classdef InputTest < matlab.unittest.TestCase
     methods (TestMethodSetup)
         function setupRandomVariableSet(testCase)
             testCase.set = opencossan.common.inputs.random.RandomVariableSet(...
-                'Members', [testCase.a, testCase.b], 'Names', ["a", "b"]);
+                'Members', [testCase.a, testCase.b], 'Names', ["a", "b"], ...
+                'correlation', [1 0.8; 0.8 1]);
         end
     end
     
@@ -190,21 +191,47 @@ classdef InputTest < matlab.unittest.TestCase
                 'OpenCossan:Input:remove');
         end
         
-        %% hypercube2physical
-%         function shouldMapSamplesToPhysicalSpace(testCase)
-%             input = opencossan.common.inputs.Input('Members', ...
-%                 {testCase.r, testCase.set}, 'Names', ["r", "set"]);
-%             
-%             s = rng(); rng(8128); % Set random seed
-%             
-%             hypercube = lhsdesign(1e5, 3);
-%             
-%             physical = input.hypercube2physical(hypercube);
-%             testCase.assertEqual(mean(physical.r), 1, 'RelTol', 1e-4);
-%             testCase.assertEqual(mean(physical.a), .5, 'RelTol', 1e-4);
-%             testCase.assertEqual(mean(physical.b), 0, 'AbsTol', 1e-4);
-%             
-%             rng(s); % Restore default random number generator
-%         end
+        %% map2physical
+        function shouldMapSamplesToPhysicalSpace(testCase)
+            input = opencossan.common.inputs.Input('Members', ...
+                {testCase.r, testCase.set}, 'Names', ["r", "set"]);
+            
+            s = rng(); rng(8128); % Set random seed
+            
+            stdNorm = array2table(randn(1e5, 3));
+            stdNorm.Properties.VariableNames = ["r" "a" "b"];
+            
+            physical = input.map2physical(stdNorm);
+            testCase.assertEqual(mean(physical.r), 1, 'RelTol', 1e-2);
+            testCase.assertEqual(mean(physical.a), .5, 'RelTol', 1e-2);
+            testCase.assertEqual(mean(physical.b), 0, 'AbsTol', 1e-2);
+            
+            testCase.assertEqual(corr(physical.a, physical.b), 0.8, 'RelTol', 1e-2);
+            
+            rng(s); % Restore default random number generator
+        end
+        
+        %% map2stdNorm
+        function shouldMapSamplesToStdNorm(testCase)
+            input = opencossan.common.inputs.Input('Members', ...
+                {testCase.r, testCase.set}, 'Names', ["r", "set"]);
+            
+            s = rng(); rng(8128); % Set random seed
+            
+            physical = input.sample('samples', 1e5);
+            testCase.verifyEqual(corr(physical.a, physical.b), 0.8, 'RelTol', 1e-2);
+            
+            stdNorm = input.map2stdnorm(physical);
+            testCase.assertEqual(mean(stdNorm.r), 0, 'AbsTol', 1e-2);
+            testCase.assertEqual(mean(stdNorm.a), 0, 'AbsTol', 1e-2);
+            testCase.assertEqual(mean(stdNorm.b), 0, 'AbsTol', 1e-2);
+            
+            testCase.assertEqual(std(stdNorm.r), 1, 'RelTol', 1e-2);
+            testCase.assertEqual(std(stdNorm.a), 1, 'RelTol', 1e-2);
+            testCase.assertEqual(std(stdNorm.b), 1, 'RelTol', 1e-2);
+            
+            testCase.assertEqual(corr(stdNorm.a, stdNorm.b), 0, 'AbsTol', 1e-2);
+            rng(s); % Restore default random number generator
+        end
     end
 end
