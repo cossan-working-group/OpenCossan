@@ -29,8 +29,8 @@ classdef SmallIRandomVariable < opencossan.common.inputs.random.RandomVariable
     %}
     
     properties (Hidden)
-        Std_ double {mustBeNonnegative};
-        Mean_ double;
+        Std_ double {mustBeNonnegative} = 1;
+        Mean_ double = 0;
     end
     
     properties (Dependent)

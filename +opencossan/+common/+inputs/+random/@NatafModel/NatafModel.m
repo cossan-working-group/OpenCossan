@@ -35,12 +35,10 @@ classdef NatafModel
     methods
         function obj = NatafModel(rvset)
             factors = ones(rvset.Nrv);
-            for i = 1:rvset.Nrv
+            for i = 1:rvset.Nrv-1
                 for j = i+1:rvset.Nrv
-                    tmp = NaN;
                     rij = rvset.Correlation(i,j);
                     if ~rij; continue; end
-                    
                     switch class(rvset.Members(i))
                         case 'opencossan.common.inputs.random.NormalRandomVariable'
                             tmp = obj.normalCorrectionFactors(rvset.Members(j));
@@ -49,7 +47,7 @@ classdef NatafModel
                         case 'opencossan.common.inputs.random.UniformRandomVariable'
                             tmp = obj.uniformCorrectionFactors(rvset.Members(j), rij);
                         case 'opencossan.common.inputs.random.ExponentialRandomVariable'
-                            tmp = obj.exponentialCorrectionFactors(rvset.Members(j), rij);
+                            tmp = obj.exponentialCorrectionFactors(rvset.Members(i), rvset.Members(j), rij);
                         case 'opencossan.common.inputs.random.RayleighRandomVariable'
                             tmp = obj.rayleighCorrectionFactors(rvset.Members(j), rij);
                         case 'opencossan.common.inputs.random.SmallIRandomVariable'
