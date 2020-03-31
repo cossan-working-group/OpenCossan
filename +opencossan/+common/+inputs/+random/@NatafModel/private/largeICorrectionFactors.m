@@ -33,10 +33,10 @@ function factor = largeICorrectionFactors(~, rvj, rij)
             factor = 1.029 + 0.001 * rij + 0.014 * rvj.CoV + 0.004 * rij^2 + ...
                 0.233 * rvj.CoV^2 - 0.197 * rvj.CoV * rij;
         case 'opencossan.common.inputs.random.WeibullRandomVariable'
-            factor = 1.056 - 0.06 * rij + 0.263 * rvj.CoV + 0.02 * rij^2 + ...
-                0.383 * rvj.CoV^2 - 0.322 * rij * rvj.CoV;
+            factor = 1.064 + 0.065 * rij - 0.210 * rvj.CoV + 0.003 * rij^2 + ...
+                0.356 * rvj.CoV^2 - 0.211 * rij * rvj.CoV;
         case 'opencossan.common.inputs.random.NormalRandomVariable'
-            factor = 1.107;
+            factor = 1.031;
         case 'opencossan.common.inputs.random.SmallIRandomVariable'
             factor = 1.064 + 0.069 * rij + 0.005 * rij^2;
         otherwise

@@ -7,26 +7,21 @@ classdef NatafModelTest < matlab.unittest.TestCase
     properties
         rvs = containers.Map('keytype', 'char', ...
             'valuetype', 'any');
-        s; % Store settings of the rng
     end
     
     properties (TestParameter)
+        rho = {0.7, -0.6};
         rv1 = {'normal', 'exponential', 'uniform', 'lognormal', ...
-               'rayleigh', 'weibull'};
+               'rayleigh', 'weibull', 'smallI', 'largeI'};
         rv2 = {'normal', 'exponential', 'uniform', 'lognormal', ...
                'rayleigh', 'weibull', 'smallI', 'largeI'};
     end
     
     methods (TestMethodSetup)
         function setRngSeed(testCase)
-            testCase.s = rng();
+            original = rng();
+            testCase.addTeardown(@rng, original);
             rng(8128);
-        end
-    end
- 
-    methods (TestMethodTeardown)
-        function resetRng(testCase)
-            rng(testCase.s);
         end
     end
     
@@ -46,26 +41,29 @@ classdef NatafModelTest < matlab.unittest.TestCase
     end
     
     methods (Test, ParameterCombination='exhaustive')
-        function shouldMatchPositiveCorrelation(testCase, rv1, rv2)
+        function shouldReturnCorrectCorrelationCoefficient(testCase, rv1, rv2, rho)
             rvset = opencossan.common.inputs.random.RandomVariableSet(...
                 'Members', [testCase.rvs(rv1), testCase.rvs(rv2)], 'Names', ["a", "b"], ...
+                'Correlation', [1, rho; rho, 1]);
+            
+            samples = rvset.sample(1e6);
+            
+            testCase.assertEqual(corr(samples.a, samples.b), rho, 'RelTol', 1e-2);
+        end
+    end
+    
+    methods (Test)
+        function shouldReturnCorrectCorrelationCoefficientWithMonteCarlo(testCase)
+            chi = opencossan.common.inputs.random.ChiRandomVariable();
+            beta = opencossan.common.inputs.random.BetaRandomVariable();
+            
+            rvset = opencossan.common.inputs.random.RandomVariableSet(...
+                'Members', [chi, beta], 'Names', ["chi", "beta"], ...
                 'Correlation', [1, 0.7; 0.7, 1]);
             
             samples = rvset.sample(1e6);
-            rho = corr(samples.a, samples.b);
             
-            testCase.assertEqual(rho, 0.7, 'RelTol', 1e-2);
-        end
-        
-        function shouldMatchNegativeCorrelation(testCase, rv1, rv2)
-            rvset = opencossan.common.inputs.random.RandomVariableSet(...
-                'Members', [testCase.rvs(rv1), testCase.rvs(rv2)], 'Names', ["a", "b"], ...
-                'Correlation', [1, -0.6; -0.6, 1]);
-            
-            samples = rvset.sample(1e6);
-            rho = corr(samples.a, samples.b);
-            
-            testCase.assertEqual(rho, -0.6, 'RelTol', 1e-2);
+            testCase.assertEqual(corr(samples.chi, samples.beta), 0.7, 'RelTol', 1e-2);
         end
     end
 end
