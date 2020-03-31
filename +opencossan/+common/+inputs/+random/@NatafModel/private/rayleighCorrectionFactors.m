@@ -29,8 +29,8 @@ function factor = rayleighCorrectionFactors(~, rvj, rij)
         case 'opencossan.common.inputs.random.UniformRandomVariable'
             factor = 1.038 + 0.008 * rij ^2;
         case 'opencossan.common.inputs.random.WeibullRandomVariable'
-            factor = 1.036 - 0.038 * rij +.266 * rvj.CoV + 0.028 * rij^2 + ...
-                0.383 * rvj.CoV^2 -0.229 * rij * rvj.CoV;
+            factor = 1.047 + 0.042 * rij - 0.212 * rvj.CoV + 0.353 * rvj.CoV^2 - ...
+                0.136 * rij * rvj.CoV;
         case 'opencossan.common.inputs.random.ExponentialRandomVariable'
             factor = 1.123 - 0.100 * rij + 0.021 * rij ^2;
         case 'opencossan.common.inputs.random.NormalRandomVariable'

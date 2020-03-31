@@ -11,7 +11,8 @@ classdef NatafModelTest < matlab.unittest.TestCase
     end
     
     properties (TestParameter)
-        rv1 = {'normal', 'exponential', 'uniform', 'lognormal'};
+        rv1 = {'normal', 'exponential', 'uniform', 'lognormal', ...
+               'rayleigh', 'weibull'};
         rv2 = {'normal', 'exponential', 'uniform', 'lognormal', ...
                'rayleigh', 'weibull', 'smallI', 'largeI'};
     end
