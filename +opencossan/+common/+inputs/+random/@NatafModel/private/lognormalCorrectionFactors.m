@@ -24,10 +24,6 @@ function factor = lognormalCorrectionFactors(~, rvi, rvj, rij)
         case 'opencossan.common.inputs.random.LognormalRandomVariable'
             factor = log(1 + rij * rvi.CoV * rvj.CoV) / ...
                 (rij * sqrt(log(1 + rvi.CoV^2) * log(1 + rvj.CoV^2)));
-        case 'opencossan.common.inputs.random.WeibullRandomVariable'
-            factor = 1.026 + 0.082 * rij - 0.019 * rvi.CoV + 0.222 * rvj.CoV ...
-                + 0.018 * rij^2 + 0.288 * rvi.CoV^2 + 0.379 * rvj.CoV^2 ...
-                -0.441 * rij * rvi.CoV + 0.126 * rvi.CoV * rvj.CoV^2 - 0.277 * rij * rvj.CoV;
         case 'opencossan.common.inputs.random.NormalRandomVariable'
             factor = rvi.CoV / sqrt(log(1 + rvi.CoV^2));
         case 'opencossan.common.inputs.random.UniformRandomVariable'
@@ -44,6 +40,10 @@ function factor = lognormalCorrectionFactors(~, rvi, rvj, rij)
         case 'opencossan.common.inputs.random.LargeIRandomVariable'
             factor = 1.029 + 0.001 * rij + 0.014 * rvi.CoV + 0.004 * rij^2 + ...
                 0.233 * rvi.CoV^2 - 0.197 * rvi.CoV * rij;
+        case 'opencossan.common.inputs.random.WeibullRandomVariable'
+            factor = 1.031 + 0.052 * rij + 0.011 * rvi.CoV - 0.210 * rvj.CoV + ...
+                0.002 * rij^2 + 0.220 * rvi.CoV^2 + 0.350 * rvj.CoV^2 + ...
+                0.005 * rij * rvi.CoV + 0.009 * rvi.CoV * rvj.CoV - 0.174 * rij * rvj.CoV;
         otherwise
             factor = NaN;
     end
