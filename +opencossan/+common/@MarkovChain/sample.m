@@ -46,11 +46,11 @@ function obj = sample(obj, points)
             
             Mxi = MU_pert{:,:} + MUlast{:,:};
             
-            % [EP] evaluate the log of the pdf
-            [~, Mrvi] = evalpdf(targetSet, 'Musamples', Mxi);
-            [~, Mrv0] = evalpdf(targetSet, 'Musamples', MUlast{:,:});
+            % Evaluate the pdf ratio
+            pdfi = prod(mvnpdf(Mxi), 2);
+            pdf0 = prod(mvnpdf(MUlast{:,:}), 2);
             
-            Mrv = Mrvi./Mrv0;
+            Mrv = pdfi./pdf0;
             
            %% Perturb each component of w/ probability Mrv
             

@@ -84,9 +84,7 @@ classdef RandomVariableSet < opencossan.common.CossanObject
                     obj.Correlation = eye(numel(required.members));
                 end
                 
-                if ~obj.isIndependent()
-                    obj.NatafModel = opencossan.common.inputs.random.NatafModel(obj);
-                end
+                obj.NatafModel = opencossan.common.inputs.random.NatafModel(obj);
             end
         end
         
@@ -99,12 +97,13 @@ classdef RandomVariableSet < opencossan.common.CossanObject
         samples = sample(obj,varargin)
         MS = map2stdnorm(obj,varargin)
         mx = map2physical(obj,varargin)
-        varargout = evalpdf(obj,varargin)
+        varargout = pdf(obj,varargin)
         Vout = pdfRatio(obj,varargin)                        % Computes the ratio between two points of the pdf
         MX = cdf2physical(obj,varargin)
         MS = cdf2stdnorm(obj,varargin)
         MU = physical2cdf(obj,varargin)
         MU = stdnorm2cdf(obj,varargin)
+        obj = remove(obj, name);
         
         function outdata = get.Nrv(obj)
             outdata = length(obj.Members);
@@ -126,7 +125,7 @@ classdef RandomVariableSet < opencossan.common.CossanObject
             p.parse(rv,n);
             
             [optional, varargin] = opencossan.common.utilities.parseOptionalNameValuePairs(...
-                "basename", {"RV"}, varargin{:});
+                "basename", "RV", varargin{:});
             
             members(1:p.Results.n) = p.Results.rv;
             

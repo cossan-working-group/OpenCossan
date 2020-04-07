@@ -202,12 +202,8 @@ classdef RandomVariableSetTest < matlab.unittest.TestCase
         function evalpdf(testCase)
             rvs = opencossan.common.inputs.random.RandomVariableSet(...
                 'members', [testCase.X1, testCase.X2], 'names', ["X1" "X2"]);
-            mu_1 = rvs.evalpdf('MHSamples',rand(10,2));
-            mu_2 = rvs.evalpdf('MXSamples',rand(10,2));
-            mu_3 = rvs.evalpdf('MUSamples',rand(10,2));
-            testCase.verifySize(mu_1,[10 1]);
-            testCase.verifySize(mu_2,[10 1]);
-            testCase.verifySize(mu_3,[10 1]);
+            pdf = rvs.pdf(rvs.sample(10));
+            testCase.verifySize(pdf,[10 1]);
         end
     end
 end

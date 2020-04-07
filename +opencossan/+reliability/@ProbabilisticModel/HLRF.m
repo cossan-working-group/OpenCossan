@@ -36,7 +36,7 @@ toleranceDesignPoint=1e-2;
 Nmaxiteration=10;
 LfiniteDifferences=true;
 
-Vu=zeros(1,Xobj.Input.NrandomVariables);
+Vu=zeros(1,Xobj.Input.NumberOfRandomInputs);
 
 %% Process inputs
 opencossan.OpenCossan.validateCossanInputs(varargin{:})
@@ -81,7 +81,7 @@ if exist('VuUnsorted','var')
         index= ismember(CnameRandomVariable,CnamesRandomVariablesInitialSolution{n});
         Vu(n)=VuUnsorted(index);
     end
-    
+
 end
 
 % Prepare optimization problem
@@ -124,8 +124,6 @@ while 1
 %            [Xgradient, Xout]=Sensitivity.localMonteCarlo('Xtarget',Xobj, ...
 %                'Coutputname',{Xobj.XperformanceFunction.Soutputname},...
 %                'CnamesRandomVariable',CnameRandomVariable,'VreferencePoint',Vphysical,'Valpha',Valpha);
-            
-            
         else
           XlocalSensitivity=LocalSensitivityMonteCarlo('Xtarget',Xobj, ...
             'Coutputname',{Xobj.SperformanceFunctionVariable},...

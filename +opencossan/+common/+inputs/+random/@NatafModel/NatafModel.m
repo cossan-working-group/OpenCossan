@@ -35,61 +35,64 @@ classdef NatafModel
     methods
         function obj = NatafModel(rvset)
             factors = ones(rvset.Nrv);
-            for i = 1:rvset.Nrv-1
-                for j = i+1:rvset.Nrv
-                    rij = rvset.Correlation(i,j);
-                    if ~rij; continue; end
-                    switch class(rvset.Members(i))
-                        case 'opencossan.common.inputs.random.NormalRandomVariable'
-                            tmp = obj.normalCorrectionFactors(rvset.Members(j));
-                        case 'opencossan.common.inputs.random.LognormalRandomVariable'
-                            tmp = obj.lognormalCorrectionFactors(rvset.Members(i), rvset.Members(j), rij);
-                        case 'opencossan.common.inputs.random.UniformRandomVariable'
-                            tmp = obj.uniformCorrectionFactors(rvset.Members(j), rij);
-                        case 'opencossan.common.inputs.random.ExponentialRandomVariable'
-                            tmp = obj.exponentialCorrectionFactors(rvset.Members(i), rvset.Members(j), rij);
-                        case 'opencossan.common.inputs.random.RayleighRandomVariable'
-                            tmp = obj.rayleighCorrectionFactors(rvset.Members(j), rij);
-                        case 'opencossan.common.inputs.random.SmallIRandomVariable'
-                            tmp = obj.smallICorrectionFactors(rvset.Members(j), rij);
-                        case 'opencossan.common.inputs.random.LargeIRandomVariable'
-                            tmp = obj.largeICorrectionFactors(rvset.Members(j), rij);
-                        case 'opencossan.common.inputs.random.WeibullRandomVariable'
-                            tmp = obj.weibullCorrectionFactors(rvset.Members(i), rvset.Members(j), rij);
-                        otherwise
-                            %% Distributions without analytical formulas
-                            s = 0;
-                            
-                            for k = 1:obj.CopulaBatches
-                                u = copularnd('gaussian', rij, obj.CopulaSamples);
+            
+            if ~rvset.isIndependent()
+                for i = 1:rvset.Nrv-1
+                    for j = i+1:rvset.Nrv
+                        rij = rvset.Correlation(i,j);
+                        if ~rij; continue; end
+                        switch class(rvset.Members(i))
+                            case 'opencossan.common.inputs.random.NormalRandomVariable'
+                                tmp = obj.normalCorrectionFactors(rvset.Members(j));
+                            case 'opencossan.common.inputs.random.LognormalRandomVariable'
+                                tmp = obj.lognormalCorrectionFactors(rvset.Members(i), rvset.Members(j), rij);
+                            case 'opencossan.common.inputs.random.UniformRandomVariable'
+                                tmp = obj.uniformCorrectionFactors(rvset.Members(j), rij);
+                            case 'opencossan.common.inputs.random.ExponentialRandomVariable'
+                                tmp = obj.exponentialCorrectionFactors(rvset.Members(i), rvset.Members(j), rij);
+                            case 'opencossan.common.inputs.random.RayleighRandomVariable'
+                                tmp = obj.rayleighCorrectionFactors(rvset.Members(j), rij);
+                            case 'opencossan.common.inputs.random.SmallIRandomVariable'
+                                tmp = obj.smallICorrectionFactors(rvset.Members(j), rij);
+                            case 'opencossan.common.inputs.random.LargeIRandomVariable'
+                                tmp = obj.largeICorrectionFactors(rvset.Members(j), rij);
+                            case 'opencossan.common.inputs.random.WeibullRandomVariable'
+                                tmp = obj.weibullCorrectionFactors(rvset.Members(i), rvset.Members(j), rij);
+                            otherwise
+                                %% Distributions without analytical formulas
+                                s = 0;
                                 
-                                gauss = norminv(u,0,1);
-                                
-                                x(:,1) = rvset.Members(i).cdf2physical(u(:,1));
-                                x(:,2) = rvset.Members(j).cdf2physical(u(:,2));
-                                
-                                rho_g = corr(gauss);
-                                v = rij/rho_g(1,2);
-                                
-                                rho_l = corr(x);
-                                rho_l(1,2) = rho_l(1,2)*v;
-                                
-                                rij = rij * rvset.Correlation(i,j)/rho_l(1,2);
-                                if abs(rij) < abs(rvset.Correlation(i,j))
-                                    rij = rvset.Correlation(i,j);
-                                elseif rij < -0.999
-                                    rij = -0.999;
-                                elseif rij > 0.999
-                                    rij = 0.999;
+                                for k = 1:obj.CopulaBatches
+                                    u = copularnd('gaussian', rij, obj.CopulaSamples);
+                                    
+                                    gauss = norminv(u,0,1);
+                                    
+                                    x(:,1) = rvset.Members(i).cdf2physical(u(:,1));
+                                    x(:,2) = rvset.Members(j).cdf2physical(u(:,2));
+                                    
+                                    rho_g = corr(gauss);
+                                    v = rij/rho_g(1,2);
+                                    
+                                    rho_l = corr(x);
+                                    rho_l(1,2) = rho_l(1,2)*v;
+                                    
+                                    rij = rij * rvset.Correlation(i,j)/rho_l(1,2);
+                                    if abs(rij) < abs(rvset.Correlation(i,j))
+                                        rij = rvset.Correlation(i,j);
+                                    elseif rij < -0.999
+                                        rij = -0.999;
+                                    elseif rij > 0.999
+                                        rij = 0.999;
+                                    end
+                                    s = s + rij;
                                 end
-                                s = s + rij;
-                            end
-                            
-                            tmp = s/(obj.CopulaBatches*rvset.Correlation(i,j));
-                    end
-                    if ~isnan(tmp)
-                        factors(i,j) = tmp;
-                        factors(j,i) = tmp;
+                                
+                                tmp = s/(obj.CopulaBatches*rvset.Correlation(i,j));
+                        end
+                        if ~isnan(tmp)
+                            factors(i,j) = tmp;
+                            factors(j,i) = tmp;
+                        end
                     end
                 end
             end

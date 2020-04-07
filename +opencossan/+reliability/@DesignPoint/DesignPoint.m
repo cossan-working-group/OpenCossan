@@ -33,9 +33,6 @@ classdef DesignPoint
     methods
         Xo = set(Xobj,varargin)  %This method allows setting properties of the Xobj object
         
-        disp(Xobj)               %This method shows the summary of the Xobj
-        
-        
         function Xoutput  = DesignPoint(varargin)
             %% DesignPoint Constructor
             %DesignPoint Constructor of DesignPoint object; this object

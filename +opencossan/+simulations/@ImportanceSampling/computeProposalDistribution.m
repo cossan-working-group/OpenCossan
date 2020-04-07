@@ -1,4 +1,4 @@
-function Xobj = computeProposalDistribution(Xobj,Xtarget)
+function obj = computeProposalDistribution(obj, target)
 %COMPUTEPROPOSALDISTRIBUTION method.
 % This method is used to compute the proposal distribution for the
 % ImportaceSampling object.
@@ -32,41 +32,29 @@ function Xobj = computeProposalDistribution(Xobj,Xtarget)
 %  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
 % =====================================================================
 
-import opencossan.common.inputs.random.RandomVariable
-import opencossan.common.inputs.random.RandomVariableSet
-
-if Xobj.Lcomputedesignpoint
-    % The Design Point can be computed automatically only on the
-    % Probabilistic Model
-    
-    assert(isa(Xtarget,'opencossan.reliability.ProbabilisticModel'), ...
-        'openCOSSAN:InportanceSampling',...
-        strcat('The DesignPoint can be computed automatically only on reliability.ProbabilisticModel object. \n',...
-        'Provided target object of type (%s) not allowed'),class(Xtarget));
-    
-    Xdp = Xtarget.designPointIdentification;
-    
+validateattributes(target, ...
+    {'opencossan.reliability.DesignPoint', ...
+     'opencossan.reliability.ProbabilisticModel'}, {'scalar'});
+ 
+if isa(target, 'opencossan.reliability.ProbabilisticModel')
+    designPoint = target.designPointIdentification();
 else
-    assert(isa(Xtarget,'opencossan.reliability.DesignPoint'), ...
-        'openCOSSAN:InportanceSampling',...
-        'A DesignPoint object is to define the proposal distribution!\n Provided object class: %s', ...
-        class(Xtarget));
-    Xdp = Xtarget;
+    designPoint = target;
 end
 
-%% Define Proposal density from the design point
-% Only Gaussian Random Variables are used to
-% define the proposal distribution from the design
-% point.
-Vdp = Xdp.VDesignPointPhysical;
-[~, Vstd] = Xdp.Xinput.getMoments;
-Crvnames = Xdp.Xinput.CnamesRandomVariable;
-for irv =  1:length(Vdp)
-    XrvDP(irv) = opencossan.common.inputs.random.NormalRandomVariable( ...
-        'Mean',Vdp(irv),'Std',Vstd(irv));       %#ok<AGROW>
-    CrvnamesUD(irv) = [Crvnames{irv} '_dp'];    %#ok<AGROW>
+% Define Proposal density from ass gaussian random variables centered around the design point.
+
+mean = designPoint.VDesignPointPhysical;
+[~, std] = designPoint.Xinput.getMoments();
+names = designPoint.Xinput.RandomInputNames;
+
+members = opencossan.common.inputs.random.RandomVariable.empty(length(mean), 0);
+for irv =  1:length(mean)
+    members(irv) = opencossan.common.inputs.random.NormalRandomVariable( ...
+        'mean',mean(irv),'std',std(irv));
 end
-Xobj.XrvsetUD = {RandomVariableSet('Members',XrvDP,'Names',CrvnamesUD)};
-Xobj.Cmapping = [CrvnamesUD' Crvnames'];
+
+obj.ProposalDistribution = opencossan.common.inputs.random.RandomVariableSet('Members', members,...
+    'Names', names);
 
 
