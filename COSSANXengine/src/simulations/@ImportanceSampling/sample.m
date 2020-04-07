@@ -155,11 +155,15 @@ for irvs=1:Nrvset
         end
     end
     
-    MsamplesPhysicalSpace=Xrvset.map2physical(Msamples);
-    
+    MsamplesPhysicalSpace=zeros(size(Msamples));    
     MunmappedPdfLog(:,irvs) = 0;
     for irv = Vindices
+        % compute the pdf of the unmapped by skipping the RVSET, since the
+        % samples are already correlated. We have already done the first
+        % step of Nataf, and calling the function of rvset will end up
+        % reapplying the correlation twice!
         MunmappedPdfLog(:,irvs) = MunmappedPdfLog(:,irvs) + log(Xrvset.Xrv{irv}.evalpdf(MsamplesPhysicalSpace(:,irv)));
+        MsamplesPhysicalSpace(:,irv) = Xrvset.Xrv{irv}.map2physical(Msamples(:,irv));
     end
         
     % Replace samples from the IS distribution
