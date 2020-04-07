@@ -68,7 +68,7 @@ end
 
 Vidist0 = find(Vdistrition==0);  %assemble vector w/ indices of any other distribution
 
-if (abs(norm(eye(Nvar)-Mcorr))) > 1.e-8,
+if (abs(norm(eye(Nvar)-Mcorr))) > 1.e-8
     
     MRmod = ones(Nvar); %Matrix storing the modification factors for the correlation matrix of the Nataf model
     
@@ -76,7 +76,7 @@ if (abs(norm(eye(Nvar)-Mcorr))) > 1.e-8,
     if ~isempty(Vidist1)
         
         %Combination N-LN
-        for i=1:length(Vidist2), %loop over all lognormal rv's
+        for i=1:length(Vidist2) %loop over all lognormal rv's
             corrmodfac = Vcov(Vidist2(i)) / sqrt(log(1+Vcov(Vidist2(i))^2));
             %the following 2 lines are only applied to combinations of Normal
             %(Vidist1) and Lognormal (Vidist2) rv's
@@ -85,8 +85,8 @@ if (abs(norm(eye(Nvar)-Mcorr))) > 1.e-8,
         end
         
         %Combination N-WEI
-        for i=1:length(Vidist8), %loop over all weibull rv's
-            corrmodfac = Vcov(Vidist8(i)) / sqrt(log(1+Vcov(Vidist8(i))^2));
+        for i=1:length(Vidist8) %loop over all weibull rv's
+            corrmodfac = 1.031 - 0.195*Vcov(Vidist8(i)) + 0.328*Vcov(Vidist8(i))^2;
             %the following 2 lines are only applied to combinations of Normal
             %(Vidist1) and weibull (Vidist8) rv's
             MRmod(Vidist1,Vidist8(i)) = corrmodfac; %assign modification factor to corresponding entry
@@ -94,48 +94,40 @@ if (abs(norm(eye(Nvar)-Mcorr))) > 1.e-8,
         end
         
         %Combination N-U
-        for i=1:length(Vidist3),
+        for i=1:length(Vidist3)
             corrmodfac = 1.023;
             MRmod(Vidist1,Vidist3(i)) = corrmodfac;
             MRmod(Vidist3(i),Vidist1) = corrmodfac;
         end
         
         %Combination N-EXP
-        for i=1:length(Vidist4),
+        for i=1:length(Vidist4)
             corrmodfac = 1.107;
             MRmod(Vidist1,Vidist4(i)) = corrmodfac;
             MRmod(Vidist4(i),Vidist1) = corrmodfac;
         end
         
         %Combination N-RAY
-        for i=1:length(Vidist5),
+        for i=1:length(Vidist5)
             corrmodfac = 1.014;
             MRmod(Vidist1,Vidist5(i)) = corrmodfac;
             MRmod(Vidist5(i),Vidist1) = corrmodfac;
         end
         
         %Combination N-SML
-        for i=1:length(Vidist6),
+        for i=1:length(Vidist6)
             corrmodfac = 1.031;
             MRmod(Vidist1,Vidist6(i)) = corrmodfac;
             MRmod(Vidist6(i),Vidist1) = corrmodfac;
         end
         
         %Combination N-LAR
-        for i=1:length(Vidist7),
+        for i=1:length(Vidist7)
             corrmodfac = 1.031;
             MRmod(Vidist1,Vidist7(i)) = corrmodfac;
             MRmod(Vidist7(i),Vidist1) = corrmodfac;
         end
         
-        %Combination N-LN
-        for i=1:length(Vidist2), %loop over all lognormal rv's
-            corrmodfac = Vcov(Vidist2(i)) / sqrt(log(1+Vcov(Vidist2(i))^2));
-            %the following 2 lines are only applied to combinations of Normal
-            %(Vidist1) and Lognormal (Vidist2) rv's
-            MRmod(Vidist1,Vidist2(i)) = corrmodfac; %assign modification factor to corresponding entry
-            MRmod(Vidist2(i),Vidist1) = corrmodfac; %do the same for the transposed entry
-        end
     end
     
     %Combination LN-LN
@@ -153,8 +145,8 @@ if (abs(norm(eye(Nvar)-Mcorr))) > 1.e-8,
     end
     
     %Combination U-U
-    for i=1:length(Vidist3),
-        for j=i+1:length(Vidist3),
+    for i=1:length(Vidist3)
+        for j=i+1:length(Vidist3)
             rij = Mcorr(Vidist3(i),Vidist3(j));
             corrmodfac = 1.047 - 0.047 * rij ^2;
             MRmod(Vidist3(i),Vidist3(j)) = corrmodfac;
@@ -163,8 +155,8 @@ if (abs(norm(eye(Nvar)-Mcorr))) > 1.e-8,
     end
     
     %Combination EXP-EXP
-    for i=1:length(Vidist4),
-        for j=i+1:length(Vidist4),
+    for i=1:length(Vidist4)
+        for j=i+1:length(Vidist4)
             rij = Mcorr(Vidist4(i),Vidist4(j));
             corrmodfac = 1.229 - 0.367 * rij + 0.153* rij ^2;
             MRmod(Vidist4(i),Vidist4(j)) = corrmodfac;
@@ -173,8 +165,8 @@ if (abs(norm(eye(Nvar)-Mcorr))) > 1.e-8,
     end
     
     %Combination RAY-RAY
-    for i=1:length(Vidist5),
-        for j=i+1:length(Vidist5),
+    for i=1:length(Vidist5)
+        for j=i+1:length(Vidist5)
             rij = Mcorr(Vidist5(i),Vidist5(j));
             corrmodfac = 1.028 - 0.029 * rij;
             MRmod(Vidist5(i),Vidist5(j)) = corrmodfac;
@@ -183,8 +175,8 @@ if (abs(norm(eye(Nvar)-Mcorr))) > 1.e-8,
     end
     
     %Combination SML-SML
-    for i=1:length(Vidist6),
-        for j=i+1:length(Vidist6),
+    for i=1:length(Vidist6)
+        for j=i+1:length(Vidist6)
             rij = Mcorr(Vidist6(i),Vidist6(j));
             corrmodfac = 1.064 - 0.069 * rij +...
                 0.005 * rij^2;
@@ -194,8 +186,8 @@ if (abs(norm(eye(Nvar)-Mcorr))) > 1.e-8,
     end
     
     %Combination LAR-LAR
-    for i=1:length(Vidist7),
-        for j=i+1:length(Vidist7),
+    for i=1:length(Vidist7)
+        for j=i+1:length(Vidist7)
             rij = Mcorr(Vidist7(i),Vidist7(j));
             corrmodfac = 1.064 + 0.069 * rij + ...
                 0.005 * rij^2;
@@ -208,20 +200,18 @@ if (abs(norm(eye(Nvar)-Mcorr))) > 1.e-8,
     for i=1:length(Vidist8)
         for j=i+1:length(Vidist8)
             rij = Mcorr(Vidist8(i),Vidist8(j));
-            corrmodfac = 1.086 + 0.054*rij + 0.104* (Vcov(Vidist8(i)) + Vcov(Vidist8(j))) ...
-                -0.055*rij^2 + 0.662*(Vcov(Vidist8(i))^2+Vcov(Vidist8(j))^2) ...
-                -0.57*rij*(Vcov(Vidist8(i))+Vcov(Vidist8(j))) + 0.203*(Vcov(Vidist8(i))*Vcov(Vidist8(j))) ...
-                -0.02*rij^3 -0.218*(Vcov(Vidist8(i))^3+Vcov(Vidist8(j))^3) ...
-                -0.371*rij*(Vcov(Vidist8(i))^2+Vcov(Vidist8(j))^2) + 0.257*rij^2*(Vcov(Vidist8(i))+Vcov(Vidist8(j))) ...
-                +0.141*(Vcov(Vidist8(i))+Vcov(Vidist8(j)))*Vcov(Vidist8(i))*Vcov(Vidist8(j));
+            corrmodfac = 1.063 - 0.004*rij + 0.200* (Vcov(Vidist8(i)) + Vcov(Vidist8(j))) ...
+                -0.001*rij^2 + 0.337*(Vcov(Vidist8(i))^2+Vcov(Vidist8(j))^2) ...
+                +0.007*rij*(Vcov(Vidist8(i)) + Vcov(Vidist8(j))) ...
+                -0.007*Vcov(Vidist8(i)) * Vcov(Vidist8(j));
             MRmod(Vidist8(i),Vidist8(j)) = corrmodfac;
             MRmod(Vidist8(j),Vidist8(i)) = corrmodfac;
         end
     end
     
     %Combination U-LN
-    for i=1:length(Vidist3),
-        for j=1:length(Vidist2),
+    for i=1:length(Vidist3)
+        for j=1:length(Vidist2)
             rij = Mcorr(Vidist3(i),Vidist2(j));
             corrmodfac = 1.019 + 0.010 * rij ^2 +...
                 0.014 * Vcov(Vidist2(j)) + ...
@@ -232,8 +222,8 @@ if (abs(norm(eye(Nvar)-Mcorr))) > 1.e-8,
     end
     
     %Combination EXP-U
-    for i=1:length(Vidist4),
-        for j=1:length(Vidist3),
+    for i=1:length(Vidist4)
+        for j=1:length(Vidist3)
             rij = Mcorr(Vidist4(i),Vidist3(j));
             corrmodfac = 1.133 + 0.029 * rij ^2;
             MRmod(Vidist4(i),Vidist3(j)) = corrmodfac;
@@ -242,8 +232,8 @@ if (abs(norm(eye(Nvar)-Mcorr))) > 1.e-8,
     end
     
     %Combination EXP-LN
-    for i=1:length(Vidist4),
-        for j=1:length(Vidist2),
+    for i=1:length(Vidist4)
+        for j=1:length(Vidist2)
             rij = Mcorr(Vidist4(i),Vidist2(j));
             corrmodfac = 1.098 + 0.003 * rij + ...
                 0.019 * Vcov(Vidist2(j)) + ...
@@ -256,8 +246,8 @@ if (abs(norm(eye(Nvar)-Mcorr))) > 1.e-8,
     end
     
     %Combination EXP-RAY
-    for i=1:length(Vidist4),
-        for j=1:length(Vidist5),
+    for i=1:length(Vidist4)
+        for j=1:length(Vidist5)
             rij = Mcorr(Vidist4(i),Vidist5(j));
             corrmodfac = 1.123 - 0.100 * rij + 0.021* rij ^2;
             MRmod(Vidist4(i),Vidist5(j)) = corrmodfac;
@@ -266,8 +256,8 @@ if (abs(norm(eye(Nvar)-Mcorr))) > 1.e-8,
     end
     
     %Combination RAY-LN
-    for i=1:length(Vidist5),
-        for j=1:length(Vidist2),
+    for i=1:length(Vidist5)
+        for j=1:length(Vidist2)
             rij = Mcorr(Vidist5(i),Vidist2(j));
             corrmodfac = 1.011 + 0.001 * rij + ...
                 0.014 * Vcov(Vidist2(j)) + ...
@@ -280,8 +270,8 @@ if (abs(norm(eye(Nvar)-Mcorr))) > 1.e-8,
     end
     
     %Combination RAY-U
-    for i=1:length(Vidist5),
-        for j=1:length(Vidist3),
+    for i=1:length(Vidist5)
+        for j=1:length(Vidist3)
             rij = Mcorr(Vidist5(i),Vidist3(j));
             corrmodfac = 1.038 + 0.008 * rij ^2;
             MRmod(Vidist5(i),Vidist3(j)) = corrmodfac;
@@ -290,8 +280,8 @@ if (abs(norm(eye(Nvar)-Mcorr))) > 1.e-8,
     end
     
     %Combination SML-EXP
-    for i=1:length(Vidist6),
-        for j=1:length(Vidist4),
+    for i=1:length(Vidist6)
+        for j=1:length(Vidist4)
             rij = Mcorr(Vidist6(i),Vidist4(j));
             corrmodfac = 1.142 + 0.154 * rij + 0.031* rij ^2;
             MRmod(Vidist6(i),Vidist4(j)) = corrmodfac;
@@ -300,8 +290,8 @@ if (abs(norm(eye(Nvar)-Mcorr))) > 1.e-8,
     end
     
     %Combination SML-U
-    for i=1:length(Vidist6),
-        for j=1:length(Vidist3),
+    for i=1:length(Vidist6)
+        for j=1:length(Vidist3)
             rij = Mcorr(Vidist6(i),Vidist3(j));
             corrmodfac = 1.055 + 0.015* rij ^2;
             MRmod(Vidist6(i),Vidist3(j)) = corrmodfac;
@@ -310,8 +300,8 @@ if (abs(norm(eye(Nvar)-Mcorr))) > 1.e-8,
     end
     
     %Combination SML-LN
-    for i=1:length(Vidist6),
-        for j=1:length(Vidist2),
+    for i=1:length(Vidist6)
+        for j=1:length(Vidist2)
             rij = Mcorr(Vidist6(i),Vidist2(j));
             corrmodfac = 1.029 - 0.001 * rij + ...
                 0.014 *Vcov(Vidist2(j))+ ...
@@ -324,8 +314,8 @@ if (abs(norm(eye(Nvar)-Mcorr))) > 1.e-8,
     end
     
     %Combination SML-RAY
-    for i=1:length(Vidist6),
-        for j=1:length(Vidist5),
+    for i=1:length(Vidist6)
+        for j=1:length(Vidist5)
             rij = Mcorr(Vidist6(i),Vidist5(j));
             corrmodfac = 1.046 + 0.045 * rij + 0.006* rij ^2;
             MRmod(Vidist6(i),Vidist5(j)) = corrmodfac;
@@ -334,8 +324,8 @@ if (abs(norm(eye(Nvar)-Mcorr))) > 1.e-8,
     end
     
     %Combination LARGE-I - RAY
-    for i=1:length(Vidist7),
-        for j=1:length(Vidist5),
+    for i=1:length(Vidist7)
+        for j=1:length(Vidist5)
             rij = Mcorr(Vidist7(i),Vidist5(j));
             corrmodfac = 1.046 - 0.045 * rij + 0.006* rij ^2;
             MRmod(Vidist7(i),Vidist5(j)) = corrmodfac;
@@ -344,8 +334,8 @@ if (abs(norm(eye(Nvar)-Mcorr))) > 1.e-8,
     end
     
     %Combination LARGE-I - EXP
-    for i=1:length(Vidist7),
-        for j=1:length(Vidist4),
+    for i=1:length(Vidist7)
+        for j=1:length(Vidist4)
             rij = Mcorr(Vidist7(i),Vidist4(j));
             corrmodfac = 1.142 - 0.154 * rij + 0.031* rij ^2;
             MRmod(Vidist7(i),Vidist4(j)) = corrmodfac;
@@ -354,8 +344,8 @@ if (abs(norm(eye(Nvar)-Mcorr))) > 1.e-8,
     end
     
     %Combination LARGE-I - Uniform
-    for i=1:length(Vidist7),
-        for j=1:length(Vidist3),
+    for i=1:length(Vidist7)
+        for j=1:length(Vidist3)
             rij = Mcorr(Vidist7(i),Vidist3(j));
             corrmodfac = 1.055 + 0.015* rij ^2;
             MRmod(Vidist7(i),Vidist3(j)) = corrmodfac;
@@ -364,8 +354,8 @@ if (abs(norm(eye(Nvar)-Mcorr))) > 1.e-8,
     end
     
     %Combination LARGE-I - LN
-    for i=1:length(Vidist7),
-        for j=1:length(Vidist2),
+    for i=1:length(Vidist7)
+        for j=1:length(Vidist2)
             rij = Mcorr(Vidist7(i),Vidist2(j));
             corrmodfac = 1.029 + 0.001 * rij +...
                 0.014 * Vcov(Vidist2(j)) +...
@@ -378,8 +368,8 @@ if (abs(norm(eye(Nvar)-Mcorr))) > 1.e-8,
     end
     
     %Combination SML-LAR
-    for i=1:length(Vidist6),
-        for j=1:length(Vidist7),
+    for i=1:length(Vidist6)
+        for j=1:length(Vidist7)
             rij = Mcorr(Vidist6(i),Vidist7(j));
             corrmodfac = 1.064 + 0.069 * rij + 0.005 * rij^2;
             MRmod(Vidist6(i),Vidist7(j)) = corrmodfac;
@@ -388,67 +378,67 @@ if (abs(norm(eye(Nvar)-Mcorr))) > 1.e-8,
     end
     
     %Combination LN-WEI
-    for i=1:length(Vidist2),
-        for j=1:length(Vidist8),
+    for i=1:length(Vidist2)
+        for j=1:length(Vidist8)
             rij = Mcorr(Vidist2(i),Vidist8(j));
-            corrmodfac = 1.026 + 0.082*rij - 0.019*Vcov(Vidist2(i)) + 0.222*Vcov(Vidist8(j)) ...
-                + 0.018*rij^2 + 0.288*Vcov(Vidist2(i))^2 + 0.379*Vcov(Vidist8(j))^2 ...
-                -0.441*rij*Vcov(Vidist2(i)) + 0.126*Vcov(Vidist2(i))*Vcov(Vidist8(j))^2 - 0.277*rij*Vcov(Vidist8(j));
+            corrmodfac = 1.031 + 0.052*rij + 0.011*Vcov(Vidist2(i)) - 0.210*Vcov(Vidist8(j)) ...
+                + 0.002*rij^2 + 0.220*Vcov(Vidist2(i))^2 + 0.350*Vcov(Vidist8(j))^2 ...
+                + 0.005*rij*Vcov(Vidist2(i)) + 0.009*Vcov(Vidist2(i))*Vcov(Vidist8(j))^2 - 0.174*rij*Vcov(Vidist8(j));
             MRmod(Vidist2(i),Vidist8(j)) = corrmodfac;
             MRmod(Vidist8(j),Vidist2(i)) = corrmodfac;
         end
     end
     
     %Combination U-WEI
-    for i=1:length(Vidist3),
-        for j=1:length(Vidist8),
+    for i=1:length(Vidist3)
+        for j=1:length(Vidist8)
             rij = Mcorr(Vidist3(i),Vidist8(j));
-            corrmodfac = 1.033 + 0.305*Vcov(Vidist8(j)) ...
-                + 0.074*rij^2 + 0.405*Vcov(Vidist8(j))^2;
+            corrmodfac = 1.061 - 0.237*Vcov(Vidist8(j)) ...
+                - 0.005*rij^2 + 0.379*Vcov(Vidist8(j))^2;
             MRmod(Vidist3(i),Vidist8(j)) = corrmodfac;
             MRmod(Vidist8(j),Vidist3(i)) = corrmodfac;
         end
     end
     
     %Combination EXP-WEI
-    for i=1:length(Vidist4),
-        for j=1:length(Vidist8),
+    for i=1:length(Vidist4)
+        for j=1:length(Vidist8)
             rij = Mcorr(Vidist4(i),Vidist8(j));
-            corrmodfac = 1.109 - 0.152*rij +0.361*Vcov(Vidist8(j)) ...
-                + 0.13*rij^2 +0.455*Vcov(Vidist8(j))^2 - 0.728*rij*Vcov(Vidist8(j));
+            corrmodfac = 1.147 + 0.145*rij -0.271*Vcov(Vidist8(j)) ...
+                + 0.010*rij^2 +0.459*Vcov(Vidist8(j))^2 - 0.467*rij*Vcov(Vidist8(j));
             MRmod(Vidist4(i),Vidist8(j)) = corrmodfac;
             MRmod(Vidist8(j),Vidist4(i)) = corrmodfac;
         end
     end
     
     %Combination RAY-WEI
-    for i=1:length(Vidist5),
-        for j=1:length(Vidist8),
+    for i=1:length(Vidist5)
+        for j=1:length(Vidist8)
             rij = Mcorr(Vidist5(i),Vidist8(j));
-            corrmodfac = 1.036 - 0.038*rij +.266*Vcov(Vidist8(j)) ...
-                + 0.028*rij^2 + 0.383*Vcov(Vidist8(j))^2 -0.229*rij*Vcov(Vidist8(j));
+            corrmodfac = 1.047 + 0.042*rij -.212*Vcov(Vidist8(j)) ...
+                 + 0.353*Vcov(Vidist8(j))^2 -0.136*rij*Vcov(Vidist8(j));
             MRmod(Vidist5(i),Vidist8(j)) = corrmodfac;
             MRmod(Vidist8(j),Vidist5(i)) = corrmodfac;
         end
     end
     
     %Combination SML-WEI
-    for i=1:length(Vidist6),
-        for j=1:length(Vidist8),
+    for i=1:length(Vidist6)
+        for j=1:length(Vidist8)
             rij = Mcorr(Vidist6(i),Vidist8(j));
-            corrmodfac = 1.056 + 0.06*rij +0.263*Vcov(Vidist8(j)) ...
-                + 0.02*rij^2 + 0.383*Vcov(Vidist8(j))^2 + 0.322*rij*Vcov(Vidist8(j));
+            corrmodfac = 1.064 + 0.065*rij -0.210*Vcov(Vidist8(j)) ...
+                + 0.003*rij^2 + 0.356*Vcov(Vidist8(j))^2 - 0.211*rij*Vcov(Vidist8(j));
             MRmod(Vidist6(i),Vidist8(j)) = corrmodfac;
             MRmod(Vidist8(j),Vidist6(i)) = corrmodfac;
         end
     end
     
     %Combination LAR-WEI
-    for i=1:length(Vidist7),
-        for j=1:length(Vidist8),
+    for i=1:length(Vidist7)
+        for j=1:length(Vidist8)
             rij = Mcorr(Vidist7(i),Vidist8(j));
-            corrmodfac = 1.056 - 0.06*rij +0.263*Vcov(Vidist8(j)) ...
-                + 0.02*rij^2 + 0.383*Vcov(Vidist8(j))^2 - 0.322*rij*Vcov(Vidist8(j));
+            corrmodfac = 1.064 - 0.065*rij -0.210*Vcov(Vidist8(j)) ...
+                + 0.003*rij^2 + 0.356*Vcov(Vidist8(j))^2 + 0.211*rij*Vcov(Vidist8(j));
             MRmod(Vidist7(i),Vidist8(j)) = corrmodfac;
             MRmod(Vidist8(j),Vidist7(i)) = corrmodfac;
         end
