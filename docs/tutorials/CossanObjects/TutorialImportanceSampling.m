@@ -124,19 +124,12 @@ display(XpfAuto)
 
 %% Estimate the Failure Probability
 % Set RandomNumber stream
-OpenCossan.resetRandomNumberGenerator(51125)
-Xpf=Xis.computeFailureProbability(Xpm);
-display(Xpf)
+Xis = opencossan.simulations.ImportanceSampling('samples', 20000, 'seed', 51125);
+Xmc = opencossan.simulations.MonteCarlo('samples', 1e5, 'seed', 51125);
 
 % Verificate the procedure
-Xis.Nbatches=1;
-Xis.Nsamples=20000;
-Xmc=MonteCarlo('Nsamples',1e5);
-XpfMC=computeFailureProbability(Xpm,Xmc);
-XpfIS=computeFailureProbability(Xpm,Xis);
+XpfMC = Xmc.computeFailureProbability(Xpm);
+XpfIS = Xis.computeFailureProbability(Xpm);
 
 display(XpfMC)
 display(XpfIS)
-
-%% Validate Solutions
-assert(abs(Xpf.pfhat-0.2)<1e-4,'openCOSSAN:Tutorials','Wrong results')

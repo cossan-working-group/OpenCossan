@@ -1,4 +1,4 @@
-classdef ImportanceSampling < opencossan.simulations.Simulations
+classdef ImportanceSampling < opencossan.simulations.MonteCarlo
     %IMPORTANCESAMPLING class definitoin of the ImportanceSampling
     %
     % See Also: http://cossan.cfd.liv.ac.uk/wiki/index.php/@ImportanceSampling
@@ -37,26 +37,24 @@ classdef ImportanceSampling < opencossan.simulations.Simulations
                 [optional, super_args] = opencossan.common.utilities.parseOptionalNameValuePairs(...
                     ["proposaldistribution", "designpoint"], ...
                     {opencossan.common.inputs.random.RandomVariableSet.empty(), ...
-                     opencossan.reliability.DesignPoint.empty()}, ...
+                     opencossan.reliability.DesignPoint.empty(), 1, false}, ...
                     varargin{:});
             end
             
-            obj@opencossan.simulations.Simulations(super_args{:});
+            obj@opencossan.simulations.MonteCarlo(super_args{:});
             
             if nargin > 0
                 obj.ProposalDistribution = optional.proposaldistribution;
                 obj.DesignPoint = optional.designpoint;
-                
+
                 assert(isempty(optional.proposaldistribution) || isempty(optional.designpoint), ...
                     'OpenCossan:ImportanceSampling', ...
                     'Only specify either the proposal distribution or the design point.');
             end
         end
         
-        obj = computeProposalDistribution(obj, varargin)
         [simData, weights] = apply(obj,varargin)
         [samples, weights] = sample(obj, varargin)
-        pf = computeFailureProbability(obj, varargin)
     end
     
 end

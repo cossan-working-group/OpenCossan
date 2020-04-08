@@ -19,6 +19,7 @@ classdef DesignPoint < opencossan.common.CossanObject
         ReliabilityIndex                %Euclidean norm of the design point w.r.t. the origin
         Form                            % First order reliability
         Input
+        Variables
     end
     
     methods
@@ -67,6 +68,10 @@ classdef DesignPoint < opencossan.common.CossanObject
         
         function obj = set.DesignPointStdNormal(obj, dp)
             obj.DesignPointPhysical = obj.Model.Input.map2stdnorm(dp);
+        end
+        
+        function vars = get.Variables(obj)
+            vars = string(obj.DesignPointPhysical.Properties.VariableNames);
         end
         
         function form = get.Form(obj)
