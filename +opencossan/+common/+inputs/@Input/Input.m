@@ -245,7 +245,7 @@ classdef Input < opencossan.common.CossanObject
         
         function discrete = get.AreDesignVariablesDiscrete(obj)
             discrete = any(arrayfun(@(dv) isa(dv, 'opencossan.optimization.DiscreteDesignVariable'), ...
-                obj.DesignVariablesdescrete));
+                obj.DesignVariables));
         end       
         
         values = getDefaultValues(obj);

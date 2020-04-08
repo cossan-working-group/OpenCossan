@@ -66,8 +66,8 @@ end
 
 if ~exist('Xoptim','var')
     % Use the HLRF approach
-    [Xdp,Xopt] = HLRF(Xpm,varargin{:});    
-else    
+    Xdp = HLRF(Xpm,varargin{:});    
+else
     Cmembers=Xpm.Input.RandomVariableNames;
     NPopulationSize=1;
     
@@ -122,7 +122,6 @@ else
         'NFunctionEvaluations',Xopt.NevaluationsObjectiveFunctions,...
         'Vdesignpointstdnormal',Mdata(1:NPopulationSize:end,end)', ...
         'XProbabilisticModel',Xpm);
-    
 end
 
 opencossan.OpenCossan.cossanDisp('[openCOSSAN:ProbabilisticModel:designPointIdentification] Design point identified',3)

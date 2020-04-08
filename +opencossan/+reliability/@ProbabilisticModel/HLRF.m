@@ -1,205 +1,101 @@
-function [Xdp, Xoptimum]= HLRF(Xobj,varargin)
-%HLRF This method computes the so-called design point adopting the gradient of
-%the function by means the linar approximations.
-%
-% See Also: http://cossan.cfd.liv.ac.uk/wiki/index.php/HLRF@ProbabilisticModel
-%
-%
-% $Copyright~1993-2012,~COSSAN~Working~Group,~University~of~Liverpool,~UK$
-% $Author: Edoardo-Patelli$
+function designPoint = HLRF(obj, varargin)
+    %HLRF This method computes the so-called design point adopting the gradient of
+    %the function by means the linar approximations.
+    %
+    % See Also: http://cossan.cfd.liv.ac.uk/wiki/index.php/HLRF@ProbabilisticModel
+    
+    %{
+    This file is part of OpenCossan <https://cossan.co.uk>.
+    Copyright (C) 2006-2018 COSSAN WORKING GROUP
 
-% =====================================================================
-% This file is part of openCOSSAN.  The open general purpose matlab
-% toolbox for numerical analysis, risk and uncertainty quantification.
-%
-% openCOSSAN is free software: you can redistribute it and/or modify
-% it under the terms of the GNU General Public License as published by
-% the Free Software Foundation, either version 3 of the License.
-%
-% openCOSSAN is distributed in the hope that it will be useful,
-% but WITHOUT ANY WARRANTY; without even the implied warranty of
-% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-% GNU General Public License for more details.
-%
-%  You should have received a copy of the GNU General Public License
-%  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
-% =====================================================================
+    OpenCossan is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License or,
+    (at your option) any later version.
 
-import opencossan.sensitivity.LocalSensitivityFiniteDifference
-import opencossan.reliability.DesignPoint
+    OpenCossan is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU General Public License for more details.
 
-% Set Global variable for optimization
-global XoptGlobal 
-
-% Set defualt value
-toleranceDesignPoint=1e-2;
-Nmaxiteration=10;
-LfiniteDifferences=true;
-
-Vu=zeros(1,Xobj.Input.NumberOfRandomInputs);
-
-%% Process inputs
-opencossan.OpenCossan.validateCossanInputs(varargin{:})
-
-for k=1:2:length(varargin)
-    switch lower(varargin{k})
-        case {'mreferencepoints','vinitialsolution'}
-            VuUnsorted     = Xobj.Xinput.map2stdnorm(varargin{k+1});
-        case {'vinitialsolutionstandardnormalspace'}
-            VuUnsorted=varargin{k+1};
-        case {'csnamerandomvariables'}
-            CnamesRandomVariablesInitialSolution =  varargin{k+1};
-        case {'lfinitedifferences'}
-            LfiniteDifferences  = varargin{k+1};
-        case {'tolerancedesignpoint'}
-            toleranceDesignPoint= varargin{k+1};
-        case {'valpha'}
-            Valpha= varargin{k+1};
-        case {'nmaxiteration'}
-            Nmaxiteration= varargin{k+1};
-        case {'xoptimum'}   %extract OptimizationProblem
-            if isa(varargin{k+1},'Optimum')    %check that arguments is actually an OptimizationProblem object
-                Xoptimum  = varargin{k+1};
-            else
-                error('openCOSSAN:HLRF',...
-                    'the variable %s must be an Optimum object',inputname(k));
-            end
-        otherwise
-            error('openCOSSAN:ProbabilisticModel:HLRF',...
-                'PropertyName %s is not valid',varargin{k})
+    You should have received a copy of the GNU General Public License
+    along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
+    %}
+    
+    import opencossan.sensitivity.LocalSensitivityFiniteDifference
+    import opencossan.sensitivity.LocalSensitivityMonteCarlo
+    import opencossan.reliability.DesignPoint
+    
+    optional = opencossan.common.utilities.parseOptionalNameValuePairs(...
+        ["referencepoint", "alpha", "tolerance" "maxIterations", "usefinitedifferences"], ...
+        {[], [], 1e-2, 10, true}, varargin{:});
+    
+    u = optional.referencepoint;
+    if isempty(u)
+        u = array2table(zeros(1, obj.Input.NumberOfRandomInputs));
+        u.Properties.VariableNames = obj.Input.RandomInputNames;
     end
-end
-
-CnameRandomVariable=Xobj.Input.RandomVariableNames;
-%% Reorder the initial solution
-if exist('VuUnsorted','var')
-    assert(logical(exist('CnamesRandomVariablesInitialSolution','var')),...
-        'openCOSSAN:ProbabilisticModel:HLRF',...
-        'It is necessary to provide the PropertyName CSnameRandomVariables in order to define an initial solution point')
-    Vu=zeros(size(VuUnsorted));
-    for n=1:length(CnameRandomVariable)
-        index= ismember(CnameRandomVariable,CnamesRandomVariablesInitialSolution{n});
-        Vu(n)=VuUnsorted(index);
-    end
-
-end
-
-% Prepare optimization problem
-XoptimizationProblem=prepareOptimizationProblem(Xobj,Vu);
-
-%% initialize Optimum
-if ~exist('Xoptimum','var')
-    XoptGlobal=opencossan.optimization.Optimum('XoptimizationProblem',XoptimizationProblem);
-else
-    %TODO: Check Optimum
-    XoptGlobal=Xoptimum;
-end
-
-
-% initialize global variable
-iIteration=0;
-
-hobjfun=@(x)evaluate(XoptimizationProblem.XobjectiveFunction,'Xoptimizationproblem',XoptimizationProblem,...
-        'MreferencePoints',x,'Lgradient',false);
     
-%% Define the Sensitivity objcect    
+    alpha = optional.alpha;
     
-
-%% Here we go
-while 1
-    iIteration=iIteration+1;
-    Vphysical=Xobj.Input.map2physical(Vu);
+    numberOfSamples= 0;
+    iteration = 0;
+    delta = Inf;
     
-    if LfiniteDifferences
-        XlocalSensitivity=LocalSensitivityFiniteDifference('Xtarget',Xobj, ...
-            'Coutputname',{Xobj.PerformanceFunctionVariable},...
-            'Cinputnames',CnameRandomVariable,'VreferencePoint',Vphysical);
-    else
-        if exist('Valpha','var')
-         XlocalSensitivity=LocalSensitivityMonteCarlo('Xtarget',Xobj, ...
-            'Coutputname',{Xobj.PerformanceFunctionVariable},...
-            'Cinputnames',CnameRandomVariable,'VreferencePoint',Vphysical,...
-            'Valpha',Valpha);
-            
-%            [Xgradient, Xout]=Sensitivity.localMonteCarlo('Xtarget',Xobj, ...
-%                'Coutputname',{Xobj.XperformanceFunction.Soutputname},...
-%                'CnamesRandomVariable',CnameRandomVariable,'VreferencePoint',Vphysical,'Valpha',Valpha);
+    while delta > optional.tolerance && iteration ~= optional.maxiterations
+        iteration = iteration + 1;
+        
+        physical = obj.Input.map2physical(u);
+        
+        if optional.usefinitedifferences
+            localSensitivity = LocalSensitivityFiniteDifference('Xtarget',obj, ...
+                'Coutputname',{obj.PerformanceFunctionVariable}, ...
+                'Cinputnames', obj.Input.RandomInputNames, 'VreferencePoint', physical);
         else
-          XlocalSensitivity=LocalSensitivityMonteCarlo('Xtarget',Xobj, ...
-            'Coutputname',{Xobj.SperformanceFunctionVariable},...
-            'Cinputnames',CnameRandomVariable,'VreferencePoint',Vphysical);            
-        end
-    end
-    
-    % Compute the gradient 
-    [Xgradient,Xout]=XlocalSensitivity.computeGradientStandardNormalSpace;
-    
-    Vg=Xout.getValues('SName', Xobj.PerformanceFunctionVariable);
-    
-    % Store values of input variables
-    MphysicalGradient=Xout.getValues('Cnames', CnameRandomVariable);    
-    
-    if iIteration == 1
-        perfomanceAtOrigin = Vg(1);
-    end
-    VevaluationPoint=Xobj.Input.map2stdnorm(Xgradient.VreferencePoint);
-    
-    % Collect SimulationData
-    if ~exist('XsimOut','var')
-        XsimOut=Xout;
-    else
-        XsimOut=XsimOut.merge(Xout);
-    end
-    
-    %% Check if the points are finite!
-    
-    assert(all([~isnan(VevaluationPoint) ~isinf(VevaluationPoint)]), ...
-        'openCOSSAN:ProbabilisticModel:HLRF',...
-        'The reference point can not contain NaN or Inf values\nProvided values: %s',...
-        sprintf('%e ',VevaluationPoint));
-    
-    % Evaluate Objective Function
-    [~] = hobjfun(Vu);  %Objective function evaluation
-    % Compute important direction
-    Valpha=Xgradient.Valpha;
-       
-    VB=(VevaluationPoint*Valpha)*Valpha';
-    Vu=VB -Vg(1)/norm(Xgradient.Vgradient)* Valpha'; 
-    
-    % Compute safety factor beta
-    if iIteration==1
-        bet0  = norm(Vu);
-    else
-        bet  = norm(Vu);
-        convergenceFactor=abs( (bet - bet0) / bet0);
-        opencossan.OpenCossan.cossanDisp(sprintf('* %i Convergence factor %e ',iIteration,convergenceFactor),2)
-        if convergenceFactor < toleranceDesignPoint,
-            Sexitflag   = 'HL-RF converged';
-            break
-        elseif iIteration == Nmaxiteration
-            Sexitflag = 'HL-RF exceeded maximum number of function evaluations';
-            break
+            if ~isempty(alpha)
+                localSensitivity = LocalSensitivityMonteCarlo('Xtarget',obj, ...
+                    'Coutputname',{obj.PerformanceFunctionVariable},...
+                    'Cinputnames',obj.Input.RandomInputNames,'VreferencePoint',physical,...
+                    'Valpha',alpha);
+            else
+                localSensitivity = LocalSensitivityMonteCarlo('Xtarget',obj, ...
+                    'Coutputname',{obj.SperformanceFunctionVariable},...
+                    'Cinputnames',obj.Input.RandomInputNames,'VreferencePoint',physical);
+            end
         end
         
-        bet0    = bet;
+        % Compute the gradient
+        [gradient, out] = localSensitivity.computeGradientStandardNormalSpace();
+        numberOfSamples = numberOfSamples + out.NumberOfSamples;
+        
+        Vg = out.Samples.(obj.PerformanceFunctionVariable);
+        if iteration == 1
+            perfomanceAtOrigin = Vg(1);
+        end
+        
+        evaluationPoint = obj.Input.map2stdnorm(gradient.VreferencePoint);
+        evaluationPoint = evaluationPoint{:,:};
+        
+        alpha = gradient.Valpha;
+        
+        b = (evaluationPoint * alpha) * alpha';
+        u{: , :} = b - Vg(1) / norm(gradient.Vgradient) * alpha';
+        
+        % Compute safety factor beta
+        if iteration == 1
+            beta_last  = norm(u{:,:});
+        else
+            beta  = norm(u{:,:});
+            delta = abs((beta - beta_last) / beta_last);
+            opencossan.OpenCossan.cossanDisp(sprintf('* %i Convergence factor %e ',iteration, delta),2)
+            beta_last = beta;
+        end
     end
     
-    %% Update Optimum object
-    % Add only the values of the constraints
-     XoptGlobal=XoptGlobal.addIteration('MdesignVariables',MphysicalGradient,...
-                            'ConstraintFunction',Vg,...
-                            'Viterations',repmat(iIteration,size(MphysicalGradient,1),1));
-                        
+    %% Construct the outputs
+    designPoint = DesignPoint('Description','DesignPoint from HLRF algorithm', ...
+        'performanceatorigin', perfomanceAtOrigin, ...
+        'FunctionEvaluations', numberOfSamples, ...
+        'designpoint', obj.Input.map2physical(u), ...
+        'model', obj);
 end
-
-Xoptimum=XoptGlobal;
-Xoptimum.Sexitflag=Sexitflag;
-%% Construct the outputs
-
-Xdp=DesignPoint('Sdescription','DesignPoint from HLRF algorithm', ...
-    'perfomanceAtOrigin',perfomanceAtOrigin,...
-    'NFunctionEvaluations',XsimOut.Nsamples,...
-    'Vdesignpointstdnormal',Vu, ...
-    'XProbabilisticModel',Xobj);
-
-
