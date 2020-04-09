@@ -1,5 +1,5 @@
-function [samples, weights] = sampleWithDesignPoint(obj, varargin)
-    %SAMPLEWITHDESIGNPOINT Summary of this function goes here
+function [samples, weights] = sample(obj, varargin)
+    %SAMPLE Summary of this function goes here
     %   Detailed explanation goes here
     [required, varargin] = opencossan.common.utilities.parseRequiredNameValuePairs("input", varargin{:});
     optional = opencossan.common.utilities.parseOptionalNameValuePairs("samples", {obj.NumberOfSamples}, varargin{:});
@@ -30,4 +30,3 @@ function [samples, weights] = sampleWithDesignPoint(obj, varargin)
     samples = required.input.map2physical(samples);
     samples = required.input.completeSamples(samples);
 end
-

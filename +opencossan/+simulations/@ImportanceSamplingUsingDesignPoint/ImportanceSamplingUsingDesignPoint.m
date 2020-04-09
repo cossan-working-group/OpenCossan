@@ -1,4 +1,4 @@
-classdef ImportanceSampling < opencossan.simulations.MonteCarlo
+classdef ImportanceSamplingUsingDesignPoint < opencossan.simulations.MonteCarlo
     %IMPORTANCESAMPLING class definitoin of the ImportanceSampling
     %
     % See Also: http://cossan.cfd.liv.ac.uk/wiki/index.php/@ImportanceSampling
@@ -24,25 +24,26 @@ classdef ImportanceSampling < opencossan.simulations.MonteCarlo
     properties (SetAccess = protected)
         ProposalDistribution opencossan.common.inputs.random.RandomVariableSet = ...
             opencossan.common.inputs.random.RandomVariableSet.empty();
+        DesignPoint opencossan.reliability.DesignPoint = opencossan.reliability.DesignPoint.empty();
     end
     
     methods
-        function obj = ImportanceSampling(varargin)
+        function obj = ImportanceSamplingUsingDesignPoint(varargin)
             %IMPORTANCESAMPLING
             
             if nargin == 0
                 super_args = {};
             else
                 [optional, super_args] = opencossan.common.utilities.parseOptionalNameValuePairs(...
-                    "proposaldistribution", ...
-                    {opencossan.common.inputs.random.RandomVariableSet.empty()}, ...
+                    "designpoint", ...
+                    {opencossan.reliability.DesignPoint.empty()}, ...
                     varargin{:});
             end
             
             obj@opencossan.simulations.MonteCarlo(super_args{:});
             
             if nargin > 0
-                obj.ProposalDistribution = optional.proposaldistribution;
+                obj.DesignPoint = optional.designpoint;
             end
         end
         
