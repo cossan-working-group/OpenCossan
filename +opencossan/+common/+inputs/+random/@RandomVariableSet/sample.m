@@ -41,8 +41,6 @@ You should have received a copy of the GNU General Public License along
 with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
 %}
 
-import opencossan.common.Samples
-
 assert(isnumeric(Nsamples) && 0 < Nsamples && mod(Nsamples,1) == 0,...
     'openCOSSAN:RandomVariableSet:sample',...
     'The number of samples has to be positiv, numeric and an integer.');

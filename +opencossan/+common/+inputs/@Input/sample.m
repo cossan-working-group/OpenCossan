@@ -40,8 +40,6 @@ function samples = sample(obj,varargin)
     %  not, see <http://www.gnu.org/licenses/>.
     % =====================================================================
     
-    import opencossan.common.Samples
-    
     %% Process inputs
     p = inputParser;
     p.FunctionName = 'opencossan.common.inputs.Input.sample';

@@ -106,18 +106,7 @@ classdef ModelTest < matlab.mock.TestCase
             out = model.apply(testCase.InputStub);
             testCase.verifyClass(out,'matlab.mock.classes.SimulationDataMock');
         end
-        
-        function shouldRunApplyWithSamples(testCase)
-            model = opencossan.common.Model('Input', testCase.InputStub, ...
-                'Evaluator', testCase.EvaluatorStub);
-            samplesStub = testCase.createMock(...
-                ?opencossan.common.Samples);
-            out = model.apply(samplesStub);
-            testCase.verifyClass(out,'matlab.mock.classes.SimulationDataMock');
-        end
-        
     end
-    
 end
 
 

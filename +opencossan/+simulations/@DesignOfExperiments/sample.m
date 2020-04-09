@@ -27,7 +27,6 @@ function [samples, obj] = sample(obj,varargin)
 % =====================================================================
 
 import opencossan.common.Dataseries
-import opencossan.common.Samples
 
 required = opencossan.common.utilities.parseRequiredNameValuePairs("input", varargin{:});
 validateattributes(required.input, {'opencossan.common.inputs.Input'}, {'scalar'});
