@@ -86,6 +86,7 @@ MisPhysicalSpace=zeros(Nsamples,size(Xobj.Cmapping,1)); % Samples of the proposa
 MhPdfLog=zeros(Nsamples,length(Xobj.XrvsetUD)); % percentile of the samples from the proposal distribution
 MfPdfLog=zeros(Nsamples,Nrvset);                % percentile of the samples from the original distribution
 MconditionalPdfLog=zeros(Nsamples,Nrvset);      % percentile of the samples from the conditional distribution
+MunmappedPdfLog=zeros(Nsamples,Nrvset);  
 
 %% Generate the samples from the "Proposal distribution"
 irvStart=0; % reset counter
@@ -95,6 +96,7 @@ for irvs=1:length(Xobj.XrvsetUD)
     
     XsUD = Xobj.XrvsetUD{irvs}.sample(Nsamples);  % Samples object 
     MisPhysicalSpace(:,Vindices)=XsUD.MsamplesPhysicalSpace;
+    MisSNS(:,Vindices)=XsUD.MsamplesStandardNormalSpace;
     
     % compute the pdf of the samples
     MhPdfLog(:,irvs)   = evalpdf(Xobj.XrvsetUD{irvs},'Xsamples',XsUD,'Llog',true);
@@ -129,7 +131,7 @@ for irvs=1:Nrvset
     if ~isempty(Vindices)
         if isempty(Xrvset.McorrelationNataf)
             Msamples(:,Vindices)=randn(Nsamples,length(Vindices));
-            MconditionalPdfLog(:,irvs) = sum(log(normpdf(Msamples(:,Vindices))),2);
+            MconditionalPdfLog = 0;
         else
             % Generate values from a multivariate normal distribution with
             % specified mean vector and covariance matrix.
@@ -143,14 +145,27 @@ for irvs=1:Nrvset
             Msigma22=Xrvset.McorrelationNataf(VindicesIS~=0,VindicesIS~=0);
             % then the distribution of x1 conditional on x2 = a is
             % multivariate normal  where:
-            Vmeans=Msamples(:,VindicesIS~=0)*(Msigma12/Msigma22)';
+            Vmeans=MisSNS*(Msigma12/Msigma22)';
             Mcovariance = Msigma11-Msigma12/Msigma22*Msigma12';
             Msamples(:,Vindices)=mvnrnd(Vmeans,Mcovariance);
-            MconditionalPdfLog(:,irvs) =log(mvnpdf(Msamples(:,Vindices),Vmeans,Mcovariance));
+            % The correction factor is the ratio between the pdf of the
+            % correlated normal and the uncorrelated normal (eq. 11 paper
+            % on nataf transformation)
+            MconditionalPdfLog(:,irvs) =log(mvnpdf(Msamples(:,Vindices),Vmeans,Mcovariance)) - sum(log(normpdf(Msamples(:,Vindices))),2);
         end
     end
     
-    MsamplesPhysicalSpace=Xrvset.map2physical(Msamples);
+    MsamplesPhysicalSpace=zeros(size(Msamples));    
+    MunmappedPdfLog(:,irvs) = 0;
+    for irv = Vindices
+        % compute the pdf of the unmapped by skipping the RVSET, since the
+        % samples are already correlated. We have already done the first
+        % step of Nataf, and calling the function of rvset will end up
+        % reapplying the correlation twice!
+        MunmappedPdfLog(:,irvs) = MunmappedPdfLog(:,irvs) + log(Xrvset.Xrv{irv}.evalpdf(MsamplesPhysicalSpace(:,irv)));
+        MsamplesPhysicalSpace(:,irv) = Xrvset.Xrv{irv}.map2physical(Msamples(:,irv));
+    end
+        
     % Replace samples from the IS distribution
     MsamplesPhysicalSpace(:,VindicesIS~=0)=MisPhysicalSpace(:,VindicesIS(VindicesIS~=0));
     
@@ -169,7 +184,7 @@ for irvs=1:Nrvset
 end
 
 %% Compute the weights
-Vweights    = exp(sum(MfPdfLog,2) - sum(MhPdfLog,2)-sum(MconditionalPdfLog,2));
+Vweights    = exp(sum(MfPdfLog,2) - sum(MhPdfLog,2) -sum(MunmappedPdfLog,2) -sum(MconditionalPdfLog,2));
 
 % Add weights to the samples object
 Xs.Vweights=Vweights;
