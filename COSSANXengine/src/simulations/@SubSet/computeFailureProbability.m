@@ -1,7 +1,6 @@
 function [Xpf,varargout]=computeFailureProbability(Xobj,Xtarget)
-%COMPUTEFAILUREPROBABILITY method. This method computes the Failure
-%Probability (pf) associate to a ProbabilisticModel / SystemReliability /
-%MetaModel by means of SubSet Simulation methods.
+%COMPUTEFAILUREPROBABILITY computes the failure probability using subset simulation 
+% of the associate ProbabilisticModel.
 %
 % See also:
 % https://cossan.co.uk/wiki/index.php/computeFailureProbability@Simulation
