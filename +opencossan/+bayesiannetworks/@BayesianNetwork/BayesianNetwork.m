@@ -59,6 +59,7 @@ classdef BayesianNetwork < opencossan.common.CossanObject
                 return
             else
                 % Process inputs via inputParser
+                
                 p = inputParser;
                 p.FunctionName = 'opencossan.bayesiannetworks.BayesianNetwork';
                 
