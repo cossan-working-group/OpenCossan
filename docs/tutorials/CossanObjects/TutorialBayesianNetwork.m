@@ -8,9 +8,16 @@ import opencossan.bayesiannetworks.BayesianNetwork
 import opencossan.bayesiannetworks.DiscreteNode
 
 % initialize variable n (number of nodes in the net)
-n=0; 
+n=0;
 
 %% Build Network Node Objects
+% Cell's structure must be (X1,X2...,Xn,Xc) where,X1,X2,...,Xn correspond 
+% to the number of states of the parents (X1,X2,...,Xn)of the current node Xc
+% E.g. cell(2,5,6,2) means that parents X1, X2, and X3, have 2,5, and 6
+% states respectively. The curret node has 2 states.
+% If Xc is a binary root, the cell dimensions must be (1,2).
+% Variable Nodes, contain the objects DiscreteNode with all its properties
+% Node1 : Fire (state 1 = False; state 2 = True)
 % Node1: Occurrence of Fire (state 1= not occurred; state 2= occurred)
 n=n+1;
 CPD_Fire=cell(1,2);
@@ -54,16 +61,22 @@ CPD_Report(1,[1,2])={0.80 0.2};
 CPD_Report(2,[1,2])={0.24 0.76};
 Nodes(1,n)=DiscreteNode('Name','Report','CPD',CPD_Report,'Parents', "Evacuation");
 
-%% Build EnhancedBayesianNetwork objecty
+%% Build BayesianNetwork object
 XFire=BayesianNetwork('Nodes',Nodes);
 % Visualize Net
 XFire.makeGraph
 
 
 %% Inference
-% Different options for inference through the method computeInference:
+% Different options for inference through the method computeBNInference:
+% In this case the queried variables are Fire, Report and Smoke, the
+% state 2 of variable Fire has been introduced as new info (evidence) to update the model
+% USE Bayes' Toolbox for Matlab (must be installed and in the path!) 
+% OpenCossan\lib\bnt or...
+% Notice here, we use computeBNInference 
 
-% USE Bayes' Toolbox for Matlab (must be installed and in the path!) or...
+% USE Bayes' Toolbox for Matlab (must be installed and in the path!) 
+% OpenCossan-master\lib\bnt or...
 Marginal_BuiltIn=XFire.computeBNInference('MarginalProbability',["Fire","Report","Smoke"],...
     'useBNT',false,'ObservedNode',"Fire",...
     'Evidence',2,...
@@ -74,7 +87,7 @@ Joint_BuiltIn=XFire.computeBNInference('JointProbability',["Fire","Report","Smok
     'Evidence',2,...
     'Algorithm',"Variable Elimination"); 
 
-
+% Using Bayes' Toolbox for Matlab
 Marginal_BNT=XFire.computeBNInference('MarginalProbability',["Fire","Report","Smoke"],...
     'useBNT',true,'ObservedNode',"Fire",...
     'Evidence',2,...
