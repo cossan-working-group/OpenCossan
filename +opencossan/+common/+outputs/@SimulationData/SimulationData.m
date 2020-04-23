@@ -55,8 +55,6 @@ classdef SimulationData
                 return
             end
             
-            opencossan.OpenCossan.validateCossanInputs(varargin{:})
-            
             for k=1:2:length(varargin)
                 switch lower(varargin{k})
                     case {'table'}

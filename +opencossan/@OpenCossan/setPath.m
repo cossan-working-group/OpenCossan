@@ -36,7 +36,7 @@ if ~isdeployed % TODO: We need a way to check and initialise toolboxes in a depl
     for i = 1:numel(obj.Toolboxes)
         addpath(genpath(obj.Toolboxes(i)));
     end
-    
+   
     % Save the userpath
     savepath(fullfile(userpath,'pathdef.m'));
     

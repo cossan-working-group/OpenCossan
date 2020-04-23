@@ -67,8 +67,7 @@ classdef (Sealed) OpenCossan < handle
         % script required to initilise the toolbox. The second column
         % contains the name of the toolboxes.
         % The following paths are relative to the cossan root
-        Toolboxes = "lib/bnt";
-        
+        Toolboxes = "lib/bnt";        
         RequiredMatlabVersion='9.5'; % Minimum required Matlab version
         KillFileName='KILL';
     end

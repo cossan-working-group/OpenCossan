@@ -34,9 +34,7 @@ Cinputs=Xobj.Cmapping(:,1);
 Sstring='Xinput=XprobabilisticModel.Xmodel.Xinput;';
 Sstring=[Sstring 'XperformanceFunction=XprobabilisticModel.XperformanceFunction;'];
 Sstring=[Sstring 'Xmodel=XprobabilisticModel.Xmodel;'];
-if isa(Xobj.XprobabilisticModel.Xmodel,'Model')
-    Sstring=[Sstring 'Xevaluator=Xmodel.Xevaluator;'];
-end
+Sstring=[Sstring 'Xevaluator=Xmodel.Xevaluator;'];
 
 %% Update Input object
 % The current values of the input objects are updated according to the
@@ -49,11 +47,8 @@ for n=1:size(Xobj.Cmapping,1)
 end
 
 %% Reconstruct Model
-if isa(Xobj.XprobabilisticModel.Xmodel,'Model')
-    Sstring=[Sstring 'Xmodel=Model(''Xinput'',Xinput,''Xevaluator'',Xevaluator);'];
-elseif isa(Xobj.XprobabilisticModel.Xmodel,'MetaModel')
-    Sstring=[Sstring 'Xmodel.Xinput=Xinput;'];
-end
+Sstring=[Sstring 'Xmodel=Model(''Xinput'',Xinput,''Xevaluator'',Xevaluator);'];
+
 
 % Reconstruct ProbabilisticModel
 Sstring=[Sstring 'XprobabilisticModel=ProbabilisticModel(''XperformanceFunction'',XperformanceFunction,''Xmodel'',Xmodel);'];

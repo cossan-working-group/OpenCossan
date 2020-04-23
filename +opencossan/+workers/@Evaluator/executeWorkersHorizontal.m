@@ -50,7 +50,7 @@ TableOutputSolver=[];
 % Evaluator execution
 for n=1:length(Xobj.CXsolvers)
     OpenCossan.cossanDisp(['[Status:workers  ]  * Processing solver ' ...
-        num2str(n) '/' num2str(length(Xobj.CXsolvers))],3)
+        num2str(n) '/' num2str(length(Xobj.CXsolvers))],4)
     
     % Merge tableInput with output produced by the workers and then
     % pass only the inputs required by the specific worker.

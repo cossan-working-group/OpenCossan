@@ -198,7 +198,7 @@ classdef FunctionTest < matlab.unittest.TestCase
         
         function evaluateDesignVariable(testCase)
             Xin = opencossan.common.inputs.Input();
-            Xpar = opencossan.optimization.DesignVariable('value', 0);
+            Xpar = opencossan.optimization.ContinuousDesignVariable('value', 0, 'lowerbound', -1, 'upperbound', 1);
             Xin = Xin.add('Member', Xpar, 'Name', 'Xpar');
             Xfun = opencossan.common.inputs.Function('Expression', '<&Xpar&>*2');
             

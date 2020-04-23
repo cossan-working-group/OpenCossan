@@ -26,9 +26,9 @@ while isempty(SexitFlag)
     Xobj.ibatch = Xobj.ibatch + 1;
     
     % Lap time for each batch
-    OpenCossan.setLaptime('description',[' Batch #' num2str(Xobj.ibatch)]);
+    opencossan.OpenCossan.getTimer().lap('description',[' Batch #' num2str(Xobj.ibatch)]);
     
-    % Number of samples current batch    
+    % Number of samples current batch
     if Xobj.ibatch==Xobj.Nbatches || Xobj.Nsimxbatch==0
         Ns=Xobj.Nlastbatch;
     else
@@ -43,7 +43,7 @@ while isempty(SexitFlag)
         
     Xinput=set(Xinput,'Xsamples',Xs);
     
-    OpenCossan.cossanDisp(['Design of Experiments simulation Batch ' num2str(Xobj.ibatch) ...
+    opencossan.OpenCossan.cossanDisp(['Design of Experiments simulation Batch ' num2str(Xobj.ibatch) ...
             ' ( ' num2str(Ns) ' samples)' ],4)
     
     %% evaluate Xtarget model 
@@ -56,7 +56,7 @@ while isempty(SexitFlag)
     else
         exportResults(Xobj,'Xsimulationoutput',Xout);
         % Keep in memory only the SimulationData of the last batch
-        XsimOut=Xout; 
+        XsimOut=Xout;
     end
         
     % check termination criteria
@@ -65,6 +65,6 @@ end
 
 % Add termination criteria to the FailureProbability
 XsimOut(end).SexitFlag=SexitFlag;
-XsimOut(end).SbatchFolder=[OpenCossan.getCossanWorkingPath filesep Xobj.SbatchFolder];
+XsimOut(end).SbatchFolder=[opencossan.OpenCossan.getWorkingPath filesep Xobj.SbatchFolder];
 
-OpenCossan.setLaptime('description','End apply@DesignOfExperiments');
+opencossan.OpenCossan.getTimer().lap('description','End apply@DesignOfExperiments');

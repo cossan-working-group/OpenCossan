@@ -48,9 +48,9 @@ switch lower(Xmio.Format)
             'Missing Output: %s'], ...
             sprintf(' "%s"; ',Xmio.OutputNames{~isfield(Toutput,Xmio.OutputNames)}))
         % Construct output Table
-        TableOutput=struct2table(Toutput);
+        TableOutput=struct2table(Toutput, 'AsArray', true);
     case 'matrix'
-        MinputMIO = table2array(TableInput);
+        MinputMIO = TableInput{:,:};
         
         if Xmio.IsFunction
             MoutputMIO = feval(Xmio.FunctionHandle,MinputMIO);
@@ -64,8 +64,7 @@ switch lower(Xmio.Format)
             ' Output size: %i %i; Expected size: %i %i'], ...
             size(MoutputMIO),height(TableInput),length(Xmio.OutputNames))
         
-        TableOutput=array2table(MoutputMIO,'VariableNames',Xmio.OutputNames);
-        
+        TableOutput = array2table(MoutputMIO,'VariableNames',Xmio.OutputNames);
     case 'vectors'  % Function with multiple input and output
         if Xmio.IsFunction           
             % Create Input variables
@@ -81,8 +80,6 @@ switch lower(Xmio.Format)
             
             % Evaluate Mio
             eval(Sexec);
-            
-            
         else
             error('OpenCossan:Mio:evaluate:vectorScript',...
                 'It is not possible to use vectors format with a script.')
@@ -95,7 +92,6 @@ switch lower(Xmio.Format)
         else
             TableOutput  = runScript(Xmio,TableInput);
         end
-        
          % Check output
         assert(all(ismember(TableOutput.Properties.VariableNames,Xmio.OutputNames)),...
             'OpenCossan:Mio:evaluate:wrongOutputTable',...

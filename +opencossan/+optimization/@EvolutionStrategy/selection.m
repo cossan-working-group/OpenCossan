@@ -1,11 +1,10 @@
-function [Mparents] = selection(Xobj,Mparents,Moffspring)
-% SELECTION: Private method for EvolutionStrategy
+function parents = selection(obj, parents, offsprings)
+% SELECTION
 
-if (Xobj.Sselection=='+'),
-    Moffspring  = [Mparents;Moffspring];
+if (obj.SelectionScheme == '+')
+    offsprings = [parents; offsprings];
 end
 
-[~,Vind] = sort(Moffspring(:,end));
-Mparents    = Moffspring(Vind(1:Xobj.Nmu),:);
-
+[~, Vind] = sort(offsprings(:,end));
+parents = offsprings(Vind(1:obj.Nmu), :);
 return

@@ -85,7 +85,7 @@ classdef BayesianModelUpdating
             
         end
         
-       Xmodel = obj.applyTMCMC(obj);
+       Xmodel = applyTMCMC(obj);
         
     end
     

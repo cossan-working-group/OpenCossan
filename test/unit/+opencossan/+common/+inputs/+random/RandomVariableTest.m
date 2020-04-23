@@ -62,7 +62,7 @@ classdef RandomVariableTest < matlab.unittest.TestCase
         function transform2designVariable(testCase)
             random = opencossan.common.inputs.random.ExponentialRandomVariable('lambda', 2.2913); 
             designVariable = random.transform2designVariable;
-            testCase.verifyEqual(designVariable.value, random.Mean);
+            testCase.verifyEqual(designVariable.Value, random.Mean);
         end
     end
 end

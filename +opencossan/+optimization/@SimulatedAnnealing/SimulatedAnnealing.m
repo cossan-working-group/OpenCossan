@@ -1,123 +1,53 @@
 classdef SimulatedAnnealing < opencossan.optimization.Optimizer
-    %   SimulatedAnnealing (SA) is a gradient-free optimization method. SA can
-    %   be used to find a MINIMUM of a function.
-    %% Properties of the object
-    properties % Public access
-        k1 = 0.9   % 1st parameter for the annealing strategy (for temperatureCossan)
-        k2 = 1     % 2nd parameter for the annealing strategy (for temperatureCossan)
-        k3 = 0     % 3rd parameter for the annealing strategy (for temperatureCossan)
-        Vsigma              % Parameter of the annealingCossan function
-        initialTemperature   = 100  % Initial Temperature
-        NreannealInterval    = 100  % number of moves required to update the T
-        StemperatureFunction = 'temperatureexp'  % Temperature function
-        SannealingFunction = 'annealingboltz'    % Function used to generate new solution  for the next iteration.
-        Nmaxmoves   = 2000    %Maximum number of moves without improvement
+    %   SimulatedAnnealing (SA) is a gradient-free optimization method. SA can be used to find a
+    %   MINIMUM of a function.
+    
+    properties
+        InitialTemperature(1,:) double = 100  % Initial Temperature
+        ReannealInterval(1,1) {mustBeInteger} = 100  % number of moves required to update the T
+        TemperatureFunction(1,:) char {mustBeMember(TemperatureFunction, {'temperatureexp', ...
+            'temperaturefast', 'temperatureboltz'})} = 'temperatureexp';  % Temperature function
+        AnnealingFunction(1,:) char {mustBeMember(AnnealingFunction, {'annealingfast', ...
+            'annealingboltz'})} = 'annealingboltz';    % Function used to generate new solution  for the next iteration.
+        StallIterLimit(1,1) {mustBeInteger} = 2000;    %Maximum number of moves without improvement
     end
     
-    properties (Hidden,SetAccess = private)
-        CtemperatureFunction={'temperatureexp' 'temperaturefast' 'temperatureboltz' 'temperatureCossan'}
-        CannealingFunction={'annealinguniform' 'annealingfast' 'annealingboltz' 'annealingCossan'}
+    properties (Hidden)
+        ExitReasons = containers.Map([1, 5, 0, -1, -2, -5],[
+            "Average change in the value of the objective function over options.MaxStallIterations iterations is less than options.FunctionTolerance.", ...
+            "options.ObjectiveLimit limit reached.", ...
+            "Maximum number of function evaluations or iterations reached.", ...
+            "Optimization terminated by an output function or plot function.", ...
+            "No feasible point found.", ...
+            "Time limit exceeded."]);
     end
     
-    %% Methods inherited from the superclass
     methods
-        [Xoptimum,varargout]= apply(Xobj,varargin)  %This method perform the simulation adopting the Xobj
-        [Lstop,Toptions,Loptchanged] = outputFunction(XOptimizer,Toptions,optimvalues,Sflag)
-                
-        function Xobj   = SimulatedAnnealing(varargin)
-            %% Constructor
-            %SimulatedAnnealing    Constructor function for class SimulatedAnnealing
-            %
-            %   SimulatedAnnealing      This is the contructor for class the
-            %               SimulatedAnnealing; Simulated Annealing (SA) can be used to
-            %               find a MINIMUM of a function. It is intended for solving
-            %               the problem
-            %
-            %                       min f_obj(x)
-            %                       x in R^n
-            %
-            % See Also: http://cossan.cfd.liv.ac.uk/wiki/index.php/@SimultatedAnnealing
-            %
-            % Copyright~1993-2011,COSSAN Working Group, University~of~Innsbruck, Austria
-            % Author: Edoardo Patelli
+        function obj = SimulatedAnnealing(varargin)
+            %SIMULATEDANNEALING
             
-            % Argument Check
-            OpenCossan.validateCossanInputs(varargin{:})
+            import opencossan.common.utilities.parseOptionalNameValuePairs;
+            if nargin == 0
+                super_args = {};
+            else
+                [optional, super_args] = parseOptionalNameValuePairs(...
+                    ["InitialTemperature", "ReannealInterval", "TemperatureFunction", ...
+                    "AnnealingFunction", "StallIterLimit"], ...
+                    {100, 100, 'temperatureexp', 'annealingboltz', 2000}, varargin{:});
+            end
             
-            % Set predefined values
-            Xobj.Sdescription   = 'SimulatedAnnealing object';
+            obj@opencossan.optimization.Optimizer(super_args{:});
             
-            % Process input arguments
-            for k=1:2:length(varargin)
-                switch lower(varargin{k})
-                    % From the super-class
-                    case 'sdescription'
-                        Xobj.Sdescription=varargin{k+1};
-                    case  {'nmax','nmaxmodelevaluations'}
-                        Xobj.Nmax=varargin{k+1};
-                    case 'nmaxiterations'
-                        Xobj.NmaxIterations=varargin{k+1};
-                    case  'timeout'
-                        Xobj.timeout=varargin{k+1};
-                    case  'objectivelimit'
-                        Xobj.objectiveLimit=varargin{k+1};
-                    case  'toleranceobjectivefunction'
-                        Xobj.toleranceObjectiveFunction=varargin{k+1};
-                    case  'tolerancedesignvariables'
-                        Xobj.toleranceDesignVariables=varargin{k+1};
-                    case 'lintermediateresults'
-                        Xobj.Lintermediateresults=varargin{k+1};
-                    case  'scalingfactor'
-                        Xobj.scalingFactor=varargin{k+1};
-                    case  'penaltyfactor'
-                        Xobj.penaltyFactor=varargin{k+1};
-                    case  'xjobmanager'
-                        Xobj.XjobManager=varargin{k+1};
-                    case {'nseedrandomnumbergenerator'}
-                        Nseed       = varargin{k+1};
-                        Xobj.RandomNumberGenerator = ...
-                            RandStream('mt19937ar','Seed',Nseed);
-                    case {'xrandomnumbergenerator'}
-                        if isa(varargin{k+1},'RandStream'),
-                            Xobj.XrandomNumberGenerator  = varargin{k+1};
-                        else
-                            error('openCOSSAN:optimization:CrossEntropy',...
-                                ['argument associated with (' varargin{k} ') is not a RandStream object']);
-                        end
-                        % Simulated Annealing properties
-                    case  'stemperaturefunction'
-                        assert(ismember(varargin{k+1},Xobj.CtemperatureFunction), ...
-                            'openCOSSAN:SimulatedAnnealing', ...
-                            strcat('Available options for StemperatureFunction are: ',sprintf('%s ', Xobj.CtemperatureFunction{:})))
-                        Xobj.StemperatureFunction=varargin{k+1};
-                        
-                    case  'sannealingfunction'
-                        assert(ismember(varargin{k+1},Xobj.CannealingFunction), ...
-                            'openCOSSAN:SimulatedAnnealing', ...
-                            strcat('Available options for Sannealingfunction are: ',sprintf('%s ',Xobj.CannealingFunction{:})))
-                        Xobj.SannealingFunction=varargin{k+1};
-                    case  'k1'
-                        Xobj.k1=varargin{k+1};
-                    case  'k2'
-                        Xobj.k2=varargin{k+1};
-                    case  'k3'
-                        Xobj.k3=varargin{k+1};
-                    case  'initialtemperature'
-                        Xobj.initialTemperature=varargin{k+1};
-                    case  'nreannealinterval'
-                        Xobj.NreannealInterval=varargin{k+1};
-                    case  'vsigma'
-                        Xobj.Vsigma=varargin{k+1};
-                    case  'nmaxmoves'
-                        Xobj.Nmaxmoves=varargin{k+1};
-                    otherwise
-                        error('openCOSSAN:SimulatedAnnealing',...
-                            'PropertyName %s  not valid ',varargin{k});
-                end
-                
-            end % input check
-            
-            
-        end % constructor
-    end % methods
-end % class
+            if nargin > 0
+                obj.InitialTemperature = optional.initialtemperature;
+                obj.ReannealInterval = optional.reannealinterval;
+                obj.TemperatureFunction = optional.temperaturefunction;
+                obj.AnnealingFunction = optional.annealingfunction;
+                obj.StallIterLimit = optional.stalliterlimit;
+            end
+        end
+        
+        optimum = apply(obj,varargin);
+    end
+    
+end
