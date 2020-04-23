@@ -14,6 +14,7 @@ import opencossan.bayesiannetworks.DiscreteNode
 import opencossan.common.inputs.random.*
 import opencossan.simulations.MonteCarlo %To reduce the network
 
+opencossan.OpenCossan.getInstance(); % Initialize OpenCossan add bnt toolbox to the path
 
 % initialize variable n (number of nodes in the net)
 n=0;

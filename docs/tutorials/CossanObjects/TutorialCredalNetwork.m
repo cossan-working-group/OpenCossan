@@ -12,6 +12,8 @@
 import opencossan.bayesiannetworks.CredalNetwork
 import opencossan.bayesiannetworks.CredalNode
 
+opencossan.OpenCossan.getInstance(); % Initialize OpenCossan add bnt toolbox to the path
+
 % initialize variable n (number of nodes in the net)
 n=0; 
 
