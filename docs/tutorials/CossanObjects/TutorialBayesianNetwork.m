@@ -7,6 +7,8 @@
 import opencossan.bayesiannetworks.BayesianNetwork
 import opencossan.bayesiannetworks.DiscreteNode
 
+opencossan.OpenCossan.getInstance(); % Initialize OpenCossan add bnt toolbox to the path
+
 % initialize variable n (number of nodes in the net)
 n=0;
 
