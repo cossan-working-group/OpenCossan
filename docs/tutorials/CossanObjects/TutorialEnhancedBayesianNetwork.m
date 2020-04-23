@@ -5,7 +5,6 @@
 %Author: Hector Diego Estrada-Lugo
 %
 % Import required packages (Need to be in the root of OpenCossan so it works)
-clear all
 
 import opencossan.bayesiannetworks.BayesianNetwork
 import opencossan.bayesiannetworks.EnhancedBayesianNetwork
@@ -134,7 +133,7 @@ Xhydrostation.makeGraph;
 
 % The Enhanced Bayesian network must be reduced to a traditional BN
 % choose the sampling method and use reduce2BN method to reduce the EBN
-XMC=MonteCarlo('Nsamples',1000);
+XMC=MonteCarlo('Nsamples',1000,'nseedrandomnumbergenerator',8128);
 XBNhydrostation=Xhydrostation.reduce2BN('SimulationObject',XMC);
 XBNhydrostation.makeGraph;
 
