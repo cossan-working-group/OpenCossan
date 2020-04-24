@@ -1,11 +1,9 @@
 classdef TutorialCantileverBeamMatlabTest < tutorials.TutorialTest
-
     properties
-        TutorialName  = 'TutorialCantileverBeamMatlab';
-        CoutputNames  = {'NominalDisplacement'};
-        CvaluesExpected = {0.0071922};
-        Ctolerance   = {0.000001};
-        PreTest     = {};
+        Name = "TutorialCantileverBeamMatlab";
+        Variables = "NominalDisplacement";
+        ExpectedValues = {0.0071922};
+        Tolerance = 1e-6;
+        PreTest = "";
     end
-
 end
