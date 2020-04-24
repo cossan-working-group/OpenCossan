@@ -43,7 +43,7 @@ function pdf = pdf(obj, samples)
     if (~obj.isIndependent())
         MY = obj.map2stdnorm(samples);
         
-        correction = mvnpdf(MY{:, obj.Names}, zeros(1, obj.Nrv), obj.NatafModel.Covariance) ./ prod(normpdf(MY{:, obj.Names}), 2);
+        correction = mvnpdf(MY{:, obj.Names}, [], obj.NatafModel.Correlation) ./ prod(normpdf(MY{:, obj.Names}), 2);
     else
         correction = 1; % no correction is required, as the rv's are independent
     end
