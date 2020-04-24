@@ -26,7 +26,7 @@ function [Xout] = deterministicAnalysis(Xobj)
 
 import opencossan.simulations.MonteCarlo
 
-OpenCossan.setLaptime('description','[ProbabilisticModel deterministicAnalysis] Start analysis')
+% opencossan.OpenCossan.setLaptime('description','[ProbabilisticModel deterministicAnalysis] Start analysis')
 
 %% Evaluate the Model and the PerformanceFunction
 % if ~isempty(Xobj.Xmodel)

@@ -18,7 +18,7 @@ for k=1:2:length(varargin)
         case 'vdirection'
             Vdirection = varargin{k+1};
         case 'pf0'
-            pf0 = varargin{k+1};
+            pf0 = varargin{k+1};\
         otherwise
             % error, unknown property specified
             error('OpenCossan:ProbabilisticModel:lineSearch',...

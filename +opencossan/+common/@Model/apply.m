@@ -21,11 +21,11 @@ along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
 
 import opencossan.OpenCossan
 
-OpenCossan.getTimer().lap('description','[Model Apply] Start model evaluation')
+% OpenCossan.getTimer().lap('description','[Model Apply] Start model evaluation')
 
 %  Evaluator execution
 XsimData = apply(obj.Evaluator, input);
 XsimData.Description = strjoin(XsimData.Description, " - apply(@Model)");
 
-OpenCossan.getTimer().lap('description','[Model Apply] Stop model evaluation')
+% OpenCossan.getTimer().lap('description','[Model Apply] Stop model evaluation')
 
