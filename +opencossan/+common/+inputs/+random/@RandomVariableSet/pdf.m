@@ -29,8 +29,10 @@ function pdf = pdf(obj, samples)
 
     validateattributes(samples, {'table'}, {});
     
+    pdf = table();
+    
     for i = 1:obj.Nrv
-        samples.(obj.Names(i)) = obj.Members(i).evalpdf(samples.(obj.Names(i)));
+        pdf.(obj.Names(i)) = obj.Members(i).evalpdf(samples.(obj.Names(i)));
     end
     
     % in case rv's are not independent, calculate correction coefficient for pdf this correction
@@ -46,5 +48,5 @@ function pdf = pdf(obj, samples)
         correction = 1; % no correction is required, as the rv's are independent
     end
     
-    pdf   = prod(samples{:,obj.Names}, 2) .* correction;
+    pdf   = prod(pdf{:, obj.Names}, 2) .* correction;
 end
