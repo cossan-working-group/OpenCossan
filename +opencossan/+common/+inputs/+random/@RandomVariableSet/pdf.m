@@ -41,9 +41,12 @@ function pdf = pdf(obj, samples)
     % marginals and covariances. Probabilistic Engineering Mechanics 1(2),105-112
     
     if (~obj.isIndependent())
-        MY = obj.map2stdnorm(samples);
+        MY = zeros(height(samples), obj.Nrv);
+        for i = 1:obj.Nrv
+            MY(:, i) = obj.Members(i).map2stdnorm(samples.(obj.Names(i)));
+        end
         
-        correction = mvnpdf(MY{:, obj.Names}, [], obj.NatafModel.Correlation) ./ prod(normpdf(MY{:, obj.Names}), 2);
+        correction = mvnpdf(MY, [], obj.NatafModel.Correlation) ./ prod(normpdf(MY), 2);
     else
         correction = 1; % no correction is required, as the rv's are independent
     end
