@@ -1,4 +1,4 @@
-function [pf, betaOpt] = computeFailureProbability(obj, model)
+function [pf, beta, betaOpt] = computeFailureProbability(obj, model)
     %Compute the FailureProbability
     %This method return the FailureProbability value associated to the
     %
@@ -80,7 +80,7 @@ function [pf, betaOpt] = computeFailureProbability(obj, model)
             nfail = nfail + 1;
             
             if b > betaOpt
-                [pf, cov, exit, ~] = checkConvergance(obj, nfail, nsim, betaOpt, dim);
+                [pf, cov, exit, ~] = checkConvergance(obj, nfail, nsim, beta, dim);
                 continue;
             end
             
@@ -106,7 +106,7 @@ function [pf, betaOpt] = computeFailureProbability(obj, model)
                 
                 betaOpt = newBeta;
                 
-                if deltaBeta < 0.01 || numel(x) == 5
+                if deltaBeta < 0.01
                     break;
                 end
 
@@ -129,11 +129,11 @@ function [pf, betaOpt] = computeFailureProbability(obj, model)
             fprintf("[ARBIS] Updated betaOpt: %f\n", betaOpt);
             fprintf("[ARBIS] Updated beta: %f\n", beta);
             
-            [pf, cov, exit, ~] = checkConvergance(obj, nfail, nsim, betaOpt, dim);
+            [pf, cov, exit, ~] = checkConvergance(obj, nfail, nsim, beta, dim);
             
             rng(rngOriginal);
         else
-            [pf, cov, exit, ~] = checkConvergance(obj, nfail, nsim, betaOpt, dim);
+            [pf, cov, exit, ~] = checkConvergance(obj, nfail, nsim, beta, dim);
             continue;
         end
     end
@@ -142,6 +142,7 @@ function [pf, betaOpt] = computeFailureProbability(obj, model)
         'simulationdata', simData, 'simulation', obj);
     
     fprintf("[ARBIS] Final betaOpt: %f\n", betaOpt);
+    fprintf("[ARBIS] Final beta: %f\n", beta);
 end
 
 function [pf, cov, exit, flag] = checkConvergance(obj, nfail, nsim, beta, n)   
