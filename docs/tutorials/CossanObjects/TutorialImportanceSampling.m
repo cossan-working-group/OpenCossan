@@ -105,26 +105,9 @@ Xis = opencossan.simulations.ImportanceSampling('samples',10,'proposalDistributi
 [XoTest, weights] = Xis.apply(Xpm);
 assert(all(weights == 1));
 
-
-%% Automatically compute the proposal density.
-% The flag Lcomputedesignpoint allows to (re)-computed automatically the desing point at run time
-% and then to used the estimated design point to define the proposal distribution. This feature is
-% extremly important in the optimization procedures or in Reliability Based Optimization analysis.
-
-XisAuto = opencossan.simulations.ImportanceSampling('samples',10);
-display(XisAuto)
-
-% Apply Importance Sampling
-XoAuto = XisAuto.apply(Xpm);
-display(XoAuto)
-
-% Compute the Failure Probability
-XpfAuto = XisAuto.computeFailureProbability(Xpm);
-display(XpfAuto)
-
 %% Estimate the Failure Probability
 % Set RandomNumber stream
-Xis = opencossan.simulations.ImportanceSampling('samples', 20000, 'seed', 51125);
+Xis = opencossan.simulations.ImportanceSampling('proposalDistribution', proposalDistribution, 'samples', 1e5, 'seed', 51125);
 Xmc = opencossan.simulations.MonteCarlo('samples', 1e5, 'seed', 51125);
 
 % Verificate the procedure
