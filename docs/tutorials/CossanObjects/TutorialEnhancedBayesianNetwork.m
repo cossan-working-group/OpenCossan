@@ -3,21 +3,29 @@
 %hydroelectricity station, based on data from the Lianghekou project
 %a station in southwest China.
 %Author: Hector Diego Estrada-Lugo
-%Supervisor: Edoardo Patelli
 %
-% Import required packages
+% Import required packages (Need to be in the root of OpenCossan so it works)
+
 import opencossan.bayesiannetworks.BayesianNetwork
 import opencossan.bayesiannetworks.EnhancedBayesianNetwork
 import opencossan.bayesiannetworks.ProbabilisticNode
 import opencossan.bayesiannetworks.DiscreteNode
-import opencossan.common.inputs.*
+import opencossan.common.inputs.random.*
 import opencossan.simulations.MonteCarlo %To reduce the network
 
+opencossan.OpenCossan.getInstance(); % Initialize OpenCossan add bnt toolbox to the path
 
 % initialize variable n (number of nodes in the net)
 n=0;
 
 %% Build Network Node Objects
+% Cell's structure must be (X1,X2...,Xn,Xc) where,X1,X2,...,Xn correspond 
+% to the number of states of the parents (X1,X2,...,Xn)of the current node Xc
+% E.g. cell(2,5,6,2) means that parents X1, X2, and X3, have 2,5, and 6
+% states respectively. The curret node has 2 states.
+% If Xc is a binary root, the cell dimensions must be (1,2).
+% Variable Nodes, contain the objects DiscreteNode with all its properties
+% Node1 : Fire (state 1 = False; state 2 = True)
 % Node1a: Emission Scenario (state 1=RCP4.5; state 2=RCP8.5)
 n=n+1;
 CPD_Emission=cell(1,2);
@@ -71,16 +79,22 @@ CPD_WaterLevel(5,[1,2])={0.1 0.9};
 Nodes(1,n)=DiscreteNode('Name','WaterLevel','CPD',CPD_WaterLevel,...
     'Parents',"ExtremePrecipitation");
 
+% ProbabilisticBode is used to define a node described by a continous
+% Random Variable. Please consult Cossan wiki to see all the distributions
+% available. 
 % Node5: Wave Raising Height (state 1= 10m/s; state 2= 22m/s windspeed)
 n=n+1;
 CPD_WaveRaising=cell(2,1);
-CPD_WaveRaising(1,1)={RandomVariable('Sdescription','WaveRaising','Sdistribution',...
-    'Rayleigh','par1',0.387)}; % Wind speed=10m/s
-CPD_WaveRaising(2,1)={RandomVariable('Sdescription','WaveRaising','Sdistribution',...
-    'Rayleigh','par1',2.068)}; % Wind speed=22m/s
+CPD_WaveRaising(1,1)={RayleighRandomVariable('Description','WaveRaising','Sigma', 0.387)}; % Wind speed=10m/s
+CPD_WaveRaising(2,1)={RayleighRandomVariable('Description','WaveRaising','Sigma',2.068)}; % Wind speed=22m/s
 Nodes(1,n)=ProbabilisticNode('Name','WaveRaising','CPD',CPD_WaveRaising,...
     'Parents',"WindVelocity");
 
+
+% A child ProbabilisticNode is used as a repository on which the
+% probabilistic parents will be reduced on. The CPD must be defined in
+% terms of Loads and Resistances in which the TableInputs are the output
+% smaples from the ProbabilisticNode parents.
 % Node5: Wave Raising Height (state 1= 10m/s; state 2= 22m/s windspeed)
 n=n+1;
 CPD_child=cell(2,1);
@@ -117,12 +131,15 @@ Xhydrostation=EnhancedBayesianNetwork('Nodes',Nodes);
 % Visualize Net
 Xhydrostation.makeGraph;
 
-% reduce to BN
-XMC=MonteCarlo('Nsamples',1000);
+% The Enhanced Bayesian network must be reduced to a traditional BN
+% choose the sampling method and use reduce2BN method to reduce the EBN
+XMC=MonteCarlo('Nsamples',1000,'nseedrandomnumbergenerator',8128);
 XBNhydrostation=Xhydrostation.reduce2BN('SimulationObject',XMC);
 XBNhydrostation.makeGraph;
 
 %% Introduce evidence
-% XBNhydrostation.Cevidence{strcmp(XBNhydrostation.CSnames,'ScenarioEmission')}=1;
+% Once network is reduced, inference can be computed with the
+% computeBNInference method
+
 % with the built-in algorithm
 Marginalization=XBNhydrostation.computeBNInference('MarginalProbability',["Overtopping","StationDamage"], 'useBNT',false);
