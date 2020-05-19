@@ -1,0 +1,25 @@
+# Project
+site_name: OpenCossan
+site_description: OpenCossan is an open and free toolbox for uncertainty quantification and management.
+
+# Copyright
+copyright: Copyright &copy; 2020 Cossan Working Group
+
+# Navigation
+nav:
+    - Home: index.md
+    - Getting started: getting-started.md
+
+# Repository
+repo_name: OpenCossan
+repo_url: https://github.com/cossan-working-group/OpenCossan
+
+# Theming
+theme:
+  name: material
+  language: en
+
+# Extensions
+markdown_extensions:
+  - attr_list
+  - admonition
