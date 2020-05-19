@@ -47,10 +47,11 @@ function objective = evaluate(obj, varargin)
     if ~isempty(optional.model)
         output = optional.model(x);
     elseif ~isempty(optProb.Model)
-        input = optProb.Input.setDesignVariable('CSnames',optProb.DesignVariableNames,'Mvalues',x);
-        input = input.getTable();
+        input = array2table(x);
+        input.Properties.VariableNames = optProb.DesignVariableNames;
+        input = optProb.Input.completeSamples(input);
         result = apply(optProb.Model, input);
-        output = result.TableValues;
+        output = result.Samples;
         opencossan.optimization.OptimizationRecorder.recordModelEvaluations(output);
     else
         input = array2table(x);
