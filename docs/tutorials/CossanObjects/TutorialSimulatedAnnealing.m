@@ -13,7 +13,7 @@
 X1      = opencossan.optimization.ContinuousDesignVariable('Description','design variable 1','value',0); 
 X2      = opencossan.optimization.ContinuousDesignVariable('Description','design variable 2','value',0);
 
-input     = opencossan.common.inputs.Input('description','Input for the Himmelblau function','MembersNames',{'X1' 'X2'},'Members',{X1 X2});
+input     = opencossan.common.inputs.Input('description','Input for the Himmelblau function','names',["X1" "X2"],'members',{X1 X2});
 
 %% Create objective function
 objfun = opencossan.optimization.ObjectiveFunction('description','Himmelblau function', ...

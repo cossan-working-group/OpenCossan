@@ -31,7 +31,7 @@ x1 = opencossan.optimization.ContinuousDesignVariable('Description','design vari
 x2 = opencossan.optimization.ContinuousDesignVariable('Description','design variable 2','value',0);
 % Create an Input object containing the design variables
 input = opencossan.common.inputs.Input(...
-    'MembersNames',{'x1' 'x2'}, 'Members',{x1 x2});
+    'names',["x1" "x2"], 'members',{x1 x2});
 
 % Create objective function
 % The objective function is based on the  Matlab Rastrigins defined as follows:
@@ -142,7 +142,7 @@ x1 = opencossan.optimization.ContinuousDesignVariable('Description','design vari
 x2 = opencossan.optimization.ContinuousDesignVariable('Description','design variable 2','value',0);
 % Create an Input object containing the design variables
 input = opencossan.common.inputs.Input(...
-    'MembersNames',{'x1' 'x2'}, 'Members',{x1 x2});
+    'names',["x1" "x2"], 'members',{x1 x2});
 %% Define the fittnest (i.e. Objective Function)
 Xobj=opencossan.optimization.ObjectiveFunction('Description','simple fitness', ...
     'format','matrix',...
@@ -176,7 +176,7 @@ opencossan.OpenCossan.resetRandomNumberGenerator(51125)
 
 optimum  = Xop.optimize('optimizer', Xga);
 
-Vreference=[-1.2312e+01, -8.1220e-01];
+Vreference=[-1.3308e+01, -8.1402e-01];
 %% Validate Solution
 Vdata = optimum.OptimalSolution;
 assert(sum(abs(Vdata-Vreference))<1e-3,...

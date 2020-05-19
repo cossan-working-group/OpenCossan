@@ -12,7 +12,7 @@ x1 = opencossan.optimization.ContinuousDesignVariable('Description','design vari
 x2 = opencossan.optimization.ContinuousDesignVariable('Description','design variable 2','value',0.1);
 
 input = opencossan.common.inputs.Input('Description','Input for the MinMax optimization', ...
-    'MembersNames',{'x1' 'x2'},'Members',{x1 x2});
+    'names',["x1" "x2"],'members',{x1 x2});
 
 %% Create objective functions
 objfun1 = opencossan.optimization.ObjectiveFunction('Description','objective function #1', ...

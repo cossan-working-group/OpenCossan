@@ -19,7 +19,7 @@ for idv =1:Ndv
     Members{idv} = opencossan.optimization.ContinuousDesignVariable('value',unifrnd(-10,10),'lowerbound',-10,'upperbound',10);
 end
 
-input = opencossan.common.inputs.Input('MembersNames',MembersNames,'Members',Members);
+input = opencossan.common.inputs.Input('names',MembersNames,'Members',Members);
 
 %% Define optimization problem
 % Create the objective function
