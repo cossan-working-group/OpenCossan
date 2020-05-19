@@ -38,7 +38,7 @@ x2 = opencossan.optimization.ContinuousDesignVariable('value',12);
 
 % Input
 input = opencossan.common.inputs.Input(...
-    'MembersNames',{'x1' 'x2'}, 'Members',{x1 x2});
+    'names',["x1" "x2"], 'members',{x1 x2});
 
 %% Objective function
 objfun = opencossan.optimization.ObjectiveFunction('Description','objective function', ...
