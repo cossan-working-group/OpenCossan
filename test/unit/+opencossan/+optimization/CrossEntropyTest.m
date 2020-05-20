@@ -9,9 +9,9 @@ classdef CrossEntropyTest < matlab.unittest.TestCase
     methods (TestMethodSetup)
         function setupOptimizationProblem(testCase)
             x1 = opencossan.optimization.ContinuousDesignVariable('upperbound', 5, ...
-                'lowerBound', -5);
+                'lowerBound', 0);
             x2 = opencossan.optimization.ContinuousDesignVariable('upperbound', 5, ...
-                'lowerBound', -5);
+                'lowerBound', 0);
             input = opencossan.common.inputs.Input('names',["x1" "x2"], 'members',{x1 x2});
             
             objfun = opencossan.optimization.ObjectiveFunction('Description','objective function', ...
@@ -21,10 +21,14 @@ classdef CrossEntropyTest < matlab.unittest.TestCase
                 'format', 'matrix', ...
                 'InputNames',{'x1' 'x2'});
             
-            s = rng(); rng(46354);
-            testCase.addTeardown(@rng, s);
             testCase.OptimizationProblem = opencossan.optimization.OptimizationProblem(...
-                'Input',input,'ObjectiveFunction',objfun, 'initialsolution', unifrnd(-5,5,40,2));
+                'Input',input,'ObjectiveFunction',objfun);
+        end
+        
+        function setRngSeed(testCase)
+            original = rng();
+            testCase.addTeardown(@rng, original);
+            rng(46354);
         end
     end
     
@@ -47,7 +51,10 @@ classdef CrossEntropyTest < matlab.unittest.TestCase
         % apply
         function shouldFindOptimum(testCase)
             ce = opencossan.optimization.CrossEntropy('NFunEvalsIter',40,'NUpdate',20);
-            optimum = testCase.OptimizationProblem.optimize('optimizer', ce);
+            
+            x0 = unifrnd(-5,5,40,2);
+            optimum = ce.apply('optimizationproblem', testCase.OptimizationProblem, ...
+                'initialsolutions', x0);
             
             testCase.assertEqual(optimum.OptimalSolution, [3, 2], 'RelTol', 1e-3);
         end

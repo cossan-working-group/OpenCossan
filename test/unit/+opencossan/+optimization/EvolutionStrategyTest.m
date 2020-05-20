@@ -1,5 +1,5 @@
 classdef EvolutionStrategyTest < matlab.unittest.TestCase
-    %CROSSENTROPYTEST Summary of this class goes here
+    %EVOLUTIONSTRATEGYTEST Summary of this class goes here
     %   Detailed explanation goes here
     
     properties
@@ -7,6 +7,12 @@ classdef EvolutionStrategyTest < matlab.unittest.TestCase
     end
     
     methods (TestMethodSetup)
+        function setRngSeed(testCase)
+            original = rng();
+            testCase.addTeardown(@rng, original);
+            rng(8756);
+        end
+        
         function setupOptimizationProblem(testCase)
             x1 = opencossan.optimization.ContinuousDesignVariable('upperbound', 5, ...
                 'lowerBound', -5);
@@ -21,8 +27,6 @@ classdef EvolutionStrategyTest < matlab.unittest.TestCase
                 'format', 'matrix', ...
                 'InputNames',{'x1' 'x2'});
             
-            s = rng(); rng(8756);
-            testCase.addTeardown(@rng, s);
             testCase.OptimizationProblem = opencossan.optimization.OptimizationProblem(...
                 'Input',input,'ObjectiveFunction',objfun);
         end
@@ -47,11 +51,12 @@ classdef EvolutionStrategyTest < matlab.unittest.TestCase
         
         % apply
         function shouldFindOptimum(testCase)
-            es = opencossan.optimization.EvolutionStrategy('Sigma',[0.5 1],'Nmu',10, ...
-                'Nlambda',70,'Nrho',2);
+            es = opencossan.optimization.EvolutionStrategy('ObjectiveFunctionTolerance', 1e-3, ...
+                'MaxIterations', 100, 'Sigma', [0.5 1], 'Nmu', 20, 'Nlambda', 70, 'Nrho', 2);
+            
             optimum = testCase.OptimizationProblem.optimize('optimizer', es);
             
-            testCase.assertEqual(optimum.OptimalSolution, [3, 2], 'RelTol', 1e-3);
+            testCase.assertEqual(optimum.OptimalSolution, [-2.8050, 3.1312], 'RelTol', 1e-3);
         end
     end
 end
