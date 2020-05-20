@@ -68,6 +68,7 @@ classdef GeneticAlgorithms < opencossan.optimization.Optimizer
                 obj.StallGenLimit = optional.stallgenlimit;
                 obj.InitialPenalty = optional.initialpenalty;
                 obj.FitnessScalingFcn = optional.fitnessscalingfcn;
+                obj.SelectionFcn = optional.selectionfcn;
                 obj.CrossoverFcn = optional.crossoverfcn;
                 obj.MutationFcn = optional.mutationfcn;
                 obj.CreationFcn = optional.creationfcn;
