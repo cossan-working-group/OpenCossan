@@ -1,4 +1,4 @@
-classdef Optimum
+classdef Optimum < opencossan.common.CossanObject
     %OPTIMUM   Constructor of Optimum object; this object contains the
     %solutions of an optimization problem.
     %
@@ -27,157 +27,97 @@ classdef Optimum
     
     %% Properties of the object
     properties
-        Sdescription                    % Description of the object
-        Sexitflag                       % exit flag of optimization algorithm
-        totalTime                       % time required to solve problem
-        XOptimizationProblem            % assosiated optimization problem
-        XOptimizer                      % optimizer used to solve the problem
-        Niterations=-1;                 % number of iteration/generation
-        VoptimalDesign=[];               % design variables values at the optimal solution
-        VoptimalScores=[];               % objective function values at the optimal solution
-        VoptimalConstraints=[];         % constraint values at the optimal solution
-        TablesValues                    % tables containing all the values
-        % creared during the optimisation process
-        NevaluationsModel=0             % number of model evaluations 
-        NevaluationsObjectiveFunctions=0  % number of evaluations of the objective function
-        NevaluationsConstraints=0         % number of evaluations of the constraints
-        NcandidateSolutions=0            % number of candidate solutions
+        % Time required to solve the problem
+        TotalTime(1,1) double
+        % Associated optimization problem
+        OptimizationProblem(1,1) opencossan.optimization.OptimizationProblem
+        % Optimizer used to solve the problem
+        Optimizer(1,1)
+        % Design variable values at the optimal solution
+        OptimalSolution(1,:) double
+        % Results of constraint evaluations
+        Constraints table = table();
+        % Results of objective function evaluations
+        ObjectiveFunction table = table();
+        % Results of model evaluations
+        ModelEvaluations table = table();
+        % Exit flag of the optimization algorithm
+        ExitFlag(1,1) {mustBeInteger}
     end
     
     properties (Dependent=true)
-        CconstraintsNames             % Names of the constraints
-        CobjectiveFunctionNames       % Names of the objectiveFunctions
-        CdesignVariableNames           % names of the Design Variables
+        ExitReason
+        ConstraintNames
+        ObjectiveFunctionNames
+        DesignVariableNames
+        OptimalConstraints
+        OptimalObjectiveFunction
     end
     
     %% Methods of the class
     methods
-        disp(Xobj)  % shows the summary of the Optimum object
         
-        varargout=plotOptimum(Xobj,varargin); % Main function used to plot values stored in the Optimum object
-        
-        varargout=plotObjectiveFunction(Xobj,varargin) % Display the evolution of the
-        % ObjectiveFunction
-        
-        varargout=plotConstraint(Xobj,varargin) % Display the evolution of the
-        % Constraint
-        varargout=plotDesignVariable(Xobj,varargin) % Display the evolution of the
-        % DesignVariables
-        
-        Xobj=merge(Xobj,Xoptimum) % Merge 2 Optimum objects
-        
-        Xobj=compactTable(Xobj,varargin) % Remove duplicate entry in the table
-        
-        function Xobj  = Optimum(varargin)
-            %% Constructor
-            % OPTIMUM   Constructor of Optimum object; this object contains the
-            % solution of an optimization problem. Whenever an optimization
-            % method is run using the method "apply", the output will be an
-            % Optimum object.
-            % The constructor takes a variable number of optional tokens of
-            % PropertyName and values pairs.
-            % Valid PropertyName are:
-            %
-            %
-            % See Also: http://cossan.cfd.liv.ac.uk/wiki/index.php/@Optimum
-            %
-            % Copyright 1983-2011 COSSAN Working Group, University of Innsbruck, Austria
-            % Author: Edoardo Patelli
+        function obj = Optimum(varargin)
+            if nargin == 0
+                super_args = {};
+            else
+                [required, varargin] = ...
+                    opencossan.common.utilities.parseRequiredNameValuePairs(...
+                    ["exitflag", "totaltime", "optimizationproblem", ...
+                     "optimizer", "optimalsolution", "objectivefunction"], ... 
+                     varargin{:});
+                 
+                 [optional, super_args] = ...
+                     opencossan.common.utilities.parseOptionalNameValuePairs(...
+                     ["constraints", "modelevaluations"], {table(), table()}, ...
+                     varargin{:});
+            end
+            obj@opencossan.common.CossanObject(super_args{:});
             
-            %% Validate input arguments
-            opencossan.OpenCossan.validateCossanInputs(varargin{:})
-            vararginTable={};
-            LaddIteration=false;
-            
-            %%  Set values passed by the user
-            for k=1:2:length(varargin)
-                switch lower(varargin{k})
-                    case 'sdescription'
-                        Xobj.Sdescription=varargin{k+1};
-                    case 'totaltime'
-                        Xobj.totalTime=varargin{k+1};
-                    case 'sexitflag'
-                        Xobj.Sexitflag=varargin{k+1};
-                    case {'vdesignvariable', 'mdesignvariable','mdesignvariables' ...
-                          'vobjectivefunction','mobjectivefunction', 'mobjectivefunctions',...
-                          'vobjectivefunctiongradient','mobjectivefunctiongradient', ...
-                          'vconstraintgradient', 'mconstraintgradient', ...
-                          'vvaluesconstraint','viterations','niteration'}
-                        vararginTable{end+1}=varargin{k};   %#ok<AGROW>
-                        vararginTable{end+1}=varargin{k+1}; %#ok<AGROW>
-                        LaddIteration=true;
-                    case 'xoptimizationproblem'
-                        assert(ismember(class(varargin{k+1}),...
-                            {'opencossan.optimization.OptimizationProblem','opencossan.optimization.RBOProblem','opencossan.optimization.RobustDesign','ExtremeCase'}), ...
-                            'OpenCossan:Optimum:Optimum', ...
-                            'A object of type %s is not valid after the PropertyName %s',...
-                            class(varargin{k+1}),varargin{k});
-                        Xobj.XOptimizationProblem=varargin{k+1};
-                    case 'xoptimizer'
-                        mc=metaclass(varargin{k+1});
-                        if isempty(mc.SuperClasses)
-                            error('OpenCossan:Optimum:wrongOptimizer', ...
-                                ['An Optimizer is expected after the PropertyName ' varargin{k}]);
-                        else
-                            assert(strcmp(mc.SuperClasses{1}.Name,'Optimizer'),...
-                                'OpenCossan:Optimum:wrongOptimizer', ...
-                                ['An Optimizer is expected after the PropertyName ' varargin{k}]);
-                        end
-                        Xobj.XOptimizer=varargin{k+1};
-                    otherwise
-                        error('OpenCossan:Optimum:wrongPropertyName', ...
-                            'The PropertyName %s is not valid. ', varargin{k});
-                end
+            if nargin > 0
+                obj.ExitFlag = required.exitflag;
+                obj.TotalTime = required.totaltime;
+                obj.OptimizationProblem = required.optimizationproblem;
+                obj.Optimizer = required.optimizer;
+                obj.OptimalSolution = required.optimalsolution;
+                obj.ObjectiveFunction = required.objectivefunction;
                 
-                
-                if LaddIteration               
-                    Xobj.TablesValues=initializeTable(Xobj,vararginTable{:});                
-                else
-                    %% No iterations
-                    % Initialise the Optimum object with an empty table
-                    Xobj.TablesValues=table;
-                end
-            end
-            
-            
-        end     %of constructor
-        
-        function NcandidateSolutions=get.NcandidateSolutions(Xobj)       % number of evaluations of the constraints
-            NcandidateSolutions=Xobj.XdesignVariable(1).VdataLength;
-        end
-        
-        % Ger names of the design variables
-        function CdesignVariableNames=get.CdesignVariableNames(Xobj)
-            if isempty(Xobj.XOptimizationProblem)
-                CdesignVariableNames={};
-            else
-                CdesignVariableNames=Xobj.XOptimizationProblem.CnamesDesignVariables;
+                obj.Constraints = optional.constraints;
+                obj.ModelEvaluations = optional.modelevaluations;
             end
         end
         
+        function names = get.ConstraintNames(obj)
+            names = obj.OptimizationProblem.ConstraintNames;
+        end
         
-        function CconstraintsNames=get.CconstraintsNames(Xobj)       % number of evaluations of the constraints
-            if isempty(Xobj.XOptimizationProblem)
-                CconstraintsNames={};
-            else
-                CconstraintsNames=Xobj.XOptimizationProblem.ConstraintsNames;
+        function names = get.ObjectiveFunctionNames(obj)
+            names = obj.OptimizationProblem.ObjectiveFunctionNames;
+        end
+        
+        function constraints = get.OptimalConstraints(obj)
+            idx = all(obj.Constraints.DesignVariables == obj.OptimalSolution, 2);
+            constraints = obj.Constraints.Constraints(idx,:);
+            if size(constraints, 1) > 1
+                constraints = constraints(1,:);
             end
         end
         
-        function CobjectiveFunctionNames=get.CobjectiveFunctionNames(Xobj)       % number of evaluations of the constraints
-            if isempty(Xobj.XOptimizationProblem)
-                CobjectiveFunctionNames={};
-            else
-                CobjectiveFunctionNames=Xobj.XOptimizationProblem.ObjectiveFunctionNames;
+        function objective = get.OptimalObjectiveFunction(obj)
+            idx = all(obj.ObjectiveFunction.DesignVariables == obj.OptimalSolution, 2);
+            objective = obj.ObjectiveFunction.ObjectiveFunction(idx);
+            if size(objective, 1) > 1
+                objective = objective(1,:);
             end
         end
         
-        Xobj=addIteration(Xobj,varargin);
+        function reason = get.ExitReason(obj)
+            reason = obj.Optimizer.ExitReasons(obj.ExitFlag);
+        end
         
-    end     %of methods
-    
-    methods (Access = private)
-        TablesValues=initializeTable(Xobj,varargin)
-    end        
-    
-end     %of classdef
+        varargout = plotOptimum(obj, varargin);
+        varargout = plotObjectiveFunctions(obj, varargin)
+        varargout = plotConstraints(obj, varargin)
+        varargout = plotDesignVariables(obj, varargin)
+    end
+end

@@ -44,5 +44,3 @@ varargin{end+1}='Constraint';
 varargout{:}=plotOptimum(Xobj,varargin{:});
 
 end
-
-

@@ -23,7 +23,7 @@ function varargout=useRandomSamples(Xobj,varargin)
 %  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/
 
 %% Check inputs
-OpenCossan.validateCossanInputs(varargin{:});
+opencossan.OpenCossan.validateCossanInputs(varargin{:});
 
 %% Process inputs
 for k=1:2:length(varargin) 
@@ -45,39 +45,39 @@ end
 Ninput=length(Xobj.Cinputnames);
 Noutput=length(Xobj.Coutputnames);
 Nsamples=Xobj.Xsimulator.Nsamples;
-OpenCossan.cossanDisp(['Total number of model evaluations ' num2str(Nsamples*(Ninput+2))],2)
+opencossan.OpenCossan.cossanDisp(['Total number of model evaluations ' num2str(Nsamples*(Ninput+2))],2)
 %% Estimate sensitivity indices
 % Generate samples
-OpenCossan.cossanDisp(['Generating samples from the ' class(Xobj.Xsimulator) ],4)
+opencossan.OpenCossan.cossanDisp(['Generating samples from the ' class(Xobj.Xsimulator) ],4)
 % Create two sample objects each with half of the sample size 
-OpenCossan.cossanDisp('Creating Samples object',4)
+opencossan.OpenCossan.cossanDisp('Creating Samples object',4)
 
 % The two input sample matrices are: with dimension(N,k) each
 XA=Xobj.Xsimulator.sample('Xinput',Xobj.Xinput);
 XB=Xobj.Xsimulator.sample('Xinput',Xobj.Xinput);
 
 % Evaluate the model 
-OpenCossan.cossanDisp('Evaluating the model ' ,4)
+opencossan.OpenCossan.cossanDisp('Evaluating the model ' ,4)
 % Computing y_{A} = f(A), where A is an (N,k) matrix
 ibatch=1;
 XoutA=Xobj.Xtarget.apply(XA); % y_A=f(A)
-if ~isempty(OpenCossan.getDatabaseDriver)
-    insertRecord(OpenCossan.getDatabaseDriver,'StableType','Simulation', ...
-        'Nid',getNextPrimaryID(OpenCossan.getDatabaseDriver,'Simulation'),...
+if ~isempty(opencossan.OpenCossan.getDatabaseDriver)
+    insertRecord(opencossan.OpenCossan.getDatabaseDriver,'StableType','Simulation', ...
+        'Nid',getNextPrimaryID(opencossan.OpenCossan.getDatabaseDriver,'Simulation'),...
         'XsimulationData',XoutA,'Nbatchnumber',ibatch)
 end
 
 % Computing y_{B} = f(B), where A is an (N,k) matrix
 ibatch = ibatch+1;
 XoutB=Xobj.Xtarget.apply(XB); % y_B=f(B)
-if ~isempty(OpenCossan.getDatabaseDriver)
-    insertRecord(OpenCossan.getDatabaseDriver,'StableType','Simulation', ...
-        'Nid',getNextPrimaryID(OpenCossan.getDatabaseDriver,'Simulation'),...
+if ~isempty(opencossan.OpenCossan.getDatabaseDriver)
+    insertRecord(opencossan.OpenCossan.getDatabaseDriver,'StableType','Simulation', ...
+        'Nid',getNextPrimaryID(opencossan.OpenCossan.getDatabaseDriver,'Simulation'),...
         'XsimulationData',XoutB,'Nbatchnumber',ibatch)
 end
 
 % Expectation values of the output variables
-OpenCossan.cossanDisp('Extract quantity of interest from SimulationData ' ,4)
+opencossan.OpenCossan.cossanDisp('Extract quantity of interest from SimulationData ' ,4)
 % Check if the model contains Dataseries
 Vindex=strcmp(XoutA.CnamesDataseries,Xobj.Coutputnames);
 if sum(Vindex)>0
@@ -129,7 +129,7 @@ switch lower(Xobj.Smethod)
         % or, the method from pre-allocated function handles
         VD=hcomputeindices([MoutA;MoutB],[MoutA;MoutB]);
         for irv=1:Ninput
-            OpenCossan.cossanDisp(['[Status] Compute Sensitivity indices ' num2str(irv) ' of ' num2str(Ninput)],2)
+            opencossan.OpenCossan.cossanDisp(['[Status] Compute Sensitivity indices ' num2str(irv) ' of ' num2str(Ninput)],2)
             % Saltelli's 2008 method describes that matrix C_i is created
             % with all elements from B except the ith elements taken from A
             Vpos=strcmp(XA.Cvariables,Xobj.Cinputnames{irv});
@@ -144,9 +144,9 @@ switch lower(Xobj.Smethod)
             ibatch=ibatch+1;
             XoutC=Xobj.Xtarget.apply(XC); %y_C_i=F(C_i)
             
-            if ~isempty(OpenCossan.getDatabaseDriver)
-                insertRecord(OpenCossan.getDatabaseDriver,'StableType','Simulation', ...
-                    'Nid',getNextPrimaryID(OpenCossan.getDatabaseDriver,'Simulation'),...
+            if ~isempty(opencossan.OpenCossan.getDatabaseDriver)
+                insertRecord(opencossan.OpenCossan.getDatabaseDriver,'StableType','Simulation', ...
+                    'Nid',getNextPrimaryID(opencossan.OpenCossan.getDatabaseDriver,'Simulation'),...
                     'XsimulationData',XoutC,'Nbatchnumber',ibatch);
             end
             
@@ -205,9 +205,9 @@ switch lower(Xobj.Smethod)
             ibatch = ibatch+1;
             XoutC=Xobj.Xtarget.apply(XC); % y_C_i=f(C_i)
             
-            if ~isempty(OpenCossan.getDatabaseDriver)
-                insertRecord(OpenCossan.getDatabaseDriver,'StableType','Simulation', ...
-                    'Nid',getNextPrimaryID(OpenCossan.getDatabaseDriver,'Simulation'),...
+            if ~isempty(opencossan.OpenCossan.getDatabaseDriver)
+                insertRecord(opencossan.OpenCossan.getDatabaseDriver,'StableType','Simulation', ...
+                    'Nid',getNextPrimaryID(opencossan.OpenCossan.getDatabaseDriver,'Simulation'),...
                     'XsimulationData',XoutC,'Nbatchnumber',ibatch)
             end
             
@@ -250,14 +250,14 @@ switch lower(Xobj.Smethod)
             % Swap the ith column of C with ith column of A to form C_i 
             MC(:,Vpos)=MB(:,Vpos);
             % Construct a samples object
-            XC=Samples('Xinput',Xobj.Xinput,'MsamplesHyperCube',MC);
+            XC=opencossan.common.Samples('Xinput',Xobj.Xinput,'MsamplesHyperCube',MC);
             % Evaluate the model
             ibatch = ibatch+1;
             XoutC=Xobj.Xtarget.apply(XC); % y_C_i=f(C_i)
             
-            if ~isempty(OpenCossan.getDatabaseDriver)
-                insertRecord(OpenCossan.getDatabaseDriver,'StableType','Simulation', ...
-                    'Nid',getNextPrimaryID(OpenCossan.getDatabaseDriver,'Simulation'),...
+            if ~isempty(opencossan.OpenCossan.getDatabaseDriver)
+                insertRecord(opencossan.OpenCossan.getDatabaseDriver,'StableType','Simulation', ...
+                    'Nid',getNextPrimaryID(opencossan.OpenCossan.getDatabaseDriver,'Simulation'),...
                     'XsimulationData',XoutC,'Nbatchnumber',ibatch)
             end
             
@@ -296,14 +296,14 @@ for n=1:Noutput
         VfirstOrderCoV=std(squeeze(Dybs(:,:,n))'./repmat(VDbs(:,n),1,Ninput))./abs(MfirstOrder');
         VtotalCoV=std(1-squeeze(Dzbs(:,:,n))'./repmat(VDbs(:,n),1,Ninput))./abs(Mtotal');
         
-        varargout{1}(n)=SensitivityMeasures('Cinputnames',Xobj.Cinputnames, ...
+        varargout{1}(n)=opencossan.sensitivity.SensitivityMeasures('Cinputnames',Xobj.Cinputnames, ...
             'Soutputname',  Xobj.Coutputnames{n},'Xevaluatedobject',Xobj.Xtarget, ...
             'Sevaluatedobjectname',Xobj.Sevaluatedobjectname, ...
             'VtotalIndices',Mtotal','VsobolFirstOrder',MfirstOrder', ...
             'VtotalIndicesCoV',VtotalCoV,'VsobolFirstOrderCoV',VfirstOrderCoV, ...
             'Sestimationmethod',Xobj.Smethod); 
     else
-        varargout{1}(n)=SensitivityMeasures('Cinputnames',Xobj.Cinputnames, ...
+        varargout{1}(n)=opencossan.sensitivity.SensitivityMeasures('Cinputnames',Xobj.Cinputnames, ...
            'Soutputname',  Xobj.Coutputnames{n},'Xevaluatedobject',Xobj.Xtarget, ...
            'Sevaluatedobjectname',Xobj.Sevaluatedobjectname, ...
            'VtotalIndices',Mtotal','VsobolFirstOrder',MfirstOrder', ...
@@ -320,10 +320,10 @@ if ~isdeployed
     % add entries in simulation and analysis database at the end of the
     % computation when not deployed. The deployed version does this with
     % the finalize command
-    XdbDriver = OpenCossan.getDatabaseDriver;
+    XdbDriver = opencossan.OpenCossan.getDatabaseDriver;
     if ~isempty(XdbDriver)
         XdbDriver.insertRecord('StableType','Result',...
-            'Nid',getNextPrimaryID(OpenCossan.getDatabaseDriver,'Result'),...
+            'Nid',getNextPrimaryID(opencossan.OpenCossan.getDatabaseDriver,'Result'),...
             'CcossanObjects',varargout(1),...
             'CcossanObjectsNames',{'Xgradient'});
     end

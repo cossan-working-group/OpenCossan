@@ -27,7 +27,7 @@ function [MphysicalSpace,MsamplesDV] = hypercube2physical(Xinput,MsamplesHypercu
 % =====================================================================
 
 Nrv = Xinput.NrandomVariables;
-Ndv = Xinput.NdesignVariables;
+Ndv = Xinput.NumberOfDesignVariables;
 Nsp = Xinput.NstochasticProcesses;
 Nsamples = size(MsamplesHypercube,1);
 Cset=Xinput.RandomVariableSetNames;
@@ -78,12 +78,12 @@ if Ndv~=0
     % assumed to be generated uniformly.
     MsamplesDV = zeros(Nsamples,Ndv);
     for n=1:Ndv
-        assert(~isinf(Xinput.DesignVariables.(Cdv{n}).lowerBound) && ...
-            ~isinf(Xinput.DesignVariables.(Cdv{n}).upperBound),...
+        assert(~isinf(Xinput.DesignVariables(n).LowerBound) && ...
+            ~isinf(Xinput.DesignVariables(n).UpperBound),...
             'openCOSSAN:LatinHypercubeSampling:sample',...
             'Only continuos design variables with finite support can be used with Latin Hypercube sampling')
-        MsamplesDV(:,n)=Xinput.DesignVariables.(Cdv{n}).lowerBound + ...
-            (Xinput.DesignVariables.(Cdv{n}).upperBound - Xinput.DesignVariables.(Cdv{n}).lowerBound)*MsamplesHypercube(:,irv+igmrvset+n);
+        MsamplesDV(:,n)=Xinput.DesignVariables(n).LowerBound + ...
+            (Xinput.DesignVariables(n).UpperBound - Xinput.DesignVariables(n).LowerBound)*MsamplesHypercube(:,irv+igmrvset+n);
     end
 else
     MsamplesDV=[];

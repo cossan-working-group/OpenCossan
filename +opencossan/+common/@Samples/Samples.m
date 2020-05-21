@@ -201,7 +201,7 @@ classdef Samples
                         
                         % extract RandomVariableSet from Input object
                         Xobj.Xrvset  = struct2cell(varargin{k+1}.RandomVariableSets);
-                        Xobj.XdesignVariable  = struct2cell(varargin{k+1}.DesignVariables);
+                        Xobj.XdesignVariable  = varargin{k+1}.DesignVariables;
                         Xobj.XstochasticProcess = struct2cell(varargin{k+1}.StochasticProcesses);
                         Xobj.CnamesStochasticProcess = varargin{k+1}.StochasticProcessNames;
                         Xobj.CnamesDesignVariables= varargin{k+1}.DesignVariableNames;

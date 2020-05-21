@@ -82,19 +82,19 @@ classdef (Abstract) RandomVariable < matlab.mixin.Heterogeneous & opencossan.com
             % TRANSFORM2DESIGNVARIABLE this method transforms a RandomVariable into
             % a DesignVariable
             
-            designVariable = opencossan.optimization.DesignVariable();
+            designVariable = opencossan.optimization.ContinuousDesignVariable();
 
             if ~isinf(obj.Mean) && ~isnan(obj.Mean)
-                designVariable.value = obj.Mean;
+                designVariable.Value = obj.Mean;
             else
                 error('openCOSSAN:RandomVariable:randomVariable2designVariable',...
                     'The mean of the distribution is not defined')
             end
             if ~isinf(obj.Bounds(1)) && ~isnan(obj.Bounds(1))
-                designVariable.lowerBound = obj.Bounds(1);
+                designVariable.LowerBound = obj.Bounds(1);
             end
             if ~isinf(obj.Bounds(2)) && ~isnan(obj.Bounds(2))
-                designVariable.upperBound = obj.Bounds(2);
+                designVariable.UpperBound = obj.Bounds(2);
             end
         end
         

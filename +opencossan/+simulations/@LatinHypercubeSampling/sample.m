@@ -47,7 +47,7 @@ for k=1:2:length(varargin)
         case 'xinput'
             Xinput=varargin{k+1};
             Nrv=Xinput.NrandomVariables;
-            Ndv=Xinput.NdesignVariables;
+            Ndv=Xinput.NumberOfDesignVariables;
         case 'xrandomvariableset'
             Xrvset=varargin{k+1};
             Nrv=length(Xrvset.Cmembers);

@@ -5,6 +5,7 @@ function display(Xobj)
 % COSSAN-X - The next generation of the computational stochastic analysis
 % University of Innsbruck, Copyright 1993-2011 IfM
 % ==================================================================
+import opencossan.OpenCossan
 
 % Name and description
 OpenCossan.cossanDisp('===================================================================',2);

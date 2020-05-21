@@ -1,87 +1,133 @@
-classdef Optimizer
-    %OPTIMIZER    Abstract class Optimizer
-    %
-    %   Optimizer:  This is the abstract class Optimizer; this class is
-    %   intented to be a super class, grouping all different optimization
-    %   algorithms available in Cossan-X.
-    %
-    % See Also: http://cossan.cfd.liv.ac.uk/wiki/@Optimizer
-    %
-    % Author: Edoardo Patelli
-    % Institute for Risk and Uncertainty, University of Liverpool, UK
-    % email address: openengine@cossan.co.uk
-    % Website: http://www.cossan.co.uk
+classdef Optimizer < opencossan.common.CossanObject
+    %OPTIMIZER Abstract Optimizer class
+
+    %{
+    This file is part of OpenCossan <https://cossan.co.uk>.
+    Copyright (C) 2006-2019 COSSAN WORKING GROUP
+
+    OpenCossan is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License or,
+    (at your option) any later version.
     
-    % =====================================================================
-    % This file is part of openCOSSAN.  The open general purpose matlab
-    % toolbox for numerical analysis, risk and uncertainty quantification.
-    %
-    % openCOSSAN is free software: you can redistribute it and/or modify
-    % it under the terms of the GNU General Public License as published by
-    % the Free Software Foundation, either version 3 of the License.
-    %
-    % openCOSSAN is distributed in the hope that it will be useful,
-    % but WITHOUT ANY WARRANTY; without even the implied warranty of
-    % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    % GNU General Public License for more details.
-    %
-    %  You should have received a copy of the GNU General Public License
-    %  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
-    % =====================================================================
+    OpenCossan is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU General Public License for more details.
     
-    %% Properties of the object
-    properties % Public access
-        Sdescription                % Description of the object
-        Nmax   = Inf                % Maximum number of model evaluations
-        NmaxFunctions  = Inf        % Maximum number of function evaluations
-        NmaxIterations = Inf        % Maximum number of iterations
-        objectiveLimit=-Inf         % Minimum objective function value desired
-        timeout = Inf               % Maximum execution time
-        toleranceObjectiveFunction = 1e-6     %Termination tolerance on the value of the objective function.
-        toleranceConstraint        = 0.001 %Termination tolerance on the constrains violation.
-        toleranceDesignVariables   = 0.001 %Termination tolerance on the design variable vector
-        Lintermediateresults=true    % save SimulationData object after each iteration
-        scalingFactor           = 1 % scale objective function
-        scalingFactorConstraints =1 % scaling factor for Constraints 
-        penaltyFactor          = 100 % for constraint
-        XjobManager                 % Job Manager object
-        XrandomNumberGenerator      % field containing RandStream object for generating random numbers
+    You should have received a copy of the GNU General Public License
+    along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
+    %}
+    
+    properties
+        % maximum number of model evaluations
+        MaxModelEvaluations(1,1) = Inf;
+        % maximum number of function evaluations
+        MaxFunctionEvaluations(1,1) = Inf;
+        % maximum number of iterations
+        MaxIterations(1,1) = Inf;    
+        % minimum objective function value desired
+        ObjectiveFunctionLimit(1,1) double = -Inf;   
+        % maximum execution time
+        Timeout(1,1) double {mustBePositive} = Inf;
+        % Termination tolerance on the value of the objective function.
+        ObjectiveFunctionTolerance(1,1) double = 1e-6;   
+        % Termination tolerance on the constrains violation.
+        ConstraintTolerance(1,1) double = 0.001;         
+        % Termination tolerance on the design variable vector
+        DesignVariableTolerance(1,1) double = 0.001;     
+        % save SimulationData object after each iteration
+        SaveIntermediateResults(1,1) logical = true;     
+        % scale objective function
+        ObjectiveFunctionScalingFactor(1,1) double = 1;        
+        % scaling factor for Constraints 
+        ConstraintScalingFactor(1,1) double = 1;     
+        % for constraint
+        PenaltyFactor(1,1) double = 100;        
+        % Job Manager
+        JobManager(1,1)
+        % field containing RandStream object for generating random numbers
+        RandomNumberGenerator              
     end
     
     properties (Dependent = true, SetAccess = protected)
-        SiterationName  % Define the name of the folder used to store intermediated results
+        IterationName;
+    end
+    
+    properties (Abstract, Hidden)
+        ExitReasons;
     end
     
     properties (Hidden, SetAccess = protected)
-        SiterationFileNames='SimulationData_iteration_' % Define the name of the
-        SiterationFolder=[];
-        % intermediated results
-        initialLaptime     % Store the initial laptime number of the optimization
-        iIterations = 0;   % Number of iterations processed
-    end
-    
-    %% Methods of the class
-    methods (Abstract)
-        Xo    = apply(Xobj,varargin)  %This method perform the simulation adopting the Xobj
+        IterationFileName = 'SimulationData_iteration_';
+        IterationFolder = [];
+        InitialLapTime;     % Store the initial laptime number of the optimization
+        NumberOfIterations(1,1) {mustBeInteger} = 0;   % Number of iterations processed
     end
     
     methods
-        display(Xobj)                 %This method shows the summary of the Xobj
+        function obj = Optimizer(varargin)
+            import opencossan.common.utilities.parseOptionalNameValuePairs
+            
+            if nargin == 0
+                super_args = {};
+            else
+                names = ["maxmodelevaluations", ...
+                    "maxfunctionevaluations", ...
+                    "maxiterations", ...
+                    "objectivefunctionlimit", ...
+                    "objectivefunctiontolerance", ...
+                    "timeout", ...
+                    "constraintscalingfactor", ...
+                    "objectivefunctionscalingfactor"];
+                defaults = {Inf, Inf, Inf, -Inf, 1e-6, Inf, 1, 1};
+
+                [optional, super_args] = parseOptionalNameValuePairs(names, ...
+                    defaults, varargin{:});
+            end
+            
+            obj@opencossan.common.CossanObject(super_args{:});
+            
+            if nargin > 0
+                obj.MaxModelEvaluations = optional.maxmodelevaluations;
+                obj.MaxFunctionEvaluations = optional.maxfunctionevaluations;
+                obj.MaxIterations = optional.maxiterations;
+                obj.ObjectiveFunctionLimit = optional.objectivefunctionlimit;
+                obj.Timeout = optional.timeout;
+                obj.ConstraintScalingFactor = optional.constraintscalingfactor;
+                obj.ObjectiveFunctionScalingFactor = optional.objectivefunctionscalingfactor;
+            end
+        end
         
-        function SiterationName = get.SiterationName(Xobj)
-            SiterationName =  [Xobj.SiterationFileNames ...
-                num2str(Xobj.iIterations) '_(' class(Xobj) ')'];
-        end % Modulus get method
+        function name = get.IterationName(obj)
+            format = '%s_%d_%s';
+            name = sprintf(format, obj.IterationFileName, ...
+                obj.NumberOfIterations, class(obj));
+        end
         
-        [Ldone,Sflag]=checkTermination(Xobj,Xresults) % Check the termination criteria
-        
-        Lstop=outputFunctionOptimiser(Xobj,x,optimValues,state)        
+        [done, flag] = checkTermination(obj, results) % Check the termination criteria
+        stop = outputFunctionOptimiser(obj, x , optimValues, state)        
     end
     
     methods (Access=protected)
-        XRandomNumberGenerator = initializeUserDefinedRandomNumberGenerator(Xobj)
-        exportResults(Xobj,varargin)  % This method is used to export the SimulationData
-        [Xobj, Xinput]=initializeOptimizer(Xobj,Xtarget)
+        exportResults(Xobj,varargin); % This method is used to export the SimulationData
+        obj = initializeOptimizer(obj, target);
+        
+        function saveOptimumToDatabase(~, optimum)
+            % Save the optimum in the database if there is a valid database
+            % driver.
+            dbDriver = opencossan.OpenCossan.getDatabaseDriver();
+            if ~isempty(dbDriver)
+                dbDriver.insertRecord(...
+                    'StableType','Result',...
+                    'Nid',getNextPrimaryID(dbDriver,'Result'), ...
+                    'CcossanObjects',{optimum}, ...
+                    'CcossanObjectsNames',{'Xoptimum'});
+            end
+        end
     end
     
+    methods (Abstract)
+        optimum = apply(obj, varargin)
+    end
 end

@@ -20,14 +20,12 @@ function Xss=constructSolutionSequence(Xobj)
 %
 % openCOSSAN is distributed in the hope that it will be useful,
 % but WITHOUT ANY WARRANTY; without even the implied warranty of
-% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See theoptimization
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 % GNU General Public License for more details.
 %
 %  You should have received a copy of the GNU General Public License
 %  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
 % =====================================================================
-
-import opencossan.workers.SolutionSequence
 
 % Extract Model and Input from Model
 Sstring='Xinput=Xmodel.Xinput;';
@@ -42,7 +40,7 @@ for n=1:size(Xobj.Cmapping,1)
 end
 
 % Reconstruct Model
-Sstring=[Sstring 'Xmodel=opencossan.common.Model(''Xinput'',Xinput,''Xevaluator'',Xevaluator);'];
+Sstring=[Sstring 'Xmodel=Model(''Xinput'',Xinput,''Xevaluator'',Xevaluator);'];
 
 % % Construct Montecarlo object
 % Sstring=[Sstring 'Xmontecarlo=MonteCarlo(''Nsamples'',' num2str(Xobj.Nsamples) ');'];
@@ -50,7 +48,7 @@ Sstring=[Sstring 'Xmodel=opencossan.common.Model(''Xinput'',Xinput,''Xevaluator'
 Sstring=[Sstring 'XsimulationData=Xsimulator.apply(Xmodel);'];
 for ioutput=1:length(Xobj.CSinnerLoopOutputNames)
     Sstring=[Sstring 'COSSANoutput{' num2str(ioutput) '}=XsimulationData;'];
-    CprovidedObjectTypes(ioutput) = {'opencossan.common.outputs.SimulationData'};
+    CprovidedObjectTypes(ioutput) = {'SimulationData'};
     Cobject2output(ioutput) = {['.getValues(''Sname'',''' Xobj.CSinnerLoopOutputNames{ioutput} ''')']};
 end
 Cinputs=Xobj.Cmapping(:,1);
@@ -61,7 +59,7 @@ Xss=SolutionSequence('Sscript',Sstring,...
     'Cobject2output',Cobject2output, ...
     'CobjectsNames',{'Xmodel', 'Xsimulator'},...
     'CXobjects',{Xobj.XinnerLoopModel Xobj.Xsimulator},...
-    'CobjectsTypes',{'opencossan.common.Model' 'opencossan.simulations.Simulations'},...
+    'CobjectsTypes',{'Model' 'Simulations'},...
     'CprovidedObjectTypes',CprovidedObjectTypes);
 
 end

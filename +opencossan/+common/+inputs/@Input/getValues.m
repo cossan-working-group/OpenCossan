@@ -138,7 +138,7 @@ for k=1:length(Cnames)
         if ~isempty(Xobj.Samples)
             Moutput(:,k) = Xobj.Samples.MdoeDesignVariables(:,ipos);
         else
-            Moutput(:,k) = Xobj.DesignVariables.(Cdv{ipos}).value;
+            Moutput(:,k) = Xobj.DesignVariables(ipos).Value;
             opencossan.OpenCossan.cossanDisp(['getValues returns the current value of the DesignVariable ' Sname],4)
         end
     end

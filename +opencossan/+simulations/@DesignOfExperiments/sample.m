@@ -29,9 +29,6 @@ function [Xsamples, varargout] = sample(Xobj,varargin)
 import opencossan.common.Dataseries
 import opencossan.common.Samples
 
-%% Validate input arguments
-opencossan.OpenCossan.validateCossanInputs(varargin{:})
-
 %% Process inputs
 
 for k=1:2:length(varargin)
@@ -48,10 +45,10 @@ assert(logical(exist('Xinput','var')),...
     'openCOSSAN:DesignOfExperiments:sample', ...
     'The method sample requires an opencossan.common.inputs.Input object to be execured')
 
-Ndv=Xinput.NdesignVariables;
+Ndv=Xinput.NumberOfDesignVariables;
 Nrv=Xinput.NrandomVariables;
-CnamesRV=Xinput.CnamesRandomVariable;
-CnamesDV=Xinput.CnamesDesignVariable;
+CnamesRV=Xinput.RandomVariableNames;
+CnamesDV=Xinput.DesignVariableNames;
 Cnames=[CnamesRV CnamesDV];
 
 %% Check the validity of inputs
@@ -61,13 +58,11 @@ assert(Ndv>0 | Nrv>0,'openCOSSAN:DesignOfExperiments:sample:noDVorRV',...
 
 % DeseignVariables without bounds are not accepted
 if Ndv > 0
-    for idv = 1:Ndv
-        if Xinput.XdesignVariable.(CnamesDV{idv}).lowerBound == -inf ...
-                || Xinput.XdesignVariable.(CnamesDV{idv}).upperBound == inf
-            error('openCOSSAN:DesignOfExperiments:sample',...
-                'All Design Variables should have a defined lower & upper bounds')
-        end
-    end
+    lb = [Xinput.DesignVariables.LowerBound];
+    ub = [Xinput.DesignVariables.UpperBound];
+    
+    assert(~any(isinf([lb, ub])), 'openCOSSAN:DesignOfExperiments:sample',...
+        'All Design Variables should have a defined lower & upper bounds');
 end
 
 % if TWO-LEVEL FACTORIAL is chosen, the dimension should be less than 25
@@ -130,7 +125,7 @@ end
 if ~isempty(Xobj.MdoeFactors)
     if ~isempty(find(Xobj.MdoeFactors<-1, 1)) || ~isempty(find(Xobj.MdoeFactors>1, 1))
         for idv = 1:Ndv
-            if ~isempty(Xinput.XdesignVariable.(CnamesDV{idv}).Vsupport)
+            if ~isempty(Xinput.DesignVariables.(CnamesDV{idv}).Vsupport)
                 error('openCOSSAN:DesignOfExperiments:sample',...
                     'Discrete DVs cannot be used within DOE with coordinates outside [-1,1]')
             end
@@ -220,52 +215,51 @@ else
         % The coordinates of the DOE points are transformed to actual values
         % using the following steps
         MdoePhysicalSpaceDV = zeros(size(Xobj.MdoeFactors(:,1:Ndv)));
-        for idv = 1:Ndv
+        idv = 0;
+        for dv = Xinput.DesignVariables
+            idv = idv + 1;
             % Xobj.LuseCurrentValues= TRUE => If MdoeFactor = 0, use CURRENT value of the DV
             if Xobj.LuseCurrentValues
                 % Identify the indices of zeros and other values
-                Vzeroindices = Xobj.MdoeFactors(:,idv+Nrv)==0;
-                Vnonzeroindices = find(Xobj.MdoeFactors(:,idv+Nrv));
+                zeroIndices = Xobj.MdoeFactors(:,idv+Nrv) == 0;
+                nonzeroIndices = find(Xobj.MdoeFactors(:, idv+Nrv));
                 % First map the zeros to the current values of the DVs
-                MdoePhysicalSpaceDV(Vzeroindices,idv) = ...
-                    Xinput.XdesignVariable.(Xinput.CnamesDesignVariable{idv}).value;
-                % For CONTINOUS DVs
-                if isempty(Xinput.XdesignVariable.(Xinput.CnamesDesignVariable{idv}).Vsupport)
-                    interval = Xinput.XdesignVariable.(Xinput.CnamesDesignVariable{idv}).upperBound - ...
-                        Xinput.XdesignVariable.(Xinput.CnamesDesignVariable{idv}).lowerBound;
-                    MdoePhysicalSpaceDV(Vnonzeroindices,idv) = ...
-                        Xinput.XdesignVariable.(Xinput.CnamesDesignVariable{idv}).lowerBound + ...
-                        unifcdf(Xobj.MdoeFactors(Vnonzeroindices,idv+Nrv),-1,1).*interval;
-                    % For DISCRETE DVs
+                MdoePhysicalSpaceDV(zeroIndices,idv) = dv.Value;
+                
+                if isa(dv, 'opencossan.optimization.ContinuousDesignVariable')
+                    % For CONTINOUS DVs
+                    interval = dv.UpperBound - dv.LowerBound;
+                    
+                    MdoePhysicalSpaceDV(nonzeroIndices,idv) = ...
+                        dv.LowerBound + unifcdf(Xobj.MdoeFactors(nonzeroIndices,idv+Nrv),-1,1).*interval;
                 else
-                    Vindices = unidinv(unifcdf(Xobj.MdoeFactors(Vnonzeroindices,idv+Nrv),-1,1),...
-                        length(Xinput.XdesignVariable.(Xinput.CnamesDesignVariable{idv}).Vsupport));
+                    % For DISCRETE DVs
+                    Vindices = unidinv(unifcdf(Xobj.MdoeFactors(nonzeroIndices,idv+Nrv),-1,1),...
+                        length(dv.Support));
                     % Since unidinv returns NaN for zero, these are replaced woth the lowerbound, i.e.
                     % Vsupport(1) values
                     VNaNindices = isnan(Vindices);
                     Vindices(VNaNindices) = 1;
-                    MdoePhysicalSpaceDV(Vnonzeroindices,idv) = ...
-                        Xinput.XdesignVariable.(Xinput.CnamesDesignVariable{idv}).Vsupport(Vindices);
+                    MdoePhysicalSpaceDV(nonzeroIndices,idv) = ...
+                        dv.Support(Vindices);
                 end
                 % Xobj.LuseCurrentValues= TRUE => If MdoeFactor = 0, use MEDIAN value of the interval of DV
             else
-                % For CONTINOUS DVs
-                if isempty(Xinput.XdesignVariable.(Xinput.CnamesDesignVariable{idv}).Vsupport)
-                    interval = Xinput.XdesignVariable.(Xinput.CnamesDesignVariable{idv}).upperBound - ...
-                        Xinput.XdesignVariable.(Xinput.CnamesDesignVariable{idv}).lowerBound;
+                if isa(dv, 'opencossan.optimization.ContinuousDesignVariable')
+                    % For CONTINOUS DVs
+                    interval = dv.UpperBound - dv.LowerBound;
                     MdoePhysicalSpaceDV(:,idv) = ...
-                        Xinput.XdesignVariable.(Xinput.CnamesDesignVariable{idv}).lowerBound + ...
-                        unifcdf(Xobj.MdoeFactors(:,idv+Nrv),-1,1).*interval;
-                    % For DISCRETE DVs
+                        dv.LowerBound + unifcdf(Xobj.MdoeFactors(:,idv+Nrv),-1,1).*interval;
                 else
+                    % For DISCRETE DVs
                     Vindices = unidinv(unifcdf(Xobj.MdoeFactors(:,idv+Nrv),-1,1),...
-                        length(Xinput.XdesignVariable.(Xinput.CnamesDesignVariable{idv}).Vsupport));
+                        length(dv.Support));
                     % Since unidinv returns NaN for zero, these are replaced woth the lowerbound, i.e.
                     % Vsupport(1) values
                     VNaNindices = isnan(Vindices);
                     Vindices(VNaNindices) = 1;
                     MdoePhysicalSpaceDV(:,idv) = ...
-                        Xinput.XdesignVariable.(Xinput.CnamesDesignVariable{idv}).Vsupport(Vindices);
+                        dv.Support(Vindices);
                 end
             end
         end
@@ -276,7 +270,7 @@ end
 
 Sarguments='Samples(''Xinput'',Xinput';
 %% Create the Samples object for the generated input values
-CspNames=Xinput.CnamesStochasticProcess;
+CspNames=Xinput.StochasticProcessNames;
 
 if ~isempty(CspNames)
     Nsamples=size(Xobj.MdoeFactors,1);

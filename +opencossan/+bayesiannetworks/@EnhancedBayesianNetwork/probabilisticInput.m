@@ -22,8 +22,8 @@ function Xinput = probabilisticInput(EBN, varargin)
 %  You should have received a copy of the GNU General Public License
 %  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
 % =====================================================================
-
 import opencossan.common.inputs.* 
+import opencossan.common.inputs.random.* 
 
 %% Process Input
 p = inputParser;
@@ -68,41 +68,44 @@ end
 
 %% Extract Random Variables from probabilistic nodes
 if ~isempty(RVNodes)
-    CXRV        = cell(1,length(RVNodes));  % Cell array of RVs collected
-    McorrRVS    = eye(length(RVNodes));
+    RVS        = RandomVariable.empty(0,length(RVNodes));  % array of RVs collected
+    CorrRVS    = eye(length(RVNodes));
     combDonly4comb = combination(Donly4Comb);
     % Collect RVs
     for irv=1:length(RVNodes)
         combNode=combDonly4comb(ismember(NamesOnly4Comb,RVNodes(irv).Parents));
         % Collect RVs (N.B. the size of probabilistic nodes is always 1)
-        CXRV(irv)=RVNodes(irv).CPD(combNode{:});       
+        RVS(irv)=RVNodes(irv).CPD{combNode{:}};       
     end
     
     if ~isempty(EBN.Correlation)
-        Mcorrelation=EBN.Correlation;
+        Correlation=EBN.Correlation;
         % Extract values of correlation among RVs involved
-        McorrRVS=Mcorrelation(LprobInNet,LprobInNet);
+        CorrRVS=Correlation(LprobInNet,LprobInNet);
     end
     
-    % BUILD RVSET OF INDEPENDENT RVs
-    Iindependent=find(sum(McorrRVS,1)==1); % Index of independent RVs
-    if ~isempty(CXRV(Iindependent)) 
+    % BUILD RVSET OF INDEPENDENT RVs    
+    Iindependent=find(sum(CorrRVS,1)==1); % Index of independent RVs
+    if ~isempty(RVS(Iindependent)) 
         NamesIndRVset=lower(RVNodes(Iindependent).Name);
-        XRVSindependent=RandomVariableSet('Cxrv',CXRV(Iindependent),'Cmembers',{NamesIndRVset{:}});
+        XRVSindependent=RandomVariableSet('members',RVS(irv), 'names',{NamesIndRVset{:}}, 'correlation', CorrRVS);
+        % RandomVariableSet('Members',RVS(Iindependent),'Names',{NamesIndRVset{:}});
         Xinput=Xinput.add('Member',XRVSindependent,'Name',"XRVSindependent"); % add the RVsets to the input object
     end
     
     % BUILD RVSET OF INDEPENDENT RVs
     % Redefine Mcorr for correlated variables
-    McorrRVS(:,(Iindependent))      = []; % Exclude values in Mcorr related to independent RVs
-    McorrRVS((Iindependent),:)      = [];
-    CnameDependentRVs               = lower(RVNodes.Name); % Name of RVs in Input
-    CnameDependentRVs(Iindependent) = [];
-    CdependentRVs                   = CXRV;
-    CdependentRVs(Iindependent)     = []; % Cell array of dependent RVs
-    if ~isempty(CnameDependentRVs) 
-        XRVSdependent=RandomVariableSet('Cxrv',CdependentRVs,'Cmembers',{CnameDependentRVs{:}},'Mcorrelation',McorrRVS,...
-            'Ncopulasamples',100000,'ncopulabatches',100);
+    CorrRVS(:,(Iindependent))      = []; % Exclude values in Mcorr related to independent RVs
+    CorrRVS((Iindependent),:)      = [];
+    NameDependentRVs               = lower(RVNodes.Name); % Name of RVs in Input
+    NameDependentRVs(Iindependent) = [];
+    DependentRVs                   = RVS;
+    DependentRVs(Iindependent)     = []; % Array of dependent RVs
+    if ~isempty(NameDependentRVs)
+        XRVSdependent=RandomVariableSet('members',DependentRVs,'names',{NameDependentRVs{:}},'correlation',CorrRVS,...
+            'copulasamples',100000,'copulabatches',100);
+%         XRVSdependent=RandomVariableSet('Cxrv',DependentRVs,'Cmembers',{NameDependentRVs{:}},'Mcorrelation',CorrRVS,...
+%             'Ncopulasamples',100000,'ncopulabatches',100);
         Xinput=Xinput.add('Member',XRVSdependent,'Name',"XRVSdependent"); % Add the RVsets to the input object
     end
     
