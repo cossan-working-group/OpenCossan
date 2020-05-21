@@ -30,34 +30,18 @@ classdef LineSampling < opencossan.simulations.Simulations
     
     %% Properties
     properties
-        Valpha          % Important Direction (pointing to the failure area)
-        CalphaNames     % Names of the corresponding directions (i.e. RandomVariable)
-    end
-       
-    properties (Dependent = true, SetAccess = protected)
-        Nlinexbatch        % number of lines per batch
-        Nlinelastbatch     % number of lines in the last batch
-    end
-    
-    properties
-        Nlines                      % Termination criteria for the maximum number of lines
-        Vset=1:6                    % Evaluation points along the line
-        Ncfine=1000                 % Number of iterpolation points of the values along each line
+        % Important Direction (pointing to the failure area)
+        Alpha(:, 1) double;          
+        NumberOfBatches(1,1) {mustBeInteger, mustBePositive} = 1;
+        % Termination criteria for the maximum number of lines
+        NumberOfLines(1,1) {mustBeInteger, mustBePositive} = 1;
+        % Evaluation points along the line
+        PointsOnLine(1, :) double = 1:6;
+        ExportBatches(1,1) logical = false;
     end
     
     methods
-        %% Methods inheritated from the superclass
-        display(Xobj)    % show object details
-        
-        XsimOut=apply(Xobj,Xtarget)      % Performe Monte Carlo Simulation
-        
-        [Xpf,XsimData,varargout]=computeFailureProbability(Xobj,Xtarget)   % Esitmate FailureProbability
-        
-        Xsamples = sample(Xobj,varargin) % Generate samples using IS method
-        
-        
-        %% constructor
-        function Xobj= LineSampling(varargin)
+        function obj = LineSampling(varargin)
             %LINESAMPLING This is the constructor of the LineSampling
             %object.
             %
@@ -65,131 +49,47 @@ classdef LineSampling < opencossan.simulations.Simulations
             %
             % Author: Edoardo Patelli
             % Institute for Risk and Uncertainty, University of Liverpool, UK
-            %% Validate input arguments
-            opencossan.OpenCossan.validateCossanInputs(varargin{:})
             
-            for k=1:2:length(varargin)
-                switch lower(varargin{k})
-                    case {'sdescription'}
-                        Xobj.Sdescription=varargin{k+1};
-                    case {'cov'}
-                        Xobj.CoV=varargin{k+1};
-                    case {'timeout'}
-                        Xobj.timeout=varargin{k+1};
-                    case {'nsamples'}
-                        NsamplesUD=varargin{k+1};
-                    case {'nlines'}
-                        NlinesUD=varargin{k+1};
-                    case {'conflevel'}
-                        Xobj.confLevel=varargin{k+1};
-                    case {'sbatchfolder'}
-                        Xobj.SbatchFolder=varargin{k+1};
-                    case {'nbatches'}
-                        Xobj.Nbatches=varargin{k+1};
-                    case {'lintermediateresults'}
-                        Xobj.Lintermediateresults=varargin{k+1};
-                    case {'xgradient','xlocalsensitivitymeasures'}
-                        Xgradient=varargin{k+1};
-                    case {'cxgradient','cxlocalsensitivitymeasures'}
-                        Xgradient=varargin{k+1}{1};
-                    case {'valpha','vimportancedirection'}
-                        Xobj.Valpha=varargin{k+1};
-                        Xobj.Valpha=Xobj.Valpha(:)/norm(Xobj.Valpha);
-                    case {'cimportancedirectionnames'}
-                        Xobj.CalphaNames=varargin{k+1}{1};
-                    case {'vset'}
-                        Xobj.Vset=varargin{k+1};
-                    case {'ncfine'}
-                        Xobj.Ncfine=varargin{k+1};
-                    case {'nseedrandomnumbergenerator'}
-                        Nseed       = varargin{k+1};
-                        Xobj.XrandomStream = ...
-                            RandStream('mt19937ar','Seed',Nseed);
-                    case {'xrandomnumbergenerator'}
-                        assert(isa(varargin{k+1},'RandStream'),...
-                            'openCOSSAN:LineSampling:wrongRandStream',...
-                            'A RandStream object is required after argument %s\nProvided object of class %s', varargin{k},class(varargin{k+1}))
-                        Xobj.XrandomStream  = varargin{k+1};                        
-                    otherwise
-                        error('openCOSSAN:LineSampling:wrongArgument',...
-                             'Field name %s not allowed!',varargin{k});
-                end
-            end % end process inputs
-            
-            %% Check Important Direction
-            if exist('Xgradient','var')
-                assert(isa(Xgradient,'opencossan.sensitivity.Gradient') |...
-                    isa(Xgradient,'opencossan.sensitivity.LocalSensitivityMeasures'), ...
-                    'openCOSSAN:LineSampling',...
-                    'Object of class %s is not valid to define the important direction', ...
-                    class(Xgradient))
-                
-                % Keep only the Gradient/SensitivityMeasures that refers to the
-                % performance function
-                
-                assert(length(Xgradient)==1,'openCOSSAN:LineSampling',...
-                    ['Please provide a %s ' ...
-                    'of the PerformanceFunction only! \nLength of the provided object: %i'], ...
-                    class(Xgradient),length(Xgradient))
-                
-                if isempty(Xobj.Valpha)
-                    % It is necessary to go in the opposite direction 
-                    % of the Gradient or the SensitivityMeasure
-                    Xobj.Valpha=-Xgradient.Valpha;
-                    Xobj.CalphaNames=Xgradient.Cnames;
-                end
-                
-            end
-            
-            % Adapt Nlines and Nsamples
-            if exist('NlinesUD','var')
-                if exist('NsamplesUD','var')
-                    if NlinesUD*length(Xobj.Vset)~=NsamplesUD
-                        Xobj.Nsamples=NlinesUD*length(Xobj.Vset);
-                        warning('openCOSSAN:simulations:LineSampling',...
-                            ['Nsamples reset to ' num2str(Xobj.Nsamples)])
-                    else
-                        Xobj.Nsamples=NsamplesUD;
-                    end
-                    Xobj.Nlines=NlinesUD;
-                else
-                    Xobj.Nsamples=NlinesUD*length(Xobj.Vset);
-                    Xobj.Nlines=NlinesUD;
-                end
+            if nargin == 0
+                super_args = {};
             else
-                if exist('NsamplesUD','var')
-                    Xobj.Nlines=floor(NsamplesUD/length(Xobj.Vset));
-                    if NsamplesUD~=Xobj.Nlines*length(Xobj.Vset)
-                        warning('openCOSSAN:simulations:LineSampling',...
-                            ['Nsamples reset to ' num2str(Xobj.Nlines*length(Xobj.Vset))])
-                    end
-                end
-                Xobj.Nsamples=Xobj.Nlines*length(Xobj.Vset);
+                [required, varargin] = opencossan.common.utilities.parseRequiredNameValuePairs(...
+                    "lines", varargin{:});
+                [optional, super_args] = opencossan.common.utilities.parseOptionalNameValuePairs(...
+                    ["alpha", "gradient", "points", "batches", "samples", ...
+                    "exportbatches"], {[], [], 1:6, 1, [], false}, varargin{:});
+            end
+            
+            obj@opencossan.simulations.Simulations(super_args{:});
+            
+            if nargin > 0
+                obj.NumberOfLines = required.lines;
+                obj.NumberOfBatches = optional.batches;
+                obj.PointsOnLine = optional.points;
+                obj.ExportBatches = optional.exportbatches;
                 
+                if ~isempty(optional.alpha)
+                    assert(isempty(optional.gradient), 'OpenCossan:LineSampling', ...
+                    "Only specify either the important direction alpha or a gradient object.");
+                    obj.Alpha = optional.alpha;
+                elseif ~isempty(optional.gradient)
+                    validateattributes(optional.gradient, {'opencossan.sensitivity.Gradient', ...
+                        'opencossan.sensitivity.LocalSensitivityMeasures'}, {'scalar'});
+                    % It is necessary to go in the opposite direction of the Gradient or the 
+                    % SensitivityMeasure
+                    obj.Alpha = -optional.gradient.Valpha;
+                end
+                
+                if ~isempty(optional.samples)
+                    warning('OpenCossan:LineSampling', ...
+                        "Argument 'samples' is ignored for LineSampling. Use 'lines'.");
+                end
             end
-            
-            if Xobj.Nbatches>Xobj.Nlines
-                error('openCOSSAN:simulations:LineSampling',...
-                    ['The number of batches (' num2str(Xobj.Nbatches) ...
-                    ') can not be greater than the number of Lines (' ...
-                    num2str(Xobj.Nlines) ')' ]);
-            end
-            
-            %%
-            
-        end % end constructor
-        
-        
-        function Nlinexbatch = get.Nlinexbatch(Xobj)
-            Nlinexbatch = floor(Xobj.Nlines/Xobj.Nbatches);
-        end % Modulus get method
-        
-        function Nlinelastbatch = get.Nlinelastbatch(Xobj)
-            Nlinelastbatch =  Xobj.Nlinexbatch+rem(Xobj.Nlines,Xobj.Nbatches);
-        end % Modulus get method
-        
-        
-    end % methods
+        end
+    end
     
+    methods (Access = protected)
+        [exit, flag] = checkTermination(obj, varargin) % Check the termination criteria 
+    end
 end
 

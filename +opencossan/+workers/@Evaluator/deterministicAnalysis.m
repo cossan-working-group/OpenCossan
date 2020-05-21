@@ -33,12 +33,7 @@ assert(isa(Xinput,'opencossan.common.inputs.Input'), ...
     'openCOSSAN:Evaluator:deterministicAnalysis', ...
     'An input object is required to perform the deterministic analysis');
 
-%% Retrieve default (nominal values)
-if isempty(Xinput.Names)
-    TableInput=table;
-else
-    TableInput=Xinput.getDefaultValuesTable;
-end
+TableInput = Xinput.getDefaultValues();
 
 % Perform analysis
 XSimOut=Xobj.apply(TableInput);

@@ -49,14 +49,16 @@ along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
     if ~isempty(optional.model)
         output = optional.model(x);
     elseif ~isempty(optProb.Model)
-        input = optProb.Input.setDesignVariable('CSnames',optProb.DesignVariableNames,'Mvalues',x);
-        input = input.getTable();
+        input = array2table(x);
+        input.Properties.VariableNames = optProb.DesignVariableNames;
+        input = optProb.Input.completeSamples(input);
         result = apply(optProb.Model, input);
-        output = result.TableValues;
+        output = result.Samples;
         opencossan.optimization.OptimizationRecorder.recordModelEvaluations(output);
     else
-        input = optProb.Input.setDesignVariable('CSnames',optProb.DesignVariableNames,'Mvalues',x);
-        output = input.getTable();
+        input = array2table(x);
+        input.Properties.VariableNames = optProb.DesignVariableNames;
+        output = optProb.Input.completeSamples(input);
     end
     
     % loop over all constraints

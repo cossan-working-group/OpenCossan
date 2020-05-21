@@ -39,7 +39,7 @@ end
 output = obj.Evaluator.deterministicAnalysis(obj.Input);
 
 %% Export results
-output.Sdescription = [output.Sdescription ' - deterministicAnalysis(@Model)'];
+output.Description = strjoin(output.Description, " - deterministicAnalysis(@Model)");
 
 % It is necessary to export the results for the GUI
 if isdeployed

@@ -50,8 +50,7 @@ X3 = opencossan.common.inputs.random.UniformRandomVariable('Description','random
     'bounds',[-5,5]);
 
 Xrvset      = opencossan.common.inputs.random.RandomVariableSet('Names',["X1","X2","X3"],'Members',[X1,X2,X3]);
-Xin         = Input;
-Xin         = add(Xin,'Member',Xrvset,'Name','Xrvset');
+Xin         = Input('Members', {Xrvset}, 'Names', "Xrvset");
 
 %%  Create Mio to Rosenbrock function
 Xmio = Mio('FullFileName',[fullfile(opencossan.OpenCossan.getRoot),'/lib/MatlabFunctions/Rosenbrock.m'],...
@@ -73,10 +72,10 @@ Xps1 = PolyharmonicSplines('Description','quadratic spline of Rosenbrock functio
     'Stype','quadratic',...
     'Sextrapolationtype','quadratic');
 
-Xlhs= LatinHypercubeSampling('Nsamples',400); % simulation obecjt for calibration samples
+Xlhs= LatinHypercubeSampling('samples',400); % simulation obecjt for calibration samples
 Xps1 = Xps1.calibrate('XSimulator',Xlhs); % calibrate spline
 
-Xmc=LatinHypercubeSampling('Nsamples',20); % simulation object for validation samples
+Xmc=LatinHypercubeSampling('samples',20); % simulation object for validation samples
 Xps1 = Xps1.validate('XSimulator',Xlhs); % validate spline
 
 % regression plots for calibration and validation
@@ -109,15 +108,17 @@ MXX2 = MXX1';
 MXX3 = ones(201,201);
 Vx1=MXX1(:); Vx2 = MXX2(:);Vx3=MXX3(:);
 Minput = [Vx1,Vx2,Vx3];
-Xs = Samples('Xrvset',Xrvset,'MsamplesPhysicalSpace',Minput);
-Xin = Xin.add('Member',Xs,'Name','Xs');
 
-Xoutreal = Xmio.run(Xin);
-Xoutps1 = Xps1.evaluate(Xin.getTable);
-Xoutps2 = Xps2.evaluate(Xin.getTable);
+samples = array2table(Minput);
+samples.Properties.VariableNames = Xin.InputNames;
+
+Xoutreal = Xmio.run(Minput);
+
+Xoutps1 = Xps1.evaluate(samples);
+Xoutps2 = Xps2.evaluate(samples);
 
 f5 = figure(5);
-mesh(MXX1,MXX2,reshape(Xoutreal.getValues('Sname','out'),201,201));
+mesh(MXX1,MXX2,reshape(Xoutreal.Samples.out,201,201));
 f6 =  figure(6);
 mesh(MXX1,MXX2,reshape(Xoutps1.out,201,201));
 f7 =  figure(7);

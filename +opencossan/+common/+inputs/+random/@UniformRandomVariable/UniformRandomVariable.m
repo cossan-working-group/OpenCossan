@@ -26,7 +26,7 @@ classdef UniformRandomVariable < opencossan.common.inputs.random.RandomVariable
     % =====================================================================
     
     properties
-        Bounds(1,2) double {mustBeNumeric} = [-Inf;Inf];
+        Bounds(1,2) double {mustBeNumeric} = [0, 1];
     end
     
     properties (Dependent)

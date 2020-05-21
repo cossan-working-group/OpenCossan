@@ -38,9 +38,9 @@ classdef ParameterTest < matlab.unittest.TestCase
         function constructorShouldValidateInput(testCase)
             % String validation for Description
             testCase.verifyError(@()opencossan.common.inputs.Parameter('description', cell(1)),...
-                'MATLAB:UnableToConvert');
+                'MATLAB:validation:UnableToConvert');
             testCase.verifyError(@()opencossan.common.inputs.Parameter('description', rand(2)),...
-                'MATLAB:type:InvalidInputSize');
+                'MATLAB:validation:IncompatibleSize');
             % Numeric validation for Value
             testCase.verifyError(@()opencossan.common.inputs.Parameter('value', 'c'),...
                 'MATLAB:validators:mustBeNumeric');

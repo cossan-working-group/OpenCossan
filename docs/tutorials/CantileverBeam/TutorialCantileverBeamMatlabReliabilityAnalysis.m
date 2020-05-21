@@ -41,14 +41,14 @@ XprobModelBeamMatlab = opencossan.reliability.ProbabilisticModel(...
 opencossan.OpenCossan.resetRandomNumberGenerator(51125);
 
 % Create MonteCarlo simulation object to run 1e5 samples in 1 batch
-Xmc = opencossan.simulations.MonteCarlo('Nsamples',1e5,'Nbatches',1);
+Xmc = opencossan.simulations.MonteCarlo('samples', 1e5, 'batches', 1);
 
 % Run reliability analysis
 XfailureProbMC = Xmc.computeFailureProbability(XprobModelBeamMatlab);
 display(XfailureProbMC);
 
 % Validate Solution
-assert(XfailureProbMC.pfhat == 0.06922,...
+assert(XfailureProbMC.Value == 0.06922,...
        'CossanX:Tutorials:CantileverBeam',...
        'Reference Solution pf MCS not matched.');
 
@@ -56,54 +56,50 @@ assert(XfailureProbMC.pfhat == 0.06922,...
 % Reset the random number generator to always produce the same results
 opencossan.OpenCossan.resetRandomNumberGenerator(49564);
 
-% Create LatinHypercubeSampling simulation object to run 1e5 samples in 1
+% Create LatinHypercubeSampling simulation object to run 1e4 samples in 1
 % batch
-Xlhs=opencossan.simulations.LatinHypercubeSampling('Nsamples',1e4);
+Xlhs=opencossan.simulations.LatinHypercubeSampling('samples', 1e4);
 
 % Run reliability analysis
 XfailureProbLHS = Xlhs.computeFailureProbability(XprobModelBeamMatlab);
 display(XfailureProbLHS);
 
 % Validate Solution
-assert(XfailureProbLHS.pfhat == 0.06840,...
+assert(XfailureProbLHS.Value == 0.06840,...
        'CossanX:Tutorials:CantileverBeam',...
        'Reference Solution pf LHS not matched.');
 
 %% Reliability Analysis via LineSampling
-% Reset the random number generator to always produce the same results
-opencossan.OpenCossan.resetRandomNumberGenerator(49564);
-
 % Line Sampling requires the definition of the so-called important 
 % direction. It can be compute using sensitivity methods. For instance,
 % here the gradient in standard normal space is computed.
 
 XlsFD = opencossan.sensitivity.LocalSensitivityFiniteDifference(...
-    'Xmodel', XprobModelBeamMatlab, 'Coutputname', {'Vg'});
+    'Xmodel', XprobModelBeamMatlab, 'Coutputname', "Vg");
 XlocalSensitivity = XlsFD.computeGradientStandardNormalSpace();
 
 % Use sensitivity information to define the important direction for LineSampling
 XLS=opencossan.simulations.LineSampling(...
-    'XlocalSensitivityMeasures', XlocalSensitivity,'Nlines', 50,...
-    'Vset', 0.5:0.5:3.5);
+    'gradient', XlocalSensitivity,'lines', 50, ...
+    'points', 0.5:0.5:3.5, 'seed', 49564);
 
 % Run reliability analysis
-[XfailureProbLS, Xout]=XLS.computeFailureProbability(XprobModelBeamMatlab);
+XfailureProbLS = XLS.computeFailureProbability(XprobModelBeamMatlab);
 
 % Show Results
 display(XfailureProbLS);
-display(Xout);
 
 % Validate Solution
-assert(abs(XfailureProbLS.pfhat-0.069097)<1e-4*0.069097,...
+assert(abs(XfailureProbLS.Value-0.06910421) < 1e-4 * 0.06910421,...
     'CossanX:Tutorials:CantileverBeam',...
     'Estimated failure probability (%e) does not match the reference Solution (%e)',...
-    XfailureProbLS.pfhat, 0.069097)
+    XfailureProbLS.Value, 0.06910421)
 
 %% Plot Results
-f1 = Xout.plotLines;
+% f1 = Xout.plotLines;
 
 %% Close figure
-close(f1);
+% close(f1);
 
 %% Optimization
 % This tutorial continues with the optimization section

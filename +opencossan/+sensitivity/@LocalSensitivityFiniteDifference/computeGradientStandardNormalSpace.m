@@ -1,4 +1,4 @@
-function varargout=computeGradientStandardNormalSpace(Xobj,varargin)
+function varargout = computeGradientStandardNormalSpace(Xobj,varargin)
 %COMPUTEGRADIENTSTANDARDNORMALSPACE This method computes the gradient of
 %the funtion in the standard normal space. Hence, the perturbation of the
 %input factor is defined in the standard normal space.
@@ -40,16 +40,16 @@ for k=1:2:length(varargin)
 end
 
 %% Check the input
-assert(Xobj.Xinput.NumberOfDesignVariables == 0,...
+assert(Xobj.Input.NumberOfDesignVariables == 0,...
     'OpenCOSSAN:computeGradientStandardNormalSpace:NoDV',...
     strcat('The method computeGradientStandardNormalSpace can only be used with a pure probabilistic model\n',...
     'No design variable permitted.',...
-    '\n DesignVariable: %s'),Xobj.Xinput.DesignVariableNames)
+    '\n DesignVariable: %s'),Xobj.Input.DesignVariableNames)
 
 % Initialize variables
-NfunctionEvaluation=0;
-Nrv=Xobj.Xinput.NrandomVariables;  % Number of RV dedined in the model
-Ninputs=length(Xobj.Cinputnames);       % Number of required inputs
+NfunctionEvaluation = 0;
+Nrv = Xobj.Input.NumberOfRandomInputs;  % Number of RV dedined in the model
+Ninputs = length(Xobj.InputNames);       % Number of required inputs
 
 % Set the analysis name when not deployed
 if ~isdeployed
@@ -70,29 +70,29 @@ end
 %[Mgradients, ~, NfunctionEvaluation, varargout{2}]=Xobj.doFiniteDifferences;
 
 %% Generate Samples object from the Reference Point
-if isempty(Xobj.Xsamples0)
+if isempty(Xobj.Samples0)
     % Construct Reference Point
     % Check mandatory fields
-    assert(length(Xobj.VreferencePoint)==Nrv, ...
+    assert(width(Xobj.VreferencePoint) == Nrv, ...
         'openCOSSAN:sensitivity:coreFiniteDifferences', ...
         strcat('The length of reference point (%i) must be equal to' , ...
         ' the sum of the number of random variables (%i)'), ...
-        length(Xobj.VreferencePoint),Nrv)
+        width(Xobj.VreferencePoint), Nrv)
     
-    Xobj.Xsamples0=opencossan.common.Samples('MsamplesPhysicalSpace',Xobj.VreferencePoint,'Xinput',Xobj.Xinput);    
+    Xobj.Samples0 = Xobj.Input.completeSamples(Xobj.VreferencePoint);
 else
-    Xobj.VreferencePoint=Xobj.Xsamples0.MsamplesStandardNormalSpace;
+    Xobj.VreferencePoint = Xobj.Input.map2stdnorm(Xobj.Samples0);
 end
 
-if isempty(Xobj.fx0)
-    Xout0=Xobj.Xtarget.apply(Xobj.Xsamples0);
+if isempty(Xobj.Fx0)
+    Xout0=Xobj.Target.apply(Xobj.Samples0);
     if ~isempty(opencossan.OpenCossan.getDatabaseDriver)
         insertRecord(opencossan.OpenCossan.getDatabaseDriver,'StableType','Simulation', ...
             'Nid',getNextPrimaryID(opencossan.OpenCossan.getDatabaseDriver,'Simulation'),...
             'XsimulationData',Xout0,'Nbatchnumber',0) 
     end  
-    NfunctionEvaluation=NfunctionEvaluation+Xout0.Nsamples;
-    Vreference=Xout0.getValues('Cnames',Xobj.Coutputnames);
+    NfunctionEvaluation = NfunctionEvaluation + Xout0.NumberOfSamples;
+    Vreference = Xout0.Samples.(Xobj.OutputNames);
 else
     Cvariables=Xobj.Xsamples0.Cvariables;
     Cvariables(end+1)=Xobj.Coutputname;
@@ -103,50 +103,41 @@ end
 
 %% Compute finite difference for each component
 % Define the perturbation points in the STANDARD NORMAL SPACE
-MsamplesSNS=repmat(Xobj.Xsamples0.MsamplesStandardNormalSpace,Ninputs,1);
+samplesInStdNorm = repmat(Xobj.Input.map2stdnorm(Xobj.VreferencePoint), Ninputs, 1);
+samplesInStdNorm = array2table(samplesInStdNorm{:,:} + Xobj.perturbation * eye(Nrv));
+samplesInStdNorm.Properties.VariableNames = Xobj.Input.RandomInputNames;
 
-Mperturbation=Xobj.perturbation*eye(Nrv);
-
-MsamplesSNS=MsamplesSNS+Mperturbation;
-
-% Define a Samples object with the perturbated values
-Xsmli=opencossan.common.Samples('MsamplesStandardNormalSpace',MsamplesSNS,'Xinput',Xobj.Xinput);
+samplesInPhysical = Xobj.Input.map2physical(samplesInStdNorm);
+samplesInPhysical = Xobj.Input.completeSamples(samplesInPhysical);
 
 % Evaluate the model
-Xdeltai     = Xobj.Xtarget.apply(Xsmli);
+fxInPhysical = Xobj.Target.apply(samplesInPhysical);
 if ~isempty(opencossan.OpenCossan.getDatabaseDriver)
     insertRecord(opencossan.OpenCossan.getDatabaseDriver,'StableType','Simulation', ...
         'Nid',getNextPrimaryID(opencossan.OpenCossan.getDatabaseDriver,'Simulation'),...
-        'XsimulationData',Xdeltai,'Nbatchnumber',0) 
+        'XsimulationData',fxInPhysical,'Nbatchnumber',0) 
 end  
-NfunctionEvaluation     = NfunctionEvaluation+Xdeltai.Nsamples;
+NfunctionEvaluation = NfunctionEvaluation + fxInPhysical.NumberOfSamples;
 
 %% Compute gradient (in StandardNormalSpace)
-MgradientsSNS=zeros(Ninputs,length(Xobj.Coutputnames));
+gradient = zeros(Ninputs,length(Xobj.OutputNames));
 
-for iout=1:length(Xobj.Coutputnames)
-    MgradientsSNS(:,iout) = (Xdeltai.getValues('Cnames',Xobj.Coutputnames(iout)) - Vreference(iout) )./Xobj.perturbation;
+for iout = 1:length(Xobj.OutputNames)
+    gradient(:, iout) = (fxInPhysical.Samples.(Xobj.OutputNames(iout)) - Vreference(iout)) ./ Xobj.perturbation;
 end
 
-%% Compute the variance of the responce in standard normal space
-Mindices=zeros(Ninputs,length(Xobj.Coutputnames));
-
-for iout=1:length(Xobj.Coutputnames)
-    Mindices(:,iout) = (Xdeltai.getValues('Cnames',Xobj.Coutputnames(iout)) - ...
-        Vreference(iout) )/Xobj.perturbation;    
-end
-XsimData=Xout0.merge(Xdeltai); % Export SimulationData
+simData = Xout0 + fxInPhysical; % Export SimulationData
 %% Export results
-varargout{2}=XsimData;
+varargout{2} = simData;
 
-for n=1:length(Xobj.Coutputnames)
-        varargout{1}(n)=opencossan.sensitivity.Gradient('Sdescription',...
-            ['Finite Difference Gradient estimation of ' Xobj.Coutputnames{n} ' computed in standard normal space'], ...
-            'Cnames',Xobj.Cinputnames, ...
+for n=1:length(Xobj.OutputNames)
+        varargout{1}(n) = opencossan.sensitivity.Gradient('Sdescription',...
+            strjoin(['Finite Difference Gradient estimation of' Xobj.OutputNames(n) 'computed in standard normal space']), ...
+            'Cnames',Xobj.InputNames, ...
             'LstandardNormalSpace',true, ...
             'NfunctionEvaluation',NfunctionEvaluation,...
-            'Vgradient',MgradientsSNS(:,n),'Vreferencepoint',Xobj.VreferencePoint,...
-            'SfunctionName',Xobj.Coutputnames{n});   
+            'Vgradient',gradient(:,n),'Vreferencepoint',Xobj.VreferencePoint,...
+            'SfunctionName',Xobj.OutputNames(n));   
 end
 
 if ~isdeployed

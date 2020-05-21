@@ -68,9 +68,9 @@ classdef LocalSensitivityFiniteDifference < opencossan.sensitivity.Sensitivity
                     case {'sdescription'}
                         Xobj.Sdescription=varargin{k+1};
                     case {'coutputnames' 'csoutputnames','coutputname','csoutputname'}
-                        Xobj.Coutputnames=varargin{k+1};
+                        Xobj.OutputNames = varargin{k+1};
                     case {'cinputnames' 'csinputnames' }
-                        Xobj.Cinputnames=varargin{k+1};
+                        Xobj.InputNames = varargin{k+1};
                     case {'sevaluatedobjectname'}
                         Xobj.Sevaluatedobjectname=varargin{k+1};
                     case {'lperformancefunction'}
@@ -81,10 +81,6 @@ classdef LocalSensitivityFiniteDifference < opencossan.sensitivity.Sensitivity
                         Xmodel=varargin{k+1}{1};
                     case {'vreferencepoint'}
                         % Reference Point in PhysicalSpace
-                        assert(all([~isnan(varargin{k+1}) ~isinf(varargin{k+1})]), ...
-                            'openCOSSAN:sensitivity:coreFiniteDifferences',...
-                            'The reference point can not contain NaN or Inf values\nProvided values: %s',...
-                            sprintf('%e ',varargin{k+1}));
                         Xobj.VreferencePoint=varargin{k+1};
                     case {'perturbation'}
                         Xobj.perturbation=varargin{k+1};

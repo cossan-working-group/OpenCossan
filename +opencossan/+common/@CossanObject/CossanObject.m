@@ -26,7 +26,7 @@ classdef (Abstract) CossanObject < matlab.mixin.CustomDisplay
     %  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
     % =====================================================================
     
-    properties
+    properties (Hidden)
         Description(1,1) string % Description of the object
     end
     

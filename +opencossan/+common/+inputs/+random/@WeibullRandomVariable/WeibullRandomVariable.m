@@ -29,8 +29,8 @@ classdef WeibullRandomVariable < opencossan.common.inputs.random.RandomVariable
     %}
     
     properties
-        A {mustBePositive} = 0.1;
-        B {mustBePositive} = 0.1;
+        A {mustBePositive} = 1;
+        B {mustBePositive} = 2;
     end
     
     properties (Dependent)

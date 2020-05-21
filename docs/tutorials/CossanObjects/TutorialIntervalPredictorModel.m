@@ -36,26 +36,22 @@ display(['Tutorial executed on: ',datestr(now)])
 %   Here, 4 input parameters (namely load, length of the beam, second
 %   moment of inertia of cross section of beam and Young's modulus) of the
 %   cantilever beam model are defined
-Xin = opencossan.common.inputs.Input('Description','input parameters of cantilever beam model');
 XP = opencossan.common.inputs.random.UniformRandomVariable('Description','load at tip of beam',...
     'bounds',[0.5e6, 1.5e6]);
 Xh = opencossan.common.inputs.random.UniformRandomVariable('Description','height of cross section of beam',...
     'bounds',[0.2, 0.3]);
 Xrvset      = opencossan.common.inputs.random.RandomVariableSet('Names',["Xh","XP"],'Members',[Xh,XP]);
-Xin         = add(Xin,'Member',Xrvset,'Name','Xrvset');
 XL = opencossan.common.inputs.Parameter('description','length of beam','Value',1);
-Xin = add(Xin,'Member',XL,'Name','XL');
 XI = opencossan.common.inputs.Function('description','second moment of inertia of beam',...
     'Expression','<&Xh&>.^4/12');
-Xin =add(Xin,'Member',XI,'Name','XI');
 XE  = opencossan.common.inputs.Parameter('description','Young''s modulus of beam','value',2e11);
-Xin =add(Xin,'Member',XE,'Name','XE');
 
 % this parameters are used in the test computation of pf
 Xthreshold1 = opencossan.common.inputs.Parameter('description','Define threshold','value',0.01);
-Xin =add(Xin,'Member',Xthreshold1,'Name','Xthreshold1');
 Xthreshold2 = opencossan.common.inputs.Parameter('description','Define threshold','value',0.017);
-Xin =add(Xin,'Member',Xthreshold2,'Name','Xthreshold2');
+
+Xin = opencossan.common.inputs.Input('Members', {Xrvset, XL, XI, XE, Xthreshold1, Xthreshold2}, ...
+            'Names', ["Xrvset", "XL", "XI", "XE", "Xthreshold1", "Xthreshold2"]);
 
 %%    Evaluator
 %   An evaluator based on a mio script is defined. This evaluator
@@ -92,7 +88,7 @@ Xipm2     = opencossan.metamodels.IntervalPredictorModel('description',...
     'Nmaximumexponent',2,...%type of Interval Predictor Model
     'chanceConstraint',0.9);   %fraction of data to include in model
 
-Xmc= opencossan.simulations.MonteCarlo('Nsamples',200);
+Xmc= opencossan.simulations.MonteCarlo('samples',200);
 
 Xipm = Xipm.calibrate('XSimulator',Xmc);
 Xipm2 = Xipm2.calibrate('XSimulator',Xmc);
@@ -104,7 +100,7 @@ Xipm2 = Xipm2.calibrate('XSimulator',Xmc);
 Xpf = opencossan.reliability.PerformanceFunction('OutputName','Vg','Demand','disp','Capacity','Xthreshold1');
 Xpm_real = opencossan.reliability.ProbabilisticModel('Model',Xmod,'PerformanceFunction',Xpf);
 
-Xmc=opencossan.simulations.MonteCarlo('Sdescription','Mio evaluation','Nsamples',1000,'Nbatches',1);
+Xmc=opencossan.simulations.MonteCarlo('Description','Mio evaluation','samples',1000,'batches',1);
 Xo_real = Xpm_real.computeFailureProbability(Xmc);
 
 %% Metamodel can also be also combined and used in a Evaluator
@@ -113,7 +109,7 @@ XmodRS= opencossan.common.Model('Evaluator',XevRS,'Input',Xin);
 Xpm_metamodel =opencossan.reliability.ProbabilisticModel('Model',XmodRS,'PerformanceFunction',Xpf);
 Xo_metamodel = Xpm_metamodel.computeFailureProbability(Xmc);
 
-assert(Xo_metamodel.pfhat>Xo_real.pfhat,'Upperbound on failure probability should be above the actual value')
+assert(Xo_metamodel.Value>Xo_real.Value,'Upperbound on failure probability should be above the actual value')
 
 %Retry with the chance constraints
 XevRS2=opencossan.workers.Evaluator('Sdescription','displacement at tip of cantilever beam','Xmetamodel',Xipm2);

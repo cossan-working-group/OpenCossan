@@ -45,8 +45,8 @@ Nsamples = size(Minputs,1);
 Ndim = size(Xobj.Mcenters,2);
 Ncenters = size(Xobj.Mcenters,1);
 
-XSimDataInput=SimulationData('Sdescription','Simulation Output from ResponseSurface',...
-    'Table',Pinput);
+XSimDataInput=SimulationData('Description','Simulation Output from ResponseSurface',...
+    'samples',Pinput);
 
 % initialize the matrix that will contain the estimated outputs
 Moutput=zeros(height(Pinput),length(Xobj.OutputNames));

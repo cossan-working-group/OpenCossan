@@ -40,7 +40,7 @@ x1 = opencossan.optimization.ContinuousDesignVariable('value',7,'lowerBound',0);
 x2 = opencossan.optimization.ContinuousDesignVariable('value',2,'lowerBound',0);
 
 % Input
-input = opencossan.common.inputs.Input('MembersNames',{'x1' 'x2'},'Members',{x1 x2});
+input = opencossan.common.inputs.Input('names',["x1" "x2"], 'members', {x1 x2});
 
 %% Model
 mio  = opencossan.workers.Mio('Description','objective function of optimization problem', ...

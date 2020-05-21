@@ -2,11 +2,15 @@
 
 pipeline {
 
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '5'))
+    }
+
     // Run in docker container
     agent {
         docker {
             image   'friesischscott/gitlab-ci-matlab'
-            args    '-v /opt/MATLAB/R2019b/:/usr/local/MATLAB/from-host -v /home/jenkins/.matlab/R2019b:/.matlab/R2019a --mac-address=2c:60:0c:e3:7e:8c'
+            args    '-v /opt/MATLAB/R2020a/:/usr/local/MATLAB/from-host -v /home/jenkins/.matlab/R2020a:/.matlab/R2020a --mac-address=2c:60:0c:e3:7e:8c'
             alwaysPull true
         }
     }

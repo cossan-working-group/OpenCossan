@@ -25,6 +25,11 @@ classdef (Abstract) DesignVariable < matlab.mixin.Heterogeneous & opencossan.com
     properties
         Value(1,1) double;  % Current value of the design variable
     end
+    
+    properties (Abstract)
+        LowerBound(1,1) double
+        UpperBound(1,1) double
+    end
 
     methods
         function obj = DesignVariable(varargin)

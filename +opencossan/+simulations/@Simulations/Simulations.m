@@ -1,4 +1,4 @@
-classdef Simulations
+classdef (Abstract) Simulations < opencossan.common.CossanObject
     % Abstract class for creating simulations methods
     % Subclass constructor should accept
     % property name/property value pairs
@@ -28,87 +28,62 @@ classdef Simulations
     %  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
     % =====================================================================
     
-    properties (Dependent = true, SetAccess = protected)
-        Nsimxbatch     % number of samples per batch
-        Nlastbatch     % number of samples in the last batch
-        SbatchName     % File name of the current batch
-    end
-    
     properties % Public access
-        Sdescription                 % Description of the object
-        Lverbose=false               % Be verbose
-        CoV                          % Termination criteria coefficient of variation (CoV) (0= no termination criteria adopted)
-        timeout                      % Termination criteria Time in seconds  (0= no termination criteria adopted)
-        Nsamples=1                   % Termination criteria Nsamples (0= no termination criteria adopted)
-        confLevel=0                  % Set Confidence Interval (0= no termination criteria adopted) (NOT IMPLEMENTED)
-        Nbatches=1                   % number of batches
-        Lintermediateresults=true    % save SimulationData object after each batch
-        XrandomStream                % field containing RandStream object
-        SbatchFolder                 % Define the name of the folder used to
-        % store intermediated results
+        % Termination criteria coefficient of variation (CoV) (0= no termination criteria adopted)
+        CoV(1,1) double {mustBeNonnegative} = 0;    
+        % Termination criteria Time in seconds  (0= no termination criteria adopted)
+        Timeout(1,1) double {mustBeNonnegative} = 0;           
+        % Termination criteria Nsamples
+        NumberOfSamples(1,1) {mustBeInteger} = 1;
+        % RandStream to use for the simulation
+        RandomStream; 
     end
     
     properties (Hidden, SetAccess = protected)
-        SbatchFileNames='SimulationData_batch_' % Define the name of the
-        % intermediated results
-        initialLaptime                % Store the initial laptime number of the simulation
-        ibatch=0                      % Store the current number of batch
-        isamples=0                    % Store the current number of samples
+        StartTime; % Store the start time of the simulation
+        ResultFolder;
     end
-    
-    
-    methods (Abstract)
-        
-        XsimOut = apply(Xobj,Xtarget) % Perform the simulation
-        
-        [Xpf, XsimOut]=computeFailureProbability(Xobj,Xtarget) % Compute the failure
-        % probability associated to the
-        % ProbabilisticModel/SystemReliability
-        
-        Xsamples=sample(Xobj,varargin) % Generate samples in the unit hypercube
-                
-        
-    end % methods
     
     methods
-        function Nsimxbatch = get.Nsimxbatch(Xobj)
-            Nsimxbatch = floor(Xobj.Nsamples/Xobj.Nbatches);
-        end % Modulus get method
-        
-        function Nlastbatch = get.Nlastbatch(Xobj)
-            %Nlastbatch =  Xobj.Nsimxbatch+rem(Xobj.Nsamples,Xobj.Nbatches);
-            Nlastbatch =  Xobj.Nsamples-Xobj.Nsimxbatch*(Xobj.Nbatches-1);
-        end % Modulus get method
-        
-        function SbatchName = get.SbatchName(Xobj)
-            SbatchName =  [Xobj.SbatchFileNames ...
-                num2str(Xobj.ibatch) '_of_' num2str(Xobj.Nbatches)];
-        end % Modulus get method
-        
-        exportResults(Xobj,varargin) % This method is used to export
-        % the SimulationData
-        
-    end % methods
-    
-    % Define protected methods
-    methods (Access=protected)
-        
-        [Xobj, Xinput]=checkInputs(Xobj,Xtarget) % Validate the input and initialize the random generator stream (if necessary)
-        
-        SexitFlag=checkTermination(Xobj,Xresults) % Check the termination criteria 
-        
-        function restoreRandomStream(Xobj) % This method restore the OpenCossan random stream as a global stream
-            %% Restore RandomStream
+        function obj = Simulations(varargin)
+            if nargin == 0
+                super_args = {};
+            else
+                [optional, super_args] = opencossan.common.utilities.parseOptionalNameValuePairs(...
+                    ["samples", "timeout", "cov", "randomstream", "seed"], {1, 0, 0, [], []}, varargin{:});
+            end
             
+            obj@opencossan.common.CossanObject(super_args{:});
             
-            if ~isempty(Xobj.XrandomStream) 
-                RandStream.setGlobalStream(opencossan.OpenCossan.getRandomStream);
+            if nargin > 0
+                obj.NumberOfSamples = optional.samples;
+                obj.Timeout = optional.timeout;
+                obj.CoV = optional.cov;
+                
+                assert(isempty(optional.randomstream) || isempty(optional.seed), ...
+                    'OpenCossan:Simulations', "You can not specify both a RandomStream and a Seed");
+                
+                if ~isempty(optional.randomstream)
+                    obj.RandomStream = optional.randomstream;
+                end
+                
+                if ~isempty(optional.seed)
+                    obj.RandomStream = RandStream('mt19937ar','Seed', optional.seed);
+                end
             end
         end
-        
-        
     end
     
+    methods (Abstract)        
+        pf = computeFailureProbability(Xobj, model)        
+        samples = sample(obj, varargin)
+    end
+    
+    methods (Access = protected)
+        [exit, flag] = checkTermination(obj, varargin);
+        exportResult(obj, pf);
+        obj = initialize(obj);
+    end
 end
 
 

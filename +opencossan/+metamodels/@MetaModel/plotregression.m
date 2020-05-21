@@ -98,12 +98,12 @@ if Lcalibration
         'MetaModel not calibrated, no calibration plot available');
     
     if ~isempty(Xobj.XcalibrationInput)
-        tableInput = Xobj.XcalibrationInput.getTable;
+        tableInput = Xobj.XcalibrationInput;
         TSimOut_metamodelCalibration = evaluate(Xobj,tableInput(:,Xobj.InputNames));
-        TSimOut_fullmodelCalibration = Xobj.XcalibrationOutput.TableValues;
+        TSimOut_fullmodelCalibration = Xobj.XcalibrationOutput.Samples;
     elseif ~isempty(Xobj.XcalibrationOutput)
-        TSimOut_metamodelCalibration = evaluate(Xobj,Xobj.XcalibrationOutput.TableValues);
-        TSimOut_fullmodelCalibration = Xobj.XcalibrationOutput.TableValues;
+        TSimOut_metamodelCalibration = evaluate(Xobj,Xobj.XcalibrationOutput.Samples);
+        TSimOut_fullmodelCalibration = Xobj.XcalibrationOutput.Samples;
     else
         TSimOut_metamodelCalibration = evaluate(Xobj,Xobj.TcalibrationData);
         TSimOut_fullmodelCalibration = Xobj.TcalibrationData;
@@ -119,12 +119,12 @@ if Lvalidation
         TSimOut_metamodelValidation = evaluate(Xobj,Xobj.TvalidationData);
         TSimOut_fullmodelValidation = Xobj.TvalidationData;
     elseif ~isempty(Xobj.XvalidationInput)
-        tableInput = Xobj.XvalidationInput.getTable;
+        tableInput = Xobj.XvalidationInput;
         TSimOut_metamodelValidation = evaluate(Xobj,tableInput(:,Xobj.InputNames));
-        TSimOut_fullmodelValidation = Xobj.XvalidationOutput.TableValues;
+        TSimOut_fullmodelValidation = Xobj.XvalidationOutput.Samples;
     elseif ~isempty(Xobj.XvalidationOutput)
         TSimOut_metamodelValidation = evaluate(Xobj,Xobj.XvalidationOutput.TableValues);    
-        TSimOut_fullmodelValidation = Xobj.XvalidationOutput.TableValues;
+        TSimOut_fullmodelValidation = Xobj.XvalidationOutput.Samples;
     end
 end
 

@@ -47,8 +47,8 @@ I = opencossan.common.inputs.Function('Description','Moment of Inertia','Express
 %% Prepare Input Object
 % The above prepared objects can be added to an Input Object
 XinputOptimization = opencossan.common.inputs.Input(...
-    'Members', {L b P h rho E I maxDisplacement},...
-    'MembersNames', {'L' 'b' 'P' 'h' 'rho' 'E' 'I' 'MaxW'});
+    'members', {L b P h rho E I maxDisplacement},...
+    'names', ["L" "b" "P" "h" "rho" "E" "I" "MaxW"]);
 
 %% Preparation of the Evaluator
 % Use of a matlab script to compute the Beam displacement
@@ -87,8 +87,8 @@ MdoeFactors=[-1 -1;
 % When the flag Lusecurrentvalues is set to true the current values of the
 % design variables is used in corresponcence of the MdoeFactors=0.
 
-Xdoe = opencossan.simulations.DesignOfExperiments('Sdesigntype','UserDefined',...
-    'Mdoefactors',MdoeFactors,'Lusecurrentvalues',true);
+Xdoe = opencossan.simulations.DesignOfExperiments('Designtype','UserDefined',...
+    'Factors',MdoeFactors,'usecurrentvalues',true);
 
 % Show summary of the design of experimemts
 display(Xdoe)
@@ -98,9 +98,9 @@ display(Xdoe)
 XoutDoe=Xdoe.apply(Xmodel);
 
 %% Results of the Design of Experiments
-h = XoutDoe.TableValues.h;
-b = XoutDoe.TableValues.b;
-w = XoutDoe.TableValues.w;
+h = XoutDoe.Samples.h;
+b = XoutDoe.Samples.b;
+w = XoutDoe.Samples.w;
 feasible = w < maxDisplacement.Value;
 
 results = table(h,b,w,feasible);

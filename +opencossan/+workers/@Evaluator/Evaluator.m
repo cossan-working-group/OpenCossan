@@ -179,8 +179,6 @@ classdef Evaluator
         
         Xout=apply(Xobj,Pinput) % Run the analysis    
         
-        Xout=display(Xobj) % Show details of the evaluator
-        
         Xout=deterministicAnalysis(Xobj,Xinput) % Perform the deterministic analysis
         
         Xout=add(Xobj,varargin) % Add a worker to the evaluator object

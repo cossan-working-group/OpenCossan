@@ -50,8 +50,6 @@ classdef ModelTest < matlab.mock.TestCase
             [inputStub, inputBehavior] = ...
                 testCase.createMock(?opencossan.common.inputs.Input);
             
-            testCase.assignOutputsWhen(...
-                withAnyInputs(inputBehavior.set), inputStub);
             testCase.InputStub = inputStub;
             testCase.InputBehavior = inputBehavior;
         end
@@ -73,7 +71,7 @@ classdef ModelTest < matlab.mock.TestCase
             
             % I tried to mock the dependent properties on the Input and
             % Evaluator but MATLAB wouldn't let me.
-            testCase.verifyEqual(model.InputNames, cell(1,0));
+            testCase.verifyEqual(model.InputNames, strings(1, 0));
             testCase.verifyEqual(model.OutputNames, {});
         end
         
@@ -86,13 +84,13 @@ classdef ModelTest < matlab.mock.TestCase
                 'OpenCossan:MissingRequiredInput');
             % Wrong input types
             testCase.verifyError(@() Model('Input',1,'Evaluator',1),...
-                'MATLAB:UnableToConvert');
+                'MATLAB:validation:UnableToConvert');
             testCase.verifyError(@() Model('Input',testCase.InputStub,...
                 'Evaluator',1),...
-                'MATLAB:UnableToConvert');
+                'MATLAB:validation:UnableToConvert');
             testCase.verifyError(@() Model('Input',1,...
                 'Evaluator',testCase.EvaluatorStub), ...
-                'MATLAB:UnableToConvert');
+                'MATLAB:validation:UnableToConvert');
         end
         
         function shouldRunDeterministicAnalysis(testCase)
@@ -108,18 +106,7 @@ classdef ModelTest < matlab.mock.TestCase
             out = model.apply(testCase.InputStub);
             testCase.verifyClass(out,'matlab.mock.classes.SimulationDataMock');
         end
-        
-        function shouldRunApplyWithSamples(testCase)
-            model = opencossan.common.Model('Input', testCase.InputStub, ...
-                'Evaluator', testCase.EvaluatorStub);
-            samplesStub = testCase.createMock(...
-                ?opencossan.common.Samples);
-            out = model.apply(samplesStub);
-            testCase.verifyClass(out,'matlab.mock.classes.SimulationDataMock');
-        end
-        
     end
-    
 end
 
 

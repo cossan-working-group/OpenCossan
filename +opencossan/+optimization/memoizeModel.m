@@ -10,11 +10,11 @@ function model = memoizeModel(optProb, cacheSize)
     end
     
     function output = evaluate(x)
-        input = optProb.Input.setDesignVariable(...
-            'CSnames', optProb.DesignVariableNames,...
-            'Mvalues', x);
-        result = optProb.Model.apply(input.getTable());
-        output = result.TableValues;
+        input = array2table(x);
+        input.Properties.VariableNames = optProb.DesignVariableNames;
+        input = optProb.Input.completeSamples(input);
+        result = optProb.Model.apply(input);
+        output = result.Samples;
         opencossan.optimization.OptimizationRecorder.recordModelEvaluations(output);
     end
     

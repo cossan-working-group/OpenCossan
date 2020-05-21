@@ -31,8 +31,8 @@ function Xobj = validateSettings(Xobj)
 if isempty(Xobj.perturbation)
     Xobj.perturbation=1e-4; % default value for cheap function evaluations
     
-    if isa(Xobj.Xtarget,'Model')
-        Xmodel=Xobj.Xtarget;
+    if isa(Xobj.Target,'Model')
+        Xmodel = Xobj.Target;
         for isolver = 1:length(Xmodel.Xevaluator.CXsolvers)
             if isa(Xmodel.Xevaluator.CXsolvers{isolver},'Connector')
                 % if there is a Connector, the evaluation is expensive
@@ -40,8 +40,8 @@ if isempty(Xobj.perturbation)
                 Xobj.perturbation=1e-2;
             end
         end
-    elseif isa(Xobj.Xtarget,'ProbabilisticModel')
-        Xmodel=Xobj.Xtarget.Xmodel;
+    elseif isa(Xobj.Target,'ProbabilisticModel')
+        Xmodel=Xobj.Target.Xmodel;
         for isolver = 1:length(Xmodel.Xevaluator.CXsolvers)
             if isa(Xmodel.Xevaluator.CXsolvers{isolver},'Connector')
                 % if there is a Connector, the evaluation is expensive
@@ -54,33 +54,22 @@ end
 
 % Check the validation point!
 if isempty(Xobj.VreferencePoint)
-    Tdefault=Xobj.Xinput.getDefaultValuesStructure;
+    defaultValues = Xobj.Input.getDefaultValues();
     
-    CnamesRV=Xobj.Xinput.RandomVariableNames;
-    CnamesDV=Xobj.Xinput.DesignVariableNames;
-    
-    VreferencePointUserDefinedRV=zeros(1,length(CnamesRV));    
-    VreferencePointUserDefinedDV=zeros(1,length(CnamesDV));
-    
-    for n=1:length(CnamesRV);
-        VreferencePointUserDefinedRV(n)=Tdefault.(CnamesRV{n});
-    end
-    for n=1:length(CnamesDV);
-        VreferencePointUserDefinedDV(n)=Tdefault.(CnamesDV{n});
-    end
+    names = [Xobj.Input.RandomInputNames Xobj.Input.DesignVariableNames];
 
-    Xobj.VreferencePoint=[VreferencePointUserDefinedRV VreferencePointUserDefinedDV];
+    Xobj.VreferencePoint = defaultValues(:, names);
 end
 
-if isempty(Xobj.Cinputnames)
-   Xobj.Cinputnames=Xobj.Xinput.CnamesRandomVariable;
+if isempty(Xobj.InputNames)
+   Xobj.Inputnames = Xobj.Xinput.RandomInputNamesNames;
 else
-   assert(all(ismember(Xobj.Cinputnames,[Xobj.Xinput.RandomVariableNames, Xobj.Xinput.DesignVariableNames])), ...
+   assert(all(ismember(Xobj.InputNames,[Xobj.Input.RandomInputNames, Xobj.Input.DesignVariableNames])), ...
    'openCOSSAN:sensitivity:randomBalanceDesign', ...
    ['Selected output names are not present in the model output. \n' ...
-    'Selected Inputs: ' sprintf('%s; ',Xobj.Cinputnames{:}) ...
-    '\nAvailable RandomVariables: ',  sprintf('%s; ', Xobj.Xinput.RandomVariableNames),...
-    '\nAvailable DesignVariables: ',  sprintf('%s; ', Xobj.Xinput.DesignVariableNames)]);
+    'Selected Inputs: ' strjoin(Xobj.InputNames, ",") ...
+    '\nAvailable RandomVariables: ',  sprintf('%s; ',Xobj.Input.RandomInputNames{:}),...
+    '\nAvailable DesignVariables: ',  sprintf('%s; ',Xobj.Input.DesignVariableNames{:})]);
 
 end
 

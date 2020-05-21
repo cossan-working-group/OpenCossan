@@ -7,10 +7,6 @@
 %
 % $Copyright~1993-2011,~COSSAN~Working~Group,~University~of~Innsbruck,~Austria$
 % $Author:~Edoardo~Patelli $ 
-close all
-clear
-clc;
-
 %% Problem Definition
 % Here we define our problem. It does not represent any physical problem.
 
@@ -22,15 +18,13 @@ RV2=opencossan.common.inputs.random.NormalRandomVariable('mean',0,'std',2);
 Xrvs1=opencossan.common.inputs.random.RandomVariableSet('names',{'RV1', 'RV2'},'members',[RV1;RV2]);
 Xdemand=opencossan.common.inputs.Parameter('description','Define threshold','value',0);
 % Construct Input Object
-Xin = opencossan.common.inputs.Input('description','Input Object of our model');
-Xin = add(Xin,'member',Xrvs1,'name','Xrv1');
-Xin = add(Xin,'member',Xdemand,'name','Xdemand');
+Xin = opencossan.common.inputs.Input('members', {Xrvs1 Xdemand}, 'names', ["Xrvs1", "Xdemand"]);
 
 %% Define the Evaluator (i.e. how our model is evaluate)
 % Construct a Mio object
 Xm=opencossan.workers.Mio( 'description', 'This is our Model', ...
     'Script','for j=1:length(Tinput), Toutput(j).out=-Tinput(j).RV1+Tinput(j).RV2; end', ...
-...    'Liostructure',true,...
+    'format','structure',...
     'OutputNames',{'out'},...
     'InputNames',{'RV1','RV2'},...
     'IsFunction',false); % This flag specify if the .m file is a script or a function.
@@ -38,32 +32,28 @@ Xm=opencossan.workers.Mio( 'description', 'This is our Model', ...
 Xeval = opencossan.workers.Evaluator('Xmio',Xm,'Sdescription','Evaluator for the IS tutorial');
 
 %% Define the Physical Model based on the Input and the Evaluator
-Xmdl=opencossan.common.Model('Xevaluator',Xeval,'Xinput',Xin);
+Xmdl=opencossan.common.Model('Evaluator',Xeval,'Input',Xin);
 
 %% Test the Model
 % Generate 10 random realization of the input
-Xin = sample(Xin,'Nsamples',10);
-
+samples = sample(Xin,'samples',10);
 % Evaluate the model
 
-Xo = apply(Xmdl,Xin);
+Xo = apply(Xmdl, samples);
 % Show Results
 display(Xo)
 
-%% Here we go!!!
-% Now we define the SobolSampling object and try to generate samples from
-% this object
 
 %% Define SobolSampling object
 % Can the SobolSampling class be constructed and used like the
 % MonteCarlo class?
 try
     % Let's try
-    Xss=SobolSampling('Nsamples',10,'Nbatches',2);
+    Xss=SobolSampling('samples',5);
 catch ME
     opencossan.OpenCossan.cossanDisp(ME.message)
     % It is mandatory to define the field Leap and Skip
-    Xss=opencossan.simulations.SobolSampling('Nsamples',10,'Nbatches',2,'NLeap',100,'NSkip',10);
+    Xss=opencossan.simulations.SobolSampling('samples',5,'leap',100,'skip',10, 'seed', 51125);
 end
 
 %% Generate samples with Sobol Sampling object
@@ -71,11 +61,9 @@ end
 % These object are only used to retrieve the number of random variable
 % (Nrv)
 
-Xsmp=Xss.sample('Nsamples',5,'Xinput',Xin);
+Xsmp=Xss.sample('input',Xin);
 display(Xsmp);
 
-Xsmp=Xss.sample('Nsamples',7,'Xrandomvariableset',Xrvs1);
-display(Xsmp);
 
 %% Perform HaltonSampling simulation
 Xo=Xss.apply(Xmdl); % The simulation is performed adopting the
@@ -84,7 +72,7 @@ Xo=Xss.apply(Xmdl); % The simulation is performed adopting the
 % samples defined
 display(Xo);
 
-Xss.Nsamples=200;
+Xss.NumberOfSamples=100;
 Xo=Xss.apply(Xmdl);
 display(Xo);
 
@@ -92,9 +80,9 @@ display(Xo);
 %% Apply the SobolSampling simulation method to a ProbabilisticModel
 % Define a probabilistic model (Requires a Model object and a PerfomanceFunction object
 % Construct the performance function
-Xpf=PerformanceFunction('OutputName','Vg','Demand','Xdemand','Capacity','out');
+Xpf=opencossan.reliability.PerformanceFunction('OutputName','Vg','Demand','Xdemand','Capacity','out');
 % Construct a ProbabilisticModel Object
-Xpm=ProbabilisticModel('Xmodel',Xmdl,'XperformanceFunction',Xpf);
+Xpm=opencossan.reliability.ProbabilisticModel('model',Xmdl,'performanceFunction',Xpf);
 % now we can apply the ImportanceSampling object to the
 % ProbabilisticModel
 Xo=Xss.apply(Xpm);
@@ -108,14 +96,10 @@ display(Xo);
 Xpf=Xpm.computeFailureProbability(Xss);
 display(Xpf);
 
-% Reset random number stream
-OpenCossan.resetRandomNumberGenerator(51125)
-
 % Change Flag of the generation of the samples
-Xss.Nskip=25;
-[Xpf Xo]=Xpm.computeFailureProbability(Xss);
+Xss.Skip=25;
+Xpf = Xpm.computeFailureProbability(Xss);
 display(Xpf);
-display(Xo);
 
 %% Validate Solutions
-assert(abs(Xpf.pfhat-0.81)<1e-4,'openCOSSAN:Tutorials','Wrong results')
+assert(abs(Xpf.Value-0.82)<1e-4,'openCOSSAN:Tutorials','Wrong results')

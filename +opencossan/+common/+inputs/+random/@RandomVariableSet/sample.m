@@ -1,4 +1,4 @@
-function XS = sample(obj,Nsamples)
+function samples = sample(obj,Nsamples)
 %SAMPLE   produce samples of a set of random variables
 %
 % The method returns a Samples object containing the samples of the
@@ -41,8 +41,6 @@ You should have received a copy of the GNU General Public License along
 with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
 %}
 
-import opencossan.common.Samples
-
 assert(isnumeric(Nsamples) && 0 < Nsamples && mod(Nsamples,1) == 0,...
     'openCOSSAN:RandomVariableSet:sample',...
     'The number of samples has to be positiv, numeric and an integer.');
@@ -54,6 +52,9 @@ else
     VX = copularnd('Gaussian', obj.NatafModel.Correlation,Nsamples);
 end
 
-XS = Samples('Xrvset',obj,'MsamplesHyperCube',VX);
+VX = cdf2physical(obj, VX);
+
+samples = array2table(VX);
+samples.Properties.VariableNames = obj.Names;
 
 end

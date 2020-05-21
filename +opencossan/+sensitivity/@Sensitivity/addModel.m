@@ -32,12 +32,12 @@ switch class(Xmodel)
             Xobj.Xinput=Xmodel.XcalibrationInput;
         end        
     case 'opencossan.reliability.ProbabilisticModel'       
-        Xobj.Xinput=Xmodel.Input;
-        if isempty(Xobj.Coutputnames)
+        Xobj.Input = Xmodel.Input;
+        if isempty(Xobj.OutputNames)
             if Xobj.LperformanceFunction
-                Xobj.Coutputnames={Xmodel.XperformanceFunction.Soutputname};
+                Xobj.OutputNames = {Xmodel.XperformanceFunction.Soutputname};
             else
-                Xobj.Coutputnames=Xmodel.Coutputnames;
+                Xobj.OutputNames = Xmodel.OutputNames;
             end
         end        
         
@@ -50,20 +50,19 @@ switch class(Xmodel)
             'Sensitivity analysis estimation for input of type %s not allowed',class(Xmodel));
 end
 
-Xobj.Xtarget=Xmodel;
+Xobj.Target = Xmodel;
 
 % Check input and output names
-if isempty(Xobj.Cinputnames)
+if isempty(Xobj.InputNames)
     % Add only RandomVariables and Design Variables 
-   Xobj.Cinputnames=[Xobj.Xinput.RandomVariableNames Xobj.Xinput.DesignVariableNames];
+   Xobj.InputNames = [Xobj.Input.RandomInputNames Xobj.Input.DesignVariableNames];
 end   
-if isempty(Xobj.Coutputnames)
-   Xobj.Coutputnames=Xobj.Xtarget.OutputNames;    
+if isempty(Xobj.OutputNames)
+   Xobj.OutputNames = Xobj.Target.OutputNames;    
 end   
 
 %% Perform some checks
-Xobj=Xobj.validateSettings;
-
+Xobj = Xobj.validateSettings();
         
 end
 

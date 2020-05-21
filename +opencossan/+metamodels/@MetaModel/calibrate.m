@@ -27,7 +27,7 @@ for k=1:2:length(varargin)
             else
                 Xsimulator  = varargin{k+1};
             end
-            assert(strcmp(superclasses(Xsimulator),'opencossan.simulations.Simulations'), ...
+            assert(any(strcmp(superclasses(Xsimulator),'opencossan.simulations.Simulations')), ...
                 'openCOSSAN:MetaModel:calibrate',...
                 'PropertyName %s must be an object of the subclasses of Simulations',varargin{k});
             
@@ -121,11 +121,10 @@ if ~isempty(Xobj.XcalibrationData)
 end
 
 if exist('Xsimulator','var')
-    Xs  = Xsimulator.sample('Xinput',Xobj.XFullmodel.Input);
-    Xobj.XcalibrationInput = Xobj.XFullmodel.Input;
-
-    Xobj.XcalibrationInput.Samples = Xs;
-    Xobj.XcalibrationOutput = apply(Xobj.XFullmodel,Xobj.XcalibrationInput);
+    Xs  = Xsimulator.sample('input', Xobj.XFullmodel.Input);
+    
+    Xobj.XcalibrationInput = Xs;
+    Xobj.XcalibrationOutput = apply(Xobj.XFullmodel, Xs);
 else
     
     assert(~isempty(Xobj.XcalibrationInput)||~isempty(Xobj.TcalibrationData),...
@@ -154,10 +153,11 @@ if ~isempty(Xobj.TcalibrationData)
     TableInput=Xobj.TcalibrationData(:,Xobj.Cinputnames);
     Ttargets=Xobj.TcalibrationData(:,Xobj.Coutputnames);    
  else
-    TempTableInput=Xobj.XcalibrationInput.getTable;
+    TempTableInput=Xobj.XcalibrationInput;
     TableInput=TempTableInput(:,Xobj.InputNames);
-    Ttargets = Xobj.XcalibrationOutput.TableValues(:,Xobj.OutputNames);
+    Ttargets = Xobj.XcalibrationOutput.Samples(:,Xobj.OutputNames);
 end
+
 Minputs=table2array(TableInput);
 Moutputs=table2array(Ttargets);
 %%  Call metamodel calibration alghorithm

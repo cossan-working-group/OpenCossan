@@ -1,36 +1,33 @@
 %% TutorialCantileverBeam: Model Definition and Uncertainty Quantification
-% This script run the Cantilever Beam Tutorial in the COSSAN-X Engine
-% The documentation and the problem description of this example is available on
-% the User Manual -> Tutorials -> Cantilever_Beam
+% This script run the Cantilever Beam Tutorial in the COSSAN-X Engine The documentation and the
+% problem description of this example is available on the User Manual -> Tutorials ->
+% Cantilever_Beam
 %
 %
 % See Also: http://cossan.co.uk/wiki/index.php/Cantilever_Beam
 
 %{
-This file is part of OpenCossan <https://cossan.co.uk>.
-Copyright (C) 2006-2019 COSSAN WORKING GROUP
+This file is part of OpenCossan <https://cossan.co.uk>. Copyright (C) 2006-2019 COSSAN WORKING GROUP
 
-OpenCossan is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License or,
-(at your option) any later version.
+OpenCossan is free software: you can redistribute it and/or modify it under the terms of the GNU
+General Public License as published by the Free Software Foundation, either version 3 of the License
+or, (at your option) any later version.
 
-OpenCossan is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
+OpenCossan is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even
+the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
+You should have received a copy of the GNU General Public License along with OpenCossan. If not, see
+<http://www.gnu.org/licenses/>.
 %}
 
 %% Initial setting
-% Reset the random number generator in order to obtain always the same results.
-% DO NOT CHANGE THE VALUES OF THE SEED
+% Reset the random number generator in order to obtain always the same results. DO NOT CHANGE THE
+% VALUES OF THE SEED
 
 %% Define an Analysis
-% This allows to store the results of the simulation in a database (if
-% initialised) or/and to define the random number generator
+% This allows to store the results of the simulation in a database (if initialised) or/and to define
+% the random number generator
 opencossan.OpenCossan.setAnalysis('ProjectName', 'TutorialCantileverBeam', ...
     'AnalysisName', 'Tutorial', ...
     'Seed', 213985)
@@ -59,7 +56,7 @@ Xrvset = opencossan.common.inputs.random.RandomVariableSet('members', [P; h; rho
 %% Prepare Input Object
 % The above prepared object can be added to an Input Object
 Xinput = opencossan.common.inputs.Input('Members', {L b Xrvset I maxDisplacement}, ...
-    'MembersNames', {'L', 'b', 'Xrvset', 'I', 'maxDisplacement'});
+    'Names', ["L", "b", "Xrvset", "I", "maxDisplacement"]);
 % Show summary of the Input Object
 display(Xinput)
 %% Preparation of the Evaluator
@@ -76,8 +73,8 @@ Xevaluator = opencossan.workers.Evaluator('CXmembers', {Xmio}, 'CSmembers', {'Xm
 XmodelBeamMatlab = opencossan.common.Model('Input', Xinput, 'Evaluator', Xevaluator);
 
 % Perform deterministic analysis
-Xout = XmodelBeamMatlab.deterministicAnalysis;
-NominalDisplacement = Xout.getValues('Sname', 'w');
+Xout = XmodelBeamMatlab.deterministicAnalysis();
+NominalDisplacement = Xout.Samples.w;
 
 % Validate Solution
 assert(abs(NominalDisplacement - 7.1922e-03) < 1e-6, ...
@@ -86,7 +83,7 @@ assert(abs(NominalDisplacement - 7.1922e-03) < 1e-6, ...
 
 %% Uncertainty Quantification
 % Define simulation method
-Xmc = opencossan.simulations.MonteCarlo('Nsamples', 1000);
+Xmc = opencossan.simulations.MonteCarlo('samples', 1000);
 % preform Analysis
 XsimOutMC = Xmc.apply(XmodelBeamMatlab);
 
@@ -94,15 +91,14 @@ XsimOutMC = Xmc.apply(XmodelBeamMatlab);
 % show scatter of the beam tip displacement
 f1 = figure;
 fah = gca(f1);
-Vw = XsimOutMC.getValues('Sname', 'w');
-histogram(fah, Vw, 50);
+histogram(fah, XsimOutMC.Samples.w, 50);
 
 %% Close Figures
 close(f1)
 
 %% Optimization
-% This tutorial continues with the optimization section
-% See Also:  <TutorialCantileverBeamMatlabOptimization.html>
+% This tutorial continues with the optimization section See Also:
+% <TutorialCantileverBeamMatlabOptimization.html>
 
 % echodemo TutorialCantileverBeamMatlabOptimization
 
@@ -113,7 +109,7 @@ close(f1)
 % echodemo TutorialCantileverBeamMatlabReliabilityAnalysis
 
 %% RELIABILITY BASED OPTIMIZAZION
-% The reliability based optimization is shown in the following tutotial
-% See Also: <TutorialCantileverBeamMatlabReliabilityBasedOptimizaion.html>
+% The reliability based optimization is shown in the following tutotial See Also:
+% <TutorialCantileverBeamMatlabReliabilityBasedOptimizaion.html>
 
 % echodemo TutorialCantileverBeamMatlabRBO

@@ -33,17 +33,14 @@ classdef SubsetInfiniteTest < matlab.unittest.TestCase
             RV2 = opencossan.common.inputs.random.NormalRandomVariable('mean',0,'std',1);
             
             Xrvs1 = opencossan.common.inputs.random.RandomVariableSet('Names',["RV1", "RV2"],'Members',[RV1 RV2]);
-            
-            testCase.Xin = opencossan.common.inputs.Input('Description','Input satellite_inp');
             Xthreshold = opencossan.common.inputs.Parameter('value',1);
-            Xadditionalparameter = opencossan.common.inputs.Parameter('value',rand(100,1));
-            testCase.Xin = add(testCase.Xin,'Member',Xrvs1,'Name','Xrvs1');
-            testCase.Xin = add(testCase.Xin,'Member',Xthreshold,'Name','Xthreshold');
-            testCase.Xin = add(testCase.Xin,'Member',Xadditionalparameter,'Name','XadditionalParameter'); %#ok<*PROP>
+            
+            testCase.Xin = opencossan.common.inputs.Input('Names', ["Xrvs1", "Xthreshold"], ...
+                'Members', {Xrvs1, Xthreshold});
             
             Xm = opencossan.workers.Mio('Script','for j=1:length(Tinput), Toutput(j).out1=0.35*sqrt(Tinput(j).RV1^2+Tinput(j).RV2^2); end', ...
-                'Format','structure',...
-                'Outputnames',{'out1'},...
+                'Format','structure', ...
+                'Outputnames',{'out1'}, ...
                 'Inputnames',{'RV1','RV2'});
             
             Xeval = opencossan.workers.Evaluator('Xmio',Xm,'Sdescription','Evaluator xmio');
@@ -55,77 +52,30 @@ classdef SubsetInfiniteTest < matlab.unittest.TestCase
     
     methods (Test)
         %% constructor
-        function constructorShouldFailWithoutSamples(testCase)
-            testCase.assertError(@() opencossan.simulations.SubsetInfinite(),...
-                'openCOSSAN:SubsetInfinite:missingArgument');
-            testCase.assertError(@() opencossan.simulations.SubsetInfinite('updateStd', true),...
-                'openCOSSAN:SubsetInfinite:missingArgument');
-        end
         
         function constructorFull(testCase)
-            SubS = opencossan.simulations.SubsetInfinite('Sdescription','Unit Test SubsetInfinite',...
+            SubS = opencossan.simulations.SubsetInfinite('Description','Unit Test SubsetInfinite',...
                 'initialSamples',100,...
-                'target_pf', 0.2,...
+                'targetprobabilityoffailure', 0.2,...
                 'maxlevels', 7,...
                 'deltaxi', 0.6,...
                 'proposalStd', 0.4,...
                 'updateStd', true);
             
-            testCase.assertEqual(SubS.Sdescription,'Unit Test SubsetInfinite');
-            testCase.assertEqual(SubS.initialSamples,100);
-            testCase.assertEqual(SubS.target_pf, 0.2);
-            testCase.assertEqual(SubS.maxlevels, 7);
-            testCase.assertEqual(SubS.deltaxi, 0.6);
-            testCase.assertEqual(SubS.proposalStd, 0.4);
-            testCase.assertTrue(SubS.updateStd);
+            testCase.assertEqual(SubS.InitialSamples,100);
+            testCase.assertEqual(SubS.TargetProbabilityOfFailure, 0.2);
+            testCase.assertEqual(SubS.MaxLevels, 7);
+            testCase.assertEqual(SubS.DeltaXi, 0.6);
+            testCase.assertEqual(SubS.ProposalStd, 0.4);
+            testCase.assertTrue(SubS.UpdateStd);
         end
         
-        function constructorShouldFailForInvalidInputs(testCase)
-            testCase.assertError(@() opencossan.simulations.SubsetInfinite('initialSamples', 1000, 'CoV', 1),...
-                'openCOSSAN:simulations:SubsetInfinite');
-            testCase.assertError(@() opencossan.simulations.SubsetInfinite('initialSamples', 1000,...
-                'SbatchFolder', fullfile(opencossan.OpenCossan.getRoot(),'tmp','data')),...
-                'openCOSSAN:SubsetInfinite:wrongArgument');
-        end
-        %% apply
-        function assertNotUsableWithSubsetSimulation(testCase)
-            SubS = opencossan.simulations.SubsetInfinite('initialSamples', 1000, 'proposalStd', 0.5);
-            testCase.assertError(@() SubS.apply(testCase.Xmdl),...
-                'openCOSSAN:simulations:subsetinfinite:apply');
-        end
-        %% sample
-        function sampleShouldNotBeImplementedForSubset(testCase)
-            SubS = opencossan.simulations.SubsetInfinite('initialSamples', 1000, 'proposalStd', 0.5);
-            Nsamples = randi(50,1);
-            testCase.assertError(@() SubS.sample('Nsamples', Nsamples, 'Xinput', testCase.Xin),...
-                'MATLAB:class:undefinedMethod');
-        end
         %% computeFailureProbabiliy
         function computeFailureProbabilityShouldOutputSampleData(testCase)
-            SubS = opencossan.simulations.SubsetInfinite('initialSamples', 100, 'proposalStd', 0.5);
-            [SubRes, SubOut] = SubS.computeFailureProbability(testCase.Xpm);
-            testCase.assertClass(SubRes, 'opencossan.reliability.FailureProbability');
-            testCase.assertClass(SubOut, 'opencossan.simulations.SubsetOutput');
-            testCase.assertNotEmpty(SubRes.pfhat);
-            testCase.assertNotEmpty(SubRes.stdPfhat);
-            testCase.assertNotEmpty(SubRes.cov);
-            testCase.assertNotEqual(SubRes.pfhat, NaN);
-            testCase.assertNotEqual(SubRes.stdPfhat, NaN);
-            testCase.assertNotEqual(SubRes.cov, NaN);
-        end
-        
-        function computeFailureProbabilityAdaptiveShouldOutputSampleData(testCase)
-            testCase.assumeFail(); % TODO: Unstable test, needs fixing
-            SubS = opencossan.simulations.SubsetInfinite('initialSamples', 100, 'updateStd', true);
-            [SubRes, SubOut] = SubS.computeFailureProbability(testCase.Xpm);
-            testCase.assertClass(SubRes, 'opencossan.reliability.FailureProbability');
-            testCase.assertClass(SubOut, 'opencossan.simulations.SubsetOutput');
-            testCase.assertNotEmpty(SubRes.pfhat);
-            testCase.assertNotEmpty(SubRes.stdPfhat);
-            testCase.assertNotEmpty(SubRes.cov);
-            testCase.assertNotEqual(SubRes.pfhat, NaN);
-            testCase.assertNotEqual(SubRes.stdPfhat, NaN);
-            testCase.assertNotEqual(SubRes.cov, NaN);
+            SubS = opencossan.simulations.SubsetInfinite('initialSamples', 100, 'proposalStd', 0.5, 'seed', 8128);
+            pf = SubS.computeFailureProbability(testCase.Xpm);
+            
+            testCase.assertClass(pf, 'opencossan.reliability.FailureProbability');
         end
     end
 end

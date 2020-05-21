@@ -31,7 +31,7 @@ x1 = opencossan.optimization.ContinuousDesignVariable('value',rand,...
     'lowerBound',-5,'upperBound',5);
 x2 = opencossan.optimization.ContinuousDesignVariable('value',rand,...
     'lowerBound',-5,'upperBound',5);
-input = opencossan.common.inputs.Input('MembersNames',{'x1' 'x2'},'Members',{x1 x2});
+input = opencossan.common.inputs.Input('names',["x1" "x2"], 'members',{x1 x2});
 
 %% Define a model 
 SrosenbrockPath=fullfile(opencossan.OpenCossan.getRoot(),'lib','MatlabFunctions','Rosenbrock.m');

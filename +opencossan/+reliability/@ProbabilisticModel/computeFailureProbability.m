@@ -1,4 +1,4 @@
-function [Xpf, Xo] = computeFailureProbability(Xpm,Xsimulation)
+function pf = computeFailureProbability(Xpm,Xsimulation)
 %COMPUTEFAILUREPROBABILITY this method estimate the failure probabilitiy of the
 %probabilistic, Xpm, using a specific Simulations object passed as mandatory
 %argument (Xsimulation).
@@ -41,4 +41,4 @@ assert(isa(Xsimulation,'opencossan.simulations.Simulations'),...
     ['The object ', inputname(2) ' must be a sub-class of Simulation'])
 
 %% Estimate the FailureProbability
-[Xpf,Xo]=Xsimulation.computeFailureProbability(Xpm);
+pf = Xsimulation.computeFailureProbability(Xpm);
