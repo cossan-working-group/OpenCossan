@@ -1,4 +1,4 @@
-classdef ObjectiveFunction < opencossan.workers.Mio
+classdef ObjectiveFunction < opencossan.workers.MatlabWorker
     %OBJECTIVEFUNCTION Defines an objective function for use in
     %optimization problems.
     
@@ -26,7 +26,7 @@ classdef ObjectiveFunction < opencossan.workers.Mio
             %
             % see also 
             
-            obj@opencossan.workers.Mio(varargin{:});
+            obj@opencossan.workers.MatlabWorker(varargin{:});
             
             if nargin > 0
                 % The objective function must have a single output

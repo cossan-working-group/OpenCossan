@@ -20,6 +20,15 @@ along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
 %}
 
 
+%% Import packages
+import opencossan.*
+import opencossan.reliability.*
+import opencossan.common.inputs.*
+import opencossan.common.inputs.random.*
+import opencossan.sensitivity.*
+import opencossan.optimization.*
+import opencossan.simulations.*
+
 %% Create model if necessary
 % This tutorial requires the model created by the tutorial 
 % TutorialCantileverBeamMatlab
@@ -30,18 +39,18 @@ end
 
 %% Define a Probabilistic Model
 % Performance Function
-Xperfun = opencossan.reliability.PerformanceFunction('OutputName', 'Vg',...
+Xperfun = PerformanceFunction('OutputName', 'Vg',...
     'Demand', 'w', 'Capacity', 'maxDisplacement');
 % Define a Probabilistic Model
-XprobModelBeamMatlab = opencossan.reliability.ProbabilisticModel(...
+XprobModelBeamMatlab = ProbabilisticModel(...
     'Model', XmodelBeamMatlab, 'PerformanceFunction', Xperfun);
 
 %% Reliability Analysis via Monte Carlo Sampling
 % Reset the random number generator to always produce the same results
-opencossan.OpenCossan.resetRandomNumberGenerator(51125);
+OpenCossan.resetRandomNumberGenerator(51125);
 
 % Create MonteCarlo simulation object to run 1e5 samples in 1 batch
-Xmc = opencossan.simulations.MonteCarlo('Nsamples',1e5,'Nbatches',1);
+Xmc = MonteCarlo('Nsamples',1e5,'Nbatches',1);
 
 % Run reliability analysis
 XfailureProbMC = Xmc.computeFailureProbability(XprobModelBeamMatlab);
@@ -54,11 +63,11 @@ assert(XfailureProbMC.pfhat == 0.06922,...
 
 %% Reliability Analysis via Latin Hypercube Sampling
 % Reset the random number generator to always produce the same results
-opencossan.OpenCossan.resetRandomNumberGenerator(49564);
+OpenCossan.resetRandomNumberGenerator(49564);
 
 % Create LatinHypercubeSampling simulation object to run 1e5 samples in 1
 % batch
-Xlhs=opencossan.simulations.LatinHypercubeSampling('Nsamples',1e4);
+Xlhs=LatinHypercubeSampling('Nsamples',1e4);
 
 % Run reliability analysis
 XfailureProbLHS = Xlhs.computeFailureProbability(XprobModelBeamMatlab);
@@ -71,18 +80,18 @@ assert(XfailureProbLHS.pfhat == 0.06840,...
 
 %% Reliability Analysis via LineSampling
 % Reset the random number generator to always produce the same results
-opencossan.OpenCossan.resetRandomNumberGenerator(49564);
+OpenCossan.resetRandomNumberGenerator(49564);
 
 % Line Sampling requires the definition of the so-called important 
 % direction. It can be compute using sensitivity methods. For instance,
 % here the gradient in standard normal space is computed.
 
-XlsFD = opencossan.sensitivity.LocalSensitivityFiniteDifference(...
+XlsFD = LocalSensitivityFiniteDifference(...
     'Xmodel', XprobModelBeamMatlab, 'Coutputname', {'Vg'});
 XlocalSensitivity = XlsFD.computeGradientStandardNormalSpace();
 
 % Use sensitivity information to define the important direction for LineSampling
-XLS=opencossan.simulations.LineSampling(...
+XLS=LineSampling(...
     'XlocalSensitivityMeasures', XlocalSensitivity,'Nlines', 50,...
     'Vset', 0.5:0.5:3.5);
 

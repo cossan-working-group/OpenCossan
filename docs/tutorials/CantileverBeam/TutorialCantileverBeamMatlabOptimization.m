@@ -3,27 +3,7 @@
 %
 %
 % See Also http://cossan.co.uk/wiki/index.php/Cantilever_Beam
-%
-% <html>
-% <h3 style="color:#317ECC">Copyright 2006-2020: <b> COSSAN working group</b></h3>
-% Author: <b>Edoardo-Patelli</b> <br> 
-% <i>Institute for Risk and Uncertainty, University of Liverpool, UK</i>
-% <br>COSSAN web site: <a href="http://www.cossan.co.uk">http://www.cossan.co.uk</a>
-% <br><br>
-% <span style="color:gray"> This file is part of <span style="color:orange">openCOSSAN</span>.  The open source general purpose matlab toolbox
-% for numerical analysis, risk and uncertainty quantification (<a
-% href="http://www.cossan.co.uk">http://www.cossan.co.uk</a>).
-% <br>
-% <span style="color:orange">openCOSSAN</span> is free software: you can redistribute it and/or modify
-% it under the terms of the GNU General Public License as published by
-% the Free Software Foundation, either version 3 of the License.
-% <span style="color:orange">openCOSSAN</span> is distributed in the hope that it will be useful,
-% but WITHOUT ANY WARRANTY; without even the implied warranty of
-% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-% GNU General Public License for more details. 
-%  You should have received a copy of the GNU General Public License
-%  along with openCOSSAN.  If not, see <a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/"</a>.
-% </span></html>
+
 
 %{
 This file is part of OpenCossan <https://cossan.co.uk>.
@@ -43,38 +23,44 @@ You should have received a copy of the GNU General Public License along
 with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
 %}
 
+%% Import packages
+import opencossan.*
+import opencossan.common.*
+import opencossan.common.inputs.*
+import opencossan.common.inputs.random.*
+import opencossan.workers.*
+import opencossan.optimization.*
+
 %% Preparation of the Input
 % In this tutorial the random variable are replaced by two design variables
 %
 % The optimization analysis requires the definition of Design Variables
 % (i.e. the variables that define new configurations)
-b = opencossan.optimization.ContinuousDesignVariable(...
-    'value', 0.12, 'lowerBound', 0.01, 'upperBound', 0.50,...
+b = ContinuousDesignVariable('value', 0.12, 'lowerBound', 0.01, 'upperBound', 0.50,...
     'Description','Beam width');
-h = opencossan.optimization.ContinuousDesignVariable(...
-    'value', 0.54, 'lowerBound', 0.02, 'upperBound', 1,...
+h = ContinuousDesignVariable('value', 0.54, 'lowerBound', 0.02, 'upperBound', 1,...
     'Description', 'Beam Heigth');
 
 % In this example we do not use random variables and we only use Parameters
-L = opencossan.common.inputs.Parameter('value', 1.8, 'Description', 'Beam Length');
-maxDisplacement = opencossan.common.inputs.Parameter('value', 0.001, 'Description', 'Maximum allowed displacement');
-P = opencossan.common.inputs.Parameter('value', 10000, 'Description', 'Load');
-rho = opencossan.common.inputs.Parameter('value', 600, 'Description', 'density');
-E = opencossan.common.inputs.Parameter('value', 10e9, 'Description','Young''s modulus');
+L = Parameter('value', 1.8, 'Description', 'Beam Length');
+maxDisplacement = Parameter('value', 0.001, 'Description', 'Maximum allowed displacement');
+P = Parameter('value', 10000, 'Description', 'Load');
+rho = Parameter('value', 600, 'Description', 'density');
+E = Parameter('value', 10e9, 'Description','Young''s modulus');
 
 % Definition of the Function
-I = opencossan.common.inputs.Function('Description','Moment of Inertia','Expression','<&b&>.*<&h&>.^3/12');
+I = Function('Description','Moment of Inertia','Expression','<&b&>.*<&h&>.^3/12');
 
 %% Prepare Input Object
 % The above prepared objects can be added to an Input Object
-XinputOptimization = opencossan.common.inputs.Input(...
+XinputOptimization = Input(...
     'Members', {L b P h rho E I maxDisplacement},...
     'MembersNames', {'L' 'b' 'P' 'h' 'rho' 'E' 'I' 'MaxW'});
 
 %% Preparation of the Evaluator
 % Use of a matlab script to compute the Beam displacement
 folder = fileparts(mfilename('fullpath'));% returns the current folder
-Xmio = opencossan.workers.Mio(...
+Xmio = MatlabWorker(...
     'FunctionHandle', @tipDisplacement, ...
     'IsFunction', true, ...
     'Format', 'table', ...
@@ -82,7 +68,7 @@ Xmio = opencossan.workers.Mio(...
     'OutputNames',{'w'});
 
 % Add the MIO object to an Evaluator object
-Xevaluator=Evaluator('Solvers',Xmio,'SolversName',"Xmio");
+Xevaluator=Evaluator('Solver',Xmio,'SolverName',"Xmio");
 
 %% Preparation of the Physical Model
 % Define the Physical Model

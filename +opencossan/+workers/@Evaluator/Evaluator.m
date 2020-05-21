@@ -29,7 +29,7 @@ along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
         SolverName(1,:) string              % Names of the workers (optional)
         Queues(1,:) string                  % Where to submit workers (one per solver)
         Hostnames(1,:) string               % Names of hostnames where to evaluate workers
-        ParallelEnvironments(:,1) string    % Name of the parallel environment of each solver
+        ParallelEnvironments(1,:) string    % Name of the parallel environment of each solver
         Slots(1,:) double {mustBePositive}  % Number of slots used in each job
         IsCompiled(1,:) logical             % Number of slots used in each job
         MaxCuncurrentJobs(1,:) double {mustBePositive} = 1  % Number of concurrent execution of each solver

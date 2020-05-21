@@ -41,9 +41,11 @@ classdef ProbabilisticModel < opencossan.common.Model
                 [required, varargin] = ...
                     opencossan.common.utilities.parseRequiredNameValuePairs(...
                     "performancefunction", varargin{:});
+                
+                    OptionalsArguments={"Model", []};
 
                     [optionalArg, superArg] = opencossan.common.utilities.parseOptionalNameValuePairs(...
-                    ["model", []], varargin{:});
+                    [OptionalsArguments{:,1}],{OptionalsArguments{:,2}}, varargin{:});
                 
             end
            

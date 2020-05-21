@@ -61,7 +61,7 @@ along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
     
     % loop over all constraints
     for j = 1:numel(obj)
-        TableOutConstrains = evaluate@opencossan.workers.Mio(obj(j), ...
+        TableOutConstrains = evaluate@opencossan.workers.MatlabWorker(obj(j), ...
             output(:,obj(j).InputNames));
         
         constraints(:,j) = TableOutConstrains.(obj(j).OutputNames{1});

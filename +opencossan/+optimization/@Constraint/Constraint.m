@@ -1,4 +1,4 @@
-classdef Constraint < opencossan.workers.Mio
+classdef Constraint < opencossan.workers.MatlabWorker
     %CONSTRAINT The class Constraint defines the constraints for the
     % optimization problem.
     
@@ -40,7 +40,7 @@ classdef Constraint < opencossan.workers.Mio
                     "inequality", {true}, varargin{:});
             end
             
-            obj@opencossan.workers.Mio(super_args{:});
+            obj@opencossan.workers.MatlabWorker(super_args{:});
             
             if nargin > 0
                 obj.IsInequality = optional.inequality;

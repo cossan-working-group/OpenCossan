@@ -59,7 +59,7 @@ function objective = evaluate(obj, varargin)
     
     % loop over all objective functions
     for j = 1:length(obj)
-        XoutObjective = evaluate@opencossan.workers.Mio(obj(j), ...
+        XoutObjective = evaluate@opencossan.workers.MatlabWorker(obj(j), ...
             output(:,obj(j).InputNames));
         
         objective(:,j) = XoutObjective.(obj(j).OutputNames{1});

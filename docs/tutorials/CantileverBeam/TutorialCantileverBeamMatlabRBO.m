@@ -8,31 +8,32 @@
 % The performance function is defined by the maximum allowable
 % stress level minus the actual stress in a clamped beam.
 %
-%                                           |
+%                                          |
 % //|                                      v
 % //|---------------------------------------
 % //|
 %
-% <html>
-% <h3 style="color:#317ECC">Copyright 2006-2014: <b> COSSAN working group</b></h3>
-% Author: <b>Edoardo-Patelli</b> <br> 
-% <i>Institute for Risk and Uncertainty, University of Liverpool, UK</i>
-% <br>COSSAN web site: <a href="http://www.cossan.co.uk">http://www.cossan.co.uk</a>
-% <br><br>
-% <span style="color:gray"> This file is part of <span style="color:orange">openCOSSAN</span>.  The open source general purpose matlab toolbox
-% for numerical analysis, risk and uncertainty quantification (<a
-% href="http://www.cossan.co.uk">http://www.cossan.co.uk</a>).
-% <br>
-% <span style="color:orange">openCOSSAN</span> is free software: you can redistribute it and/or modify
-% it under the terms of the GNU General Public License as published by
-% the Free Software Foundation, either version 3 of the License.
-% <span style="color:orange">openCOSSAN</span> is distributed in the hope that it will be useful,
-% but WITHOUT ANY WARRANTY; without even the implied warranty of
-% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-% GNU General Public License for more details. 
-%  You should have received a copy of the GNU General Public License
-%  along with openCOSSAN.  If not, see <a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/"</a>.
-% </span></html>
+%
+% See Also http://cossan.co.uk/wiki/index.php/Cantilever_Beam
+
+
+%{
+This file is part of OpenCossan <https://cossan.co.uk>.
+Copyright (C) 2006-2020 COSSAN WORKING GROUP
+
+OpenCossan is free software: you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free
+Software Foundation, either version 3 of the License or, (at your option)
+any later version.
+
+OpenCossan is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+more details.
+
+You should have received a copy of the GNU General Public License along
+with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
+%}
 
 %% Check avilability of the probabilistic model
 assert(logical(exist('XprobModelBeamMatlab','var')),'openCOSSAN:Tutorial', ...
