@@ -27,17 +27,7 @@ along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
         JobManager opencossan.highperformancecomputing.JobManagerInterface  % Define JobManager to submit job to grid/cluster computer
         Solver(1,:)                         % List of OpenCossan Workers opencossan.workers.Worker
         SolverName(1,:) string              % Names of the workers (optional)
-        Queues(1,:) string                  % Where to submit workers (one per solver)
-        Hostnames(1,:) string               % Names of hostnames where to evaluate workers
-        ParallelEnvironments(1,:) string    % Name of the parallel environment of each solver
-        Slots(1,:) double {mustBePositive}  % Number of slots used in each job
-        IsCompiled(1,:) logical             % Number of slots used in each job
-        MaxCuncurrentJobs(1,:) double {mustBePositive} = 1  % Number of concurrent execution of each solver
-        RemoteInjectExtract = false         %TODO: make it true by default
-        VerticalSplit = false               % if true split the analysis in vertical components (see wiki for more details)
-        MaxNumberofJobs double {mustBePositive} = 1     % max number of jobs submitted for each analysis
-        WrapperMatlabInputName(1,1) string  % Name of the input Matlab file loaded by the job
-        WrapperMatlabOutputName(1,1) string % Name of the output Matlab file create by the job
+        VerticalSplit = false               % if true split the analysis in vertical components 
     end
     
     properties (Dependent=true)
@@ -52,7 +42,7 @@ along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
             %
             % Please see the reference manual for the complete documentation
             %
-            % Copyright 1983-2015 COSSAN Working Group
+            % Copyright 1983-2020 COSSAN Working Group
             % Author: Edoardo Patelli
             
             
@@ -67,18 +57,9 @@ along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
                 
                 OptionalsArguments={...
                     "JobManager", opencossan.highperformancecomputing.JobManagerInterface.empty(1,0);...
-                    "Queues",[];...
-                    "Hostnames",[];...
-                    "ParallelEnvironments",[];...
-                    "Slots",[];...
-                    "IsCompiled",false;...
-                    "MaxCuncurrentJobs",[];...
-                    "RemoteInjectExtract", false;...
-                    "VerticalSplit",[];...
-                    "MaxNumberofJobs",[];...
-                    "WrapperMatlabInputName","";...
-                    "WrapperMatlabOutputName","";...
-                    "SolverName",[]};
+                    "Queues","";...
+                    "SolverName",[];...
+                    "VerticalSplit",true};
                 
                 [optionalArg, superArg] = opencossan.common.utilities.parseOptionalNameValuePairs(...
                     [OptionalsArguments{:,1}],{OptionalsArguments{:,2}}, varargin{:});
@@ -101,18 +82,7 @@ along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
                         numel(obj.Solver),numel(obj.SolverName));
                 end
                 
-                obj.JobManager = optionalArg.jobmanager;
-                obj.Queues = optionalArg.queues;
-                obj.Hostnames = optionalArg.hostnames;
-                obj.ParallelEnvironments = optionalArg.parallelenvironments;
-                obj.Slots = optionalArg.slots;
-                obj.IsCompiled = optionalArg.iscompiled;
-                obj.MaxCuncurrentJobs = optionalArg.maxcuncurrentjobs;
-                obj.RemoteInjectExtract=optionalArg.remoteinjectextract;
                 obj.VerticalSplit = optionalArg.verticalsplit;
-                obj.MaxNumberofJobs = optionalArg.maxnumberofjobs;
-                obj.WrapperMatlabInputName = optionalArg.wrappermatlabinputname;
-                obj.WrapperMatlabOutputName = optionalArg.wrappermatlaboutputname;
                 
                  obj=validateObject(obj);
             end

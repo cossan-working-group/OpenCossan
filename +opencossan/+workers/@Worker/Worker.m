@@ -32,6 +32,7 @@ classdef Worker < matlab.mixin.Heterogeneous & opencossan.common.CossanObject
         OutputNames cell {opencossan.common.utilities.isunique(OutputNames)}
         InputNames  cell {opencossan.common.utilities.isunique(InputNames)}
         KeepSimulationFiles(1,1) logical = false % Keep simulation files
+        ExecutionStrategy(1,1) opencossan.common.worker.ExecutionStrategy
     end
     
     methods (Abstract)
@@ -50,8 +51,13 @@ classdef Worker < matlab.mixin.Heterogeneous & opencossan.common.CossanObject
                 [requiredArgs, varargin] = opencossan.common.utilities.parseRequiredNameValuePairs(...
                     ["InputNames","OutputNames"], varargin{:});
                 
+                OptionalsArguments={...
+                    "KeepSimulationFiles", false;...
+                    "ExecutionStrategy",[]};
+                
                 [optionalArgs, superArg] = opencossan.common.utilities.parseOptionalNameValuePairs(...
-                    "KeepSimulationFiles",{false}, varargin{:});
+                    [OptionalsArguments{:,1}],{OptionalsArguments{:,2}}, varargin{:});
+                
             end
             obj@opencossan.common.CossanObject(superArg{:});
             
@@ -59,6 +65,7 @@ classdef Worker < matlab.mixin.Heterogeneous & opencossan.common.CossanObject
                 obj.InputNames=requiredArgs.inputnames;
                 obj.OutputNames=requiredArgs.outputnames;
                 obj.KeepSimulationFiles=optionalArgs.keepsimulationfiles;
+                obj.ExecutionStrategy=optionalArgs.executionstrategy;
             end
         end
     end

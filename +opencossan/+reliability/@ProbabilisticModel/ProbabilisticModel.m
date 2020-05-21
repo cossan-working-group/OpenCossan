@@ -25,7 +25,7 @@ classdef ProbabilisticModel < opencossan.common.Model
     
     properties (Dependent=true)
         PerformanceFunctionVariable     % Name of the output of the performance function
-        StdDeviationIndicatorFunction   % StdDeviationIndicatorFunction of the performance Function
+        StdDeviationIndicatorFunction
     end
     
     methods
@@ -36,31 +36,29 @@ classdef ProbabilisticModel < opencossan.common.Model
             %   This class allows to perform reliability analysis and uncertainty quantification
             
             if nargin == 0
-                super_args = {};
+                superArg = {};
             else
                 [required, varargin] = ...
                     opencossan.common.utilities.parseRequiredNameValuePairs(...
                     "performancefunction", varargin{:});
                 
-                    OptionalsArguments={"Model", []};
-
-                    [optionalArg, superArg] = opencossan.common.utilities.parseOptionalNameValuePairs(...
+                OptionalsArguments={"Model", []};
+                
+                [modelArg, superArg] = opencossan.common.utilities.parseOptionalNameValuePairs(...
                     [OptionalsArguments{:,1}],{OptionalsArguments{:,2}}, varargin{:});
                 
+                
             end
-           
+            
             obj@opencossan.common.Model(superArg{:});
             
-            obj.PerformanceFunctionVariable
-                % Add PerformanceFunction to Evaluator
-                if isempty(obj.Evaluator.Solver)
-                    obj.Evaluator = obj.Evaluator.add('Solver',required.performancefunction);
-                else
-                    % TODO: What does this do?
-                    obj.Evaluator = obj.Evaluator.add('Solver',required.performancefunction,'SolverName','N/A','Slots',Inf,...
-                        'MaxCuncurrentJobs',Inf,'Hostname','localhost','Queue','','ParallelEnvironment','');
-                end
-
+            if ~isempty(modelArg.model)
+                obj=modelArg.model;
+            end
+            
+            % Add PerformanceFunction to Evaluator
+            obj.Evaluator = obj.Evaluator.add('Solver',required.performancefunction);
+            
         end
         
         function variable = get.PerformanceFunctionVariable(obj)
