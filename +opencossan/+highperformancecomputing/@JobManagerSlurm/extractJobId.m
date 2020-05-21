@@ -1,4 +1,4 @@
-function jobID = extractJobId(sbatchCommandOutput)
+function jobID = extractJobId(~,sbatchCommandOutput)
 % Extracts the job ID from the sbatch command output for Slurm
 % Adapted from matlab-roll
 % https://github.com/cossan-working-group/matlab-roll

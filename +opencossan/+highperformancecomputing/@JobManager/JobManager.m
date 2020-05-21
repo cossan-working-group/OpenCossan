@@ -29,10 +29,10 @@ classdef(Abstract) JobManager < opencossan.common.CossanObject
     properties
         PreExeCmd           % prepocessor executeble cmd TODO: check with connector
         PostExeCmd          % postprocessor executeble cmd TODO: check with connector
-        WorkingPath    % directory when the job will be executed (better if not on NFS!)
-        MainInputPath
+        WorkingPath         % directory when the job will be executed (better if not on NFS!)
+        MainInputPath       % 
         SubFolder           % Subfolder name for the batch execution
-        HasSharedFilesystem true %
+        HasSharedFilesystem(1,1) logical  %
         ClusterMatlabRoot
         OperatingSystem
         JobStorageLocation
@@ -73,8 +73,9 @@ classdef(Abstract) JobManager < opencossan.common.CossanObject
                     "PostExeCmd",[];...
                     "WorkingPath",opencossan.OpenCossan.getWorkingPath;...
                     "MainInputPath",[];...
-                    "SubFolder",datestr(now,30),...
-                    "HasSharedFilesystem",true,...
+                    "OperatingSystem",'unix';...
+                    "SubFolder",datestr(now,30);...
+                    "HasSharedFilesystem",true;...
                     "LogFile","OpenCossanJob.log"};
                 
                 [optionalArgs, superArg] = opencossan.common.utilities.parseOptionalNameValuePairs(...
@@ -108,21 +109,16 @@ classdef(Abstract) JobManager < opencossan.common.CossanObject
         end
         
         
-        jobID = submitJob(obj,varargin)        % submit single job
-        jobID = submitAnalysis(obj,Samples) % submit analysis (multiple jobs)
+        jobObj = submitJob(obj,varargin)        % submit single job
+        jobObj = submitAnalysis(obj,Samples)    % submit analysis (multiple jobs)
         
         % Define function requirements for subclasses
         
-        isOK=cancelJob(obj,JobObject)
-        State = getJobState(Xobj,JobObject)
-        Lsuccessfull = checkSuccessfulJobs(obj,ScheckFileName)   
-        Status=checkCluster(obj,varargin
-        
-        
-    end
-    
-    methods (static)
-        jobId=extractJobId(sbatchCommandOutput)
+        isOK=cancelJob(obj,JobObject)           % delete job from the job manager
+        state = getJobState(Xobj,JobObject)     % Get state of the Job
+        clusterStatus=checkCluster(obj,varargin)% Check status of the cluster
+        % Extract job ID
+        jobID=extractJobId(obj,sbatchCommandOutput)
     end
             
 end

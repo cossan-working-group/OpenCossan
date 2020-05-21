@@ -1,4 +1,4 @@
-function state = getJobStateFcn(cluster, job, state)
+function state = getJobStateFcn(obj, job)
 %GETJOBSTATEFCN Gets the state of a job from Slurm
 %
 % Set your cluster's IntegrationScriptsLocation to the parent folder of this
@@ -8,25 +8,22 @@ function state = getJobStateFcn(cluster, job, state)
 
 % Store the current filename for the errors, warnings and dctSchedulerMessages
 currFilename = mfilename;
-if ~isa(cluster, 'parallel.Cluster')
+if ~isa(obj, 'parallel.Cluster')
     error('parallelexamples:GenericSLURM:SubmitFcnError', ...
         'The function %s is for use with clusters created using the parcluster command.', currFilename)
 end
-if ~cluster.HasSharedFilesystem
-    error('parallelexamples:GenericSLURM:NotSharedFileSystem', ...
-        'The function %s is for use with shared filesystems.', currFilename)
-end
+
 
 % Shortcut if the job state is already finished or failed
-jobInTerminalState = strcmp(state, 'finished') || strcmp(state, 'failed');
+jobInTerminalState = strcmp(job.state, 'finished') || strcmp(job.state, 'failed');
 if jobInTerminalState
     return
 end
 % Get the information about the actual cluster used
-data = cluster.getJobClusterData(job);
+data = obj.getJobClusterData(job);
 if isempty(data)
     % This indicates that the job has not been submitted, so just return
-    dctSchedulerMessage(1, '%s: Job cluster data was empty for job with ID %d.', currFilename, job.ID);
+    pencossan.OpenCossan.cossanDisp(sprintf('%s: Job cluster data was empty for job with ID %d.', currFilename, job.ID,1));
     return
 end
 try

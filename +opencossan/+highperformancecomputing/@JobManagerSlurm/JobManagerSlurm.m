@@ -1,4 +1,4 @@
-classdef(Abstract) JobManagerSlurm < opencossan.highperformancecomputing.JobManager
+classdef JobManagerSlurm < opencossan.highperformancecomputing.JobManager
     %  This class defines the interface with the cluster/cloud computing. 
     %   The requested computation are automatically converted to jobs and
     %   submitted to the Job management software on the cluster. The results are then retrieved and
@@ -27,9 +27,13 @@ classdef(Abstract) JobManagerSlurm < opencossan.highperformancecomputing.JobMana
     % =====================================================================
     
     properties
-
+        ModuleList              % list of module to load  
+        AdditionalSubmitArgs    % Custumisation arguments for submitting jobs
     end
-        
+    
+    properties (Dependent)    
+        quotedCommand
+    end
     
     methods
         
@@ -42,20 +46,20 @@ classdef(Abstract) JobManagerSlurm < opencossan.highperformancecomputing.JobMana
                 
                 % Process optional paramets
                 OptionalsArguments={...
-                    "Undefined", [];};
+                    ["moduleList","AdditionalSubmitArgs"], {[] []};};
                 
-                [~, superArg] = opencossan.common.utilities.parseOptionalNameValuePairs(...
+                [optionalArgs, superArg] = opencossan.common.utilities.parseOptionalNameValuePairs(...
                     [OptionalsArguments{:,1}],OptionalsArguments(:,2), varargin{:});
             end
             
             obj@opencossan.highperformancecomputing.JobManager(superArg{:});
             
+            if optionalArgs > 0
+                obj.ModuleList=optionalArgs.modulelist;
+                obj.AdditionalSubmitArgs=optionalArgs.additionalsubmitargs;
+            end
         end
      
-    end
-    
-    methods (private)
-        jobID = extractJobId(obj,sbatchCommandOutput)
     end
             
 end

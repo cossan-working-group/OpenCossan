@@ -38,17 +38,18 @@ classdef ProbabilisticModel < opencossan.common.Model
             if nargin == 0
                 super_args = {};
             else
-                [required, super_args] = ...
+                [required, varargin] = ...
                     opencossan.common.utilities.parseRequiredNameValuePairs(...
-                    ["model", "performancefunction"], varargin{:});
-                % TODO: Why Input arguments????
-                super_args = [super_args; {'input', required.model.Input, ...
-                    'evaluator', required.model.Evaluator}];
+                    "performancefunction", varargin{:});
+
+                    [optionalArg, superArg] = opencossan.common.utilities.parseOptionalNameValuePairs(...
+                    ["model", []], varargin{:});
+                
             end
+           
+            obj@opencossan.common.Model(superArg{:});
             
-            obj@opencossan.common.Model(super_args{:});
-            
-            if nargin > 0
+            obj.PerformanceFunctionVariable
                 % Add PerformanceFunction to Evaluator
                 if isempty(obj.Evaluator.Solver)
                     obj.Evaluator = obj.Evaluator.add('Solver',required.performancefunction);
@@ -57,7 +58,7 @@ classdef ProbabilisticModel < opencossan.common.Model
                     obj.Evaluator = obj.Evaluator.add('Solver',required.performancefunction,'SolverName','N/A','Slots',Inf,...
                         'MaxCuncurrentJobs',Inf,'Hostname','localhost','Queue','','ParallelEnvironment','');
                 end
-            end
+
         end
         
         function variable = get.PerformanceFunctionVariable(obj)

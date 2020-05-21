@@ -41,7 +41,7 @@ classdef Job < opencossan.common.CossanObject
                     ["ID","Status"], varargin{:});
                 
                 [optionalArgs, superArg] = opencossan.common.utilities.parseOptionalNameValuePairs(...
-                    ["Name","Dependences"],{[],[]}, varargin{:});
+                    ["Name","Dependences" "ScriptName"],{[],[],[]}, varargin{:});
             end
             
             obj@opencossan.common.CossanObject(superArg{:});
@@ -51,6 +51,7 @@ classdef Job < opencossan.common.CossanObject
                 obj.State=requiredArgs.state;
                 obj.Name=optionalArgs.name;
                 obj.Dependences=optionalArgs.dependences;
+                obj.ScriptName=optionalArgs.scriptname;
             end
         end
         

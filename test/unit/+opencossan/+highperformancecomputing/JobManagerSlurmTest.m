@@ -1,59 +1,41 @@
-classdef EvaluatorTest < matlab.unittest.TestCase
-    % EVALUATORTEST Unit tests for the class common.MarkovChain
-    % see http://cossan.co.uk/wiki/index.php/@Evaluator
+classdef JobManagerSlurmTest < matlab.unittest.TestCase
+    % JOBMANAGERSLURMTEST Unit tests for the class
+    % common.highperformancecompiting.JobMagagerSlurm
     %
-    % @author Jasper Behrensdorf<behrensdorf@irz.uni-hannover.de>
-    % @date   05.09.2016
+    % See also: Job, JobManager
     %
-    % =====================================================================
-    % This file is part of openCOSSAN.  The open general purpose matlab
-    % toolbox for numerical analysis, risk and uncertainty quantification.
-    %
-    % openCOSSAN is free software: you can redistribute it and/or modify
-    % it under the terms of the GNU General Public License as published by
-    % the Free Software Foundation, either version 3 of the License.
-    %
-    % openCOSSAN is distributed in the hope that it will be useful,
-    % but WITHOUT ANY WARRANTY; without even the implied warranty of
-    % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    % GNU General Public License for more details.
-    %
-    % You should have received a copy of the GNU General Public License
-    % along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
-    % =====================================================================
+    % @author Edoardo Patelli <edoardo.patelli@strath.ac.uk>
+    % @date   23.02.2020
     
     properties
-        MatWorker
-        MatWorker2
-        ConWorker
+        Evaluator
     end
     methods (TestClassSetup)
+        
+        
         function defineWorker(testCase)
-            testCase.MatWorker  = opencossan.workers.MatlabWorker( ...
-                'Description','covariance function', ...
-                'Format','structure',...
-                'InputNames',{'TestInput'},... % Define the inputs
-                'Script', "%Do Nothing",'OutputNames',{'TestOutput'}); % Define the outputs
-            
-            testCase.MatWorker2  = opencossan.workers.MatlabWorker('Script',"Toutput.out2=Tinput.out1+5;", ...
+            MatWorker  = opencossan.workers.MatlabWorker('Script',"Toutput.out2=Tinput.out1+5;", ...
                 'Format',"structure", ...
                 'OutputNames',{'out3'},...
                 'InputNames',{'X1' 'X2' 'X4' 'out1'});
             
-            testCase.ConWorker=opencossan.workers.Connector;
+            testCase.Evaluator = opencossan.workers.Evaluator('Solver',MatWorker,...
+                'SolverName',{'Xmio'});
         end
+        
     end
     
     methods (Test)
         %% Constructor
         function emptyConstructor(testCase)
-            Xe = opencossan.workers.Evaluator;
-            testCase.assertClass(Xe,'opencossan.workers.Evaluator');
+            Xjm = opencossan.highperformancecomputing.JobManagerSlurm;
+            testCase.assertClass(Xjm,'opencossan.workers.highperformancecomputing');
         end
         
         function constructorShouldSetDescription(testCase)
-            Xe = opencossan.workers.Evaluator('Description','Evaluator',...
-                'Solver',testCase.MatWorker );
+            Xjm = opencossan.highperformancecomputing.JobManagerSlurm(...
+                'description','TestJobManager','moduleList',["matlabR2019a" "secondModule"], ...
+                'ClusterMatlabRoot','/Apps/Matlab/R2019b');
             testCase.assertEqual(Xe.Description,"Evaluator");
         end
         
@@ -69,6 +51,8 @@ classdef EvaluatorTest < matlab.unittest.TestCase
                 'SolverName',["MatlabWorker" "ExtraName"]);
             testCase.assertEqual(Xe.Solver(2),testCase.MatWorker2);
         end
+        
+        
         
         function constructorShouldSetJobManagerInterface(testCase)
             Xjmi = opencossan.highperformancecomputing.JobManagerInterface();
@@ -150,7 +134,10 @@ classdef EvaluatorTest < matlab.unittest.TestCase
         end
         
         function constructorTestOutputNames(testCase)
-            Xe = opencossan.workers.Evaluator('Solver',[testCase.MatWorker testCase.MatWorker2]);          
+            
+            
+            Xe = opencossan.workers.Evaluator('Solver',[testCase.MatWorker testCase.MatWorker2]);
+            
             Coutput=[testCase.MatWorker.OutputNames testCase.MatWorker2.OutputNames];
             testCase.assertEqual(Xe.OutputNames,Coutput);
         end
