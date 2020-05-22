@@ -8,7 +8,33 @@
 
 OpenCossan.reset
 Spath = fileparts(which('TutorialIshigamiFunction.m'));
-SsolverPathBinary=fullfile(Spath,'solver','ishigamifunction');
+%% Solver preparation
+% Ensure that the binary solver is present in the openCOSSAN installation
+SsolverSrcPath = fullfile(opencossan.OpenCossan.getRoot, 'lib', 'src', 'ishigami', 'ishigamiFunction.c');
+SsolverBinPath = fullfile(opencossan.OpenCossan.getRoot, 'lib', 'dist');
+if ispc
+    % on windows
+    SsolverBinPath = fullfile(SsolverBinPath, 'ishigamiFunction.exe');
+else
+    % on linux and unix
+    SsolverBinPath = fullfile(SsolverBinPath, 'ishigamiFunction');
+end
+
+if ~exist(SsolverBinPath,'file')
+    % compile the source code of the solver
+    if ispc
+        %TODO implement check if gcc is available and compilation commands
+        %for windows
+        error('windows compilation missing')
+    else
+        compilationCommand = ...
+            "cd " + fileparts(SsolverSrcPath) + ";" + ... % go to the source folder
+            "gcc ishigamiFunction.c ini.c -lm -o ishigamiFunction;" + ... % compile the source code
+            "mv ishigamiFunction " + SsolverBinPath + ";"; % move the solver to the "dist" directory
+        outFlag = system(compilationCommand);
+        assert(outFlag ==0, 'openCOSSAN:TutorialIshigamiFunction:CompileError','Solver compilation failed.')
+    end
+end
 
 %% Input Definition
 % In this example, the external solver computes the value of the Ishigami
@@ -63,7 +89,7 @@ connector_ishigami = Connector('Sdescription','Connector to test executable ishi
         'Sexecmd','%SsolverBinary %SmainInputFile', ...
         'SmainInputPath',pwd,...
         'SmainInputFile','input.dat',...
-        'SsolverBinary',SsolverPathBinary,...
+        'SsolverBinary',SsolverBinPath,...
         'CXmembers',{Xinjector,Xextractor});
 
 % You can check the connector with the test method
