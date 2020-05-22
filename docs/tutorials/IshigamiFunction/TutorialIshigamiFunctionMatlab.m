@@ -1,16 +1,21 @@
-X1   = RandomVariable('Sdistribution','uniform','lowerbound',-pi,'upperbound',pi);
-X2   = RandomVariable('Sdistribution','uniform','lowerbound',-pi,'upperbound',pi);
-X3   = RandomVariable('Sdistribution','uniform','lowerbound',-pi,'upperbound',pi);
-Xrvset = RandomVariableSet('Cmembers',{'X1','X2','X3'},'CXrandomvariables',{X1,X2,X3});
-Xin    = Input('XrandomVariableSet',Xrvset);
-Xm2 = Mio('Sscript','Moutput=(sin(Minput(:,1)) + 7*sin(Minput(:,2)).^2 + 0.05*(Minput(:,3)).^4.*sin(Minput(:,1)));', ...
-         'Coutputnames',{'Y'},...
-         'Cinputnames',{'X1' 'X2' 'X3'},...
-         'Liostructure',false,...
-         'Liomatrix',true,...
-	     'Lfunction',false);  
+import opencossan.common.*
+import opencossan.common.inputs.*
+import opencossan.common.inputs.random.*
+import opencossan.workers.*
+import opencossan.simulations.*
+import opencossan.sensitivity.*
+
+X1   = UniformRandomVariable('Bounds',[-pi,pi]);
+X2   = UniformRandomVariable('Bounds',[-pi,pi]);
+X3   = UniformRandomVariable('Bounds',[-pi,pi]);
+Xrvset = RandomVariableSet('names',["X1","X2","X3"],'members',[X1,X2,X3]);
+Xin    = Input('RandomVariableSet',Xrvset);
+Xm2 = Mio('Script','Moutput=(sin(Minput(:,1)) + 7*sin(Minput(:,2)).^2 + 0.05*(Minput(:,3)).^4.*sin(Minput(:,1)));', ...
+         'OutputNames',{'Y'},...
+         'InputNames',{'X1' 'X2' 'X3'},...
+         'Format','matrix');  
 Xev2    = Evaluator('Xmio',Xm2);
-Xmdl2   = Model('Xinput',Xin,'Xevaluator',Xev2);
+Xmdl2   = Model('Input',Xin,'Evaluator',Xev2);
 
 Xmc=MonteCarlo('Nsamples',10000);
 Xgs=GlobalSensitivitySobol('Xmodel',Xmdl2,'Nbootstrap',100,'Xsimulator',Xmc,'Smethod','Jansen1999');

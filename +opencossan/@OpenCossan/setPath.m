@@ -32,16 +32,11 @@ if ~isdeployed % TODO: We need a way to check and initialise toolboxes in a depl
     % Add jar folder to javaclasspath
     javaaddpath(obj.PathToJar);
     
-    % Predefined Toolboxes
-    for i = 1:size(obj.PredefinedToolboxes,1)
-        toolbox = obj.PredefinedToolboxes{i,1};
-        if endsWith(toolbox, '.m')
-            run(fullfile(obj.Root, toolbox));
-        else
-            addpath(toolbox);
-        end
+    % Add additional libraries to path
+    for i = 1:numel(obj.Toolboxes)
+        addpath(genpath(obj.Toolboxes(i)));
     end
-    
+   
     % Save the userpath
     savepath(fullfile(userpath,'pathdef.m'));
     

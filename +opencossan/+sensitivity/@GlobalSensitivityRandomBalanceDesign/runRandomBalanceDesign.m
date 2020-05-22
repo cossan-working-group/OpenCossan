@@ -36,10 +36,10 @@ function [MfirstOrder, MfirstOrderCoV, MfirstOrderCI, Xout] = runRandomBalanceDe
 %  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
 % =====================================================================
 
-if ~isdeployed && isempty(OpenCossan.getAnalysisName)
-    OpenCossan.setAnalysisName('randomBalanceDesign');
+if ~isdeployed && isempty(opencossan.OpenCossan.getAnalysisName)
+    opencossan.OpenCossan.setAnalysisName('randomBalanceDesign');
 end
-OpenCossan.setLaptime('description', ...
+opencossan.OpenCossan.getTimer().lap('description', ...
     '[Sensitivity:randomBalanceDesign] Start sensitivity analysis')
 
 
@@ -52,10 +52,10 @@ Ninputs=length(Xobj.Cinputnames);
 % Mapping the input names
 VindexInput=zeros(1,Ninputs);
 for n=1:Ninputs
-    VindexInput(n)=find(strcmp(Xobj.Xinput.CnamesRandomVariable,Xobj.Cinputnames{n}));
+    VindexInput(n)=find(strcmp(Xobj.Xinput.RandomVariableNames,Xobj.Cinputnames{n}));
 end
 
-OpenCossan.cossanDisp(['Total number of model evaluations required: ' num2str(Xobj.Nsamples)],2)
+opencossan.OpenCossan.cossanDisp(['Total number of model evaluations required: ' num2str(Xobj.Nsamples)],2)
 
 %% Estimate sensitivity indices
 
@@ -77,27 +77,27 @@ Mx=0.5+asin(sin(1*Ms))/pi; % 1=\omega
 %[~, Mindex]=sort(Ms,1); % each input factor are reorder
 
 %% Evaluate the model
-OpenCossan.cossanDisp('Creating Samples object',4)
+opencossan.OpenCossan.cossanDisp('Creating Samples object',4)
 
 % Preallocate memory
 XinputRBD=Xobj.Xinput.sample('Nsamples',Xobj.Nsamples);
-Msamples=XinputRBD.Xsamples.MsamplesHyperCube;
+Msamples=XinputRBD.Samples.MsamplesHyperCube;
 % Keep only the components required by the sensitivity analysis
 Msamples(:,VindexInput)=Mx;
 
-Xsamples=Samples('Xinput',XinputRBD,'MsamplesHyperCube',Msamples);
+Xsamples=opencossan.common.Samples('Xinput',XinputRBD,'MsamplesHyperCube',Msamples);
 
 % Evaluate the model 
-OpenCossan.cossanDisp('Evaluating the model ' ,4)
+opencossan.OpenCossan.cossanDisp('Evaluating the model ' ,4)
 Xout=Xobj.Xtarget.apply(Xsamples); % y_A=f(A)
-if ~isempty(OpenCossan.getDatabaseDriver)
-    insertRecord(OpenCossan.getDatabaseDriver,'StableType','Simulation', ...
-        'Nid',getNextPrimaryID(OpenCossan.getDatabaseDriver,'Simulation'),...
+if ~isempty(opencossan.OpenCossan.getDatabaseDriver)
+    insertRecord(opencossan.OpenCossan.getDatabaseDriver,'StableType','Simulation', ...
+        'Nid',getNextPrimaryID(opencossan.OpenCossan.getDatabaseDriver,'Simulation'),...
         'XsimulationData',Xout,'Nbatchnumber',1)  
 end
 
 % values of the output variables
-OpenCossan.cossanDisp('Extract quantity of interest from SimulationData ' ,4)
+opencossan.OpenCossan.cossanDisp('Extract quantity of interest from SimulationData ' ,4)
 Mout=Xout.getValues('Cnames',Xobj.Coutputnames);
 
 % MmainEffect=zeros(Noutputs,Ninputs);
@@ -146,7 +146,7 @@ end
 
 
 %% Finalizing timer
-OpenCossan.setLaptime('description','[Sensitivity:randomBalanceDesign] end sensitivity analysis')
+opencossan.OpenCossan.getTimer().lap('description','[Sensitivity:randomBalanceDesign] end sensitivity analysis')
 
 end
 

@@ -30,6 +30,7 @@ function EBN = computeProbabilisticNodes(EBN, varargin)
 import opencossan.common.utilities.*
 import opencossan.workers.Mio
 import opencossan.common.inputs.*
+import opencossan.common.inputs.random.UserDefinedRandomVariable
 
 p = inputParser;
 p.FunctionName = 'opencossan.bayesiannetworks.EnhancedBayesianNetwork.computeProbabilisticNodes';
@@ -134,7 +135,7 @@ for indCont=1:length(Cnodes2compute)
         combind=num2cell(myind2sub(Vcomputations,icomb)); % combination of states of nodes involved size(newCPD)
         
         % Build input
-        Xinput = EBN.probabilisticInput('Combination',combind,'CombinationNames',NewParents,'Node',Xnode);
+        Input = EBN.probabilisticInput('Combination',combind,'CombinationNames',NewParents,'Node',Xnode);
         
         % Extract Script from nodes to compute
         if sum(LoldPaInd)==1
@@ -142,7 +143,7 @@ for indCont=1:length(Cnodes2compute)
             CSscript(1,2)   = CPD(combind{LoldPaInd});
         elseif  sum(LoldPaInd)>1
             CPD             = reshape(Xnode.CPD,VsizeNewPa(LoldPaInd));  % size continuous nodes always one!
-            CSscript(1,2)   = CPD(combind{LoldPaInd});
+            CSscript(1,2)   = CPD(combind{LoldPaInd});d
         else % no discrete parents!
             CSscript(1,2)   = Xnode.CPD;
         end
@@ -154,11 +155,11 @@ for indCont=1:length(Cnodes2compute)
             'InputNames',{Parents{:}},...
             'Format','table');
         
-        Xinput      = sample(Xinput,'Nsamples',10000);
-        TableOutput = Xm.evaluate(Xinput.getTable);
-        values      = TableOutput.out; % Results of the model evaluation on the samples
+        input = sample(Input,'samples',10000);
+        output = Xm.evaluate(input);
+        values      = output.out; % Results of the model evaluation on the samples
         %% TO DO: INTRODUCE TRUNCATED RANDOM VARIABLE IF REQUESTED
-        newCPD{combind{:}}  = UserDefinedRandomVariable('Vdata',values,'Vtails',[1e-20,1-1e-20]); % Build UserDefRV on the results
+        newCPD{combind{:}}  = UserDefinedRandomVariable('data',values,'Bounds',[1e-20,1-1e-20]); % Build UserDefRV on the results
     end
     
     %% Overwrite newCPD values and newParents
