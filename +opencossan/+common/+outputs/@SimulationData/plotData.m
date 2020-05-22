@@ -14,7 +14,6 @@ Lstatistics=true;
 Cnames=Xobj.Cnames;
 
 %% Validate input arguments
-OpenCossan.validateCossanInputs(varargin{:})
 
 for k=1:2:length(varargin)
     switch lower(varargin{k})

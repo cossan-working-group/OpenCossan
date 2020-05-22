@@ -111,11 +111,7 @@ classdef Connector < opencossan.workers.Worker
             % =====================================================================
 
             
-            %%  Argument Check
-            if opencossan.OpenCossan.getChecks
-                opencossan.OpenCossan.validateCossanInputs(varargin{:});            
-            end
-            
+            %%  Argument Check            
             if nargin==0
                 return
             end
@@ -130,7 +126,7 @@ classdef Connector < opencossan.workers.Worker
                     case ('stype')
                         Xobj.Stype = varargin{k+1};
                     case ('sdescription')
-                        Xobj.Sdescription = varargin{k+1};
+                        Xobj.Description = varargin{k+1};
                     case ('smaininputfile')
                         Xobj.Smaininputfile = varargin{k+1};
                     case ('smaininputpath')
@@ -203,8 +199,8 @@ classdef Connector < opencossan.workers.Worker
             end
             
             % set private properties Cinputnames and Coutputnames
-            Xobj.Cinputnames = Xobj.getCinputnames();
-            Xobj.Coutputnames = Xobj.getCoutputnames();
+            Xobj.InputNames = Xobj.getCinputnames();
+            Xobj.OutputNames = Xobj.getCoutputnames();
             
             % check that the number of the members and number of names are
             % the same
