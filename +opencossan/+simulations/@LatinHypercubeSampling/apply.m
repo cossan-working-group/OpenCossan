@@ -25,7 +25,7 @@ function XsimOut = apply(Xobj,Xtarget)
 %  You should have received a copy of the GNU General Public License
 %  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
 % =====================================================================
-
+import opencossan.OpenCossan
 
 %% Check inputs
 [Xobj, Xinput]=checkInputs(Xobj,Xtarget);
@@ -46,7 +46,7 @@ while isempty(SexitFlag)
     Xobj.ibatch = Xobj.ibatch + 1;
     
     % Lap time for each batch
-    opencossan.OpenCossan.setLaptime('description',[' Batch #' num2str(Xobj.ibatch)]);
+    OpenCossan.getTimer().lap('description',[' Batch #' num2str(Xobj.ibatch)]);
     
     % Number of samples current batch    
     if Xobj.ibatch==Xobj.Nbatches || Xobj.Nsimxbatch==0
@@ -84,13 +84,13 @@ end
 
 % Add termination criteria to the FailureProbability
 XsimOut(end).SexitFlag=SexitFlag;
-XsimOut(end).SbatchFolder=[OpenCossan.getCossanWorkingPath filesep Xobj.SbatchFolder];
+XsimOut(end).SbatchFolder=[OpenCossan.getWorkingPath filesep Xobj.SbatchFolder];
 
 %%  Set random number generator to state prior to running simulation
 if exist('XRandomNumberGenerator','var'),
      Simulations.restoreRandomNumberGenerator(XRandomNumberGenerator)
 end
 
-OpenCossan.setLaptime('description','End apply@LatinHypercubeSampling');
+OpenCossan.getTimer().lap('description','End apply@LatinHypercubeSampling');
 % Restore Global Random Stream
 restoreRandomStream(Xobj);

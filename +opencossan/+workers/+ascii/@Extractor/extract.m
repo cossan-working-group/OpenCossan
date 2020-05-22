@@ -23,7 +23,7 @@ function [Tout,LsuccessfullExtract] = extract(Xobj,varargin)
 %  You should have received a copy of the GNU General Public License
 %  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
 % =====================================================================
-
+import opencossan.OpenCossan
 %% 1. Processing Inputs
 
 opencossan.OpenCossan.validateCossanInputs(varargin{:});
