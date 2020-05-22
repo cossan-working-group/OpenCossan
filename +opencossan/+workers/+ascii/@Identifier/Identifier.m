@@ -1,80 +1,84 @@
-classdef Identifier
-    % class Identifier 
-    % 
+classdef Identifier < opencossan.common.CossanObject
+    % class Identifier
+    %
     % Objects of the class Identifier contains information for Injector to
     % find data to inject. The properties of the Identifier objects can be
     % populated by scanning an ASCII input file that contains COSSAN
     % identifier (see Injector for additional information)
     
+    %{
+    This file is part of OpenCossan <https://cossan.co.uk>.
+    Copyright (C) 2006-2020 COSSAN WORKING GROUP
+
+    OpenCossan is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License or,
+    (at your option) any later version.
+
+    OpenCossan is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
+    %}
+    
+    
     properties
-        Sname                    % 1) Name of the associate COSSAN varialbles
-        Nindex                   % 2) Index of the variable (only for vector and matrix)
-        Sfieldformat             % 3) Format string '%' +  Maximum field width + conversion character (see fscanf for more information)
-        Slookoutfor              % 4)  if present define the string to be searched inside the ASCII file in order to define the relative position
-        Sregexpression           % 6) Regular expression
-        Ncolnum                  % 7) Colum position in the ASCII file of the variables (length(Vcolnum)=Nresponse)
-        Nrownum                  % 8) Row  position in the ASCII file of the variables (length(Vcolnum)=Nresponse)
-        Nposition                % 9) Absolute position inside the input file
-        Soriginal                % 10) Original text in the ASCII file
-        Sincludefile             % 11) Name of the file where the samples of the Stochastic Process are written
+        Name(1,:) char                    % Name of the associate COSSAN variable quantity (can be an input or an output of a worker)
+        Index(1,1) double                 % Index of the variable (only for vector and matrix)
+        FieldFormat(1,1) string           % Format string '%' +  Maximum field width + conversion character (see fscanf for more information)
+        SearchString(1,:) string          % if present, define the string to be searched inside the ASCII file in order to define the relative position
+        ColumnNumber(1,1) double          % Colum position in the ASCII file of the variables (length(Vcolnum)=Nresponse)
+        RowNumber(1,1) double             % Row  position in the ASCII file of the variables (length(Vcolnum)=Nresponse)
+        Position(1,1) double              % Absolute position inside the input file
+        OriginalString(1,1) string        % Original text in the ASCII file
     end
     
     properties (Dependent=true)
-        Noriginal                % Original value of the identifier
+        OriginalValue                     % Original value of the identifier
     end
     
     methods
-        function Xobj = Identifier(varargin)
-            % IDENTIFIER 
+        function obj = Identifier(varargin)
+            % IDENTIFIER
             
-             %% Check Inputs
-            opencossan.OpenCossan.validateCossanInputs(varargin{:});
-            
-            for k = 1:2:length(varargin)
-                switch(lower(varargin{k}))
-                    case 'sname'
-                        Xobj.Sname=varargin{k+1};
-                    case 'nindex'
-                        Xobj.Nindex=varargin{k+1};
-                    case 'sfieldformat'
-                        Xobj.Sfieldformat=varargin{k+1};
-                    case 'slookoutfor'
-                        Xobj.Slookoutfor=varargin{k+1};
-                    case 'sregexpression'
-                        Xobj.Sregexpression=varargin{k+1};
-                    case 'ncolnum'
-                        Xobj.Ncolnum=varargin{k+1};
-                    case 'nrownum'
-                        Xobj.Nrownum=varargin{k+1};
-                    case 'nposition'
-                        Xobj.Nposition=varargin{k+1};
-                    case 'soriginal'
-                        Xobj.Soriginal=varargin{k+1};
-                    case 'sincludefile'
-                        Xobj.Sincludefile=varargin{k+1};
-                end
-                
+            %% Process inputs
+            if nargin == 0
+                super_args={};
+            else
+                [required, varargin] = opencossan.common.utilities.parseRequiredNameValuePairs(...
+                    ["name", "index", "fieldformat", "originalstring", "position"], varargin{:});
+                [optional, super_args] = opencossan.common.utilities.parseOptionalNameValuePairs(...
+                    "searchstring", "", varargin{:});
             end
             
-        end %end constructor
+            obj@opencossan.common.CossanObject(super_args{:});
             
+            if nargin > 0
+                obj.Name = required.name;
+                obj.Index = required.index;
+                obj.FieldFormat = required.fieldformat;
+                obj.OriginalString = required.originalstring;
+                obj.Position = required.position;
+                
+                obj.SearchString = optional.searchstring;
+            end
+                        
+        end %end constructor
+        
         display(Xobj) % Display identifier object
         
-        function Noriginal = get.Noriginal(Xobj)
+        function Noriginal = get.OriginalValue(obj)
             
             import opencossan.common.utilities.*
             % convert the string to a number. The function mystr2double is
             % used to convert also number in nastran format.
-            Noriginal = mystr2double(Xobj.Soriginal);
+            Noriginal = mystr2double(obj.OriginalString);
         end
         
-        replaceValues(Xobj,varargin)
-    end
-     
-    methods (Static)
-        Svalue=num2nastran8(value); % Convert to Nastran Format 8
-        Svalue=num2nastran16(value); % Convert to Nastran Format 16
-        writeTable(Sfolder,Sformat,Sname,Vdata,Vtime); % write table with samples from Dataseries
+        replaceValues(obj,varargin) % replace the value of the injection quantities in the file
     end
     
 end
