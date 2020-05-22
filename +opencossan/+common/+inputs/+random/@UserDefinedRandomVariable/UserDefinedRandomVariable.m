@@ -102,19 +102,19 @@ classdef UserDefinedRandomVariable < opencossan.common.inputs.random.RandomVaria
         end
         
         function obj = set.support(obj,value)
-            obj.support_ = value -obj.Shift;
+            obj.support_ = value;
         end
         
         function support=get.support(obj)
-            support = obj.support_ +obj.Shift;
+            support = obj.support_;
         end
         
         function obj = set.data(obj,values)
-            obj.data_ = values - obj.Shift;
+            obj.data_ = values;
         end
         
         function data = get.data(obj)
-            data = obj.data_ + obj.Shift;
+            data = obj.data_;
         end
         
         function pdf=get.pdf(obj)

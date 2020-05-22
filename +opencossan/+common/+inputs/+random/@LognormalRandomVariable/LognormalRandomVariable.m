@@ -72,7 +72,6 @@ classdef LognormalRandomVariable< opencossan.common.inputs.random.RandomVariable
         
         function mean = get.Mean(obj)
             [mean, ~] = lognstat(obj.Mu,obj.Sigma);
-            mean = mean + obj.Shift;
         end
         
         function std = get.Std(obj)
@@ -84,14 +83,14 @@ classdef LognormalRandomVariable< opencossan.common.inputs.random.RandomVariable
             %CDF2PHYSICAL Inverse lognormal cumulative distribution function.
             % VX = cdf2physical(obj,VX) returns the inverse cdf of the
             % lognormal distribution, evaluated at the values VU.
-            VX = logninv(VU,obj.Mu,obj.Sigma) + obj.Shift;
+            VX = logninv(VU,obj.Mu,obj.Sigma);
         end
         
         function VX = map2physical(obj,VU)
             % MAP2PHYSICAL Map from standard normal into physical space.
             % VX = map2physical(obj,VU) maps the values in VU from standard
             % normal into physical space.
-            VX = logninv(normcdf(VU),obj.Mu,obj.Sigma) + obj.Shift;
+            VX = logninv(normcdf(VU),obj.Mu,obj.Sigma);
         end
         
         function VU = map2stdnorm(obj,VX)
@@ -112,13 +111,13 @@ classdef LognormalRandomVariable< opencossan.common.inputs.random.RandomVariable
             %EVALPDF Lognormal probability density function.
             % Y = evalpdf(obj,X) returns the pdf of the lognormal
             % distribution, evaluated at the values X.
-            Vpdf_vX  = lognpdf(Vx - obj.Shift,obj.Mu,obj.Sigma);
+            Vpdf_vX  = lognpdf(Vx,obj.Mu,obj.Sigma);
         end
     end
     
     methods (Access = protected)
         function samples = getSamples(obj,size)
-            samples = lognrnd(obj.Mu,obj.Sigma,size) + obj.Shift;
+            samples = lognrnd(obj.Mu,obj.Sigma,size);
         end
     end
     

@@ -75,7 +75,6 @@ classdef HypergeometricRandomVariable < opencossan.common.inputs.random.RandomVa
         
         function mean = get.Mean(obj)
             [mean,~] = hygestat(obj.M,obj.K,obj.N);
-            mean = mean + obj.Shift;
         end
         
         function std = get.Std(obj)
@@ -87,41 +86,41 @@ classdef HypergeometricRandomVariable < opencossan.common.inputs.random.RandomVa
             %CDF2PHYSICAL Inverse hypergeometric cumulative distribution function.
             % VX = cdf2physical(obj,VX) returns the inverse cdf of the
             % hypergeometric distribution, evaluated at the values VU.
-            VX = icdf('hypergeometric',VU(VU > 0),obj.M,obj.K,obj.N) + obj.Shift;
+            VX = icdf('hypergeometric',VU(VU > 0),obj.M,obj.K,obj.N);
         end
         
         function VX = map2physical(obj,VU)
             % MAP2PHYSICAL Map from standard normal into physical space.
             % VX = map2physical(obj,VU) maps the values in VU from standard
             % normal into physical space.
-            VX = icdf('hypergeometric',normcdf(VU),obj.M,obj.K,obj.N) + obj.Shift;
+            VX = icdf('hypergeometric',normcdf(VU),obj.M,obj.K,obj.N);
         end
         
         function VU = map2stdnorm(obj,VX)
             % MAP2STDNORM Map from physical into standard normal space.
             % VU = map2stdnorm(obj,VX) maps the values in VX from physical
             % into standard normal space.
-            VU = norminv(cdf('hypergeometric',VX - obj.Shift,obj.M,obj.K,obj.N));
+            VU = norminv(cdf('hypergeometric',VX,obj.M,obj.K,obj.N));
         end
         
         function VU = physical2cdf(obj,VX)
             %PHYSICAL2CDF Hypergeometric cumulative distribution function.
             % VU = physical2cdf(obj,VX) returns the cdf of the 
             % hypergeometric distribution, evaluated at the values VX.
-            VU = cdf('hypergeometric',VX - obj.Shift,obj.M,obj.K,obj.N);
+            VU = cdf('hypergeometric',VX,obj.M,obj.K,obj.N);
         end
         
         function Vpdf_vX = evalpdf(obj,Vx)
             %EVALPDF Hypergeometric probability density function.
             % Y = evalpdf(obj,X) returns the pdf of the hypergeometric
             % distribution, evaluated at the values X.
-            Vpdf_vX = pdf('hypergeometric',Vx - obj.Shift,obj.M,obj.K,obj.N);
+            Vpdf_vX = pdf('hypergeometric',Vx,obj.M,obj.K,obj.N);
         end
     end
     
     methods (Access = protected)
         function samples = getSamples(obj,size)
-            samples = random('hypergeometric',obj.M,obj.K,obj.N,size) + obj.Shift;
+            samples = random('hypergeometric',obj.M,obj.K,obj.N,size);
         end
     end
     

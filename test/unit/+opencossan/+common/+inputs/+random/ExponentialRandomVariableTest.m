@@ -54,14 +54,6 @@ classdef ExponentialRandomVariableTest < matlab.unittest.TestCase
             testCase.verifyEqual(random.Mean,1/1.5);
         end
         
-        %% shifting
-        function shifting(testCase)
-            random = opencossan.common.inputs.random.ExponentialRandomVariable('lambda', 1.5);
-            meanWithoutShift = random.Mean;
-            random.Shift = 1;
-            testCase.verifyEqual(random.Mean, meanWithoutShift + 1);
-        end
-        
         %% sample
         function SampleEmpty(testCase)
             random = opencossan.common.inputs.random.ExponentialRandomVariable('lambda', 1.5);

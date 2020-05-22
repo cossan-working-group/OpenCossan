@@ -75,8 +75,6 @@ classdef WeibullRandomVariable < opencossan.common.inputs.random.RandomVariable
         
         function mean = get.Mean(obj)
             [mean,~] = wblstat(obj.A, obj.B);
-            mean = mean + obj.Shift;
-            
         end
         
         function std = get.Std(obj)
@@ -88,41 +86,41 @@ classdef WeibullRandomVariable < opencossan.common.inputs.random.RandomVariable
             %CDF2PHYSICAL Inverse weibull cumulative distribution function.
             % VX = cdf2physical(obj,VX) returns the inverse cdf of the
             % weibull distribution, evaluated at the values VU.
-            VX = wblinv(VU,obj.A,obj.B) + obj.Shift;
+            VX = wblinv(VU,obj.A,obj.B);
         end
         
         function VX = map2physical(obj,VU)
             % MAP2PHYSICAL Map from standard normal into physical space.
             % VX = map2physical(obj,VU) maps the values in VU from standard
             % normal into physical space.
-            VX = wblinv(normcdf(VU),obj.A,obj.B) + obj.Shift;
+            VX = wblinv(normcdf(VU),obj.A,obj.B);
         end
         
         function VU = map2stdnorm(obj,VX)
             % MAP2STDNORM Map from physical into standard normal space.
             % VU = map2stdnorm(obj,VX) maps the values in VX from physical
             % into standard normal space.
-            VU = norminv(wblcdf(VX - obj.Shift,obj.A,obj.B));
+            VU = norminv(wblcdf(VX,obj.A,obj.B));
         end
         
         function VU = physical2cdf(obj,VX)
             %PHYSICAL2CDF Weibull cumulative distribution function.
             % VU = physical2cdf(obj,VX) returns the cdf of the weibull
             % distribution, evaluated at the values VX.
-            VU = wblcdf(VX - obj.Shift,obj.A,obj.B);
+            VU = wblcdf(VX,obj.A,obj.B);
         end
         
         function Vpdf_vX = evalpdf(obj,Vx)
             %EVALPDF Weibull probability density function.
             % Y = evalpdf(obj,X) returns the pdf of the weibull
             % distribution, evaluated at the values X.
-            Vpdf_vX = wblpdf(Vx - obj.Shift,obj.A,obj.B);
+            Vpdf_vX = wblpdf(Vx,obj.A,obj.B);
         end
     end
     
     methods (Access = protected)
         function samples = getSamples(obj,size)
-            samples = wblrnd(obj.A,obj.B,size) + obj.Shift;
+            samples = wblrnd(obj.A,obj.B,size);
         end
     end
     

@@ -86,13 +86,13 @@ classdef ModelTest < matlab.mock.TestCase
                 'OpenCossan:MissingRequiredInput');
             % Wrong input types
             testCase.verifyError(@() Model('Input',1,'Evaluator',1),...
-                'MATLAB:UnableToConvert');
+                'MATLAB:validation:UnableToConvert');
             testCase.verifyError(@() Model('Input',testCase.InputStub,...
                 'Evaluator',1),...
-                'MATLAB:UnableToConvert');
+                'MATLAB:validation:UnableToConvert');
             testCase.verifyError(@() Model('Input',1,...
                 'Evaluator',testCase.EvaluatorStub), ...
-                'MATLAB:UnableToConvert');
+                'MATLAB:validation:UnableToConvert');
         end
         
         function shouldRunDeterministicAnalysis(testCase)

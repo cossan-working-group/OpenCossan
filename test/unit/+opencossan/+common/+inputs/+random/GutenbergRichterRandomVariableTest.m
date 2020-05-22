@@ -59,16 +59,6 @@ classdef GutenbergRichterRandomVariableTest < matlab.unittest.TestCase
             testCase.verifyEqual(random.Mean, testMean);
         end
         
-        %% shifting
-        function shifting(testCase)
-            random = opencossan.common.inputs.random.GutenbergRichterRandomVariable('b',0.7,'bounds',[0.5;1]);
-            random.Shift = 1;
-            b = 0.7*log(10);
-            Den = (exp(-b*(1.5))-exp(-b*(2)));
-            testMean = 1/Den*(-(2*exp(-b*(2))-2*exp(-b*(1.5))) - 1/b*(exp(-b*(2))-exp(-b*(1.5))));
-            testCase.verifyEqual(random.Mean, testMean,'RelTol',0.1);
-        end
-        
         %% sample
         function SampleEmpty(testCase)
             random = opencossan.common.inputs.random.GutenbergRichterRandomVariable('b',0.7,'bounds',[0.5;1]);

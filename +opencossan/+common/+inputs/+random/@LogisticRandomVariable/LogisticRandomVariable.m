@@ -72,7 +72,7 @@ classdef LogisticRandomVariable< opencossan.common.inputs.random.RandomVariable
         end
         
         function mean = get.Mean(obj)
-            mean = obj.Mu + obj.Shift;
+            mean = obj.Mu;
         end
         
         function std = get.Std(obj)
@@ -83,28 +83,28 @@ classdef LogisticRandomVariable< opencossan.common.inputs.random.RandomVariable
             %CDF2PHYSICAL Inverse logistic cumulative distribution function.
             % VX = cdf2physical(obj,VX) returns the inverse cdf of the
             % logistic distribution, evaluated at the values VU.
-            VX = obj.Mu + obj.S * log(VU./(1-VU)) + obj.Shift;
+            VX = obj.Mu + obj.S * log(VU./(1-VU));
         end
         
         function VX = map2physical(obj,VU)
             % MAP2PHYSICAL Map from standard normal into physical space.
             % VX = map2physical(obj,VU) maps the values in VU from standard
             % normal into physical space.
-            VX = obj.Mu + obj.S * log(normcdf(VU)./(1-normcdf(VU))) + obj.Shift;
+            VX = obj.Mu + obj.S * log(normcdf(VU)./(1-normcdf(VU)));
         end
         
         function VU = map2stdnorm(obj,VX)
             % MAP2STDNORM Map from physical into standard normal space.
             % VU = map2stdnorm(obj,VX) maps the values in VX from physical
             % into standard normal space.
-            VU = norminv(1./(1 + exp((-VX - obj.Shift + obj.Mu)/obj.S)));
+            VU = norminv(1./(1 + exp((-VX + obj.Mu)/obj.S)));
         end
         
         function VU = physical2cdf(obj,VX)
             %PHYSICAL2CDF Logistic cumulative distribution function.
             % VU = physical2cdf(obj,VX) returns the cdf of the logistic
             % distribution, evaluated at the values VX.
-            VU = 1./(1 + exp((-VX - obj.Shift + obj.Mu)/obj.S));
+            VU = 1./(1 + exp((-VX + obj.Mu)/obj.S));
         end
         
         function Vpdf_vX = evalpdf(obj,Vx)
@@ -118,7 +118,7 @@ classdef LogisticRandomVariable< opencossan.common.inputs.random.RandomVariable
     methods (Access = protected)
         function samples = getSamples(obj,size)
             VZ = normcdf(normrnd(0,1,size));
-            samples = obj.Mu + obj.S * log(VZ./(1-VZ)) + obj.Shift;
+            samples = obj.Mu + obj.S * log(VZ./(1-VZ));
         end
     end
     

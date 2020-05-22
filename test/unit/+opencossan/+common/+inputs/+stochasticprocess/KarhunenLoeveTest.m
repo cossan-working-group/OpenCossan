@@ -100,7 +100,7 @@ classdef KarhunenLoeveTest < matlab.unittest.TestCase
         function constructorInvalidCovFun(testCase) % should fail on initial input, can put in @Parameter object
             testCase.assertError(@()opencossan.common.inputs.stochasticprocess.KarhunenLoeve(...
                 'CovarianceFunction',opencossan.common.inputs.Parameter),...
-                'MATLAB:UnableToConvert' );
+                'MATLAB:validation:UnableToConvert' );
         end
                
         function constructorMcovariance(testCase)

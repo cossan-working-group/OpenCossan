@@ -73,7 +73,6 @@ classdef FisherSnedecorRandomVariable < opencossan.common.inputs.random.RandomVa
         
         function mean = get.Mean(obj)
             [mean, ~] = fstat(obj.P1,obj.P2);
-            mean = mean + obj.Shift;
         end
         
         function std = get.Std(obj)
@@ -85,41 +84,41 @@ classdef FisherSnedecorRandomVariable < opencossan.common.inputs.random.RandomVa
             %CDF2PHYSICAL Inverse Fisher-Snedecor cumulative distribution function.
             % VX = cdf2physical(obj,VX) returns the inverse cdf of the
             % Fisher-Snedecor distribution, evaluated at the values VU.
-            VX = finv(VU,obj.P1,obj.P2) + obj.Shift;
+            VX = finv(VU,obj.P1,obj.P2);
         end
         
         function VX = map2physical(obj,VU)
             % MAP2PHYSICAL Map from standard normal into physical space.
             % VX = map2physical(obj,VU) maps the values in VU from standard
             % normal into physical space.
-            VX = finv(normcdf(VU),obj.P1,obj.P2) + obj.Shift;
+            VX = finv(normcdf(VU),obj.P1,obj.P2);
         end
         
         function VU = map2stdnorm(obj,VX)
             % MAP2STDNORM Map from physical into standard normal space.
             % VU = map2stdnorm(obj,VX) maps the values in VX from physical
             % into standard normal space.
-            VU = norminv(fcdf(VX - obj.Shift,obj.P1,obj.P2));
+            VU = norminv(fcdf(VX,obj.P1,obj.P2));
         end
         
         function VU = physical2cdf(obj,VX)
             %PHYSICAL2CDF Fisher-Snedecor cumulative distribution function.
             % VU = physical2cdf(obj,VX) returns the cdf of the 
             % Fisher-Snedecor distribution, evaluated at the values VX.
-            VU =fcdf(VX - obj.Shift,obj.P1,obj.P2);
+            VU =fcdf(VX,obj.P1,obj.P2);
         end
         
         function Vpdf_vX = evalpdf(obj,Vx)
             %EVALPDF Fisher-Snedecor probability density function.
             % Y = evalpdf(obj,X) returns the pdf of the Fisher-Snedecor
             % distribution, evaluated at the values X.
-            Vpdf_vX = pdf('f',Vx - obj.Shift,obj.P1,obj.P2);
+            Vpdf_vX = pdf('f',Vx,obj.P1,obj.P2);
         end
     end
     
     methods (Access = protected)
         function samples = getSamples(obj,size)
-            samples = frnd(obj.P1,obj.P2,size) + obj.Shift;
+            samples = frnd(obj.P1,obj.P2,size);
         end
     end
     
