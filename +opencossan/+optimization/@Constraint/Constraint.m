@@ -37,13 +37,13 @@ classdef Constraint < opencossan.workers.MatlabWorker
                 super_args = {};
             else
                 [optional, super_args] = opencossan.common.utilities.parseOptionalNameValuePairs(...
-                    "inequality", {true}, varargin{:});
+                    "IsInequality", {true}, varargin{:});
             end
             
             obj@opencossan.workers.MatlabWorker(super_args{:});
             
             if nargin > 0
-                obj.IsInequality = optional.inequality;
+                obj.IsInequality = optional.isinequality;
             end
             
             % Assert that the constraint has a single output

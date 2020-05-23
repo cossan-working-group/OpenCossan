@@ -35,9 +35,12 @@ classdef ProbabilisticModel < opencossan.common.Model
             %   physical model (Model) and a performance function (PerformanceFunction).
             %   This class allows to perform reliability analysis and uncertainty quantification
             
+
             if nargin == 0
                 superArg = {};
             else
+                idxPerFun=find(strcmpi(varargin,'performancefunction'));
+                            
                 [required, varargin] = ...
                     opencossan.common.utilities.parseRequiredNameValuePairs(...
                     "performancefunction", varargin{:});
@@ -47,17 +50,23 @@ classdef ProbabilisticModel < opencossan.common.Model
                 [modelArg, superArg] = opencossan.common.utilities.parseOptionalNameValuePairs(...
                     [OptionalsArguments{:,1}],{OptionalsArguments{:,2}}, varargin{:});
                 
+                if ~isempty(modelArg.model)
+                    superArg{end+1}="Input";
+                    superArg{end+1}=modelArg.model.Input;
+                    superArg{end+1}="Evaluator";
+                    superArg{end+1}=modelArg.model.Evaluator;
+                end
                 
             end
             
             obj@opencossan.common.Model(superArg{:});
+           
             
-            if ~isempty(modelArg.model)
-                obj=modelArg.model;
-            end
-            
+            if nargin>0
             % Add PerformanceFunction to Evaluator
-            obj.Evaluator = obj.Evaluator.add('Solver',required.performancefunction);
+               obj.Evaluator = obj.Evaluator.add("Solver",required.performancefunction,...
+                "SolverName",inputname(idxPerFun+1));
+            end
             
         end
         

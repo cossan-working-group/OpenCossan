@@ -53,7 +53,7 @@ classdef EvaluatorTest < matlab.unittest.TestCase
         
         function constructorShouldSetDescription(testCase)
             Xe = opencossan.workers.Evaluator('Description','Evaluator',...
-                'Solver',testCase.MatWorker );
+                'Solver',testCase.MatWorker,'SolverName','test');
             testCase.assertEqual(Xe.Description,"Evaluator");
         end
         
@@ -63,7 +63,7 @@ classdef EvaluatorTest < matlab.unittest.TestCase
             testCase.assertEqual(Xe.Solver(1),testCase.MatWorker);
         end
         
-        function constructorShouldFail(testCase)
+        function constructorTwoWorkers(testCase)
             
             Xe = opencossan.workers.Evaluator('Solver',[testCase.MatWorker testCase.MatWorker2],...
                 'SolverName',["MatlabWorker" "ExtraName"]);
@@ -72,85 +72,24 @@ classdef EvaluatorTest < matlab.unittest.TestCase
         
         function constructorShouldSetJobManagerInterface(testCase)
             Xjmi = opencossan.highperformancecomputing.JobManagerInterface();
-            Xe = opencossan.workers.Evaluator('Solver',testCase.MatWorker,'JobManager',Xjmi);
+            Xe = opencossan.workers.Evaluator('Solver',testCase.MatWorker,'JobManager',Xjmi,'SolverName','MatWorker');
             testCase.assertEqual(Xe.JobManager,Xjmi);
         end
         
-        function constructorShouldSetLremoteInjectExtract(testCase)
-            Xe = opencossan.workers.Evaluator('Solver',testCase.MatWorker,...
-                'RemoteInjectExtract',true);
-            testCase.assertTrue(Xe.RemoteInjectExtract);
-        end
-        
-        function constructorShouldSetHostNames(testCase)
-            
-            Squeues = ["Queue1" "Queue2"];
-            Shostnames = ["Host1","Host2"];
-            Xe = opencossan.workers.Evaluator('Solver',[testCase.ConWorker testCase.MatWorker],...
-                'Hostnames',Shostnames,...
-                'Queues',Squeues);
-            testCase.assertEqual(Xe.Hostnames,Shostnames);
-        end
-        
-        function constructorShouldSetQueues(testCase)
-            Squeues = ["Queue1" "Queue2"];
-            Xe = opencossan.workers.Evaluator('Solver',...
-                [testCase.ConWorker testCase.MatWorker],'Queues',Squeues);
-            testCase.assertEqual(Xe.Queues,Squeues);
-        end
-        
-        function constructorShouldSetVconcurrent(testCase)
-            Xe = opencossan.workers.Evaluator('Solver',[testCase.ConWorker testCase.MatWorker],...
-                'MaxCuncurrentJobs',[Inf 4]);
-            testCase.assertEqual(Xe.MaxCuncurrentJobs,[Inf 4]);
-        end
-        
-        function constructorShouldSetMembers(testCase)
-            Xe = opencossan.workers.Evaluator('Solver',[testCase.ConWorker testCase.MatWorker]);
-            testCase.assertEqual(Xe.Solver,[testCase.ConWorker testCase.MatWorker]);
-        end
-        
-        function constructorShouldSetNames(testCase)
-            CSnames = ["Connector Name", "Mio name"];
-            Xe = opencossan.workers.Evaluator('Solver',[testCase.ConWorker testCase.MatWorker],'SolverName',CSnames);
-            testCase.assertEqual(Xe.Solver,[testCase.ConWorker  testCase.MatWorker]);
-            testCase.assertEqual(Xe.SolverName,CSnames);
-        end
-        
-        function constructorShouldSetSolutionSequence(testCase)
-            Xss = opencossan.workers.SolutionSequence();
-            Xe = opencossan.workers.Evaluator('Solver',Xss);
-            testCase.assertEqual(Xe.Solver(1),Xss);
-        end
-        
-        function constructorShouldSetMetaModel(testCase)
-            Xrs = opencossan.metamodels.ResponseSurface();
-            Xe = opencossan.workers.Evaluator('Solver',Xrs);
-            testCase.assertEqual(Xe.Solver(1),Xrs);
-        end
-        
-        function constructorShouldSetParallelEnvironment(testCase)
-            Xe = opencossan.workers.Evaluator('Solver',[testCase.ConWorker testCase.MatWorker],...
-                'ParallelEnvironments',["parallel" "parallel"]);
-            testCase.assertEqual(Xe.ParallelEnvironments,["parallel";"parallel"]);
-        end
-        
-        function constructorShouldSetVSlots(testCase)
-            Xe = opencossan.workers.Evaluator('Solver',[testCase.ConWorker testCase.MatWorker],...
-                'Slots',[1 1]);
-            testCase.assertEqual(Xe.Slots,[1 1]);
-        end
+
         
         function constructorTestInputNames(testCase)
             
-            Xe = opencossan.workers.Evaluator('Solver',[testCase.MatWorker testCase.MatWorker2]);
+            Xe = opencossan.workers.Evaluator('Solver',[testCase.MatWorker testCase.MatWorker2],...
+            'SolverName',["MatWorker" "MatWorker2"]);
             
             Cinput=[testCase.MatWorker.InputNames testCase.MatWorker2.InputNames];
             testCase.assertEqual(Xe.InputNames,Cinput);
         end
         
         function constructorTestOutputNames(testCase)
-            Xe = opencossan.workers.Evaluator('Solver',[testCase.MatWorker testCase.MatWorker2]);          
+            Xe = opencossan.workers.Evaluator('Solver',[testCase.MatWorker testCase.MatWorker2],...
+                'SolverName',["MatWorker" "MatWorker2"]);          
             Coutput=[testCase.MatWorker.OutputNames testCase.MatWorker2.OutputNames];
             testCase.assertEqual(Xe.OutputNames,Coutput);
         end

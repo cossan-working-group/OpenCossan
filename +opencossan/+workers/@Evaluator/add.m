@@ -1,5 +1,9 @@
 function obj=add(obj,varargin)
-%ADD This method adds a worker object to the current Evaluator
+%ADD This method adds a worker object to the current Evaluator. 
+% 
+% Mandatory arguments:
+%   * Solver 
+%   * SolverName
 %
 % See also: Evaluator, Worker
 %
@@ -24,34 +28,11 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
     %}
-[requiredArgs, varargin] = opencossan.common.utilities.parseRequiredNameValuePairs(...
-    "Solver", varargin{:});
-
-% Define optional arguments and default values
-
-OptionalsArguments={...
-    "Queues","";...
-    "Hostnames","";...
-    "ParallelEnvironments","";...
-    "Slots",[];...
-    "MaxCuncurrentJobs",inf;...
-    "RemoteInjectExtract", false;...
-    "MaxNumberofJobs",[];...
-    "SolverName",""};
-
-[optionalArg, ~] = opencossan.common.utilities.parseOptionalNameValuePairs(...
-    [OptionalsArguments{:,1}],{OptionalsArguments{:,2}}, varargin{:});
+[requiredArgs, ~] = opencossan.common.utilities.parseRequiredNameValuePairs(...
+    ["Solver" "SolverName"], varargin{:});
 
 obj.Solver = [obj.Solver requiredArgs.solver];
-
-obj.SolverName = [obj.SolverName optionalArg.solvername];
-
-obj.Queues = [obj.Queues, optionalArg.queues];
-obj.Hostnames = [obj.Hostnames, optionalArg.hostnames];
-obj.ParallelEnvironments = [obj.ParallelEnvironments, optionalArg.parallelenvironments];
-obj.Slots = [obj.Slots, optionalArg.slots];
-obj.MaxCuncurrentJobs = [obj.MaxCuncurrentJobs, optionalArg.maxcuncurrentjobs];
-obj.MaxNumberofJobs = optionalArg.maxnumberofjobs;
+obj.SolverName = [obj.SolverName requiredArgs.solvername];
 
 % Validate object
 obj=validateObject(obj);

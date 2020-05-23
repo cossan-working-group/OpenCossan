@@ -35,7 +35,7 @@ Xin = add(Xin,'member',Xadditionalparameter,'name','Xadditionalparameter');
 
 %% Define the evaluator
 % Construct a Mio object
-Xm=opencossan.workers.Mio(         'description', 'Performance function', ...
+Xm=opencossan.workers.MatlabWorker('Description', 'Performance function', ...
                 'script','for j=1:length(Tinput), Toutput(j).out1=sqrt(Tinput(j).RV1^2+Tinput(j).RV2^2); end', ...
                 ...'Liostructure',true,...
                 'format','structure',...
@@ -45,10 +45,10 @@ Xm=opencossan.workers.Mio(         'description', 'Performance function', ...
 
             
 % Construct the Evaluator
-Xeval = opencossan.workers.Evaluator('Xmio',Xm,'Sdescription','Evaluator xmio');
+Xeval = opencossan.workers.Evaluator('Solver',Xm,'Description','Evaluator xmio');
 
 %% Define a Model
-Xmdl=opencossan.common.Model('evaluator',Xeval,'input',Xin);
+Xmdl=opencossan.common.Model('Evaluator',Xeval,'Input',Xin);
 
 %% Define a Monte Carlo object
 % The montecarlo object defines the number of simulations to be used, the number
@@ -65,7 +65,7 @@ display(Xo)
 % Define performance function 
 Xpf=opencossan.reliability.PerformanceFunction('OutputName','Vg','Capacity','Xthreshold','Demand','out1');
 % Construct the model
-Xpm=opencossan.reliability.ProbabilisticModel('model',Xmdl,'performanceFunction',Xpf);
+Xpm=opencossan.reliability.ProbabilisticModel('Model',Xmdl,'PerformanceFunction',Xpf);
 
 % Apply MC object to generate samples of the ProbabilisticModel
 Xo=Xmc.apply(Xpm);
@@ -184,4 +184,4 @@ Xof1    = XpmSmooth.computeFailureProbability(Xmc);
 display(Xof1)
 
 %% Validate Solutions
-assert(abs(Xof1.pfhat-0.6823)<1e-4,'openCOSSAN:Tutorials','Wrong results')
+assert(abs(Xof1.pfhat-0.6823)<1e-4,'OpemCossan:Tutorials','Wrong results')

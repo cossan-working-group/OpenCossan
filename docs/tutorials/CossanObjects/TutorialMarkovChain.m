@@ -8,9 +8,9 @@
 % another state (or remain in the same state) according to a 
 % probability distribution. 
 %
-% See Also: http://cossan.cfd.liv.ac.uk/wiki/index.php/@MarkovChain
+% See Also: MarkovChain
 %
-% $Copyright~1993-2011,~COSSAN~Working~Group,~University~of~Innsbruck,~Austria$
+% $Copyright~1993-2020,~COSSAN~Working~Group,~University~of~Innsbruck,~Austria$
 % $Author:~Edoardo~Patelli$ 
 
 clear 

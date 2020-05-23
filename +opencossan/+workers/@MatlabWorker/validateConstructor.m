@@ -1,10 +1,9 @@
-function Xobj=validateConstructor(Xobj)
+function obj=validateConstructor(obj)
 % VALIDATECONSTRUCTOR this private method check if the object is
 % constructed correctly.
-% See also: https://cossan.co.uk/wiki/index.php/@Mio
+% See also: Mio
 %
 % Author: Edoardo Patelli and Matteo Broggi
-% Institute for Risk and Uncertainty, University of Liverpool, UK
 % email address: openengine@cossan.co.uk
 % Website: http://www.cossan.co.uk
 
@@ -26,99 +25,93 @@ function Xobj=validateConstructor(Xobj)
 % =====================================================================
 import opencossan.OpenCossan;
 
-OpenCossan.cossanDisp('[Mio:validateConstructor] Validate Constructor',4)
+OpenCossan.cossanDisp('[MatlabWorker:validateConstructor] Validate Constructor',4)
 
-assert(~isempty(Xobj.OutputNames),'openCOSSAN:Mio',...
+assert(~isempty(obj.OutputNames),'OpenCossan:MatlabWorker:EmptyOutputNames',...
     'The names of the Output variables must be defined in the field OutputNames');
-if size(Xobj.OutputNames,1)>1
-    Xobj.OutputNames=Xobj.OutputNames';
+if size(obj.OutputNames,1)>1
+    obj.OutputNames=obj.OutputNames';
 end
 
-assert(~isempty(Xobj.InputNames),'openCOSSAN:Mio',...
+assert(~isempty(obj.InputNames),'OpenCossan:MatlabWorker:EmptyInputNames',...
     'The names of the Input variables should be defined in the field InputNames');
-if size(Xobj.InputNames,1)>1
-    Xobj.InputNames=Xobj.InputNames';
+if size(obj.InputNames,1)>1
+    obj.InputNames=obj.InputNames';
 end
 
 
-% Existance of m-file in directory Spath is checked
-if isempty(Xobj.Script) && isempty(Xobj.FunctionHandle)
+% Existance of m-file in directory Path is checked
+if isempty(obj.Script) && isempty(obj.FunctionHandle)
     % check that an absolute path is given
-    assert(~isempty(Xobj.FullFileName),'openCOSSAN:Mio',...
-        'A file name must be supplied.')
+    assert(~isempty(obj.FullFileName),'OpenCossan:MatlabWorker:NoFileName',...
+        'A filename must be supplied if script of a function handle are not provided.')
     
     if ~isdeployed % if not deployed
-        %% If is a Mio function, check if the file in already in the path
-        if Xobj.IsFunction
-            % Check if the provided files is really a function
-            
-            [Nfid,Smessage]=fopen(Xobj.FullFileName);
-            
-            assert(isempty(Smessage),'openCOSSAN:Mio',...
-                  'The Script or Function specified in the field ''Spath/Sname'' (%s) can not be open\nError message: %s',...
-                  Xobj.FullFileName,Smessage);
-                    
-            
-            Sline=fgetl(Nfid);
-            while 1              
-                if isempty(regexp(Sline, '^%','once')) && ~isempty(Sline)
-                    % No comment identified, check for function
-                    
-                    assert(~isempty(regexp(Sline, '^function','once')),'openCOSSAN:Mio',...
-                        'The provided file (%s) does not seem to be a function!!\nPlease check the Lfunction flag and your file',Xobj.FullFileName);
-                    break
-                else
-                    % Process next line
-                    Sline=fgetl(Nfid);
-                end
-            end
-            fclose(Nfid);
-            
-            opencossan.OpenCossan.cossanDisp(['[Mio:validateConstructor] convert : ' ...
-                Xobj.FullFileName ' to Handle function'] ,4)
-            [Spath,Sfile,Sext] = fileparts(Xobj.FullFileName);
-            if isempty(which([Sfile,Sext]))
-                    addpath(Spath);
-                    Xobj.FunctionHandle=str2func(Sfile);
-                    rmpath(Spath);
-            else
-                Xobj.FunctionHandle=str2func(Sfile);
-            end
-            
-            
-        end % nothing to do if is a script
+        % Check if the file provided is a function or a script
         
-        if Xobj.IsFunction
-            % TODO: Include check of the file. It should at least contain
-            % the word function. 
+        [Nfid,Smessage]=fopen(obj.FullFileName);
+        
+        assert(isempty(Smessage),'OpenCossan:MatlabWorker:ErrorOpeningFile',...
+            ['The file specified in the field ''FullFileName'' (%s) ',...
+            'can not be open\nError message: %s'],...
+            obj.FullFileName,Smessage);
+        
+        % Read the file and check if it is a function or a script
+        Sline=fgetl(Nfid);
+        while isempty(regexp(Sline, '^%','once')) && ~isempty(Sline)
+            Sline=fgetl(Nfid);
             
-        else
-            % TODO: Include check of the file. 
         end
-
+        
+        % No comment identified, check for function
+        if isempty(regexp(Sline, '^function','once'))
+            obj.IsFunction=false;
+        else
+            obj.IsFunction=true;
+        end
+        
+        fclose(Nfid);
+        
+        opencossan.OpenCossan.cossanDisp(['[MatlabWorker:validateConstructor] convert : ' ...
+            obj.FullFileName ' to Handle function'] ,4)
+        [Spath,Sfile,Sext] = fileparts(obj.FullFileName);
+        if isempty(which([Sfile,Sext]))
+            addpath(Spath);
+            obj.FunctionHandle=str2func(Sfile);
+            rmpath(Spath);
+        else
+            obj.FunctionHandle=str2func(Sfile);
+        end
+        
+        
+        % nothing to do if is a script
+        
+        
     else %if is deployed version
         %% If is a Script, put the content of the script file in Sscript
-        if ~Xobj.IsFunction
+        if ~obj.IsFunction
             OpenCossan.cossanDisp(['[Mio:validateConstructor] convert : ' ...
-                Xobj.FullFileName ' script to a single string'] ,4)
-            Nfid = fopen(Xobj.FullFileName);
+                obj.FullFileName ' script to a single string'] ,4)
+            Nfid = fopen(obj.FullFileName);
             Vbytes = fread(Nfid);
             fclose(Nfid);
             % remove carriage return
             Vbytes(Vbytes==13)=[];
             % substitute line feeds (newlines) with commas
             Vbytes(Vbytes==10)=44;
-            Xobj.Script=char(Vbytes');
+            obj.Script=char(Vbytes');
         end % nothing to do if is a function
     end
 end
 
 if ~isdeployed
-    assert((~isempty(Xobj.Script) || ~isempty(Xobj.FunctionHandle) || exist(Xobj.FullFileName,'file')), ...
-        'openCOSSAN:Mio',strcat('A function or a script is required by the Mio object\n',...
-        'Please use the propertyName Sfile, Sscript or AfunctionHandle or check that the files exists. \nFile: %s'),Xobj.FullFileName);
+    assert((~isempty(obj.Script) || ~isempty(obj.FunctionHandle) || exist(obj.FullFileName,'file')), ...
+        'OpenCossan:MatlabWorker:MissingMatlabFile',...
+        strcat('A function or a script is required by the MatlabWorker object\n',...
+        'Please use the PropertyName File, Script or FunctionHandle or check that the file exists. \nFile: %s'),obj.FullFileName);
 else
-    assert((~isempty(Xobj.Script) || exist(Xobj.FullFileName,'file')), ...
-        'openCOSSAN:Mio',strcat('A function or a script is required by the Mio object\n',...
+    assert((~isempty(obj.Script) || exist(obj.FullFileName,'file')), ...
+        'OpenCossan:MatlabWorker:NoScript',...
+        strcat('A function or a script is required by the MatlabWorker object\n',...
         'Please use the propertyName Sfile or Sscript'));
 end

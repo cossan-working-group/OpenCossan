@@ -20,7 +20,7 @@ partion=Xjm.getPartition;
 queues=Xjm.getQueues;
 
 % Submit job system('sbactch ....')
-[]=Xjm.submit()
+[ID]=Xjm.submit()
     
 
 

@@ -1,4 +1,4 @@
-function Moutput = ExampleMioMatrix(Minput)
+function Moutput = ExampleMatlabWorkerMatrix(Minput)
 % Example of Mio Function
 % Input and output are passed as an array of numbers 
 

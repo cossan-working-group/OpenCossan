@@ -1,13 +1,13 @@
 classdef MatlabWorker < opencossan.workers.Worker
     % Matlab Input/Output interface
-    % See also: Worker, Evaluator, Connector
     %
+    % See also: Worker, Evaluator, Connector
+        
     % Author: Edoardo Patelli, Matteo Broggi, Marco De Angelis
-    % Institute for Risk and Uncertainty, University of Liverpool, UK
     % email address: openengine@cossan.co.uk
     % Website: http://www.cossan.co.uk
     
-    %{
+%{
     This file is part of OpenCossan <https://cossan.co.uk>.
     Copyright (C) 2006-2020 COSSAN WORKING GROUP
 
@@ -21,22 +21,22 @@ classdef MatlabWorker < opencossan.workers.Worker
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
     GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
-    %}
+    You should have received a copy of the GNU General Public License
+    along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
+%}
     
     %% Properties of the object
     properties % Public access
-        FullFileName(1,:) char            % Default Full path of the matlab file
+        FullFileName(1,:) char            % Full path of the matlab file
         Format(1,1) string  = 'table'     % Define interface to the matlab file
         IsFunction(1,1) logical           % Define if the matlab script is a function
         AdditionalPath(1,1)     		  % Folder that contains additional files required for compiling MatlabWorker
         Script(1,:) char                  % field that  contains the script
     end
     
-    properties (SetAccess=private,Hidden=true)% Define private propeties
-        IsCompiled logical = false          % compiled status
-        FunctionHandle                      % function handle for external file
+    properties (SetAccess=private)        % Define private propeties
+        IsCompiled logical = false        % compiled status
+        FunctionHandle                    % function handle for external file
     end
     
     properties  (Constant,Hidden)
@@ -63,6 +63,13 @@ along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
             %   input to the corresponding output, using a Matlab
             %   function defined in an m-file
             %
+            %   PropertyName:
+            %   * FullFileName
+            %   * Format
+            %   * AdditionalPath
+            %   * Script
+            %   * FunctionHandle
+            %
             % See also: Worker,
            
             
@@ -74,7 +81,6 @@ along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
                 % Define optional arguments with default values
                 OptionalsArguments={"FullFileName", [];...
                                     "Format","table";...
-                                    "IsFunction",false;...
                                     "AdditionalPath","";...
                                     "Script",[];...
                                     "FunctionHandle",[]};
@@ -91,7 +97,6 @@ along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
             
                 obj.FullFileName = optionalArg.fullfilename;
                 obj.Format = optionalArg.format;
-                obj.IsFunction = optionalArg.isfunction;    
                 obj.AdditionalPath = optionalArg.additionalpath;  
                 obj.Script = optionalArg.script; 
                 obj.FunctionHandle = optionalArg.functionhandle; 

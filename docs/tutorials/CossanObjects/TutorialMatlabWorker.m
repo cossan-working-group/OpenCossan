@@ -1,9 +1,7 @@
 % Tutorial for MatlabWorker.
 % This tutorial shows how to construct and use a MatlabWorker object.
 %
-clear
-close all
-clc;
+clear, close all, clc;
 
 import opencossan.workers.*
 import opencossan.common.inputs.*
@@ -73,7 +71,7 @@ display(TableOutput)
 
 %% First test - Use MonteCarlo simulation
 %  Define Evaluator
-Xev     = Evaluator('Solvers',Xm);
+Xev     = Evaluator('Solver',Xm);
 %  Define probmodel
 Xmodel  = opencossan.common.Model('Input',Xinp,'Evaluator',Xev); 
 %  Apply
@@ -109,7 +107,7 @@ display(TableOutput)
     
 %%  Second - Use MonteCarlo simulation
 %   Define Evaluator
-Xev     = Evaluator('Solvers',XmB);
+Xev     = Evaluator('Solver',XmB);
 %  Define probmodel
 Xmodel  = opencossan.common.Model('Input',Xinp,'Evaluator',Xev); 
 %   Apply
@@ -172,7 +170,7 @@ display(TableOutput)
 
 %% Third test - Use MonteCarlo simulation
 %8.1.   Define Evaluator
-Xev     = Evaluator('Solvers',XmD);
+Xev     = Evaluator('Solver',XmD);
 %8.2.   Define probmodel
 Xmodel  = opencossan.common.Model('Input',Xinp,'Evaluator',Xev); 
 %8.3.   Apply
@@ -220,7 +218,7 @@ display(TableOutput)
 
 %% Third test - Use MonteCarlo simulation
 %8.1.   Define Evaluator
-Xev     = Evaluator('Solvers',XmDfun);
+Xev     = Evaluator('Solver',XmDfun);
 %8.2.   Define probmodel
 Xmodel  = opencossan.common.Model('Input',Xinp,'Evaluator',Xev); 
 %8.3.   Apply

@@ -4,29 +4,31 @@
 % strategy and the interface with JobManager. 
 %
 %
-% See Also: http://cossan.co.uk/wiki/index.php/@Evaluator
+% See Also: Evaluator TutorialModel
 %
 % $Author: Edoardo Patelli$ 
-% Copyright~1993-2015, COSSAN Working Group, University of Liverpool, UK
+% COSSAN Working Group
 % email address: openengine@cossan.co.uk
 % Website: http://www.cossan.co.uk
 
-% =====================================================================
-% This file is part of openCOSSAN.  The open general purpose matlab
-% toolbox for numerical analysis, risk and uncertainty quantification.
-%
-% openCOSSAN is free software: you can redistribute it and/or modify
-% it under the terms of the GNU General Public License as published by
-% the Free Software Foundation, either version 3 of the License.
-%
-% openCOSSAN is distributed in the hope that it will be useful,
-% but WITHOUT ANY WARRANTY; without even the implied warranty of
-% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-% GNU General Public License for more details.
-%
-%  You should have received a copy of the GNU General Public License
-%  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
-% =====================================================================
+%{
+This file is part of OpenCossan <https://cossan.co.uk>.
+Copyright (C) 2006-2020 COSSAN WORKING GROUP
+
+OpenCossan is free software: you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free
+Software Foundation, either version 3 of the License or, (at your option)
+any later version.
+
+OpenCossan is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+more details.
+
+You should have received a copy of the GNU General Public License along
+with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
+%}
+
 clear;
 close all
 clc;
@@ -40,14 +42,14 @@ opencossan.OpenCossan.resetRandomNumberGenerator(56236)
 %
 % Define a siple model based on a Matlab function
 % Construct a Mio object
-Xm=opencossan.workers.Mio('description', 'Performance function', ...
+Xm=opencossan.workers.MatlabWorker('description', 'Performance function', ...
     'Script','for j=1:length(Tinput), Toutput(j).out1=sqrt(Tinput(j).RV1^2+Tinput(j).RV2^2); end', ...
     'OutputNames',{'out1'},...
     'InputNames',{'RV1' 'RV2'},...
     'Format','structure',...
     'IsFunction',false); % This flag specify if the .m file is a script or a function.
 % Construct the Evaluator
-Xeval1 = opencossan.workers.Evaluator('Xmio',Xm,'Sdescription','fist Evaluator');
+Xeval1 = opencossan.workers.Evaluator("Solver",Xm,"SolverName","Xm","Description","fist Evaluator");
 
 % In order to be able to test our Evaluator we need an Input object:
 % Define an Input
@@ -66,7 +68,7 @@ Xin = sample(Xin,'Nsamples',2);
 % TestX evaluetor
 Xo1=Xeval1.apply(Xin);
 display(Xo1)
-Vout=Xo1.getValues('Cnames',Xeval1.Coutputnames);
+Vout=Xo1.getValues('Cnames',Xeval1.OutputNames);
 
 
 % Validate Solution
@@ -84,7 +86,7 @@ assert(max(abs(Vout-Vreference))<1e-4,...
 % factors computed internally to the evaluator object.
 
 % Construct a Mio object
-Xm2=opencossan.workers.Mio('description', 'Performance function', ...
+Xm2=opencossan.workers.MatlabWorker('description', 'Performance function', ...
     'Script','for j=1:length(Tinput), Toutput(j).out2=Tinput(j).out1+3; end', ...
     'OutputNames',{'out2'},...
     'InputNames',{'out1'},...
@@ -92,24 +94,24 @@ Xm2=opencossan.workers.Mio('description', 'Performance function', ...
     'IsFunction',false); % This flag specify if the .m file is a script or a function.
 
 % Construct a Mio object
-Xm3=opencossan.workers.Mio('description', 'Performance function', ...
+Xm3=opencossan.workers.MatlabWorker('description', 'Performance function', ...
     'Script','for j=1:length(Tinput), Toutput(j).out3=Tinput(j).out2+Tinput(j).RV1; end', ...
     'OutputNames',{'out3'},...
     'InputNames',{'out2' 'RV1'},...
     'Format','structure',...
     'IsFunction',false);
 
-XevALL=opencossan.workers.Evaluator('CXmembers',{Xm Xm2 Xm3});
-XevALL.Cinputnames
+XevALL=opencossan.workers.Evaluator('Solver',[Xm Xm2 Xm3],'SolverName',["Xm" "Xm2" "Xm3"]);
+XevALL.InputNames
 % The provided output are shows in the field Coutputnames
-XevALL.Coutputnames
+XevALL.OutputNames
 
 
 %% Deterministic Analysis
 %
 Xoutdet=XevALL.deterministicAnalysis(Xin);
 display(Xoutdet)
-Vout=Xoutdet.getValues('Sname','out3');
+Vout=Xoutdet.getValues('Name','out3');
 
 % Validate Solution
 Vreference= 3;
@@ -129,7 +131,7 @@ assert(abs(Vout-Vreference)<1e-4,...
 % models are exetuted before processing the next samples). 
 
 % The default option is HorizontalSplit
-display(XevALL.LverticalSplit)
+display(XevALL.VerticalSplit)
 
 XinTest(1) = sample(Xin,'Nsamples',1);
 XinTest(2) = sample(Xin,'Nsamples',10);

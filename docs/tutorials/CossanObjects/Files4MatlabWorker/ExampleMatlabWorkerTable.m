@@ -1,4 +1,4 @@
-function TableOutput = ExampleMioTable(TableInput)
+function TableOutput = ExampleMatlabWorkerTable(TableInput)
 % Example of Mio Function. 
 %
 % Input and output passed as Matlab Table 

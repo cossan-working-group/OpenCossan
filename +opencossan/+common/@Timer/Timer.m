@@ -140,10 +140,11 @@ classdef Timer < handle & matlab.mixin.CustomDisplay
             %   f = plot(obj,varargin)
             %
             %   PLOT supports the following name-value parameters:
-            %       'FigureName' - Export the figure as FigureName.pdf
-            %       (char)
-            %       'ExportFormat' - Specifiy the format to export as
-            %       (char)
+            %       Title:          Title of the figure (char)
+            %       FigureName:     Export the figure as FigureName.pdf  (char)
+            %       ExportFormat:   Specifiy the format to export as (char)
+            %      
+            % See also: Timer
             
             %% Parse Inputs
             p = inputParser;

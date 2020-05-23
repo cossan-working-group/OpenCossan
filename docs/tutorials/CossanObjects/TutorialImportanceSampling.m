@@ -46,17 +46,16 @@ Xin = add(Xin,'member',Xthreshold,'name','Xthreshold');
 
 %% Define the Evaluator (i.e. how our model is evaluate)
 % Construct a Mio object
-Xm=opencossan.workers.Mio( 'description', 'This is our Model', ...
+Xm=opencossan.workers.MatlabWorker( 'description', 'This is our Model', ...
     'Script','for j=1:length(Tinput), Toutput(j).out=-Tinput(j).RV1+Tinput(j).RV2; end', ...
-...    'Liostructure',true,...
     'OutputNames',{'out'},...
     'InputNames',{'RV1','RV2'},...
     'IsFunction',false); % This flag specify if the .m file is a script or a function.
 % Construct the Evaluator
-Xeval = opencossan.workers.Evaluator('Xmio',Xm,'Sdescription','Evaluator for the IS tutorial');
+Xeval = opencossan.workers.Evaluator('Solver',Xm,'Description','Evaluator for the IS tutorial');
 
 %% Define the Physical Model based on the Input and the Evaluator
-Xmdl=opencossan.common.Model('Xevaluator',Xeval,'Xinput',Xin);
+Xmdl=opencossan.common.Model('Evaluator',Xeval,'Input',Xin);
 
 %% Define ImportanceSampling object
 % The InportanceSampling object required the definition of a "Proposal
@@ -110,7 +109,7 @@ display(Xo)
 Xpf=PerformanceFunction('OutputName','Vg','Capacity','Xthreshold','Demand','out');
 
 % Construct a ProbabilisticModel Object
-Xpm=ProbabilisticModel('Xmodel',Xmdl,'XperformanceFunction',Xpf);
+Xpm=ProbabilisticModel('Model',Xmdl,'PerformanceFunction',Xpf);
 % now we can apply the ImportanceSampling object and estimate also
 % the performance function
 % ProbabilisticModel
@@ -123,8 +122,8 @@ Xopf.getValues('Sname',Xpf.Soutputname)
 %% Check the weights
 % use as Importance Sampling density the same distribution of RV1 and RV2.
 % By doing so, all the weigth must be equal 1!
-RV3=RV1; %#ok<SNASGU>
-RV4=RV2; %#ok<SNASGU>
+RV3=RV1; 
+RV4=RV2;
 XrvsIS=RandomVariableSet('Cmembers',{'RV3';'RV4'});
 Cmapping={'RV3' 'RV1'; 'RV4' 'RV2'};
 % Construct the Simulation object
@@ -171,4 +170,4 @@ display(XpfMC)
 display(XpfIS)
 
 %% Validate Solutions
-assert(abs(Xpf.pfhat-0.2)<1e-4,'openCOSSAN:Tutorials','Wrong results')
+assert(abs(Xpf.pfhat-0.2)<1e-4,'OpenCossan:Tutorials','Wrong results')

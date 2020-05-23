@@ -28,10 +28,13 @@ function TableOutput = evaluate(Xmio,TableInput)
 %  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
 % =====================================================================
 
-% Use only required inputs. If some names are not present in the TableInput
-% the following line is failing.
-TableInput=TableInput(:,Xmio.InputNames);
+assert(istable(TableInput),...
+    'Provided input type %s is not valid in this method. A table is required',class(TableInput))
 
+        % Use only required inputs. If some names are not present in the TableInput
+        % the following line is failing.
+        TableInput=TableInput(:,Xmio.InputNames);
+        
 %% Prepare inputs
 switch lower(Xmio.Format)
     case 'structure'
@@ -87,6 +90,8 @@ switch lower(Xmio.Format)
                 
         TableOutput=array2table(Poutput,'VariableNames',Xmio.OutputNames);
     case 'table'
+
+
         if Xmio.IsFunction
             TableOutput = feval(Xmio.FunctionHandle,TableInput);
         else

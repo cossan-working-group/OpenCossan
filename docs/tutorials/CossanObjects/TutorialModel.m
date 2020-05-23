@@ -4,7 +4,7 @@
 % The Model object defines the user defined model compoused by an Input
 % object and an Evaluator object.
 %
-% See Also: https://cossan.co.uk/wiki/index.php/Model
+% See Also: Model
 %
 %{
 This file is part of OpenCossan <https://cossan.co.uk>.
@@ -37,7 +37,7 @@ opencossan.OpenCossan.resetRandomNumberGenerator(56236)
 %  user define model based on a Matlab function 
 %
 % Construct a Mio object
-Xm=opencossan.workers.Mio( 'description', 'This is our Model', ...
+Xm=opencossan.workers.MatlabWorker( 'description', 'This is our Model', ...
     'Script','for j=1:length(Tinput), Toutput(j).out=-Tinput(j).RV1+Tinput(j).RV2; end', ... 
     'format','structure',...
     'OutputNames',{'out'},...
@@ -46,15 +46,15 @@ Xm=opencossan.workers.Mio( 'description', 'This is our Model', ...
             
 %% Construct the Evaluator
 % First mode (The object are passed by reference) 
-Xeval1 = opencossan.workers.Evaluator('Xmio',Xm,'Sdescription','fist Evaluator');
+Xeval1 = opencossan.workers.Evaluator('Solver',Xm,'Description','fist Evaluator');
 
 % In order to be able to construct our Model an Input object must be
 % defined
 
 %% Define an Input
 % Define RVs
-RV1=opencossan.common.inputs.random.NormalRandomVariable('mean',1,'std',1);  %#ok<SNASGU>
-RV2=opencossan.common.inputs.random.NormalRandomVariable('mean',3,'std',1);  %#ok<SNASGU>
+RV1=opencossan.common.inputs.random.NormalRandomVariable('mean',1,'std',1); 
+RV2=opencossan.common.inputs.random.NormalRandomVariable('mean',3,'std',1); 
 % Define the RVset
 Xrvs1=opencossan.common.inputs.random.RandomVariableSet('names',{'RV1', 'RV2'}, 'members', [RV1; RV2]); 
 % Define Xinput
@@ -63,9 +63,9 @@ Xin = add(Xin,'member',Xrvs1,'name','Xrvs1');
 Xin = sample(Xin,'Nsamples',10);
 
 %%  Construct the Model
-Xmdl=opencossan.common.Model('Input',Xin,'evaluator',Xeval1); %#ok<NASGU>
+Xmdl=opencossan.common.Model('Input',Xin,'Evaluator',Xeval1); %#ok<NASGU>
 % or
-Xmdl=opencossan.common.Model('input',Xin,'evaluator',Xeval1,'description','The Model');
+Xmdl=opencossan.common.Model('input',Xin,'Evaluator',Xeval1,'Description','The Model');
 
 % Show Model details
 display(Xmdl)
@@ -87,7 +87,7 @@ display(Xo2)
 MX=Xo2.getValues('Cnames',Xo2.Cnames);
      
 % % Check solution
-assert(all(MX(:,3)-MX(:,2)==MX(:,1)),'openCOSSAN:Tutorial','wrong results');
+assert(all(MX(:,3)-MX(:,2)==MX(:,1)),'OpenCossan:Tutorial','wrong results');
 
 disp('Tutorial terminated successfully')
 

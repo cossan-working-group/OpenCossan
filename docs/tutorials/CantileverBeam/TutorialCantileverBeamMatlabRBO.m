@@ -35,6 +35,9 @@ You should have received a copy of the GNU General Public License along
 with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
 %}
 
+%% Import packages
+import opencossan.optimization.*
+
 %% Check avilability of the probabilistic model
 assert(logical(exist('XprobModelBeamMatlab','var')),'openCOSSAN:Tutorial', ...
     'Please run first the tutorial TutorialCantileverBeamMatlabReliabilityAnalysis')

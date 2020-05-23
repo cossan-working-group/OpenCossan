@@ -77,8 +77,15 @@ currentFolder = fileparts(mfilename('fullpath'));
 Xmio = MatlabWorker('FullFileName', fullfile(currentFolder, 'model', 'tipDisplacement.m'), ...
     'InputNames', {'I', 'b', 'L', 'h', 'rho', 'P', 'E'}, ...
     'OutputNames', {'w'}, 'Format', 'structure');
-% Add the MIO object to an Evaluator object
+% Add the MatlabWorker object to an Evaluator object
+% By default all the samples are processed by the workers using an
+% horizontal splitting strategy (i.e. all the samples processed by the
+% first workers, then the results of the first worker are passed to the
+% second worker and so on). 
 Xevaluator = Evaluator('Solver', Xmio, 'SolverName',"Xmio");
+
+% To split the execution in vertical use set "VerticalSplit",true);
+%Xevaluator.VerticalSplit=true;
 
 %% Preparation of the Physical Model
 % Define the Physical Model
@@ -95,7 +102,7 @@ assert(abs(NominalDisplacement - 7.1922e-03) < 1e-6, ...
 
 %% Uncertainty Quantification
 % Define simulation method
-Xmc = MonteCarlo('Nsamples', 1000);
+Xmc = MonteCarlo('Nsamples', 100);
 % preform Analysis
 XsimOutMC = Xmc.apply(XmodelBeamMatlab);
 

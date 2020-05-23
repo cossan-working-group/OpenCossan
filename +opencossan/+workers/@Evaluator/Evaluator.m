@@ -25,9 +25,9 @@ along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
     
     properties
         JobManager opencossan.highperformancecomputing.JobManagerInterface  % Define JobManager to submit job to grid/cluster computer
-        Solver(1,:)                         % List of OpenCossan Workers opencossan.workers.Worker
+        Solver(1,:)  opencossan.workers.Worker              % List of OpenCossan Workers opencossan.workers.Worker
         SolverName(1,:) string              % Names of the workers (optional)
-        VerticalSplit = false               % if true split the analysis in vertical components 
+        VerticalSplit logical               % if true split the analysis in vertical compartments 
     end
     
     properties (Dependent=true)
@@ -50,6 +50,7 @@ along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
                 % Crate empty object
                 superArg={};
             else
+                idxSolver=find(strcmpi(varargin,'solver'));
                 [requiredArgs, varargin] = opencossan.common.utilities.parseRequiredNameValuePairs(...
                     "Solver", varargin{:});
                 
@@ -57,9 +58,8 @@ along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
                 
                 OptionalsArguments={...
                     "JobManager", opencossan.highperformancecomputing.JobManagerInterface.empty(1,0);...
-                    "Queues","";...
-                    "SolverName",[];...
-                    "VerticalSplit",true};
+                    "VerticalSplit",false;...
+                    "SolverName",[]};
                 
                 [optionalArg, superArg] = opencossan.common.utilities.parseOptionalNameValuePairs(...
                     [OptionalsArguments{:,1}],{OptionalsArguments{:,2}}, varargin{:});
@@ -73,18 +73,15 @@ along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
                 
                 obj.Solver = requiredArgs.solver;
                 
-                obj.SolverName = optionalArg.solvername;
-                
-                if ~isempty(obj.SolverName)
-                    assert(numel(obj.Solver) == numel(obj.SolverName),...
-                        'Evaluator:IllegalArguments',...
-                        'Number of solvers (%i) specified must be the same size of SolverName (%i)',...
-                        numel(obj.Solver),numel(obj.SolverName));
+                if isempty(optionalArg.solvername)
+                    obj.SolverName = inputname(idxSolver+1);
+                else
+                    obj.SolverName = optionalArg.solvername;
                 end
                 
                 obj.VerticalSplit = optionalArg.verticalsplit;
                 
-                 obj=validateObject(obj);
+                obj=validateObject(obj);
             end
             
            

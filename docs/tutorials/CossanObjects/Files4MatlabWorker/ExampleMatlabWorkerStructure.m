@@ -1,4 +1,4 @@
-function Toutput = ExampleMioStructure(Tinput)
+function Toutput = ExampleMatlabWorkerStructure(Tinput)
 % Example of Mio Function
 % Input and output passed as Structure
 % Required Inputs RV_1, RV_2

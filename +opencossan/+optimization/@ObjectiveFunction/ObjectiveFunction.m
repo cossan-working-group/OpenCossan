@@ -1,10 +1,12 @@
 classdef ObjectiveFunction < opencossan.workers.MatlabWorker
     %OBJECTIVEFUNCTION Defines an objective function for use in
     %optimization problems.
+    %
+    % See also: Worker Optimization
     
     %{
     This file is part of OpenCossan <https://cossan.co.uk>.
-    Copyright (C) 2006-2018 COSSAN WORKING GROUP
+    Copyright (C) 2006-2030 COSSAN WORKING GROUP
 
     OpenCossan is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -31,7 +33,7 @@ classdef ObjectiveFunction < opencossan.workers.MatlabWorker
             if nargin > 0
                 % The objective function must have a single output
                 assert(length(obj.OutputNames) == 1,...
-                    'openCOSSAN:optimization:ObjectiveFunction',...
+                    'OpenCossan:optimization:ObjectiveFunction',...
                     'A single output (OutputNames) must be defined');
             end
         end

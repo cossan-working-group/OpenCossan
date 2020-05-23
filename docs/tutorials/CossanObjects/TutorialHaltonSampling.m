@@ -16,8 +16,8 @@ clc;
 
 %% Define the Input
 % Define RandomVariable
-RV1=opencossan.common.inputs.random.NormalRandomVariable('mean',2,'std',1); %#ok<SNASGU>
-RV2=opencossan.common.inputs.random.NormalRandomVariable('mean',0,'std',2); %#ok<SNASGU>
+RV1=opencossan.common.inputs.random.NormalRandomVariable('mean',2,'std',1); 
+RV2=opencossan.common.inputs.random.NormalRandomVariable('mean',0,'std',2);
 % Define the RandomVariableSet
 Xrvs1=opencossan.common.inputs.random.RandomVariableSet('names',{'RV1', 'RV2'},'members',[RV1; RV2]);
 % Construct Input Object
@@ -29,17 +29,16 @@ Xin = add(Xin,'member',Xthreshold,'name','Xthreshold');
 
 %% Define the Evaluator (i.e. how our model is evaluate)
 % Construct a Mio object
-Xm=opencossan.workers.Mio( 'description', 'This is our Model', ...
+Xm=opencossan.workers.MatlabWorker( 'description', 'This is our Model', ...
     'Script','for j=1:length(Tinput), Toutput(j).out=-Tinput(j).RV1+Tinput(j).RV2; end', ...
-...    'Liostructure',true,...
     'OutputNames',{'out'},...
     'InputNames',{'RV1','RV2'},...
     'IsFunction',false); % This flag specify if the .m file is a script or a function.
 % Construct the Evaluator
-Xeval = opencossan.workers.Evaluator('Xmio',Xm,'Sdescription','Evaluator for the IS tutorial');
+Xeval = opencossan.workers.Evaluator('Solver',Xm,'Description','Evaluator for the IS tutorial');
 
 %% Define the Physical Model based on the Input and the Evaluator
-Xmdl=opencossan.common.Model('Xevaluator',Xeval,'Xinput',Xin);
+Xmdl=opencossan.common.Model('Evaluator',Xeval,'Input',Xin);
 
 %% Test the Model
 % Generate 10 random realization of the input
