@@ -26,7 +26,7 @@ function replaceValues(Xidentifier,varargin)
 %  You should have received a copy of the GNU General Public License
 %  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
 % =====================================================================
-
+import opencossan.OpenCossan
 %% Process Inputs
 % OpenCossan.validateCossanInputs(varargin{:});
 LuseOriginal = false;

@@ -25,7 +25,7 @@ function XsimOut = apply(Xobj,Xtarget)
 %  You should have received a copy of the GNU General Public License
 %  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
 % =====================================================================
-
+import opencossan.OpenCossan
 
 %% Check inputs
 [Xobj, Xinput]=checkInputs(Xobj,Xtarget);
