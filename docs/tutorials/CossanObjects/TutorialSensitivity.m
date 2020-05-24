@@ -7,32 +7,50 @@
 % simply: $y=x_1^2+2x_2-x_3$
 %
 % A more realistic example is provided in the TutorialInfectionDynamicModel. 
-% See Also: http://cossan.cfd.liv.ac.uk/wiki/index.php/Infection_Dynamic_Model
+% See Also: http://cossan.co.uk/wiki/index.php/Infection_Dynamic_Model
 % 
-%
+%{
+This file is part of OpenCossan <https://cossan.co.uk>.
+Copyright (C) 2006-2018 COSSAN WORKING GROUP
+OpenCossan is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License or,
+(at your option) any later version.
+	
+OpenCossan is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
+%}
+
 % $Copyright~1993-2015,~COSSAN~Working~Group,~University~of~Liverpool,~UK$
 % $Author: Edoardo-Patelli$ 
-close all
-clear
-clc;
+
+% Clean up enviroment
+close('all'), clear, clc;
+import opencossan.common.inputs.random.*
+import opencossan.common.inputs.*
+import opencossan.workers.*
 
 %% Problem setup
 % In this examples we consider only 3 uniform random variables
-Xrv1   = opencossan.common.inputs.random.UniformRandomVariable('bounds',[-1,1]);
-Xrv2   = opencossan.common.inputs.random.UniformRandomVariable('bounds',[-1,1]);
-Xrv3   = opencossan.common.inputs.random.UniformRandomVariable('bounds',[-1,1]);
-Xrv4   = opencossan.common.inputs.random.UniformRandomVariable('bounds',[-1,1]);
-Xpar   = opencossan.common.inputs.Parameter('value',0);
-Xrvset = opencossan.common.inputs.random.RandomVariableSet('names',{'Xrv1','Xrv2','Xrv3' 'Xrv4'},'members',[Xrv1;Xrv2;Xrv3;Xrv4]);
-Xin    = opencossan.common.inputs.Input('randomVariableSet',Xrvset,'parameter',Xpar);
+Xrv1   = UniformRandomVariable('bounds',[-1,1],'Description','First Random Variable');
+Xrv2   = UniformRandomVariable('bounds',[-1,1],'Description','Second Random Variable');
+Xrv3   = UniformRandomVariable('bounds',[-1,1],'Description','Thirth Random Variable');
+Xrv4   = UniformRandomVariable('bounds',[-1,1],'Description','Dummy Random Variable');
+Xpar   = Parameter('value',0);
+Xrvset = RandomVariableSet('names',{'Xrv1','Xrv2','Xrv3' 'Xrv4'},'members',[Xrv1;Xrv2;Xrv3;Xrv4]);
+Xin    = Input('RandomVariableSet',Xrvset,'Parameter',Xpar);
 
 % The model is defined using a Mio object
-Xm = opencossan.workers.Mio('Script','for j=1:length(Tinput), Toutput(j).out1=Tinput(j).Xrv1^2+2*Tinput(j).Xrv2-Tinput(j).Xrv3; end', ...
+Xm = Mio('Script','for j=1:length(Tinput), Toutput(j).out1=Tinput(j).Xrv1^2+2*Tinput(j).Xrv2-Tinput(j).Xrv3; end', ...
          'OutputNames',{'out1'},...
          'InputNames',{'Xrv1' 'Xrv2' 'Xrv3'},...
          'Format','structure'); 
      
-Xev    = opencossan.workers.Evaluator('Xmio',Xm);
+Xev    = Evaluator('Xmio',Xm);
 Xmdl   = opencossan.common.Model('Xinput',Xin,'Xevaluator',Xev);
 
 Xperfun = PerformanceFunction('OutputName','vg','Demand','Xpar','Capacity','out1');

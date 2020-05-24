@@ -8,9 +8,9 @@
 %   $y=2+x_1^2+5*x_2^2+0.01*x_4^2$ 
 % where x1, x2, x3, x4 are modelled as random variables (RV1,...,RV4)
 % 
-% See Also: http://cossan.cfd.liv.ac.uk/wiki/index.php/@Gradient
+% See Also: Gradient
 %
-% $Copyright~1993-2014,~COSSAN~Working~Group,~University~of~Liverpool,~UK$
+% $Copyright~1993-2020,~COSSAN~Working~Group$
 % $Author: Edoardo-Patelli$ 
 clear;
 close all
@@ -30,18 +30,17 @@ Xin = opencossan.common.inputs.Input('description','Gradient Tutorial Input');
 Xin = add(Xin,'name','Xrvs1','member',Xrvs1);
 
 % Construct a Mio object that defines the model
-Xm=opencossan.workers.Mio('description', 'Performance function', ...
+Xm=opencossan.workers.MatlabWorker('description', 'Performance function', ...
                 'Script','for j=1:length(Tinput), Toutput(j).out1=2+Tinput(j).RV1^2+5*Tinput(j).RV2^2+0.01*Tinput(j).RV4^2; end', ...
-...                'Liostructure',true,...
 				'IsFunction',false, ...
                 'InputNames',{'RV1' 'RV2' 'RV3' 'RV4'},...
                 'OutputNames',{'out1'}); % This flag specify if the .m file is a script or a function. 
 
 % Construct the Evaluator
-Xeval1 = opencossan.workers.Evaluator('Xmio',Xm,'Sdescription','fist Evaluator');
+Xeval1 = opencossan.workers.Evaluator('Solver',Xm,'Description','fist Evaluator');
 
 %  Construct the Model 
-Xmdl=opencossan.common.Model('CXmembers',{Xin,Xeval1});
+Xmdl=opencossan.common.Model('Input',Xin,'Evaluator',Xeval1);
 
 % Show Model details
 display(Xmdl)

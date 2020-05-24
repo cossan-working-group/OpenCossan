@@ -25,7 +25,7 @@ classdef ProbabilisticModel < opencossan.common.Model
     
     properties (Dependent=true)
         PerformanceFunctionVariable     % Name of the output of the performance function
-        StdDeviationIndicatorFunction   % StdDeviationIndicatorFunction of the performance Function
+        StdDeviationIndicatorFunction
     end
     
     methods
@@ -35,35 +35,46 @@ classdef ProbabilisticModel < opencossan.common.Model
             %   physical model (Model) and a performance function (PerformanceFunction).
             %   This class allows to perform reliability analysis and uncertainty quantification
             
+
             if nargin == 0
-                super_args = {};
+                superArg = {};
             else
-                [required, super_args] = ...
+                idxPerFun=find(strcmpi(varargin,'performancefunction'));
+                            
+                [required, varargin] = ...
                     opencossan.common.utilities.parseRequiredNameValuePairs(...
-                    ["model", "performancefunction"], varargin{:});
-                super_args = [super_args; {'input', required.model.Input, ...
-                    'evaluator', required.model.Evaluator}];
-            end
-            
-            obj@opencossan.common.Model(super_args{:});
-            
-            if nargin > 0
-                % Add PerformanceFunction to Evaluator
-                if isempty(obj.Evaluator.CXsolvers)
-                    obj.Evaluator = obj.Evaluator.add('Xmember',required.performancefunction);
-                else
-                    % TODO: What does this do?
-                    obj.Evaluator = obj.Evaluator.add('Xmember',required.performancefunction,'Sname','N/A','Nslots',Inf,...
-                        'Nconcurrent',Inf,'Shostname','localhost','Squeue','','SparallelEnvironment','');
+                    "performancefunction", varargin{:});
+                
+                OptionalsArguments={"Model", []};
+                
+                [modelArg, superArg] = opencossan.common.utilities.parseOptionalNameValuePairs(...
+                    [OptionalsArguments{:,1}],{OptionalsArguments{:,2}}, varargin{:});
+                
+                if ~isempty(modelArg.model)
+                    superArg{end+1}="Input";
+                    superArg{end+1}=modelArg.model.Input;
+                    superArg{end+1}="Evaluator";
+                    superArg{end+1}=modelArg.model.Evaluator;
                 end
+                
             end
+            
+            obj@opencossan.common.Model(superArg{:});
+           
+            
+            if nargin>0
+            % Add PerformanceFunction to Evaluator
+               obj.Evaluator = obj.Evaluator.add("Solver",required.performancefunction,...
+                "SolverName",inputname(idxPerFun+1));
+            end
+            
         end
         
         function variable = get.PerformanceFunctionVariable(obj)
             % Return the name of the output of the performance function
-            for i = 1:numel(obj.Evaluator.CXsolvers)
-                if isa(obj.Evaluator.CXsolvers{i},'opencossan.reliability.PerformanceFunction')
-                    variable = obj.Evaluator.CXsolvers{i}.OutputNames{:};
+            for i = 1:numel(obj.Evaluator.Solver)
+                if isa(obj.Evaluator.Solver(i),'opencossan.reliability.PerformanceFunction')
+                    variable = obj.Evaluator.Solver(i).OutputNames{:};
                     return;
                 end
             end
@@ -72,9 +83,9 @@ classdef ProbabilisticModel < opencossan.common.Model
         function indicatorFunction = get.StdDeviationIndicatorFunction(obj)
             % Return the standard deviation indicator function of the
             % performance function
-            for i = 1:numel(obj.Evaluator.CXsolvers)
-                if isa(obj.Evaluator.CXsolvers{i},'opencossan.reliability.PerformanceFunction')
-                    indicatorFunction = obj.Evaluator.CXsolvers{i}.StdDeviationIndicatorFunction;
+            for i = 1:numel(obj.Evaluator.Solver)
+                if isa(obj.Evaluator.Solver(i),'opencossan.reliability.PerformanceFunction')
+                    indicatorFunction = obj.Evaluator.Solver(i).StdDeviationIndicatorFunction;
                     return;
                 end
             end

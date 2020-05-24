@@ -50,10 +50,10 @@ classdef Model < opencossan.common.CossanObject
                 
                 % Check that all names required by the evaluator are
                 % present in the input
-                assert(all(ismember(obj.Evaluator.Cinputnames,...
+                assert(all(ismember(obj.Evaluator.InputNames,...
                     obj.InputNames)),'OpenCossan:Model:MissingInputs',...
                     'The Input object must contain all inputs required by the Evaluator: ''%s''', ...
-                    strjoin(obj.Evaluator.Cinputnames,''', '''));
+                    strjoin(obj.Evaluator.InputNames,''', '''));
             end
         end
         
@@ -62,11 +62,11 @@ classdef Model < opencossan.common.CossanObject
         obj = setGridProperties(obj, varargin);     % Add execution details (i.e. Grid configuration)
         
         function names = get.OutputNames(obj)
-            names = obj.Evaluator.Coutputnames;
+            names = obj.Evaluator.OutputNames;
         end
         
         function names = get.InputNames(obj)
-            names = obj.Input.Names;
+            names = obj.Evaluator.InputNames;
         end
     end
 end

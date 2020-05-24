@@ -4,9 +4,9 @@
 %   FailureProbability.
 %
 %
-% See Also: http://cossan.cfd.liv.ac.uk/wiki/index.php/@FailureProbability
+% See Also: FailureProbability
 %
-% $Copyright~1993-2011,~COSSAN~Working~Group,~University~of~Innsbruck,~Austria$
+% $Copyright~1993-2020,~COSSAN~Working~Group$
 % $Author: Edoardo-Patelli$ 
 
 clear;

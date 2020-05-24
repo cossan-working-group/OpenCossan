@@ -2,7 +2,8 @@
 % Perform optimization using Matlab evaluator
 %
 %
-% See Also http://cossan.cfd.liv.ac.uk/wiki/index.php/Cantilever_Beam
+% See Also http://cossan.co.uk/wiki/index.php/Cantilever_Beam
+
 
 %{
 This file is part of OpenCossan <https://cossan.co.uk>.
@@ -22,38 +23,44 @@ You should have received a copy of the GNU General Public License along
 with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
 %}
 
+%% Import packages
+import opencossan.*
+import opencossan.common.*
+import opencossan.common.inputs.*
+import opencossan.common.inputs.random.*
+import opencossan.workers.*
+import opencossan.optimization.*
+
 %% Preparation of the Input
 % In this tutorial the random variable are replaced by two design variables
 %
 % The optimization analysis requires the definition of Design Variables
 % (i.e. the variables that define new configurations)
-b = opencossan.optimization.ContinuousDesignVariable(...
-    'value', 0.12, 'lowerBound', 0.01, 'upperBound', 0.50,...
+b = ContinuousDesignVariable('value', 0.12, 'lowerBound', 0.01, 'upperBound', 0.50,...
     'Description','Beam width');
-h = opencossan.optimization.ContinuousDesignVariable(...
-    'value', 0.54, 'lowerBound', 0.02, 'upperBound', 1,...
+h = ContinuousDesignVariable('value', 0.54, 'lowerBound', 0.02, 'upperBound', 1,...
     'Description', 'Beam Heigth');
 
 % In this example we do not use random variables and we only use Parameters
-L = opencossan.common.inputs.Parameter('value', 1.8, 'Description', 'Beam Length');
-maxDisplacement = opencossan.common.inputs.Parameter('value', 0.001, 'Description', 'Maximum allowed displacement');
-P = opencossan.common.inputs.Parameter('value', 10000, 'Description', 'Load');
-rho = opencossan.common.inputs.Parameter('value', 600, 'Description', 'density');
-E = opencossan.common.inputs.Parameter('value', 10e9, 'Description','Young''s modulus');
+L = Parameter('value', 1.8, 'Description', 'Beam Length');
+maxDisplacement = Parameter('value', 0.001, 'Description', 'Maximum allowed displacement');
+P = Parameter('value', 10000, 'Description', 'Load');
+rho = Parameter('value', 600, 'Description', 'density');
+E = Parameter('value', 10e9, 'Description','Young''s modulus');
 
 % Definition of the Function
-I = opencossan.common.inputs.Function('Description','Moment of Inertia','Expression','<&b&>.*<&h&>.^3/12');
+I = Function('Description','Moment of Inertia','Expression','<&b&>.*<&h&>.^3/12');
 
 %% Prepare Input Object
 % The above prepared objects can be added to an Input Object
-XinputOptimization = opencossan.common.inputs.Input(...
+XinputOptimization = Input(...
     'Members', {L b P h rho E I maxDisplacement},...
     'MembersNames', {'L' 'b' 'P' 'h' 'rho' 'E' 'I' 'MaxW'});
 
 %% Preparation of the Evaluator
 % Use of a matlab script to compute the Beam displacement
 folder = fileparts(mfilename('fullpath'));% returns the current folder
-Xmio = opencossan.workers.Mio(...
+Xmio = MatlabWorker(...
     'FunctionHandle', @tipDisplacement, ...
     'IsFunction', true, ...
     'Format', 'table', ...
@@ -61,11 +68,11 @@ Xmio = opencossan.workers.Mio(...
     'OutputNames',{'w'});
 
 % Add the MIO object to an Evaluator object
-Xevaluator = opencossan.workers.Evaluator('CXmembers',{Xmio},'CSmembers',{'Xmio'});
+Xevaluator=Evaluator('Solver',Xmio,'SolverName',"Xmio");
 
 %% Preparation of the Physical Model
 % Define the Physical Model
-Xmodel = opencossan.common.Model('Input', XinputOptimization, 'Evaluator', Xevaluator);
+Xmodel=Model('Input',XinputOptimization,'Evaluator',Xevaluator);
 
 %% Check feasibility of the optimization preoblem
 % The EesignOfExperiment analysis can be used to see if a feasible solution

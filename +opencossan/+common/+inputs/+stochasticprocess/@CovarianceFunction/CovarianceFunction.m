@@ -1,4 +1,4 @@
-classdef CovarianceFunction < opencossan.workers.Mio
+classdef CovarianceFunction < opencossan.workers.MatlabWorker
     %COVARIANCEFUNCTION This class defines the covariance function for a
     %stochastic process. 
     %
@@ -22,7 +22,7 @@ classdef CovarianceFunction < opencossan.workers.Mio
             
             % Call constructor of opencossan.workers.Mio
             
-            Xobj = Xobj@opencossan.workers.Mio(varargin{:});
+            Xobj = Xobj@opencossan.workers.MatlabWorker(varargin{:});
             
             if nargin==0
                 return;

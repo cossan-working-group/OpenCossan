@@ -5,19 +5,36 @@
 % Please refer to the Mio tutorial and Optimization tutorial  for more
 % examples of objective function
 %
-% See Also: http://cossan.cfd.liv.ac.uk/wiki/index.php/@ObjectiveFunction
+% See Also: ObjectiveFunction TutorialConstraint
+% TutorialOptimizationProblem
 %
-% $Copyright~1993-2011,~COSSAN~Working~Group,~University~of~Innsbruck,~Austria$
-% $Author:~Edoardo~Patelli$ 
-clear
-close all
-clc;
+% Author: Edoardo Patelli
+    
+%{
+    This file is part of OpenCossan <https://cossan.co.uk>.
+    Copyright (C) 2006-2020 COSSAN WORKING GROUP
+
+    OpenCossan is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License or,
+    (at your option) any later version.
+
+    OpenCossan is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
+%}
+    
+clear, clc;
+import opencossan.optimization.*
+
 %% Constructor
-Xofun   = opencossan.optimization.ObjectiveFunction('description','objective function', ...
-         'IsFunction',true, ...
-...         'Liostructure',true,'Liomatrix',false,...
+Xofun   = ObjectiveFunction('description','objective function', ...
           'InputNames',{'X1','X2'},... % Define the inputs 
-          'function',@rastriginsfcn,...
+          'FunctionHandle',@rastriginsfcn,...
           'OutputNames',{'fobj'}); % Define the outputs
 
 % Show details of the ObjectiveFunction
@@ -27,11 +44,8 @@ display(Xofun)
 
 ScurrentPath=which('TutorialObjectiveFunction');
 [Spath, ~ ]=fileparts(ScurrentPath);
-Xofun1  = opencossan.optimization.ObjectiveFunction('description','objective function of optimization problem', ...
-    'FullFileName',fullfile(Spath,'Files4Mio','ExampleMioStructure') ,...
-...    'Sfile','ExampleMioStructure',...
-...    'Liostructure',true,...
-...    'Lfunction',true,...
+Xofun1  = ObjectiveFunction('description','objective function of optimization problem', ...
+    'FullFileName',fullfile(Spath,'Files4MatlabWorker','ExampleMatlabWorkerStructure.m') ,...
     'InputNames',{'X1','X2'},...
     'OutputNames',{'mioout'});
 
@@ -39,6 +53,10 @@ display(Xofun1)
 
 
 %% Use ObjectiveFunction
-% In order to be able to use the method evaluate of ObjectiveFunction an
-% OptimizationProblem needs to be defined.
-Xofun1.evaluate
+% ObjectiveFunction can be evaluate by passing a table containing the name
+% of variables defined in ObjectiveFunction.InputNames
+
+TableInput=array2table([0 0; 4 3; 4, 1],'VariableName',{'X1','X2'});
+TableOutput=Xofun1.evaluate(TableInput);
+
+disp(TableOutput.fobj)

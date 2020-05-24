@@ -46,7 +46,7 @@ while isempty(SexitFlag)
     Xobj.ibatch = Xobj.ibatch + 1;
     
     % Lap time for each batch
-    OpenCossan.getTimer().lap('description',[' Batch #' num2str(Xobj.ibatch)]);
+     opencossan.OpenCossan.getTimer().lap('description',[' Batch #' num2str(Xobj.ibatch)]);
     
     % Number of samples current batch    
     if Xobj.ibatch==Xobj.Nbatches || Xobj.Nsimxbatch==0
@@ -63,7 +63,7 @@ while isempty(SexitFlag)
         
     Xinput=set(Xinput,'Xsamples',Xs);
     
-    OpenCossan.cossanDisp(['Latin Hypercube Sampling simulation Batch ' num2str(Xobj.ibatch) ...
+    opencossan.OpenCossan.cossanDisp(['Latin Hypercube Sampling simulation Batch ' num2str(Xobj.ibatch) ...
             ' ( ' num2str(Ns) ' samples)' ],4)
     
     %% evaluate performance function
@@ -84,13 +84,13 @@ end
 
 % Add termination criteria to the FailureProbability
 XsimOut(end).SexitFlag=SexitFlag;
-XsimOut(end).SbatchFolder=[OpenCossan.getWorkingPath filesep Xobj.SbatchFolder];
+XsimOut(end).SbatchFolder=[opencossan.OpenCossan.getWorkingPath filesep Xobj.SbatchFolder];
 
 %%  Set random number generator to state prior to running simulation
-if exist('XRandomNumberGenerator','var'),
+if exist('XRandomNumberGenerator','var')
      Simulations.restoreRandomNumberGenerator(XRandomNumberGenerator)
 end
 
-OpenCossan.getTimer().lap('description','End apply@LatinHypercubeSampling');
+opencossan.OpenCossan.getTimer().lap('Description','End apply@LatinHypercubeSampling');
 % Restore Global Random Stream
 restoreRandomStream(Xobj);

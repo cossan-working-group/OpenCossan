@@ -4,9 +4,9 @@
 % The line sampling is not applicable to simulate the Model since it
 % required a performace function.
 %
-% See Also: http://cossan.cfd.liv.ac.uk/wiki/index.php/@LineSampling
+% See Also: LineSampling
 %
-% $Copyright~1993-2011,~COSSAN~Working~Group,~University~of~Innsbruck,~Austria$
+% $Copyright~1993-2011,~COSSAN~Working~Group$
 % $Author: Edoardo-Patelli and Marco-de-Angelis$ 
 clear
 close all
@@ -22,20 +22,20 @@ Xrvs1=opencossan.common.inputs.random.RandomVariableSet('names',{'RV1', 'RV2'},'
 % Add parameter for the performance function
 Xthreshold=opencossan.common.inputs.Parameter('value',2);
 % Construct Input Object
-Xin = opencossan.common.inputs.Input('description','Input Object of our model', ...
-    'members',{Xrvs1 Xthreshold},'membersnames',{'Xrvs1' 'Xthreshold'});
+Xin = opencossan.common.inputs.Input('Description','Input Object of our model', ...
+    'Members',{Xrvs1 Xthreshold},'MembersNames',{'Xrvs1' 'Xthreshold'});
 %% Define the Evaluator (i.e. how our model is evaluate)
 % Construct a Mio object
-Xm=opencossan.workers.Mio( 'description', 'This define our Model', ...
+Xm=opencossan.workers.MatlabWorker( 'description', 'This define our Model', ...
         'Script','for j=1:length(Tinput), Toutput(j).out=-Tinput(j).RV1+Tinput(j).RV2+Tinput(j).RV2.^2; end', ...
         'Format','structure',...
         'OutputNames',{'out'},...
         'InputNames',{'RV1' 'RV2'},...
         'IsFunction',false); % This flag specify if the .m file is a script or a function.
 % Construct the Evaluator
-Xeval = opencossan.workers.Evaluator('Xmio',Xm,'Sdescription','Evaluator for the IS tutorial');
+Xeval = opencossan.workers.Evaluator('Solver',Xm,'Description','Evaluator for the IS tutorial');
 %% Define the Physical Model based on the Input and the Evaluator
-Xmdl=opencossan.common.Model('Xevaluator',Xeval,'Xinput',Xin);
+Xmdl=opencossan.common.Model('Evaluator',Xeval,'Input',Xin);
 %% Test the Model
 % Generate 10 random realization of the input
 Xin = sample(Xin,'Nsamples',10);
@@ -61,7 +61,7 @@ display(Xo)
 % Construct the performance function
 Xpf=PerformanceFunction('OutputName','Vg','Capacity','Xthreshold','Demand','out');
 % Construct a ProbabilisticModel Object
-Xpm=ProbabilisticModel('Xmodel',Xmdl,'XperformanceFunction',Xpf);
+Xpm=ProbabilisticModel('Model',Xmdl,'PerformanceFunction',Xpf);
 %% Compute Reference Solution
 % This can take a while
 Xmc=MonteCarlo('Nsamples',5e4);

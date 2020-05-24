@@ -4,11 +4,11 @@
 %
 %
 %
-% See Also:  https://cossan.co.uk/wiki/index.php/Function
+% See Also:  Function
 %
 %{
 This file is part of OpenCossan <https://cossan.co.uk>.
-Copyright (C) 2006-2019 COSSAN WORKING GROUP
+Copyright (C) 2006-2020 COSSAN WORKING GROUP
 
 OpenCossan is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -68,7 +68,7 @@ assert(max(Vreference-values)<1e-10,'COSSAN:Tutorial','wrong results')
 %retrieve the names of all objects that are associated with the Function
 %object and their type
 
-[Cmembers Ctypes] = getMembers(Xfun1);
+[Cmembers, Ctypes] = getMembers(Xfun1);
 disp(Cmembers)
 disp(Ctypes)
 

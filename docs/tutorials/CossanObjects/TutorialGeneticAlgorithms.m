@@ -2,9 +2,9 @@
 % This tutorial shows how to optimize the Rastrigin's function using
 % GeneticAlgorithms
 %
-% See Also: http://cossan.cfd.liv.ac.uk/wiki/index.php/@GeneticAlgorithms
+% See Also: GeneticAlgorithms
 %
-% $Copyright~1993-2014,~COSSAN~Working~Group,~University~of~Liverpool,~UK$
+% $Copyright~1993-2020,~COSSAN~Working~Group$
 %
 % $Author: Edoardo~Patelli$
 % $email address: openengine@cossan.co.uk$

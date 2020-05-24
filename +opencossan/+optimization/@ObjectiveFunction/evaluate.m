@@ -2,7 +2,7 @@ function objective = evaluate(obj, varargin)
     % EVALUATE Evaluate the objective function
     
     %{
-    This file is part of OpenCossan <https://cossan.co.uk>. Copyright (C) 2006-2018 COSSAN WORKING
+    This file is part of OpenCossan <https://cossan.co.uk>. Copyright (C) 2006-2020 COSSAN WORKING
     GROUP
 
     OpenCossan is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -59,7 +59,7 @@ function objective = evaluate(obj, varargin)
     
     % loop over all objective functions
     for j = 1:length(obj)
-        XoutObjective = evaluate@opencossan.workers.Mio(obj(j), ...
+        XoutObjective = evaluate@opencossan.workers.MatlabWorker(obj(j), ...
             output(:,obj(j).InputNames));
         
         objective(:,j) = XoutObjective.(obj(j).OutputNames{1});

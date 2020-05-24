@@ -39,7 +39,7 @@ function [Xpf,XsimOut]=computeFailureProbability(Xobj,Xtarget)
 %  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
 % =====================================================================
 
-import opencossan.common.inputs.random.RandomVariableSet
+import opencossan.common.inputs.random.RandomVariableSet.*
 import opencossan.common.Samples
 import opencossan.simulations.SubsetOutput
 import opencossan.reliability.FailureProbability

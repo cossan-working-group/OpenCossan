@@ -1,4 +1,4 @@
-function XSimOut = executeWorkersGrid(Xobj,XSimInp,Xjob)
+function SimOut = executeWorkersGrid(Xobj,PinputALL)
 % EXECUTEWORKERSGRID  This is a protected method of evaluator to run the
 % analysis in vertical chunks using the Job Manager.
 %
@@ -6,7 +6,7 @@ function XSimOut = executeWorkersGrid(Xobj,XSimInp,Xjob)
 %
 %  Usage:  XSimout = executeWorkersGrid(Xobj,XSimInp,Xjob)
 %
-% See Also: http://cossan.co.uk/wiki/index.php/executeWorkers@Evaluator
+% See Also: Evaluator, JobManager
 %
 %
 % Author: Edoardo Patelli
@@ -35,14 +35,14 @@ function XSimOut = executeWorkersGrid(Xobj,XSimInp,Xjob)
 
 % split input samples between jobs
 
-if (Xjob.Nconcurrent == Inf)     % checks whether or not Njobs has been defined
+if (Xobj.MaxCuncurrentJobs == Inf)     % checks whether or not Njobs has been defined
     Njobs      = size(PinputALL,1);   % sets number of jobs equal to number of simulations to be performed
     Vsimxjobs  = ones(size(PinputALL))';    % obviously, there is one simulation per job
 else
-    Njobs      = min(Xjob.Nconcurrent,size(PinputALL,1)); % re-adjusts number of jobs (if required)
-    Vsimxjobs = floor(size(PinputALL,1)/Xjob.Nconcurrent)*ones(1,Xjob.Nconcurrent);
-    Vsimxjobs(1:rem(size(PinputALL,1),Xjob.Nconcurrent)) = ...
-        Vsimxjobs(1:rem(size(PinputALL,1),Xjob.Nconcurrent)) + 1; % sets number of simulations per job
+    Njobs      = min(Xobj.MaxCuncurrentJobs,size(PinputALL,1)); % re-adjusts number of jobs (if required)
+    Vsimxjobs = floor(size(PinputALL,1)/Xobj.Nconcurrent)*ones(1,Xobj.MaxCuncurrentJobs);
+    Vsimxjobs(1:rem(size(PinputALL,1),Xobj.MaxCuncurrentJobs)) = ...
+        Vsimxjobs(1:rem(size(PinputALL,1),Xobj.MaxCuncurrentJobs)) + 1; % sets number of simulations per job
     % if there are less samples than concurrent jobs remove jobs with no samples
     Vsimxjobs(Vsimxjobs==0) = [];
 end
@@ -58,19 +58,19 @@ for irun=1:Njobs
     %  If required, displays information on which job is being processed
     OpenCossan.cossanDisp(['Preparing input file for Worker job #' num2str(irun) ' of ' num2str(Njobs) ],2);
     %  Creates folder where the job will be executed
-    Sfoldername    = [Xjob.Sfoldername '_job_' num2str(irun)];  % defines name of folder where the job will be executed
+    Sfoldername    = [Xobj.JobManager.Sfoldername '_job_' num2str(irun)];  % defines name of folder where the job will be executed
     mkdir(fullfile(OpenCossan.getCossanWorkingPath,Sfoldername));    % creates the folder
     % set the execution command. This is a method/property depending on
     % whether you run worker compiled or not
-    Xjob.Sexecmd = ['cd ' fullfile(OpenCossan.getCossanWorkingPath,Sfoldername) '; '...
+    Xobj.JobManager.Sexecmd = ['cd ' fullfile(OpenCossan.getCossanWorkingPath,Sfoldername) '; '...
         strrep(fullfile(OpenCossan.getMatlabPath,'bin','matlab'),' ','\\ ') ...
         ' -r workers.remoteWorkerJob -nosplash -nodesktop'];
     %  Copy input table and worker into the new grid folder
     % split table with inputs
-    TableInput  = PinputALL(Vstart(irun):Vend(irun)); %#ok<NASGU>
+    TableInput  = PinputALL(Vstart(irun):Vend(irun)); 
     % get individual solver from Evaluator
     % TODO: how to loop on the available solvers???
-    Xworker = Xobj.CXsolvers{1};    %#ok<NASGU>
+    Xworker = Xobj.Solvers(1);    
     save (fullfile(OpenCossan.getCossanWorkingPath, Sfoldername, 'workerInput.mat'),'TableInput','Xworker');  
 end
 
@@ -97,7 +97,7 @@ while 1
         % Check status of job every second. 
         % TODO: Get this value from JobManager 
         pause(1);
-        Cstatus = Xjob.getJobStatus('CSjobID',CSjobID); %#ok<AGROW> % check the status of the one that are not yet completed only
+        Cstatus = Xjob.getJobStatus('CSjobID',CSjobID); % check the status of the one that are not yet completed only
         
         % TODO: Use properties of JobManagerInterface
         % It should be 
@@ -145,17 +145,17 @@ Vresults   = zeros(Njobs,1);  % vector to define which results have been read so
 %  Load results form output files
 [PoutputALL, Vresults] = Xmio.retrieveResults(Vresults,Vstart,Vend,PoutputALL,Xjob);
 % In case some results are missing, try to reload
-if any(Vresults==0),
+if any(Vresults==0)
     % if not all the simulation were readed correctly try againg
     [PoutputALL(Vresults==0), Vresults] = Xmio.retrieveResults(Vresults,Vstart,Vend,PoutputALL,Xjob);
 end
 % Manage results that could not be loaded
-if any(Vresults==0),
+if any(Vresults==0)
     % Include NaN in the output if the results of the simulation can not be
     % retrieved
     Vpos   = find(Vresults==0);   %determine results that could not be retrieved
-    for ij=1:length(Vpos),
-        if isa(PoutputALL,'struct'),
+    for ij=1:length(Vpos)
+        if isa(PoutputALL,'struct')
             for isim = Vstart(Vpos(ij)):Vend(Vpos(ij))
                 for ifield = 1:length(Xmio.Coutputnames)
                     PoutputALL(isim).(Xmio.Coutputnames{ifield})    = NaN;
@@ -172,18 +172,18 @@ if any(Vresults==0),
 end
 
 %% Export results - create output object
-if isa(PoutputALL,'struct'),
+if isa(PoutputALL,'struct')
     Xsimtmp=SimulationData('Tvalues',PoutputALL);
-elseif isa(PoutputALL,'double'),
-    Xsimtmp=SimulationData('Mvalues',PoutputALL,'Cvariablenames',Xmio.Coutputnames);
+elseif isa(PoutputALL,'double')
+    Xsimtmp=SimulationData('Mvalues',PoutputALL,'Cvariablenames',Xmio.OutputNames);
 else
     error('openCOSSAN:Mio:runJob','The output of a compiled MIO has to be a structure or a matrix');
 end
 
 if  exist('XSimOut','var')
-    XSimOut=XSimOut.merge(Xsimtmp);
+    SimOut=SimOut.merge(Xsimtmp);
 else
-    XSimOut=Xsimtmp;
+    SimOut=Xsimtmp;
 end
 
 

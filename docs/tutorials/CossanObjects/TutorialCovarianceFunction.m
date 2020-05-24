@@ -23,9 +23,6 @@ Sscript1 = ['sigma = 1; b = 0.5;' ,... % standard deviation and correlation leng
 %% Define CovarianceFunction object  
 
 Xcovfun1  = opencossan.common.inputs.stochasticprocess.CovarianceFunction('Description','covariance function', ...
-          'IsFunction',false, ... 
-...          'Liostructure',true, ... % input and output are structures
-...          'Liomatrix',false,...
           'InputNames',{'t1','t2'},... % names of inputs 
           'Script',Sscript1,... % script with 1D exponential function
           'OutputNames',{'fcov'}); % name of output
@@ -33,7 +30,9 @@ Xcovfun1  = opencossan.common.inputs.stochasticprocess.CovarianceFunction('Descr
 %% Evaluate the values of the covariance function for time lags between 0 and 4
 
 timesteps = linspace(0,4,100);
-Vcov1 =  Xcovfun1.evaluate([zeros(1, 100); timesteps]);
+InputTable=array2table([zeros(1, 100); timesteps]','VariableNames',{'t1','t2'});
+
+Vcov1 =  Xcovfun1.evaluate(InputTable);
 
 %% Visualize and validate results
 
@@ -57,12 +56,10 @@ Sscript2 = ['sigma = 1; b = 1.0;' ,... % standard deviation and correlation leng
 %% Define CovarianceFunction object  
 
 Xcovfun2  = CovarianceFunction('Sdescription','covariance function', ...
-          'Lfunction',false, ... 
-          'Liostructure',true, ... % input and output are structures
-          'Liomatrix',false,...
-          'Cinputnames',{'x1','x2'},... % names of inputs 
-          'Sscript',Sscript2,... % script with 1D exponential function
-          'Coutputnames',{'fcov'}); % name of output
+          'format','structure', ... 
+          'InputNames',{'x1','x2'},... % names of inputs 
+          'Script',Sscript2,... % script with 1D exponential function
+          'OutputNames',{'fcov'}); % name of output
 
       
 %% Visualize and validate results
@@ -70,7 +67,10 @@ Xcovfun2  = CovarianceFunction('Sdescription','covariance function', ...
 coordinates = meshgrid(linspace(0,4,100),linspace(0,4,100));
 xcoordinates = coordinates(:)';
 ycoordinates = repmat(linspace(0,4,100),1,100);
-Vcov2 =  Xcovfun2.evaluate([zeros(2, 10000);xcoordinates;ycoordinates]);
+
+InputTable=array2table([zeros(2, 10000);xcoordinates;ycoordinates]','VariableNames',{'x1','x2'});
+
+Vcov2 =  Xcovfun2.evaluate(InputTable);
 f2 = figure;
 plot3(xcoordinates,ycoordinates,Vcov2,'.')
 grid on

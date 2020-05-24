@@ -1,5 +1,7 @@
 classdef RandomVariableSet < opencossan.common.CossanObject
     %RANDOMVARIABLESET   Constructs object RandomVariableSet
+    %
+    % See also: RandomVariable, Input
     
     %{
     This file is part of OpenCossan <https://cossan.co.uk>.
@@ -58,6 +60,7 @@ classdef RandomVariableSet < opencossan.common.CossanObject
                     ["Correlation", "Covariance"],{[],[]}, varargin{:});
             end
             
+            % Now we define all the inputs not filtered out by the parsers
             obj@opencossan.common.CossanObject(super_args{:});
             
             if nargin > 0
@@ -116,26 +119,31 @@ classdef RandomVariableSet < opencossan.common.CossanObject
     end
     
     methods (Static)
-        function obj = fromIidRandomVariables(rv,n,varargin)
+        function obj = fromIidRandomVariables(varargin)
+            % Required input arguments: 
+            % * Number: Number of Random Variable in the set
+            % * RandomVariable: IID Random variable
+            %
+            % Optional arguments
+            %  * NamePrefix: Prefix used to construct IID random variables
+            % 
             import opencossan.common.inputs.random.RandomVariableSet
-            p = inputParser;
-            p.FunctionName = 'opencossan.common.inputs.random.RandomVariableSet.fromIidRandomVariables';
-            p.addRequired('rv')
-            p.addRequired('n');
             
-            p.parse(rv,n);
+            [required, varargin] = opencossan.common.utilities.parseRequiredNameValuePairs(...
+                    ["Number","RandomVariable"], varargin{:});
             
-            [optional, varargin] = opencossan.common.utilities.parseOptionalNameValuePairs(...
-                "basename", {"RV"}, varargin{:});
+            [optional, superArg] = opencossan.common.utilities.parseOptionalNameValuePairs(...
+                    "NamePrefix","RV_", varargin{:});
+                
             
-            members(1:p.Results.n) = p.Results.rv;
+            members(1:required.number) = required.randomvariable;
             
-            names = strings(1,n);
-            for i = 1:p.Results.n
-                names(i) = sprintf("%s_%d", optional.basename, i);
+            names = strings(1,required.number);
+            for i = 1:required.number
+                names(i) = sprintf("%s%d", optional.nameprefix, i);
             end
             
-            varargin = [varargin {'members', members, 'names', names}];
+            varargin = [superArg {'members', members, 'names', names}];
             obj = RandomVariableSet(varargin{:});
         end
     end

@@ -1,4 +1,4 @@
-classdef PerformanceFunction < opencossan.workers.Mio
+classdef PerformanceFunction < opencossan.workers.MatlabWorker
     % PERFORMANCEFUNCTION This class define the performance function for the
     % realiability analysis. It is a subclass of workers.Mio.
     %
@@ -97,7 +97,7 @@ classdef PerformanceFunction < opencossan.workers.Mio
                 end
             end
             
-            obj = obj@opencossan.workers.Mio(super_args{:});
+            obj = obj@opencossan.workers.MatlabWorker(super_args{:});
             
             if nargin > 0
                 obj.Demand = p.Results.Demand;

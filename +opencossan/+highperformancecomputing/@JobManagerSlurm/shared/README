@@ -1,0 +1,114 @@
+Copyright 2010-2018 The MathWorks, Inc.
+
+MATLAB and Simulink are registered trademarks of The MathWorks, Inc.
+See www.mathworks.com/trademarks for a list of additional trademarks.
+Other product or brand names may be trademarks or registered trademarks of their respective holders.
+
+This folder contains a number of files to allow Parallel Computing Toolbox
+to be used with Slurm via the generic cluster interface.
+
+The files in this folder assume that the client and cluster share a file system
+and that the client is able to submit directly to the cluster using the
+sbatch command.
+
+Note that all the files in this directory will work only for clusters that are
+running on UNIX.
+
+1) Instructions for Use
+=======================
+On the Slurm cluster
+--------------------
+Enable job accounting on the Slurm cluster.
+This allows the sacct command to run.
+The scripts use the sacct output to track the state of Slurm jobs.
+
+Read the documentation for using the generic cluster interface with
+the Parallel Computing Toolbox and familiarize yourself with the different
+properties that can be set for a generic cluster.
+
+In the MATLAB Client
+--------------------
+1. Create a generic cluster object for your cluster. Set the IntegrationScriptsLocation
+to this folder. For independent jobs, independentSubmitFcn is used as your 
+submit function. For communicating jobs, communicatingSubmitFcn is used as 
+your submit function.
+
+Example:
+% Use a folder that both the client and cluster can access
+% as the JobStorageLocation.  If your cluster and client use
+% different operating systems, specify JobStorageLocation
+% to be a structure.  Refer to the documentation on
+% generic cluster for more information.
+cluster = parallel.cluster.Generic('JobStorageLocation', '/home/JOB_STORAGE_LOCATION');
+set(cluster, 'HasSharedFilesystem', true);
+set(cluster, 'IntegrationScriptsLocation', '<INSTALLATION_DIR>/parallel/slurm/shared');
+set(cluster, 'ClusterMatlabRoot', '/apps/matlab');
+set(cluster, 'OperatingSystem', 'unix');
+
+2. Create a job and some tasks, submit the job, and wait for it to finish before
+getting the results. Do the same for communicating jobs if required.
+
+
+As an alternative to these steps, create a profile that defines the appropriate
+properties and run profile validation to verify that the profile
+works correctly.
+
+
+2) Description of Files
+=======================
+For more detail about these files, refer to the help and comments contained in the files themselves.
+
+MATLAB Functions Required for generic cluster
+----------------------------------------------
+independentSubmitFcn.m
+    Submit function for independent jobs.  Used as the IndependentSubmitFcn for your generic cluster object.
+communicatingSubmitFcn.m
+    Submit function for communicating jobs.  Used as the CommunicatingSubmitFcn for your generic cluster object.
+deleteJobFcn.m
+    Delete a job on the cluster.  Used as the DeleteJobFcn for your generic cluster object.
+getJobStateFcn.m
+    Get the job state from the cluster.  Used as the GetJobStateFcn for your generic cluster object.
+
+Other MATLAB Functions
+-----------------------
+extractJobId.m
+    Get the cluster's job ID from the submission output.
+getSubmitString.m
+    Get the submission string for the cluster.
+
+Executable Scripts
+-------------------
+independentJobWrapper.sh
+    Script used by the cluster to launch the MATLAB worker processes for independent jobs.
+communicatingJobWrapper.sh
+    Script used by the cluster to launch the MATLAB worker processes for communicating jobs.
+
+
+3) Optional Customizations
+==========================
+The code customizations listed in this section are clearly marked in the relevant files.
+
+independentSubmitFcn.m
+----------------------
+independentSubmitFcn provides the ability to supply additional submit arguments to the
+sbatch command.  Modify the AdditionalProperties.AdditionalSubmitArgs
+property to include additional submit arguments that are appropriate to your cluster.
+For more information, refer to the sbatch documentation provided with your cluster.
+
+communicatingSubmitFcn.m
+------------------------
+communicatingSubmitFcn calculates the number of nodes to request from the cluster from the
+NumWorkersRange property of the communicating job.  Customize the number of
+nodes requested to suit your cluster's requirements.
+
+communicatingSubmitFcn provides the ability to supply additional submit arguments to the
+sbatch command.  Modify the AdditionalProperties.AdditionalSubmitArgs
+property to include additional submit arguments that are appropriate to your cluster.
+For more information, refer to the sbatch documentation provided with your cluster.
+
+communicatingJobWrapper.sh
+--------------------------
+communicatingJobWrapper.sh uses the StrictHostKeyChecking=no and UserKnownHostsFile=/dev/null options
+for ssh.  Customize the ssh options to suit your cluster's requirements.  For
+more information, refer to your operating system's ssh documentation.
+

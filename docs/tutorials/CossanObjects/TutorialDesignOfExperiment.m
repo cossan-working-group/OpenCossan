@@ -4,15 +4,17 @@
 % Please refer to the specific tutorials for the other objects available in
 % [COSSANEngine/examples/Tutorials]
 %
-% See Also: http://cossan.cfd.liv.ac.uk/wiki/index.php/@DesignOfExperiment
+% See Also: DesignOfExperiment
 %
 %
-% $Copyright~1993-2011,~COSSAN~Working~Group,~University~of~Innsbruck,~Austria$
+% $Copyright~1993-2020,~COSSAN~Working~Group$
 % $Author: Edoardo-Patelli$ 
 
 clear;
 close all
 clc;
+
+import opencossan.simulations.*
 %% Example #1 - using only RandomVariables in Input
 
 % Define RandomVariablesSet

@@ -1,9 +1,9 @@
-classdef Worker < opencossan.common.CossanObject
-    %WORKERS Abstract class to define the COSSAN workers.
+classdef Worker < matlab.mixin.Heterogeneous & opencossan.common.CossanObject
+    %WORKERS Abstract class to define the OpenCossan workers.
     %   The class worker provides a common interface for the Worker
     %   objects.
     %
-    % See Also: http://cossan.co.uk/wiki/index.php/@Worker
+    % See Also: SolutionSequence, Mio, Evaluator, Connector
     %
     %
     % Author: Edoardo Patelli
@@ -30,14 +30,44 @@ classdef Worker < opencossan.common.CossanObject
     
     properties
         OutputNames cell {opencossan.common.utilities.isunique(OutputNames)}
-        InputNames  cell {opencossan.common.utilities.isunique(InputNames)} 
-        IsKeepSimulationFiles(1,1) logical = false % Keep simulation files
+        InputNames  cell {opencossan.common.utilities.isunique(InputNames)}
+        KeepSimulationFiles(1,1) logical = false % Keep simulation files
+  %      ExecutionStrategy opencossan.highperformancecomputing.ExecutionStrategy
     end
     
     methods (Abstract)
         % Evaluate the workerObject based on the realizations provided in a
-        % Table object 
-        TableOutput=evaluate(workerObject,TableInput);        
-    end    
+        % Table object
+        TableOutput=evaluate(workerObject,TableInput);
+    end
+    
+    methods
+        function obj = Worker(varargin)
+            
+            if nargin == 0
+                superArg = {};
+            else
+                
+                [requiredArgs, varargin] = opencossan.common.utilities.parseRequiredNameValuePairs(...
+                    ["InputNames","OutputNames"], varargin{:});
+                
+                OptionalsArguments={...
+                    "KeepSimulationFiles", false;...
+                    "ExecutionStrategy",[]};
+                
+                [optionalArgs, superArg] = opencossan.common.utilities.parseOptionalNameValuePairs(...
+                    [OptionalsArguments{:,1}],{OptionalsArguments{:,2}}, varargin{:});
+                
+            end
+            obj@opencossan.common.CossanObject(superArg{:});
+            
+            if nargin > 0
+                obj.InputNames=requiredArgs.inputnames;
+                obj.OutputNames=requiredArgs.outputnames;
+                obj.KeepSimulationFiles=optionalArgs.keepsimulationfiles;
+%                obj.ExecutionStrategy=optionalArgs.executionstrategy;
+            end
+        end
+    end
 end
 

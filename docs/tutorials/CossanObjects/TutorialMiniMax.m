@@ -6,7 +6,7 @@
 % the Aim of this tutorial is to find x that minimize the maximum value of 5
 % objective functions. 
 %
-% See Also: http://cossan.cfd.liv.ac.uk/wiki/index.php/@MiniMax
+% See Also: MiniMax
 
 x1 = opencossan.optimization.ContinuousDesignVariable('Description','design variable 1','value',0.1);
 x2 = opencossan.optimization.ContinuousDesignVariable('Description','design variable 2','value',0.1);

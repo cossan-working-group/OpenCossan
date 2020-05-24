@@ -2,11 +2,10 @@
 % The object MetaModel is use to replace a computational demanding model or
 % to provide relationships between input and output. 
 % 
-% See Also: http://cossan.cfd.liv.ac.uk/wiki/index.php/@MetaModel
+% See Also: MetaModel
 %
 %
 % Author: Edoardo Patelli
-% Institute for Risk and Uncertainty, University of Liverpool, UK
 % email address: openengine@cossan.co.uk
 % Website: http://www.cossan.co.uk
 

@@ -3,7 +3,7 @@
 % compute frequency response functions
 %
 %
-% See Also:  http://cossan.cfd.liv.ac.uk/wiki/index.php/@Modes
+% See Also:  Modes
 %
 % $Copyright~1993-2011,~COSSAN~Working~Group,~University~of~Innsbruck,~Austria$
 % $Author: Barbara-Goller$ 
@@ -19,7 +19,7 @@ load(fullfile([Sdirectory '/stiffness_mass_matrices.mat']));
 % Determine modal properties
 opts.disp = 0;
 Nmodes = 20;  % number of modes to be retained
-[Phi Lam]=eigs(stiff,mass,Nmodes,0,opts);
+[Phi. Lam]=eigs(stiff,mass,Nmodes,0,opts);
 Vlam = diag(Lam);
 
 % Construct object Modes

@@ -4,10 +4,9 @@
 %
 % Prepared by IM
 %
-%  Copyright 1993-2012, 
+%  Copyright 1993-2020, 
 %
-% See Also: 
-% http://cossan.cfd.liv.ac.uk/wiki/index.php/@Kriging
+% See Also: Kriging
 
 % Reset the random number generator in order to always obtain the same results.
 % DO NOT CHANGE THE VALUES OF THE SEED

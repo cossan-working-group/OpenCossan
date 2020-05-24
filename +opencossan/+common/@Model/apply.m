@@ -3,7 +3,7 @@ function XsimData = apply(obj, input)
 
 %{
 This file is part of OpenCossan <https://cossan.co.uk>.
-Copyright (C) 2006-2018 COSSAN WORKING GROUP
+Copyright (C) 2006-2020 COSSAN WORKING GROUP
 
 OpenCossan is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

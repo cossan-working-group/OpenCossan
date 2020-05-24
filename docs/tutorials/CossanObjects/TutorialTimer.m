@@ -49,61 +49,60 @@ opencossan.OpenCossan.getTimer
 ... opencossan.OpenCossan.setLaptime
 
 %% Get the Timer object
-% A timer object can be retrieved via the Analysis object
-Xanalysis=opencossan.OpenCossan.getAnalysis;
-% The timer is self is 
-Xanalysis.Xtimer
+% A timer object can be retrieved via the OpenCossan object
+Xtimer=opencossan.OpenCossan.getTimer;
+
 
 % Reset timer
-Xanalysis.Xtimer.reset
-display(Xanalysis.Xtimer)
+Xtimer.reset
+display(Xtimer)
 
 % Get total time of the analyis
-Xanalysis.Xtimer.totalTime
+Xtimer.TotalTime
 pause(1)
 % The total time does not change because the Timer is not running
-Xanalysis.Xtimer.totalTime
+Xtimer.TotalTime
 
 
 % start the total time of the analyis
-Xanalysis.Xtimer.starttime
-Xanalysis.Xtimer.totalTime
+Xtimer.start
+Xtimer.TotalTime
 pause(1)
-Xanalysis.Xtimer.totalTime
+Xtimer.TotalTime
 
 % It is possible to assign labels to the Timer
-Xanalysis.Xtimer.starttime('Sdescription','MyLabel 1')
+Xtimer.start('Description','MyLabel 1')
 pause(1)
-Xanalysis.Xtimer.starttime('Sdescription','MyLabel 2')
-display(Xanalysis.Xtimer)
+Xtimer.start('Description','MyLabel 2')
+display(Xtimer)
 
 %% Get the lap time 
 % returns the time elapsed from previous counter and start a new counter
 
-counterID=laptime(Xanalysis.Xtimer,'Sdescription','MyLabel 3');
-display(Xanalysis.Xtimer)
+counterID=lap(Xtimer,'Description','MyLabel 3');
+display(Xtimer)
 
 %% Get enlapsed time between two counters
 
-Xanalysis.Xtimer.deltatime(counterID-1,counterID)
-display(Xanalysis.Xtimer)
+Xtimer.delta(counterID-1,counterID)
+display(Xtimer)
 
-counterID2=laptime(Xanalysis.Xtimer,'Sdescription','MyLabel 4');
-Xanalysis.Xtimer.deltatime(counterID,counterID2)
-display(Xanalysis.Xtimer)
+counterID2=lap(Xtimer,'Description','MyLabel 4');
+Xtimer.delta(counterID,counterID2)
+display(Xtimer)
 
-            % The method returns as optional output argument the number of
-            % the new counter started
+% The method returns as optional output argument the number of
+% the new counter started
             
 %% Plot time
 SfigureName='PlotTimer';
 Sformat='pdf';
-Xanalysis.Xtimer.plot('SfigureName',SfigureName,'Stitle','Tutorial Timer','SexportFormat',Sformat)
+Xtimer.plot('FigureName',SfigureName,'Title','Tutorial Timer','ExportFormat',Sformat)
 % The figure is export in the Cossan working directory
 
 assert (logical(exist(fullfile(OpenCossan.getCossanWorkingPath,[SfigureName '.' Sformat]),'file')),...
     'OpenCossan:Tutorial:TutorialTimer:nofigurecreated','Figure Not created')
 
 % remove created file
-delete(fullfile(OpenCossan.getCossanWorkingPath,[SfigureName '.' Sformat]))
+delete(fullfile(opencossan.OpenCossan.getWorkingPath,[SfigureName '.' Sformat]))
 

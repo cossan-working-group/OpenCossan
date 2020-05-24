@@ -5,12 +5,12 @@
 %
 % In this tutorial a very simplified model is considered.  
 % 
-% See Also: http://cossan.cfd.liv.ac.uk/wiki/index.php/Infection_Dynamic_Model
+% See Also: Infection_Dynamic_Model
 % 
 %
 %{
 This file is part of OpenCossan <https://cossan.co.uk>.
-Copyright (C) 2006-2019 COSSAN WORKING GROUP
+Copyright (C) 2006-2020 COSSAN WORKING GROUP
 
 OpenCossan is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -41,14 +41,13 @@ Xin    = opencossan.common.inputs.Input('description','Input LocalSensitivity');
 Xin = add(Xin,'member',Xrvset,'name','Xrvset');
 
 % The model is defined using a Mio object
-Xm = opencossan.workers.Mio('Script','for j=1:length(Tinput), Toutput(j).out1=Tinput(j).Xrv1^2+2*Tinput(j).Xrv2-Tinput(j).Xrv3; end', ...
+Xm = opencossan.workers.MatlabWorker('Script','for j=1:length(Tinput), Toutput(j).out1=Tinput(j).Xrv1^2+2*Tinput(j).Xrv2-Tinput(j).Xrv3; end', ...
          'OutputNames',{'out1'},...
          'InputNames',{'Xrv1' 'Xrv2' 'Xrv3'},...
- ...        'Liostructure',true,...
 	     'IsFunction',false); 
      
-Xev    = opencossan.workers.Evaluator('Xmio',Xm);
-Xmdl   = opencossan.common.Model('Input',Xin,'evaluator',Xev);
+Xev    = opencossan.workers.Evaluator('Solver',Xm);
+Xmdl   = opencossan.common.Model('Input',Xin,'Evaluator',Xev);
 
 % Here we go!!!
 %% Local Sensitivity Analysis

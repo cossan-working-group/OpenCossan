@@ -29,14 +29,13 @@ Xrvset = opencossan.common.inputs.random.RandomVariableSet('names',{'Xrv1','Xrv2
 Xin    = opencossan.common.inputs.Input('members',Xrvset, 'membersnames','Xrvset');
 
 % The model is defined using a Mio object
-Xm = opencossan.workers.Mio('Script','for j=1:length(Tinput), Toutput(j).out1=Tinput(j).Xrv1^2+2*Tinput(j).Xrv2-Tinput(j).Xrv3; end', ...
+Xm = opencossan.workers.MatlabWorker('Script','for j=1:length(Tinput), Toutput(j).out1=Tinput(j).Xrv1^2+2*Tinput(j).Xrv2-Tinput(j).Xrv3; end', ...
          'OutputNames',{'out1'},...
          'InputNames',{'Xrv1' 'Xrv2' 'Xrv3'},...
-...         'Liostructure',true,...
 	     'IsFunction',false); 
      
-Xev    = opencossan.workers.Evaluator('Xmio',Xm);
-Xmdl   = opencossan.common.Model('Xinput',Xin,'Xevaluator',Xev);
+Xev    = opencossan.workers.Evaluator('Solver',Xm);
+Xmdl   = opencossan.common.Model('Input',Xin,'Evaluator',Xev);
 
 % Here we go!!!
 %% Local Sensitivity Analysis
@@ -77,17 +76,15 @@ Sscript=['for i=1:length(Tinput),'...
     'Toutput(i).Out1   = 2*Tinput(i).DV1-Tinput(i).DV2^2;'...
     'end'];
 
-XmDV  = Mio('Sdescription', 'Performance function', ...
-                'Sscript',Sscript, ... % Define the script
-                'Coutputnames',{'Out1'},... % This field is mandatory
-                'Cinputnames',{'DV1';'DV2'},...    % This field is mandatory
-                'Liostructure',true,...     % This flag specify the type of I/O
-                'Liomatrix',false, ...  % This flag specify the type of I/O
-				'Lfunction',false); % This flag specify if the .m file is a script or a function. 
-
-Xev     = Evaluator('Xmio',XmDV);
+XmDV  = opencossan.workers.MatlabWorker('Description', 'Performance function', ...
+                'Script',Sscript, ... % Define the script
+                'OutputNames',{'Out1'},... % This field is mandatory
+                'InputNames',{'DV1';'DV2'},...    % This field is mandatory
+                'Format','structure');
+            
+Xev     = opencossan.workers.Evaluator('Solver',XmDV);
 % Define probmodel
-Xmodel  = Model('XInput',Xin,'XEvaluator',Xev);     
+Xmodel  = opencossan.common.Model('Xnput',Xin,'Evaluator',Xev);     
 
 %% Select a user defined point
 XlsFD2=LocalSensitivityFiniteDifference('Xtarget',Xmodel,...
@@ -122,14 +119,13 @@ title(hf2,'Samples in Standard Normal Space')
 % The figures show the correlation of the sample in physical space. 
 
 % The model is defined using a Mio object
-Xm = Mio('Sscript','for j=1:length(Tinput), Toutput(j).out1=-2*Tinput(j).Xrv1+(Tinput(j).Xrv2-2); end', ...
-         'Coutputnames',{'out1'},...
-         'Cinputnames',{'Xrv1' 'Xrv2'},...
-         'Liostructure',true,...
-	     'Lfunction',false); 
+Xm = opencossan.workers.MatlabWorker('Script','for j=1:length(Tinput), Toutput(j).out1=-2*Tinput(j).Xrv1+(Tinput(j).Xrv2-2); end', ...
+         'OutputNames',{'out1'},...
+         'InputNames',{'Xrv1' 'Xrv2'},...
+         'Format','structure'); 
      
-Xev    = Evaluator('Xmio',Xm);
-Xmdl   = Model('Xinput',Xin,'Xevaluator',Xev);
+Xev    = Evaluator('Solver',Xm);
+Xmdl   = Model('Input',Xin,'Evaluator',Xev);
 
 % Define the Local Sensitivity method 
 XlsFD=LocalSensitivityFiniteDifference('Xmodel',Xmdl);

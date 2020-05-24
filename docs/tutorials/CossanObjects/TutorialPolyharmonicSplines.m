@@ -61,7 +61,7 @@ Xmio = Mio('FullFileName',[fullfile(opencossan.OpenCossan.getRoot),'/lib/MatlabF
     'Outputnames',{'out'});
 
 %% Construct the Model
-Xev = Evaluator('Xmio',Xmio);
+Xev = Evaluator('Solver',Xmio);
 Xmod = Model('Evaluator',Xev,'Input',Xin);
 
 %% Construction and Calibration of Polyharmonic Splines

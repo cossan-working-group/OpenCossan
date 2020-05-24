@@ -6,30 +6,31 @@ function [TableOutput] = executeWorkersHorizontal(Xobj,TableInput)
 %
 %  Usage:  TableOutput = executeWorkersVertical(Xobj,TableInput)
 %
-% See Also: http://cossan.co.uk/wiki/index.php/executeWorkersHorizontal@Evaluator
+% See Also: Evaluator
 %
 %
 % Author: Edoardo Patelli
-% Institute for Risk and Uncertainty, University of Liverpool, UK
+% Cossan Working Group
 % email address: openengine@cossan.co.uk
 % Website: http://www.cossan.co.uk
 
-% =====================================================================
-% This file is part of openCOSSAN.  The open general purpose matlab
-% toolbox for numerical analysis, risk and uncertainty quantification.
-%
-% openCOSSAN is free software: you can redistribute it and/or modify
-% it under the terms of the GNU General Public License as published by
-% the Free Software Foundation, either version 3 of the License.
-%
-% openCOSSAN is distributed in the hope that it will be useful,
-% but WITHOUT ANY WARRANTY; without even the implied warranty of
-% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-% GNU General Public License for more details.
-%
-%  You should have received a copy of the GNU General Public License
-%  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
-% =====================================================================
+%{
+    This file is part of OpenCossan <https://cossan.co.uk>.
+    Copyright (C) 2006-2020 COSSAN WORKING GROUP
+
+    OpenCossan is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License or,
+    (at your option) any later version.
+
+    OpenCossan is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
+%}
 
 import opencossan.*
 %% Initialization
@@ -48,9 +49,9 @@ Xanalysis=opencossan.OpenCossan.getAnalysis;
 TableOutputSolver=[];
 
 % Evaluator execution
-for n=1:length(Xobj.CXsolvers)
+for n=1:length(Xobj.Solver)
     OpenCossan.cossanDisp(['[Status:workers  ]  * Processing solver ' ...
-        num2str(n) '/' num2str(length(Xobj.CXsolvers))],4)
+        num2str(n) '/' num2str(length(Xobj.Solver))],3)
     
     % Merge tableInput with output produced by the workers and then
     % pass only the inputs required by the specific worker.
@@ -64,22 +65,22 @@ for n=1:length(Xobj.CXsolvers)
         % Execute worker.
         % Only the input required by the worker are passes. No recheck
         % is needed in the evaluate method.
-        TableOutputSolverTmp=Xobj.CXsolvers{n}.evaluate(TableSolver(:,Xobj.CXsolvers{n}.InputNames));
-        %TableOutputSolverTmp=array2table(Xobj.CXsolvers{n}.evaluate(TableSolver(:,Xobj.CXsolvers{n}.Cinputnames)),'VariableNames',Xobj.Coutputnames);
+        TableOutputSolverTmp=Xobj.Solver(n).evaluate(TableSolver(:,Xobj.Solver(n).InputNames));
+        %TableOutputSolverTmp=array2table(Xobj.CXSolver{n}.evaluate(TableSolver(:,Xobj.CXSolver{n}.Cinputnames)),'VariableNames',Xobj.Coutputnames);
     catch Exception
         warning('OpenCossan:Evaluator:executeWorkersHorizontal:workerFaild',...
-            sprintf('Unable to execute worker %i of type %s',n,class(Xobj.CXsolvers{n})))
+            'Unable to execute worker %i of type %s',n,class(Xobj.Solver(n)))
         % Add meaningful error message
         msgID = 'OpenCossan:Evaluator:executeWorkersHorizontal:workerFaild';
-        msg = sprintf('Unable to execute worker %i of type %s',n,class(Xobj.CXsolvers{n}));
+        msg = sprintf('Unable to execute worker %i of type %s',n,class(Xobj.Solver(n)));
         causeException = MException(msgID,msg);
         
         % Store Exception in the Analysis object
         Xanalysis.ErrorsStack{end+1} = addCause(Exception,causeException);
         
         % Construct a tableOutputSolverTmp with NaN
-        TableOutputSolverTmp=array2table(NaN(height(TableSolver),length(Xobj.CXsolvers{n}.OutputNames)),...
-            'VariableNames',Xobj.CXsolvers{n}.OutputNames);
+        TableOutputSolverTmp=array2table(NaN(height(TableSolver),length(Xobj.Solver(n).OutputNames)),...
+            'VariableNames',Xobj.Solver(n).OutputNames);
     end
     % Merge workers output for the currenct analysis
     TableOutputSolver=[TableOutputSolver, TableOutputSolverTmp]; %#ok<AGROW>

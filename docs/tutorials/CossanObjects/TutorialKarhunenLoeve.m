@@ -7,7 +7,7 @@
 %
 % See Also: STOCHASTICPROCESS TutorialInput
 %
-% $Copyright~1993-2018,~COSSAN~Working~Group$
+% $Copyright~1993-2020,~COSSAN~Working~Group$
 % $Author:~Barbara~Goller$
 % $Author:~Edoardo~Patelli$
 
@@ -34,7 +34,7 @@ Xcovfun  = CovarianceFunction('Description','covariance function', ...
     'IsFunction',false,'Format','structure',...
     'Script', strcat('sigma = 1; b = 0.5; for i=1:length(Tinput), ',...
     'Toutput(i).fcov  = sigma^2*exp(-1/b*abs(Tinput(i).x_2-Tinput(i).x_1));',...
-    'end'), 'OutputNames',{'fcov'}); % Define the outputs
+    'end'), 'OutputNames',{'fcov'},'InputNames',{'x_1' 'x_2'}); % Define the outputs
 
 % Define the time steps of the process
 Vtime =  linspace(0,5,101); % time steps
@@ -136,7 +136,7 @@ Xcovfun  = CovarianceFunction('Description','covariance function', ...
     'Script',strcat('sigma = 1; b = 0.5; for i=1:length(Tinput),',...
     'Toutput(i).fcov  = sigma^2*exp(-1/b*sqrt((Tinput(i).x_2-Tinput(i).x_1)*',...
     '(Tinput(i).x_2-Tinput(i).x_1)'')); end'), ...
-    'OutputNames',{'fcov'}); % Define the outputs
+    'OutputNames',{'fcov'},'InputNames',{'x_1','x_2'}); % Define the outputs
 
 % Define StochasticProcess object by passing the covariance function and assembling the matrix
 [Vx ,Vy]  = meshgrid(0:0.5:5,0:0.5:4);
@@ -160,7 +160,7 @@ plot(ds1.Xdataseries(1,1).Vdata)
 
 TableInput=array2table([Mindex1(:) Mindex1(:)],'VariableNames',Xcovfun.InputNames);
 TableOutput = evaluate(Xcovfun,TableInput);
-Mcovariance =  reshape(table2array(TableOutput),length(Vtime),length(Vtime));
+Mcovariance =  reshape(table2array(TableOutput),length(Mindex1),length(Mindex2));
 
 f2=figure;
 mesh(Mindex1,Mindex2,Mcovariance)
@@ -195,7 +195,7 @@ Xcovfun  = CovarianceFunction('Description','covariance function', ...
     'Script',strcat('sigma = 1; b = 0.5; for i=1:length(Tinput), ', ...
     'Toutput(i).fcov  = sigma^2*exp(-1/b*sqrt((Tinput(i).x_2-Tinput(i).x_1)',...
     '*(Tinput(i).x_2-Tinput(i).x_1)'')); end'),...
-    'OutputNames',{'fcov'}); % Define the outputs
+    'OutputNames',{'fcov'},'InputNames',{'x_1','x_2'}); % Define the outputs
 
 % Define 3d-coordinates for random field
 [Vx, Vy, Vz]  = meshgrid(0:0.5:5,0:0.5:5,0:0.5:5);
