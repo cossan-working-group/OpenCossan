@@ -13,7 +13,7 @@ function inject(Xi,Tinput)
 %
 %   see also: connector, extractor, injector
 %
-
+import opencossan.OpenCossan
 %%. Processing Inputs
 
 % Process all the optional arguments and assign them the corresponding

@@ -21,9 +21,8 @@ function copyFiles(Xc,varargin)
 %  You should have received a copy of the GNU General Public License
 %  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
 % =====================================================================
-
+import opencossan.OpenCossan
 % Validate inputs
-OpenCossan.validateCossanInputs(varargin{:});
 
 % process optional inputs
 for k=1:2:length(varargin)

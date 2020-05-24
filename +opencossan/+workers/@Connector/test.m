@@ -22,16 +22,18 @@ function [Lstatus, vargout]=test(Xconnector)
 %  You should have received a copy of the GNU General Public License
 %  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
 % =====================================================================
+import opencossan.OpenCossan
+
 Lstatus=true;
 
 Sdiagnostic{1}=['Connector diagnostic tool for the object ' inputname(1) ];
 OpenCossan.cossanDisp(Sdiagnostic,1);
 
 % testing working directory
-Sdiagnostic{end+1}=['Testing the working directory: ' Xconnector.Sworkingdirectory];
+Sdiagnostic{end+1}=['Testing the working directory: ' OpenCossan.getWorkingPath];
 OpenCossan.cossanDisp(Sdiagnostic{end},1);
 
-if not(exist(Xconnector.Sworkingdirectory,'dir')),
+if not(exist(OpenCossan.getWorkingPath,'dir'))
     Sdiagnostic{end+1}=' F A I L E D';
     Lstatus=false;
 else
@@ -43,7 +45,7 @@ OpenCossan.cossanDisp(Sdiagnostic{end},1)
 Sdiagnostic{end+1}=['Testing the executable file:  ' Xconnector.Ssolverbinary];
 OpenCossan.cossanDisp(Sdiagnostic{end},1);
 
-if not(exist([Xconnector.Ssolverbinary],'file')),
+if not(exist([Xconnector.Ssolverbinary],'file'))
     Sdiagnostic{end+1}=' F A I L E D';
     Lstatus=false;
 else
@@ -62,7 +64,7 @@ else
         Sdiagnostic{end+1}=fullfile(Xconnector.CXmembers{ii}.Sscanfilepath,Xconnector.CXmembers{ii}.Sscanfilename); %#ok<AGROW>
         OpenCossan.cossanDisp(Sdiagnostic{end},1);
         % Testing injector
-        if not(exist(Sdiagnostic{end},'file')),
+        if not(exist(Sdiagnostic{end},'file'))
             Sdiagnostic{end+1}=' F A I L E D'; %#ok<AGROW>
             Lstatus=false;
         else
@@ -81,7 +83,7 @@ else
         Sdiagnostic{end+1}=fullfile(Xconnector.CXmembers{ii}.Sscanfilepath,Xconnector.CXmembers{ii}.Sscanfilename); %#ok<AGROW>
         OpenCossan.cossanDisp(Sdiagnostic{end},1);
         % Testing Extractor
-        if not(exist(Sdiagnostic{end},'file')),
+        if not(exist(Sdiagnostic{end},'file'))
             Sdiagnostic{end+1}=' F A I L E D'; %#ok<AGROW>
             Lstatus=false;
         else
