@@ -71,7 +71,6 @@ classdef StudentRandomVariable < opencossan.common.inputs.random.RandomVariable
         
         function mean = get.Mean(obj)
             [mean,~] = tstat(obj.Nu);
-            mean = mean + obj.Shift;
         end
         
         function std = get.Std(obj)
@@ -83,41 +82,41 @@ classdef StudentRandomVariable < opencossan.common.inputs.random.RandomVariable
             %CDF2PHYSICAL Inverse student cumulative distribution function.
             % VX = cdf2physical(obj,VX) returns the inverse cdf of the
             % student distribution, evaluated at the values VU.
-            VX = tinv(VU,obj.Nu) + obj.Shift;
+            VX = tinv(VU,obj.Nu);
         end
         
         function VX = map2physical(obj,VU)
             % MAP2PHYSICAL Map from standard normal into physical space.
             % VX = map2physical(obj,VU) maps the values in VU from standard
             % normal into physical space.
-            VX = tinv(normcdf(VU),obj.Nu) + obj.Shift;
+            VX = tinv(normcdf(VU),obj.Nu);
         end
         
         function VU = map2stdnorm(obj,VX)
             % MAP2STDNORM Map from physical into standard normal space.
             % VU = map2stdnorm(obj,VX) maps the values in VX from physical
             % into standard normal space.
-            VU = norminv(tcdf(VX - obj.Shift,obj.Nu));
+            VU = norminv(tcdf(VX,obj.Nu));
         end
         
         function VU = physical2cdf(obj,VX)
             %PHYSICAL2CDF Student cumulative distribution function.
             % VU = physical2cdf(obj,VX) returns the cdf of the student
             % distribution, evaluated at the values VX.
-            VU = tcdf(VX - obj.Shift,obj.Nu);
+            VU = tcdf(VX,obj.Nu);
         end
         
         function Vpdf_vX = evalpdf(obj,Vx)
             %EVALPDF Student probability density function.
             % Y = evalpdf(obj,X) returns the pdf of the student
             % distribution, evaluated at the values X.
-            Vpdf_vX = tpdf(Vx - obj.Shift,obj.Nu);
+            Vpdf_vX = tpdf(Vx,obj.Nu);
         end
     end
     
     methods (Access = protected)
         function samples = getSamples(obj,size)
-            samples = trnd(obj.Nu,size) + obj.Shift;
+            samples = trnd(obj.Nu,size);
         end
     end
     

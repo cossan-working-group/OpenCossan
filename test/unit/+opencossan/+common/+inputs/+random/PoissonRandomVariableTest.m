@@ -50,13 +50,6 @@ classdef PoissonRandomVariableTest < matlab.unittest.TestCase
             testCase.verifyEqual(2, random.Mean);   
         end
         
-        %% shifting
-        function shifting(testCase)
-            random = opencossan.common.inputs.random.PoissonRandomVariable('lambda',1);
-            random.Shift = 1;
-            testCase.verifyEqual(2, random.Mean);
-        end
-        
          %% sample
         function SampleEmpty(testCase)
             random = opencossan.common.inputs.random.PoissonRandomVariable('lambda',1);

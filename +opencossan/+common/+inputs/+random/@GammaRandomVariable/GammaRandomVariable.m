@@ -73,7 +73,6 @@ classdef GammaRandomVariable < opencossan.common.inputs.random.RandomVariable
         
         function mean = get.Mean(obj)
             [mean, ~] = gamstat(obj.K,obj.Theta);
-            mean = mean + obj.Shift;
         end
         
         function std = get.Std(obj)
@@ -85,42 +84,42 @@ classdef GammaRandomVariable < opencossan.common.inputs.random.RandomVariable
             %CDF2PHYSICAL Inverse gamma cumulative distribution function.
             % VX = cdf2physical(obj,VX) returns the inverse cdf of the
             % gamma distribution, evaluated at the values VU.
-            VX = gaminv(VU,obj.K,obj.Theta) + obj.Shift;
+            VX = gaminv(VU,obj.K,obj.Theta);
         end
         
         function VX = map2physical(obj,VU)
             % MAP2PHYSICAL Map from standard normal into physical space.
             % VX = map2physical(obj,VU) maps the values in VU from standard
             % normal into physical space.
-            VX = gaminv(normcdf(VU),obj.K,obj.Theta) + obj.Shift;
+            VX = gaminv(normcdf(VU),obj.K,obj.Theta);
         end
         
         function VU = map2stdnorm(obj,VX)
             % MAP2STDNORM Map from physical into standard normal space.
             % VU = map2stdnorm(obj,VX) maps the values in VX from physical
             % into standard normal space.
-            VU = norminv(gamcdf(VX - obj.Shift,obj.K,obj.Theta));
+            VU = norminv(gamcdf(VX,obj.K,obj.Theta));
         end
         
         function VU = physical2cdf(obj,VX)
             %PHYSICAL2CDF Gamma cumulative distribution function.
             % VU = physical2cdf(obj,VX) returns the cdf of the gamma
             % distribution, evaluated at the values VX.
-            VU = gamcdf(VX - obj.Shift,obj.K,obj.Theta);
+            VU = gamcdf(VX,obj.K,obj.Theta);
         end
         
         function Vpdf_vX = evalpdf(obj,Vx)
             %EVALPDF Gamma probability density function.
             % Y = evalpdf(obj,X) returns the pdf of the gamma
             % distribution, evaluated at the values X.
-            Vpdf_vX = gampdf(Vx - obj.Shift,obj.K,obj.Theta);
+            Vpdf_vX = gampdf(Vx,obj.K,obj.Theta);
         end
         
     end
     
     methods (Access = protected)
         function samples = getSamples(obj,size)
-            samples = gamrnd(obj.K,obj.Theta,size) + obj.Shift;
+            samples = gamrnd(obj.K,obj.Theta,size);
         end
     end
     

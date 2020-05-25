@@ -34,5 +34,6 @@ classdef ParameterTest < matlab.unittest.TestCase
             Xpar = opencossan.common.inputs.Parameter('value', 5);
             testCase.verifyEqual(Xpar.Value, 5);
         end
+
     end
 end

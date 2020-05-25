@@ -73,7 +73,7 @@ classdef SmallIRandomVariable < opencossan.common.inputs.random.RandomVariable
         end
         
         function mean = get.Mean(obj)
-            mean = obj.Mean_ + obj.Shift;
+            mean = obj.Mean_;
         end
         
         function std = get.Std(obj)
@@ -86,7 +86,7 @@ classdef SmallIRandomVariable < opencossan.common.inputs.random.RandomVariable
             % small-I distribution, evaluated at the values VU.
             small_alpha = pi/(sqrt(6)*obj.Std);
             small_u = obj.Mean + 0.5772156/small_alpha;
-            VX = small_u + log(-log(1-VU))/small_alpha + obj.Shift;
+            VX = small_u + log(-log(1-VU))/small_alpha;
         end
         
         function VX = map2physical(obj,VU)
@@ -95,7 +95,7 @@ classdef SmallIRandomVariable < opencossan.common.inputs.random.RandomVariable
             % normal into physical space.
             small_alpha = pi/(sqrt(6)*obj.Std);
             small_u = obj.Mean + 0.5772156/small_alpha;
-            VX = small_u + log(-log(1 - normcdf(VU)))/small_alpha + obj.Shift;
+            VX = small_u + log(-log(1 - normcdf(VU)))/small_alpha;
         end
         
         function VU = map2stdnorm(obj,VX)
@@ -104,7 +104,7 @@ classdef SmallIRandomVariable < opencossan.common.inputs.random.RandomVariable
             % into standard normal space.
             small_alpha = pi/(sqrt(6)*obj.Std^2);
             small_u = obj.Mean + 0.5772156/small_alpha;
-            VU = norminv(1 - exp(-exp(small_alpha*(VX-obj.Shift - small_u))));
+            VU = norminv(1 - exp(-exp(small_alpha*(VX - small_u))));
         end
         
         function VU = physical2cdf(obj,VX)
@@ -113,7 +113,7 @@ classdef SmallIRandomVariable < opencossan.common.inputs.random.RandomVariable
             % distribution, evaluated at the values VX.
             small_alpha = pi/(sqrt(6)*obj.Std^2);
             small_u = obj.Mean + 0.5772156/small_alpha;
-            VU = 1 - exp(-exp(small_alpha*(VX - obj.Shift - small_u)));
+            VU = 1 - exp(-exp(small_alpha*(VX - small_u)));
         end
         
         function Vpdf_vX = evalpdf(obj,Vx)
@@ -122,15 +122,15 @@ classdef SmallIRandomVariable < opencossan.common.inputs.random.RandomVariable
             % distribution, evaluated at the values X.
             small_alpha = pi/(sqrt(6)*obj.Std);
             small_u = obj.Mean + 0.5772156/small_alpha;
-            Vpdf_vX = small_alpha*exp(small_alpha*(Vx - obj.Shift - small_u)) .* exp(-exp(small_alpha*(Vx - obj.Shift - small_u)));
+            Vpdf_vX = small_alpha*exp(small_alpha*(Vx - small_u)) .* exp(-exp(small_alpha*(Vx - small_u)));
         end
     end
     
     methods (Access = protected)
         function samples = getSamples(obj,size)
             small_alpha = pi/(sqrt(6)*obj.Std);
-            small_u = obj.Mean+0.5772156/small_alpha - obj.Shift;
-            samples = small_u+log(-log(1-rand(size)))/small_alpha + obj.Shift;
+            small_u = obj.Mean+0.5772156/small_alpha;
+            samples = small_u+log(-log(1-rand(size)))/small_alpha;
         end
     end
     

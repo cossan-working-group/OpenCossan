@@ -96,7 +96,7 @@ classdef NormtRandomVariable < opencossan.common.inputs.random.RandomVariable
         end
         
         function bounds = get.Bounds(obj)
-            bounds = obj.Bounds + obj.Shift;
+            bounds = obj.Bounds;
         end
         
         function obj = set.Bounds(obj,bounds)

@@ -56,14 +56,6 @@ classdef NormalRandomVariableTest < matlab.unittest.TestCase
             testCase.verifyEqual(random.Mean, 1);
         end
         
-        %% shifting
-        function shifting(testCase)
-            random = opencossan.common.inputs.random.NormalRandomVariable('mean',1,'std',0.5);
-            meanWithoutShift = random.Mean;
-            random.Shift = 1;
-            testCase.verifyEqual(random.Mean, meanWithoutShift + 1);
-        end
-        
         %% sample
         function SampleEmpty(testCase)
             random = opencossan.common.inputs.random.NormalRandomVariable('mean',1,'std',0.5);
