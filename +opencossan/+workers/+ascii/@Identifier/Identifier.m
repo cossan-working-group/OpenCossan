@@ -7,18 +7,18 @@ classdef Identifier < opencossan.common.CossanObject
     % identifier (see Injector for additional information)
     
     %{
-    This file is part of OpenCossan <https://cossan.co.uk>.
-    Copyright (C) 2006-2020 COSSAN WORKING GROUP
+This file is part of OpenCossan <https://cossan.co.uk>.
+Copyright (C) 2006-2020 COSSAN WORKING GROUP
 
-    OpenCossan is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License or,
-    (at your option) any later version.
+OpenCossan is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License or,
+(at your option) any later version.
 
-    OpenCossan is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU General Public License for more details.
+OpenCossan is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
@@ -29,9 +29,6 @@ along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
         Name(1,:) char                    % Name of the associate COSSAN variable quantity (can be an input or an output of a worker)
         Index(1,1) double                 % Index of the variable (only for vector and matrix)
         FieldFormat(1,1) string           % Format string '%' +  Maximum field width + conversion character (see fscanf for more information)
-        SearchString(1,:) string          % if present, define the string to be searched inside the ASCII file in order to define the relative position
-        ColumnNumber(1,1) double          % Colum position in the ASCII file of the variables (length(Vcolnum)=Nresponse)
-        RowNumber(1,1) double             % Row  position in the ASCII file of the variables (length(Vcolnum)=Nresponse)
         Position(1,1) double              % Absolute position inside the input file
         OriginalString(1,1) string        % Original text in the ASCII file
     end
@@ -50,8 +47,6 @@ along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
             else
                 [required, varargin] = opencossan.common.utilities.parseRequiredNameValuePairs(...
                     ["name", "index", "fieldformat", "originalstring", "position"], varargin{:});
-                [optional, super_args] = opencossan.common.utilities.parseOptionalNameValuePairs(...
-                    "searchstring", "", varargin{:});
             end
             
             obj@opencossan.common.CossanObject(super_args{:});
