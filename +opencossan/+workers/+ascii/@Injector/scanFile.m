@@ -1,4 +1,4 @@
-function Xidentifier=scanFile(Xobj,Nfid)
+function obj=scanFile(obj,Nfid)
 %SCANFILE This is a private function of the Injector object. It is used to
 %scan ASCII files for cossan identifiers (i.e. XLM tag <cossan />)
 %
@@ -51,7 +51,7 @@ while 1
     end
     
     % find a matching identifier
-    [Cm, s, e] = regexp(Stline,Xobj.Sexpr, 'match', 'start', 'end');
+    [Cm, s, e] = regexp(Stline,obj.Sexpr_identifier, 'match', 'start', 'end');
     
     if ~isempty(s)
         for it=1:length(s)
@@ -65,11 +65,10 @@ while 1
             fseek(Nfid,0,'cof');
             Nposition = ftell(Nfid);
             
-            [tmp_name] = regexp(Cm(it), Xobj.Sexpr_name, 'tokens');
-            [tmp_index] = regexp(Cm(it), Xobj.Sexpr_index, 'tokens');
-            [tmp_format] = regexp(Cm(it), Xobj.Sexpr_format, 'tokens');
-            [tmp_original] = regexp(Cm(it), Xobj.Sexpr_originalvalue, 'tokens');
-            [tmp_includefile] = regexp(Cm(it), Xobj.Sexpr_includefile, 'tokens');
+            [tmp_name] = regexp(Cm(it), obj.Sexpr_name, 'tokens');
+            [tmp_index] = regexp(Cm(it), obj.Sexpr_index, 'tokens');
+            [tmp_format] = regexp(Cm(it), obj.Sexpr_format, 'tokens');
+            [tmp_original] = regexp(Cm(it), obj.Sexpr_originalvalue, 'tokens');
             
             if ~isempty(tmp_format{1})
                 switch lower(tmp_format{1}{1}{1})
@@ -91,7 +90,7 @@ while 1
                         end
                         
                         try
-                            [Cstringlength] = regexp(Cm(it), Xobj.Sexpr_formatlength, 'tokens');
+                            [Cstringlength] = regexp(Cm(it), obj.Sexpr_formatlength, 'tokens');
                             Nstringlength=str2double(Cstringlength{1}{1}{1}); %use only the first value of format
                         catch ME
                             error('openCOSSAN:Injector:scanFile',...
@@ -99,7 +98,7 @@ while 1
                                 '\nFormat          : %s',...
                                 '\nIdentifier name : %s', ...
                                 '\nLine            : %i'),...
-                                Xobj.Sscanfilename,tmp_format{1}{1}{1},tmp_name{1}{1}{1},line_id);
+                                obj.Sscanfilename,tmp_format{1}{1}{1},tmp_name{1}{1}{1},line_id);
                         end
                 end
             end
@@ -117,7 +116,7 @@ while 1
                     '\nUsing default format %10.4e.',...
                     '\nIdentifier name : %s', ...
                     '\nLine            : %i'),...
-                    Xobj.Sscanfilename,tmp_format{1}{1}{1},tmp_name{1}{1}{1},line_id);
+                    obj.Sscanfilename,tmp_format{1}{1}{1},tmp_name{1}{1}{1},line_id);
                 CMmaster{var_id}.Sformat  = '%10.4e';
                 Nstringlength = 10;
             else
@@ -133,7 +132,7 @@ while 1
                     '\nDeterministic analysis will not perform.',...
                     '\nIdentifier name : %s', ...
                     '\nLine            : %i'),...
-                    Xobj.Sscanfilename,tmp_name{1}{1}{1},line_id);
+                    obj.Sscanfilename,tmp_name{1}{1}{1},line_id);
             else
                 CMmaster{var_id}.Soriginal=tmp_original{1}{1}{1};
                 
@@ -146,18 +145,6 @@ while 1
                         length(tmp_original{1}{1}{1}),Nstringlength,tmp_name{1}{1}{1},line_id);
                 end
                 
-            end
-            
-            if isempty(tmp_includefile{1})
-                if ~isempty(strfind(CMmaster{var_id}.Sformat,'table'))
-                    error('COSSAN:injector:scanfile',...
-                        ['Definition of includefile missing in the identifier of the Stochastic Process ',...
-                        CMmaster{var_id}.Sname]);
-                else
-                    CMmaster{var_id}.includefile  = [];
-                end
-            else
-                CMmaster{var_id}.includefile=tmp_includefile{1}{1}{1};
             end
             
             Ntotfield=0;
@@ -185,20 +172,15 @@ end
 if var_id == 0
     % if var_id is 0, no identifiers are present in the file and
     % an empty Identifier is returned
-    Xidentifier = [];
+    obj = opencossan.workers.ascii.Identifier.empty(0,0);
 else
     % Create identifiers
-    Xidentifier(var_id) = Identifier('Sname',CMmaster{var_id}.Sname,...
-        'Nindex',CMmaster{var_id}.Nindex,...
-        'Sfieldformat',CMmaster{var_id}.Sformat,...
-        'Nposition',CMmaster{var_id}.Nposition,...
-        'Soriginal',CMmaster{var_id}.Soriginal);
+    obj = opencossan.workers.ascii.Identifier.empty(0,var_id);
     for ivar=1:var_id
-        Xidentifier(ivar) = Identifier('Sname',CMmaster{ivar}.Sname,...
-            'Nindex',CMmaster{ivar}.Nindex,...
-            'Sfieldformat',CMmaster{ivar}.Sformat,...
-            'Nposition',CMmaster{ivar}.Nposition,...
-            'Soriginal',CMmaster{ivar}.Soriginal,...
-            'Sincludefile',[Xobj.Srelativepath CMmaster{ivar}.includefile]);
+        obj(ivar) = Identifier('Name',CMmaster{ivar}.Sname,...
+            'Index',CMmaster{ivar}.Nindex,...
+            'FieldFormat',CMmaster{ivar}.Sformat,...
+            'Position',CMmaster{ivar}.Nposition,...
+            'OriginalString',CMmaster{ivar}.Soriginal);
     end
 end

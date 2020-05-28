@@ -58,13 +58,13 @@ classdef Injector < opencossan.common.CossanObject
         Sexpr_format = 'format="(.+?)"';
         Sexpr_formatlength = '%([0-9]+)';
         Sexpr_originalvalue= 'original="(.+?)"';
-        Sexpr_identifier = '<cossan\s.+?/>';
-        Sexpr_includefile = 'includefile="(.+?)"';            
+        Sexpr_identifier = '<cossan\s.+?/>';      
     end
     
     properties (Dependent = true)
         Nvariable
         InputNames(1,:) string % array of strings with the names of the input quantities
+        ScanFilePath(1,1) string
     end
     
     methods
@@ -103,7 +103,11 @@ classdef Injector < opencossan.common.CossanObject
                 obj.ScanFileName = required.scanfilename;
                 obj.FileName = required.filename;
                 
-                obj.RelativePath = optional.relativepath;
+                if isempty(optional.relativepath)
+                    obj.RelativePath = '';
+                else
+                    obj.RelativePath = optional.relativepath;
+                end
                 
                 if isempty(optional.identifiers)
                     % if the identifier vector is not passed to the
@@ -111,8 +115,8 @@ classdef Injector < opencossan.common.CossanObject
                     % file.
                     
                     % does the template file exist?
-                    assert( exist(obj.ScanFileName,'file'),...
-                        'OpenCossan:Injector:noscanfile','The file to be scanned does not exist \n Filename: %s',...
+                    assert( exist(obj.ScanFileName,'file')==2,...
+                        'OpenCossan:Injector:noScanFile','The file to be scanned does not exist \n Filename: %s',...
                         obj.ScanFileName);
                 end
             end
@@ -121,14 +125,14 @@ classdef Injector < opencossan.common.CossanObject
             
             %% Define main parameters of responses
             % Use file with identifiers to create injector
-            if isempty(obj.Xidentifier)
+            if isempty(obj.Identifiers)
                 % if the array of the identifiers is not passed to the
                 % constructor, invoke the createByScan method
-                if ~isempty(obj.ScanFileName) && exist(fullfile(obj.Sscanfilepath,obj.ScanFileName),'file')
+                if ~isempty(obj.ScanFileName) && exist(fullfile(obj.ScanFileName),'file')
                     obj= createByScan(obj);
 
                     if strcmp(obj.Sscanfilepath,obj.RelativePath) && strcmp(obj.ScanFileName,obj.FileName)
-                        error('openCOSSAN:injector:wronngIdentifierName',...
+                        error('openCOSSAN:Injector:wronngIdentifierName',...
                             ['The file with the identifiers and the file without the identifiers have the same name\n',...
                             ' Filename: %s'],  obj.ScanFileName,obj.FileName')
                     end
@@ -162,6 +166,10 @@ classdef Injector < opencossan.common.CossanObject
         
         function Nvariable = get.Nvariable(Xobj)
             Nvariable = length(Xobj.Cinputnames);
+        end
+        
+        function path = get.ScanFilePath(obj)
+            path = fileparts(obj.ScanFileName);
         end
         
         function replaceIdentifiers(Xinjector)
@@ -273,57 +281,42 @@ classdef Injector < opencossan.common.CossanObject
         
         inject(Xi,Pinput)
         
-        display(Xi)
     end
     
     methods (Access= private)
 
         Xidentifier=scanFile(Xobj,Nfid)         % Scan ASCII file with identifier
         
-        function Xinj = createByScan(Xinj)
+        function obj = createByScan(obj)
             %CREATEBYSCAN Private function to create the Injector from the scanning on an input
             %file containing the COSSAN identifiers
-            % Arguments: 'Xinj' injector Object
-            %                      'Scanfullname' Full name (path+name) of the file
-            %                      with the identifiers
+            % Arguments: injector Object
             
+            opencossan.OpenCossan.cossanDisp(['[COSSAN-X.Injector.createByScan] File to be scanned: ' obj.ScanFileName],2)
             
-            Scanfullname= fullfile(Xinj.Sscanfilepath,Xinj.ScanFileName);
-            
-            opencossan.OpenCossan.cossanDisp(['[COSSAN-X.Injector.createByScan] File to be scanned: ' Scanfullname],2)
-            
-            % Open file to scan
-            [Nfid, Serror] = fopen(Scanfullname,'r'); % open ASCII file
-            
-            if Nfid<0
-                error('openCOSSAN:Injector:createbyscan',...
-                    ['The file' Sscanfullname ' does not exist. ' Serror ])
-            end
-            % remove the wrong line termination that can be included in a
-            % file if it was created/modified in windows
-            Vbytes = fread(Nfid,'uint8=>uint8');
-            fclose(Nfid);
-            Nfid = fopen(Scanfullname,'w');
-            Vbytes(Vbytes==uint8(13))=[]; % remove the CR ascii character
-            fwrite(Nfid,Vbytes,'uint8');
-            fclose(Nfid);
-            
-            % reopen the file after the CRs have been removed
-            Nfid = fopen(Scanfullname,'r');
+            % Change the eventual windows line termination to unix line
+            % termination
+            opencossan.common.utilities.dos2unix(obj.ScanFileName)
+
+            % open the file with identifiers
+            Nfid = fopen(obj.ScanFileName,'r');
             
             % Scan file
-            Xinj.Xidentifier = Xinj.scanFile(Nfid);
+            obj.Identifiers = obj.scanFile(Nfid);
             
             fclose(Nfid);
-            opencossan.OpenCossan.cossanDisp(['[COSSAN-X.Injector.createByScan] Close File to be scanned: ' Scanfullname],2)
+            opencossan.OpenCossan.cossanDisp(['[COSSAN-X.Injector.createByScan] Close File to be scanned: ' obj.ScanFileName],2)
             
-            if isempty(Xinj.Xidentifier)
+            if isempty(obj.Xidentifier)
                 warning('openCOSSAN:Injector:createByScan',...
-                    ['No identifiers found in file ' Scanfullname ...
+                    ['No identifiers found in file ' obj.ScanFileName ...
                     '\nConsider including this file in the property Caddfiles of Connector.'])
             end
             
-            Xinj.Sdescription=['Injector created from file ' Scanfullname];
+            if isempty(obj.Sdescription)
+                % if no description is given, create one
+                obj.Sdescription=['Injector created from file ' obj.ScanFileName];
+            end
             
             opencossan.OpenCossan.cossanDisp('[COSSAN-X.Injector.createByScan] Identifier identified correctly',4)
         end   

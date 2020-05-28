@@ -45,7 +45,7 @@ along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
             if nargin == 0
                 super_args={};
             else
-                [required, varargin] = opencossan.common.utilities.parseRequiredNameValuePairs(...
+                [required, super_args] = opencossan.common.utilities.parseRequiredNameValuePairs(...
                     ["name", "index", "fieldformat", "originalstring", "position"], varargin{:});
             end
             
@@ -57,13 +57,9 @@ along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
                 obj.FieldFormat = required.fieldformat;
                 obj.OriginalString = required.originalstring;
                 obj.Position = required.position;
-                
-                obj.SearchString = optional.searchstring;
             end
                         
         end %end constructor
-        
-        display(Xobj) % Display identifier object
         
         function Noriginal = get.OriginalValue(obj)
             

@@ -23,17 +23,21 @@ end
 if ~exist(SsolverBinPath,'file')
     % compile the source code of the solver
     if ispc
-        %TODO implement check if gcc is available and compilation commands
-        %for windows
-        error('windows compilation missing')
+        [~,out] = system('gcc');
+        assert(contains(out,'gcc: fatal error: no input files'),...
+            'openCOSSAN:TutorialIshigamiFunction:MissingCompiler','Ensure that GCC is installed and available in PATH')
+        compilationCommand = ...
+            "cd " + fileparts(SsolverSrcPath) + "& " + ... % go to the source folder
+            "gcc ishigamiFunction.c ini.c -lm -o ishigamiFunction.exe & " + ... % compile the source code
+            "move ishigamiFunction.exe " + SsolverBinPath; % move the solver to the "dist" directory
     else
         compilationCommand = ...
             "cd " + fileparts(SsolverSrcPath) + ";" + ... % go to the source folder
             "gcc ishigamiFunction.c ini.c -lm -o ishigamiFunction;" + ... % compile the source code
             "mv ishigamiFunction " + SsolverBinPath + ";"; % move the solver to the "dist" directory
-        outFlag = system(compilationCommand);
-        assert(outFlag ==0, 'openCOSSAN:TutorialIshigamiFunction:CompileError','Solver compilation failed.')
     end
+    outFlag = system(compilationCommand);
+    assert(outFlag ==0, 'openCOSSAN:TutorialIshigamiFunction:CompileError','Solver compilation failed.')
 end
 
 %% Input Definition
@@ -52,7 +56,7 @@ parameterB = opencossan.common.inputs.Parameter('Value',0.05);
 
 % Construct Input object
 Xinput = opencossan.common.inputs.Input('Members',{Xrvset,parameterA,parameterB},...
-    'MembersNames',{'Xrvset','parameterA','parameterB'});
+    'Names',{'Xrvset','parameterA','parameterB'});
 
 %% Connector set-up
 % The connector is the object that calls an external solver after modifying 
@@ -66,8 +70,8 @@ Xinput = opencossan.common.inputs.Input('Members',{Xrvset,parameterA,parameterB}
 % modifiable file connected to cossan input qunatities. Injector is used to
 % insert single scalar values. Dedicated injectors subclasses are available
 % for specilized requirement like the injection of tables. 
-Xinjector = opencossan.workers.ascii.Injector('Sscanfilepath',Spath,'Sscanfilename','input.dat.cossan',... % file to be scan with the cossan identifiers
-    'Sfile','input.dat'); % file created by injector with the injected data
+Xinjector = opencossan.workers.ascii.Injector('ScanFileName',fullfile(Spath,'input.dat.cossan'),... % file to be scan with the cossan identifiers
+    'FileName','input.dat'); % file created by injector with the injected data
 %% Extractor
 % The extractor is used to retrieve the quantity of interest from an ASCII
 % output file. The user must specify a search string and a relative
