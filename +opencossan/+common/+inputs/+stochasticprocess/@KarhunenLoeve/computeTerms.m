@@ -52,7 +52,6 @@ assert(~isempty(Xobj.CovarianceMatrix)||~isempty(Xobj.CovarianceFunction), ...
 
 Vx = Xobj.Coordinates;
 
-Topts.issym = 1;
 Topts.isreal = 1;
 if opencossan.OpenCossan.getVerbosityLevel==4
     Topts.disp = 2;
@@ -92,6 +91,7 @@ elseif AssembleCovariance
     Xobj.CovarianceMatrix = Mcov;
     [MPhi, Mlam] = eigs(Mcov,NumberTerms,'lm',Topts);
 else
+    Topts.issym = 1; % issym is only valid for function handles
     if Xobj.IsHomogeneous && Xobj.IsEquallySpaced
         OpenCossan.cossanDisp(['Homogeneus and equally spaced method with ' ...
             num2str(NumberTerms) ' K-L terms'],4)

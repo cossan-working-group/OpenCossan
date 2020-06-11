@@ -67,10 +67,7 @@ classdef Input < opencossan.common.CossanObject
         NumberOfRandomInputs
     end
     
-    methods
-        
-        samples = sample(obj, varargin)             % Generate samples from the Input object
-        
+    methods        
         obj = add(obj, varargin)                    % Add an object to the Input object
         obj = remove(obj, varargin)                 % Remove an object from the Input object
         
@@ -194,7 +191,7 @@ classdef Input < opencossan.common.CossanObject
         
         %% Dependent StochasticProcess properties
         function sps = get.StochasticProcesses(obj)
-            sps = obj.filterMembers('opencossan.common.inputs.StochasticProcess');
+            sps = obj.filterMembers('opencossan.common.inputs.stochasticprocess.StochasticProcess');
         end
         
         function n = get.NumberOfStochasticProcesses(obj)
@@ -202,7 +199,7 @@ classdef Input < opencossan.common.CossanObject
         end
         
         function names = get.StochasticProcessNames(obj)
-            names = obj.filterNames('opencossan.common.inputs.StochasticProcess');
+            names = obj.filterNames('opencossan.common.inputs.stochasticprocess.StochasticProcess');
         end
         
         %% Dependent GaussianMixtureRandomVariableSets properties
@@ -250,7 +247,7 @@ classdef Input < opencossan.common.CossanObject
         
         values = getDefaultValues(obj);
         checkFunction(obj);
-        samples = completeSamples(obj, samples);
+        [samples, dataseries] = completeSamples(obj, samples);
     end
     
     %% Private Methods

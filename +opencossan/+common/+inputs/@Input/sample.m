@@ -1,4 +1,4 @@
-function samples = sample(obj,varargin)
+function [samples, ds] = sample(obj,varargin)
     %SAMPLE   produce samples of the random variables and stochastic processes defined in the Input
     %object and evaluate eventually the parameters.
     %
@@ -50,7 +50,6 @@ function samples = sample(obj,varargin)
     
     p.parse(varargin{:});
     
-    
     samples = table();
     
     for rvset = obj.RandomVariableSets
@@ -80,5 +79,13 @@ function samples = sample(obj,varargin)
     for i = 1:obj.NumberOfFunctions
         samples.(names(i)) = evaluate(funs(i), samples);
     end
-
+    
+    if nargout > 1
+        ds = opencossan.common.Dataseries.empty(0, obj.NumberOfStochasticProcesses);
+        if obj.NumberOfStochasticProcesses > 0
+            for i = 1:obj.NumberOfStochasticProcesses
+                ds(1, i) = obj.StochasticProcesses(i).sample('samples', p.Results.Samples);
+            end
+        end
+    end
 end
