@@ -29,7 +29,7 @@ classdef ParameterTest < matlab.unittest.TestCase
     methods (Test)
         %% constructor
         function constructorEmpty(testCase)
-            Xpar = common.inputs.Parameter();
+            Xpar = opencossan.common.inputs.Parameter();
             testCase.verifyClass(Xpar, 'common.inputs.Parameter');
             testCase.verifyNumElements(Xpar, 1);
             testCase.verifyLength(Xpar.Value, 0);
@@ -37,28 +37,28 @@ classdef ParameterTest < matlab.unittest.TestCase
         end
         
         function constructorShouldSetDescription(testCase)
-            Xpar = common.inputs.Parameter('description','Description');
+            Xpar = opencossan.common.inputs.Parameter('description','Description');
             testCase.verifyEqual(Xpar.Description,"Description");
         end
         
         function constructorShouldSetValue(testCase)
-            Xpar = common.inputs.Parameter('value', 5);
+            Xpar = opencossan.common.inputs.Parameter('value', 5);
             testCase.verifyEqual(Xpar.Value, 5);
         end
         
         function constructorShouldValidateInput(testCase)
             % String validation for Description
-            testCase.verifyError(@()common.inputs.Parameter('description', cell(1)),...
+            testCase.verifyError(@()opencossan.common.inputs.Parameter('description', cell(1)),...
                 'MATLAB:UnableToConvert');
-            testCase.verifyError(@()common.inputs.Parameter('description', rand(2)),...
+            testCase.verifyError(@()opencossan.common.inputs.Parameter('description', rand(2)),...
                 'MATLAB:type:InvalidInputSize');
             % Numeric validation for Value
-            testCase.verifyError(@()common.inputs.Parameter('value', 'c'),...
+            testCase.verifyError(@()opencossan.common.inputs.Parameter('value', 'c'),...
                 'MATLAB:validators:mustBeNumeric');
         end
                                
         function constructorClassShouldNotInheritFromHandle(testCase)
-            Xpar = common.inputs.Parameter();
+            Xpar = opencossan.common.inputs.Parameter();
             testCase.verifyFalse(ishandle(Xpar));
         end
         
@@ -66,13 +66,13 @@ classdef ParameterTest < matlab.unittest.TestCase
         %% display
         function checkDisplayWorks(testCase)
             % Check for single Object
-            Xpar = common.inputs.Parameter('description', 'Test Object',...
-                'value', magic(4));
+            Xpar = opencossan.common.inputs.Parameter('description', 'Test Object',...
+                'value', [1, 2, 3, 4]);
             testPhrase = [Xpar.Description;...
                           num2str(Xpar.Nelements)];
             worksSingle = testOutput(Xpar,testPhrase);
             % Check for array of objects
-            Xpar = [common.inputs.Parameter(); common.inputs.Parameter()];
+            Xpar = [opencossan.common.inputs.Parameter(); opencossan.common.inputs.Parameter()];
             testPhrase = ["Parameter array with properties:";...
                           "Description";...
                            "Nelements";...

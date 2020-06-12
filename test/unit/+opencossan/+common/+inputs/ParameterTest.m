@@ -21,8 +21,8 @@ classdef ParameterTest < matlab.unittest.TestCase
             Xpar = opencossan.common.inputs.Parameter();
             testCase.verifyClass(Xpar, 'opencossan.common.inputs.Parameter');
             testCase.verifyNumElements(Xpar, 1);
-            testCase.verifyLength(Xpar.Value, 0);
-            testCase.verifyEqual(Xpar.Nelements, 0);
+            testCase.verifyLength(Xpar.Value, 1);
+            testCase.verifyEqual(Xpar.Nelements, 1);
         end
         
         function constructorShouldSetDescription(testCase)
@@ -56,7 +56,7 @@ classdef ParameterTest < matlab.unittest.TestCase
         function checkDisplayWorks(testCase)
             % Check for single Object
             Xpar = opencossan.common.inputs.Parameter('description', 'Test Object',...
-                'value', magic(4));
+                'value', [1, 2, 3, 4]);
             testPhrase = [Xpar.Description;...
                 num2str(Xpar.Nelements)];
             worksSingle = testOutput(Xpar,testPhrase);

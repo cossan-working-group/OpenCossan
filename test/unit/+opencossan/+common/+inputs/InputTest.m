@@ -34,7 +34,7 @@ classdef InputTest < matlab.unittest.TestCase
         c = opencossan.optimization.ContinuousDesignVariable('Value', 5, 'LowerBound', 0);
         d = opencossan.optimization.ContinuousDesignVariable('Value', 3, 'UpperBound', 10);
         
-        sp = opencossan.common.inputs.StochasticProcess();
+        sp = opencossan.common.inputs.stochasticprocess.KarhunenLoeve();
         
         set;
     end

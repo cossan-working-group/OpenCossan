@@ -25,7 +25,7 @@ classdef Parameter < opencossan.common.CossanObject
     % =====================================================================
     
     properties % Public access
-        Value {mustBeNumeric}   % Value(s) of the parameter
+        Value(1, :) {mustBeNumeric} = 0  % Value(s) of the parameter
     end
     
     properties (Dependent)
@@ -52,8 +52,8 @@ classdef Parameter < opencossan.common.CossanObject
                 p.FunctionName = 'opencossan.common.inputs.Parameter';
                 
                 % Use default values
-                p.addParameter('Description',obj.Description);
-                p.addParameter('Value',obj.Value);
+                p.addParameter('Description', "");
+                p.addParameter('Value', 0);
                 
                 p.parse(varargin{:});
                 
