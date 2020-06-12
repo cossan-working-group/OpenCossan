@@ -21,8 +21,8 @@ classdef ParameterTest < matlab.unittest.TestCase
             Xpar = opencossan.common.inputs.Parameter();
             testCase.verifyClass(Xpar, 'opencossan.common.inputs.Parameter');
             testCase.verifyNumElements(Xpar, 1);
-            testCase.verifyLength(Xpar.Value, 0);
-            testCase.verifyEqual(Xpar.Nelements, 0);
+            testCase.verifyLength(Xpar.Value, 1);
+            testCase.verifyEqual(Xpar.Nelements, 1);
         end
         
         function constructorShouldSetDescription(testCase)
