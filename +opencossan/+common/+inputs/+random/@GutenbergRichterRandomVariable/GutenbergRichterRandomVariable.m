@@ -70,7 +70,6 @@ classdef GutenbergRichterRandomVariable < opencossan.common.inputs.random.Random
             b = obj.B*log(10);
             Den = (exp(-b*(obj.Bounds(1)))-exp(-b*(obj.Bounds(2))));
             mean = 1/Den*(-(obj.Bounds(2)*exp(-b*(obj.Bounds(2)))-obj.Bounds(2)*exp(-b*(obj.Bounds(1)))) - 1/b*(exp(-b*(obj.Bounds(2)))-exp(-b*(obj.Bounds(1)))));
-            mean = mean + obj.Shift;
         end
         
         function std = get.Std(~)
@@ -117,7 +116,7 @@ classdef GutenbergRichterRandomVariable < opencossan.common.inputs.random.Random
     
     methods (Access = protected)
         function samples = getSamples(obj,size)
-            samples = obj.Bounds(1)-1/obj.B*(log10(1-rand(size)*(1-10^(-obj.B*(obj.Bounds(2)-obj.Bounds(1)))))) + obj.Shift;
+            samples = obj.Bounds(1)-1/obj.B*(log10(1-rand(size)*(1-10^(-obj.B*(obj.Bounds(2)-obj.Bounds(1))))));
         end
     end
     

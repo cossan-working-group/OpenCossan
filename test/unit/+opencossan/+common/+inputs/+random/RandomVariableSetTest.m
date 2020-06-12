@@ -124,7 +124,7 @@ classdef RandomVariableSetTest < matlab.unittest.TestCase
         function getRVInfo(testCase)
             random = opencossan.common.inputs.random.RandomVariableSet(...
                 'members', [testCase.X1, testCase.X2], 'names', ["X1","X2"]);
-            testCase.verifySize(random.getRVInfo(), [2,6]);
+            testCase.verifySize(random.getRVInfo(), [2,5]);
         end
         
         %% sample

@@ -58,14 +58,6 @@ classdef BinomialRandomVariableTest < matlab.unittest.TestCase
             testCase.verifyEqual(random.Mean, testMean);
         end
         
-        %% shifting
-        function shifting(testCase)
-            random = opencossan.common.inputs.random.BinomialRandomVariable('p',0.5,'n',1);
-            meanWithoutShift = random.Mean;
-            random.Shift = 1;
-            testCase.verifyEqual(random.Mean, meanWithoutShift + 1);
-        end
-        
         %% sample
         function SampleEmpty(testCase)
             random = opencossan.common.inputs.random.BinomialRandomVariable('p',0.5,'n',1);

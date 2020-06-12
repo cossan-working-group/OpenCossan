@@ -57,14 +57,6 @@ classdef LogisticRandomVariableTest < matlab.unittest.TestCase
             testCase.verifyEqual(random.Mean, 1);   
         end
         
-        %% shifting
-        function shifting(testCase)
-            random = opencossan.common.inputs.random.LogisticRandomVariable('mu',1,'s',0.5);
-            meanWithoutShift = random.Mean;
-            random.Shift = 1;
-            testCase.verifyEqual(random.Mean, meanWithoutShift + 1);
-        end
-        
          %% sample
         function SampleEmpty(testCase)
             random = opencossan.common.inputs.random.LogisticRandomVariable('mu',1,'s',0.5);

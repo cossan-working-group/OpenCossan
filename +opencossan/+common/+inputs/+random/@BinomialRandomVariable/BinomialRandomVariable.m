@@ -73,7 +73,6 @@ classdef BinomialRandomVariable < opencossan.common.inputs.random.RandomVariable
         
         function mean = get.Mean(obj)
             [mean, ~] = binostat(obj.N,obj.P);
-            mean = mean + obj.Shift;
         end
         
         function std = get.Std(obj)
@@ -85,28 +84,28 @@ classdef BinomialRandomVariable < opencossan.common.inputs.random.RandomVariable
             %CDF2PHYSICAL Inverse binomial cumulative distribution function.
             % VX = cdf2physical(obj,VX) returns the inverse cdf of the 
             % binomial distribution, evaluated at the values VU.            
-            VX = icdf('binomial', VU, obj.N, obj.P) + obj.Shift;
+            VX = icdf('binomial', VU, obj.N, obj.P);
         end
         
         function VX = map2physical(obj,VU)
             % MAP2PHYSICAL Map from standard normal into physical space.
             % VX = map2physical(obj,VU) maps the values in VU from standard
             % normal into physical space.
-            VX = icdf('binomial', normcdf(VU),obj.N,obj.P) + obj.Shift;
+            VX = icdf('binomial', normcdf(VU),obj.N,obj.P);
         end
         
         function VU = map2stdnorm(obj,VX)
             % MAP2STDNORM Map from physical into standard normal space.
             % VU = map2stdnorm(obj,VX) maps the values in VX from physical
             % into standard normal space.
-            VU = norminv(cdf('binomial',VX - obj.Shift,obj.N,obj.P));
+            VU = norminv(cdf('binomial',VX,obj.N,obj.P));
         end
         
         function VU = physical2cdf(obj,VX)
             %PHYSICAL2CDF Binomial cumulative distribution function.
             % VU = physical2cdf(obj,VX) returns the cdf of the binomial
             % distribution, evaluated at the values VX.
-            VU = cdf('binomial',VX - obj.Shift,obj.N,obj.P);
+            VU = cdf('binomial',VX,obj.N,obj.P);
         end
         
         %% evalpdf
@@ -114,13 +113,13 @@ classdef BinomialRandomVariable < opencossan.common.inputs.random.RandomVariable
             %EVALPDF Binomial probability density function.
             % Y = evalpdf(obj,X) returns the pdf of the binomial
             % distribution, evaluated at the values X.
-            Vpdf_vX = pdf('binomial',Vx - obj.Shift,obj.N,obj.P);
+            Vpdf_vX = pdf('binomial',Vx,obj.N,obj.P);
         end
     end
     
     methods (Access = protected)
         function samples = getSamples(obj,size)
-            samples = random('binomial',obj.N,obj.P,size) + obj.Shift;
+            samples = random('binomial',obj.N,obj.P,size);
         end
     end
     

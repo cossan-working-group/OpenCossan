@@ -6,27 +6,53 @@
 % input.dat and produce an output file result.out 
 % See example in the subfolder solver
 
-OpenCossan.reset
+opencossan.OpenCossan.reset
 Spath = fileparts(which('TutorialIshigamiFunction.m'));
-SsolverPathBinary=fullfile(Spath,'solver','ishigamifunction');
+%% Solver preparation
+% Ensure that the binary solver is present in the openCOSSAN installation
+SsolverSrcPath = fullfile(opencossan.OpenCossan.getRoot, 'lib', 'src', 'ishigami', 'ishigamiFunction.c');
+SsolverBinPath = fullfile(opencossan.OpenCossan.getRoot, 'lib', 'dist');
+if ispc
+    % on windows
+    SsolverBinPath = fullfile(SsolverBinPath, 'ishigamiFunction.exe');
+else
+    % on linux and unix
+    SsolverBinPath = fullfile(SsolverBinPath, 'ishigamiFunction');
+end
+
+if ~exist(SsolverBinPath,'file')
+    % compile the source code of the solver
+    if ispc
+        %TODO implement check if gcc is available and compilation commands
+        %for windows
+        error('windows compilation missing')
+    else
+        compilationCommand = ...
+            "cd " + fileparts(SsolverSrcPath) + ";" + ... % go to the source folder
+            "gcc ishigamiFunction.c ini.c -lm -o ishigamiFunction;" + ... % compile the source code
+            "mv ishigamiFunction " + SsolverBinPath + ";"; % move the solver to the "dist" directory
+        outFlag = system(compilationCommand);
+        assert(outFlag ==0, 'openCOSSAN:TutorialIshigamiFunction:CompileError','Solver compilation failed.')
+    end
+end
 
 %% Input Definition
 % In this example, the external solver computes the value of the Ishigami
 % function, a classical example for testin sensitivity analysis algorithms.
 % The Ishigami function gets as input three random variables uniformly
 % distributed in [-pi,pi] and 2 shape parameters.
-Xrv1=RandomVariable('Sdistribution','uniform','lowerbound',-pi,'upperbound',pi);
-Xrv2=RandomVariable('Sdistribution','uniform','lowerbound',-pi,'upperbound',pi);
-Xrv3=RandomVariable('Sdistribution','uniform','lowerbound',-pi,'upperbound',pi);
-Xrvset = RandomVariableSet('Cmembers',{'Xrv1','Xrv2','Xrv3'},'CXrv',{Xrv1,Xrv2,Xrv3});
+Xrv1 = opencossan.common.inputs.random.UniformRandomVariable('Bounds',[-pi,pi]);
+Xrv2 = opencossan.common.inputs.random.UniformRandomVariable('Bounds',[-pi,pi]);clc
+Xrv3 = opencossan.common.inputs.random.UniformRandomVariable('Bounds',[-pi,pi]);
+Xrvset = opencossan.common.inputs.random.RandomVariableSet('Names',{'Xrv1','Xrv2','Xrv3'},'Members',[Xrv1,Xrv2,Xrv3]);
 
 % Define parameters
-parameterA = Parameter('value',7);
-parameterB = Parameter('value',0.05);
+parameterA = opencossan.common.inputs.Parameter('Value',7);
+parameterB = opencossan.common.inputs.Parameter('Value',0.05);
 
 % Construct Input object
-Xinput = Input('CXmembers',{Xrvset,parameterA,parameterB},...
-    'CSmembers',{'Xrvset','parameterA','parameterB'});
+Xinput = opencossan.common.inputs.Input('Members',{Xrvset,parameterA,parameterB},...
+    'MembersNames',{'Xrvset','parameterA','parameterB'});
 
 %% Connector set-up
 % The connector is the object that calls an external solver after modifying 
@@ -40,7 +66,7 @@ Xinput = Input('CXmembers',{Xrvset,parameterA,parameterB},...
 % modifiable file connected to cossan input qunatities. Injector is used to
 % insert single scalar values. Dedicated injectors subclasses are available
 % for specilized requirement like the injection of tables. 
-Xinjector = Injector('Sscanfilename','input.dat.cossan',... % file to be scan with the cossan identifiers
+Xinjector = opencossan.workers.ascii.Injector('Sscanfilepath',Spath,'Sscanfilename','input.dat.cossan',... % file to be scan with the cossan identifiers
     'Sfile','input.dat'); % file created by injector with the injected data
 %% Extractor
 % The extractor is used to retrieve the quantity of interest from an ASCII
@@ -51,19 +77,19 @@ Xinjector = Injector('Sscanfilename','input.dat.cossan',... % file to be scan wi
 % read and te extracted values are saved in a vector).
 % Other extractors are available for dedicated extraction of data in
 % tabular form.
-Xresponse = Response('Sname','out',... name to be assigned to the extracted quantity
+Xresponse = opencossan.workers.ascii.Response('Sname','out',... name to be assigned to the extracted quantity
     'ClookOutFor',{'Result'}, ...
     'Ncol',1,'Nrow',1,'Sformat','%9e');
-Xextractor = Extractor('Sfile','result.out','Xresponse',Xresponse);
+Xextractor = opencossan.workers.ascii.Extractor('Sfile','result.out','Xresponse',Xresponse);
 %% Connector
 % The Connector object instructs cossan on the command to be executed to
 % call the external solver, the main input file, and contains the
 % constructed injectors and extractors.
-connector_ishigami = Connector('Sdescription','Connector to test executable ishigami',...
+connector_ishigami = opencossan.workers.Connector('Sdescription','Connector to test executable ishigami',...
         'Sexecmd','%SsolverBinary %SmainInputFile', ...
-        'SmainInputPath',pwd,...
+        'SmainInputPath',Spath,...
         'SmainInputFile','input.dat',...
-        'SsolverBinary',SsolverPathBinary,...
+        'SsolverBinary',SsolverBinPath,...
         'CXmembers',{Xinjector,Xextractor});
 
 % You can check the connector with the test method
@@ -72,15 +98,15 @@ connector_ishigami.test
 %% Model definition
 
 % This evaluator executes all the solvers on the local machine
-Xevaluator   = Evaluator('CXmembers',{connector_ishigami},'CSnames',{'test_connector'});
+Xevaluator   = opencossan.workers.Evaluator('CXmembers',{connector_ishigami},'CSnames',{'test_connector'});
 
 % Model is the union of the black-boxes and the uncertain inputs
-Xmodel = Model('Xevaluator',Xevaluator,'Xinput',Xinput);
+Xmodel = opencossan.common.Model('Evaluator',Xevaluator,'Input',Xinput);
 
 %% Uncertainty Quantification
 % Uncertainty propagation with Latin Hypercube sampling. For each sample a
 % modified input file is executed in a dedicated folder.
-Xmc = LatinHypercubeSampling('Nsamples',25);
+Xmc = opencossan.simulations.LatinHypercubeSampling('Nsamples',25);
 Xout = Xmc.apply(Xmodel);
 
 % Plot results

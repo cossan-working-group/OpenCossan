@@ -40,7 +40,7 @@ import opencossan.common.outputs.SimulationData
 % Use the verbosity level predifined in OpenCossan but when the connector
 % is executed remotely used the local verbosity level
 if ~Xc.Lremote
-    NverboseLevel=OpenCossan.getVerbosityLevel;
+    NverboseLevel=opencossan.OpenCossan.getVerbosityLevel;
 else
     NverboseLevel=Xc.NverboseLevel;
 end
@@ -65,12 +65,12 @@ for irun=1:Nsimulations
         Xc.SfolderTimeStamp = fullfile(Xc.SremoteWorkingDirectory,Sfoldername);
     else
         Sfoldername=[datestr(now,30) '_sim_' num2str(irun)];
-        Xc.SfolderTimeStamp = fullfile(OpenCossan.getCossanWorkingPath,Sfoldername);
+        Xc.SfolderTimeStamp = fullfile(opencossan.OpenCossan.getWorkingPath,Sfoldername);
     end
     
     [~,mess] = mkdir(Xc.SfolderTimeStamp);
     
-    OpenCossan.cossanDisp(['Create folder: ' Xc.SfolderTimeStamp],3)
+    opencossan.OpenCossan.cossanDisp(['Create folder: ' Xc.SfolderTimeStamp],3)
     
     if ~isempty(mess)
         disp(['Create folder: ' Xc.SfolderTimeStamp])
@@ -235,27 +235,27 @@ for irun=1:Nsimulations
     end
     
     % TODO: TO BE CHECKED!
-    if ~isempty(OpenCossan.getDatabaseDriver)   % Add record to the Database
-        % Create a SimulationData object
-        XSimData = SimulationData('Table',TableOutput(irun,:));
-        
-        if ~isempty(fieldnames(Tout))
-            % if no extractor is defined, Tout is an empty structure
-            XSimData = XSimData.merge(SimulationData('Table',TableOutput(irun,:)));
-        end
-        
-        SsimulationFolder=fullfile(OpenCossan.getCossanWorkingPath,Sfoldername);
-        
-        %% Add record
-        insertRecord(OpenCossan.getDatabaseDriver,'StableType','Solver',...
-            'Nid',getNextPrimaryID(OpenCossan.getDatabaseDriver,'Solver'),...
-            'XsimulationData',XSimData,...
-            'LsuccessfullExtract',LsuccessfullExtract(irun), ...
-            'SsimulationFolder', SsimulationFolder, 'Nsimulation',irun, ...
-            'LsuccessfullExecution',~LerrorFound(irun));
-        % % delete the folder after it is assured that the content has been corretly put in db
-        % delete([SsimulationFolder '.tgz']);
-    end
+%     if ~isempty(OpenCossan.getDatabaseDriver)   % Add record to the Database
+%         % Create a SimulationData object
+%         XSimData = SimulationData('Table',TableOutput(irun,:));
+%         
+%         if ~isempty(fieldnames(Tout))
+%             % if no extractor is defined, Tout is an empty structure
+%             XSimData = XSimData.merge(SimulationData('Table',TableOutput(irun,:)));
+%         end
+%         
+%         SsimulationFolder=fullfile(OpenCossan.getCossanWorkingPath,Sfoldername);
+%         
+%         %% Add record
+%         insertRecord(OpenCossan.getDatabaseDriver,'StableType','Solver',...
+%             'Nid',getNextPrimaryID(OpenCossan.getDatabaseDriver,'Solver'),...
+%             'XsimulationData',XSimData,...
+%             'LsuccessfullExtract',LsuccessfullExtract(irun), ...
+%             'SsimulationFolder', SsimulationFolder, 'Nsimulation',irun, ...
+%             'LsuccessfullExecution',~LerrorFound(irun));
+%         % % delete the folder after it is assured that the content has been corretly put in db
+%         % delete([SsimulationFolder '.tgz']);
+%     end
     
 end
 

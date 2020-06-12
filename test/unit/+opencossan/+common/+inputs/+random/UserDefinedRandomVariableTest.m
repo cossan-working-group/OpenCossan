@@ -187,26 +187,6 @@ classdef UserDefinedRandomVariableTest < matlab.unittest.TestCase
             testCase.verifyEqual(random.Mean, mean(testCase.data));
         end
         
-        %% shifting
-        
-        function shiftingData(testCase)
-            random = opencossan.common.inputs.random.UserDefinedRandomVariable('data',testCase.data,'Shift',1);
-            meanWithoutShift = mean(testCase.data);
-            testCase.verifyEqual(random.Mean, meanWithoutShift + 1, 'RelTol', 0.000001);
-        end
-        
-        function shiftingPdf(testCase)
-            testShift = 1;
-            random = opencossan.common.inputs.random.UserDefinedRandomVariable('pdf',testCase.pdf,'support',testCase.support,'Shift',testShift);
-            testCase.verifyEqual(testCase.support + testShift, random.support);
-        end
-        
-        function shiftingCdf(testCase)
-            testShift = 1;
-            random = opencossan.common.inputs.random.UserDefinedRandomVariable('cdf',testCase.cdf,'support',testCase.support,'Shift',testShift);
-            testCase.verifyEqual(testCase.support + testShift, random.support);
-        end
-        
         %% sample
         function SampleEmpty(testCase)
             random = opencossan.common.inputs.random.UserDefinedRandomVariable('data',testCase.data);

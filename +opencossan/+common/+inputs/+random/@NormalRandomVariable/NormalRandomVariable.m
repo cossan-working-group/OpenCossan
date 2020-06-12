@@ -73,7 +73,7 @@ classdef NormalRandomVariable < opencossan.common.inputs.random.RandomVariable
         end
         
         function mean = get.Mean(obj)
-            mean = obj.Mean_ + obj.Shift;
+            mean = obj.Mean_;
         end
         
         function std = get.Std(obj)

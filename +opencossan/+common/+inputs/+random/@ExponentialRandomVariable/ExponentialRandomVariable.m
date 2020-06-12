@@ -72,7 +72,7 @@ classdef ExponentialRandomVariable < opencossan.common.inputs.random.RandomVaria
         end
         
         function mean = get.Mean(obj)
-            mean = 1/obj.Lambda + obj.Shift;
+            mean = 1/obj.Lambda;
         end
         
         function std = get.Std(obj)
@@ -83,41 +83,41 @@ classdef ExponentialRandomVariable < opencossan.common.inputs.random.RandomVaria
             %CDF2PHYSICAL Inverse exponential cumulative distribution function.
             % VX = cdf2physical(obj,VX) returns the inverse cdf of the 
             % exponential distribution, evaluated at the values VU.
-            VX = expinv(VU,1/obj.Lambda) + obj.Shift;
+            VX = expinv(VU,1/obj.Lambda);
         end
 
         function VX = map2physical(obj,VU)
             % MAP2PHYSICAL Map from standard normal into physical space.
             % VX = map2physical(obj,VU) maps the values in VU from standard
             % normal into physical space.
-            VX = expinv(normcdf(VU),1/obj.Lambda) + obj.Shift;  
+            VX = expinv(normcdf(VU),1/obj.Lambda);  
         end
         
         function VU = map2stdnorm(obj,VX)
             % MAP2STDNORM Map from physical into standard normal space.
             % VU = map2stdnorm(obj,VX) maps the values in VX from physical
             % into standard normal space.
-            VU = norminv(expcdf((VX - obj.Shift),1/obj.Lambda));
+            VU = norminv(expcdf((VX),1/obj.Lambda));
         end
         
         function VU = physical2cdf(obj,VX)
             %PHYSICAL2CDF Exponential cumulative distribution function.
             % VU = physical2cdf(obj,VX) returns the cdf of the exponential
             % distribution, evaluated at the values VX.
-            VU = expcdf((VX - obj.Shift),1/obj.Lambda); 
+            VU = expcdf((VX),1/obj.Lambda); 
         end
         
         function Vpdf_vX = evalpdf(obj,Vx)
         	%EVALPDF Exponential probability density function.
             % Y = evalpdf(obj,X) returns the pdf of the exponential
             % distribution, evaluated at the values X.
-            Vpdf_vX = exppdf(Vx - obj.Shift,1/obj.Lambda);
+            Vpdf_vX = exppdf(Vx,1/obj.Lambda);
         end
     end
     
     methods (Access = protected)
         function samples = getSamples(obj,size)
-            samples = exprnd(obj.Lambda,size) + obj.Shift;
+            samples = exprnd(obj.Lambda,size);
         end
     end
     

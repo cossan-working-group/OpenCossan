@@ -62,14 +62,6 @@ classdef GammaRandomVariableTest < matlab.unittest.TestCase
             testCase.verifyEqual(random.Mean, testMean);   
         end
         
-        %% shifting
-        function shifting(testCase)
-            random = opencossan.common.inputs.random.GammaRandomVariable('k',0.1,'theta',0.1);
-            meanWithoutShift = random.Mean;
-            random.Shift = 1;
-            testCase.verifyEqual(random.Mean, meanWithoutShift + 1);
-        end
-        
          %% sample
         function SampleEmpty(testCase)
             random = opencossan.common.inputs.random.GammaRandomVariable('k',0.1,'theta',0.1);

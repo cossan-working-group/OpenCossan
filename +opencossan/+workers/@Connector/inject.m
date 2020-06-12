@@ -28,7 +28,7 @@ function inject(Xc,Tinput)
 %  You should have received a copy of the GNU General Public License
 %  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
 % =====================================================================
-
+import opencossan.OpenCossan
 %% Check input
 if ~isa(Tinput,'struct')
     error('openCOSSAN:connector:inject', ...

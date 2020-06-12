@@ -51,14 +51,6 @@ classdef NegativeBinomialRandomVariableTest < matlab.unittest.TestCase
             testCase.verifyEqual(1, random.Mean);   
         end
         
-        %% shifting
-        function shifting(testCase)
-            random = opencossan.common.inputs.random.NegativeBinomialRandomVariable('p',0.5,'r',1);
-            meanWithoutShift = random.Mean;
-            random.Shift = 1;
-            testCase.verifyEqual(random.Mean, meanWithoutShift + 1);
-        end
-        
          %% sample
         function SampleEmpty(testCase)
             random = opencossan.common.inputs.random.NegativeBinomialRandomVariable('p',0.5,'r',1);
