@@ -27,9 +27,9 @@ if ~exist(SsolverBinPath,'file')
         assert(contains(out,'gcc: fatal error: no input files'),...
             'openCOSSAN:TutorialIshigamiFunction:MissingCompiler','Ensure that GCC is installed and available in PATH')
         compilationCommand = ...
-            "cd " + fileparts(SsolverSrcPath) + "& " + ... % go to the source folder
+            "cd """ + fileparts(SsolverSrcPath) + """ & " + ... % go to the source folder
             "gcc ishigamiFunction.c ini.c -lm -o ishigamiFunction.exe & " + ... % compile the source code
-            "move ishigamiFunction.exe " + SsolverBinPath; % move the solver to the "dist" directory
+            "move ishigamiFunction.exe """ + SsolverBinPath + ""; % move the solver to the "dist" directory
     else
         compilationCommand = ...
             "cd " + fileparts(SsolverSrcPath) + ";" + ... % go to the source folder
@@ -46,7 +46,7 @@ end
 % The Ishigami function gets as input three random variables uniformly
 % distributed in [-pi,pi] and 2 shape parameters.
 Xrv1 = opencossan.common.inputs.random.UniformRandomVariable('Bounds',[-pi,pi]);
-Xrv2 = opencossan.common.inputs.random.UniformRandomVariable('Bounds',[-pi,pi]);clc
+Xrv2 = opencossan.common.inputs.random.UniformRandomVariable('Bounds',[-pi,pi]);
 Xrv3 = opencossan.common.inputs.random.UniformRandomVariable('Bounds',[-pi,pi]);
 Xrvset = opencossan.common.inputs.random.RandomVariableSet('Names',{'Xrv1','Xrv2','Xrv3'},'Members',[Xrv1,Xrv2,Xrv3]);
 
