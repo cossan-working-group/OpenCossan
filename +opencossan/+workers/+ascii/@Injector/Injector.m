@@ -131,38 +131,31 @@ classdef Injector < opencossan.common.CossanObject
                 if ~isempty(obj.ScanFileName) && exist(fullfile(obj.ScanFileName),'file')
                     obj= createByScan(obj);
 
-                    if strcmp(obj.Sscanfilepath,obj.RelativePath) && strcmp(obj.ScanFileName,obj.FileName)
-                        error('openCOSSAN:Injector:wronngIdentifierName',...
+                    if strcmp(obj.ScanFilePath,obj.RelativePath) && strcmp(obj.ScanFileName,obj.FileName)
+                        error('openCOSSAN:Injector:wrongIdentifierName',...
                             ['The file with the identifiers and the file without the identifiers have the same name\n',...
                             ' Filename: %s'],  obj.ScanFileName,obj.FileName')
                     end
 
                     %% Include orginal values in the input file
-                    if ~isempty(obj.Xidentifier)
-                        obj.replaceIdentifiers;
+                    if ~isempty(obj.Identifiers)
+                        obj.replaceIdentifiers();
                     else
-                        copyfile(fullfile(obj.Sscanfilepath,obj.ScanFileName),...
-                            fullfile(obj.Sscanfilepath,obj.FileName),'f')
+                        copyfile(fullfile(obj.ScanFilePath,obj.ScanFileName),...
+                            fullfile(obj.ScanFilePath,obj.FileName),'f')
                     end
                 else
-                    error('openCOSSAN:injector:noscanfile','The file to be scanned does not exist \n Filename: %s',...
-                        fullfile(obj.Sscanfilepath,obj.ScanFileName));
+                    error('openCOSSAN:Injector:NoScanFile','The file to be scanned does not exist \n Filename: %s',...
+                        fullfile(obj.ScanFilePath,obj.ScanFileName));
                 end
                 
             end
-            
-            %% Set
-            Xidentifiers = obj.Xidentifier;
-            if isempty(Xidentifiers)
-                obj.Cinputnames={};
-            else
-                obj.Cinputnames=cell(size(Xidentifiers));
-                for n=1:length(Xidentifiers)
-                    obj.Cinputnames(n) = {Xidentifiers(n).Sname};
-                end
-                obj.Cinputnames = unique(obj.Cinputnames);
-            end
+
         end % end constructor
+        
+        function InputNames = get.InputNames(obj)
+            InputNames = unique({obj.Identifiers.Name}); 
+        end
         
         function Nvariable = get.Nvariable(Xobj)
             Nvariable = length(Xobj.Cinputnames);
@@ -172,7 +165,7 @@ classdef Injector < opencossan.common.CossanObject
             path = fileparts(obj.ScanFileName);
         end
         
-        function replaceIdentifiers(Xinjector)
+        function replaceIdentifiers(obj)
             %REPLACE_IDENTIFIERS private function for the injector
             %   Require the fid number of file and the structure of value to be
             %   injected
@@ -185,20 +178,15 @@ classdef Injector < opencossan.common.CossanObject
             import opencossan.workers.ascii.Identifier
             
             %% open the files
-            Nfid_old = fopen(fullfile(Xinjector.Sscanfilepath,Xinjector.ScanFileName));
-            Nfid_new=fopen(fullfile(Xinjector.Sscanfilepath,Xinjector.FileName),'w+');
+            Nfid_old = fopen(fullfile(obj.ScanFileName));
+            Nfid_new=fopen(fullfile(obj.ScanFilePath,obj.FileName),'w+');
             
-            if (Nfid_old == -1)
-                error('openCOSSAN:Injector:Injector',...
-                    ['Input file ' fullfile(Xinjector.Sscanfilepath,...
-                    Xinjector.ScanFileName) ' does not exist'])
-            end
-            if (Nfid_new == -1)
-                error('openCOSSAN:Injector:Injector', ...
-                    ['Cannot write on injected input file ' ....
-                    fullfile(Xinjector.Sscanfilepath,Xinjector.FileName) ...
-                    '\n Check file permissions.'])
-            end
+            assert(Nfid_old ~= -1,'openCOSSAN:Injector:MissingTemplateFile',...
+                    'Input file %s does not exist', obj.ScanFileName)
+            
+            assert(Nfid_new ~= -1,'openCOSSAN:Injector:CantWriteTargetFile', ...
+                    'Cannot write on injected input file %s \nCheck file permissions.', ....
+                    fullfile(obj.ScanFilePath,obj.FileName))
             
             % initialize the variables
             line_id = 0; var_id = 0;
@@ -212,7 +200,7 @@ classdef Injector < opencossan.common.CossanObject
                 end
                 
                 % find a matching identifier
-                [~, s, e] = regexp(Stline,Xinjector.Sexpr, 'match', 'start', 'end');
+                [~, s, e] = regexp(Stline,obj.Sexpr_identifier, 'match', 'start', 'end');
                 
                 if ~isempty(s)
                     fseek(Nfid_old,0,'cof');
@@ -220,7 +208,7 @@ classdef Injector < opencossan.common.CossanObject
                     Snew = {};
                     for it=1:length(s)
                         var_id=var_id+1;
-                        Sformat = Xinjector.Xidentifier(var_id).Sfieldformat;
+                        Sformat = obj.Identifiers(var_id).FieldFormat;
                         
                         % Replace the xml identifier in the string with the
                         % original value
@@ -228,16 +216,10 @@ classdef Injector < opencossan.common.CossanObject
                         % the original values
                         switch lower(Sformat)
                             case {'nastran8'}
-                                Svalue= Identifier.num2nastran8(Xinjector.Xidentifier(var_id).Noriginal);
+                                Svalue= opencossan.common.utilities.num2nastran8(obj.Identifiers(var_id).OriginalValue);
                                 [Snew{it}, errmsg] = sprintf(Svalue);%#ok<*AGROW>
                             case {'nastran16'}
-                                Svalue= Identifier.num2nastran16(Xinjector.Xidentifier(var_id).Noriginal);
-                                [Snew{it}, errmsg] =sprintf(Svalue);
-                            case {'nastran16_table'}
-                                Svalue= Xinjector.Xidentifier(var_id).Soriginal;
-                                [Snew{it}, errmsg] =sprintf(num2str(Svalue));
-                            case {'abaqus_table'}
-                                Svalue= Xinjector.Xidentifier(var_id).Soriginal;
+                                Svalue= opencossan.common.utilities.num2nastran16(obj.Identifiers(var_id).OriginalValue);
                                 [Snew{it}, errmsg] =sprintf(Svalue);
                             otherwise
                                 [Vpos]=regexp(Sformat,'%');
@@ -248,7 +230,7 @@ classdef Injector < opencossan.common.CossanObject
                                     Sformat=Sformat(Vpos(1):Vpos(2)-1);
                                 end
                                 
-                                [Snew{it}, errmsg] = sprintf(Sformat,Xinjector.Xidentifier(var_id).Noriginal);
+                                [Snew{it}, errmsg] = sprintf(Sformat,obj.Identifiers(var_id).OriginalValue);
                         end
                         
                         if ~isempty(errmsg)
@@ -257,14 +239,14 @@ classdef Injector < opencossan.common.CossanObject
                     end
                     
                     if length(s)==1
-                        Stline=[Stline(1:s(it)-1) Snew{1} Stline(e(it)+1:end)];
+                        Stline=strcat(Stline(1:s(it)-1),Snew{1},Stline(e(it)+1:end));
                     else
                         Stline_old=Stline;
                         Stline=Stline_old(1:s(1)-1);
                         for it=1:length(s)-1
-                            Stline=[Stline Snew{it} Stline_old(e(it)+1:s(it+1)-1)];
+                            Stline=strcat(Stline,Snew{it},Stline_old(e(it)+1:s(it+1)-1));
                         end
-                        Stline=[Stline Snew{end} Stline_old(e(end)+1:end)];
+                        Stline=strcat(Stline,Snew{end},Stline_old(e(end)+1:end));
                     end
                     
                 end
@@ -275,8 +257,8 @@ classdef Injector < opencossan.common.CossanObject
             fclose(Nfid_old);
             fclose(Nfid_new);
             
-            opencossan.OpenCossan.cossanDisp(['Injected input file with original values: ' ....
-                fullfile(Xinjector.Sscanfilepath,Xinjector.FileName) ],4)
+            opencossan.OpenCossan.cossanDisp(['Injected target input file with original values: ' ....
+                fullfile(obj.ScanFilePath,obj.FileName) ],4)
         end
         
         inject(Xi,Pinput)
@@ -307,13 +289,13 @@ classdef Injector < opencossan.common.CossanObject
             fclose(Nfid);
             opencossan.OpenCossan.cossanDisp(['[COSSAN-X.Injector.createByScan] Close File to be scanned: ' obj.ScanFileName],2)
             
-            if isempty(obj.Xidentifier)
+            if isempty(obj.Identifiers)
                 warning('openCOSSAN:Injector:createByScan',...
                     ['No identifiers found in file ' obj.ScanFileName ...
                     '\nConsider including this file in the property Caddfiles of Connector.'])
             end
             
-            if isempty(obj.Sdescription)
+            if isempty(obj.Description)
                 % if no description is given, create one
                 obj.Sdescription=['Injector created from file ' obj.ScanFileName];
             end
