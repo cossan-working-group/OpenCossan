@@ -8,7 +8,6 @@ classdef (Abstract) RandomVariable < matlab.mixin.Heterogeneous & opencossan.com
     %   Properties:
     %       Mean
     %       Std
-    %       Shift
     
     %{
     This file is part of OpenCossan <https://cossan.co.uk>.
@@ -28,10 +27,6 @@ classdef (Abstract) RandomVariable < matlab.mixin.Heterogeneous & opencossan.com
     along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
     %}
     
-    properties
-        Shift(1,1) double {mustBeNumeric} = 0; % Distribution shift
-    end
-    
     properties (Dependent)
         CoV; % Coefficient of variation
     end
@@ -42,17 +37,8 @@ classdef (Abstract) RandomVariable < matlab.mixin.Heterogeneous & opencossan.com
     end
     
     methods
-        %% Constructor
-        function obj = RandomVariable(varargin)
-            names = "Shift";
-            defaults = {0};
-            
-            [results, super_args] = opencossan.common.utilities.parseOptionalNameValuePairs(...
-                names, defaults, varargin{:});
-                        
-            obj@opencossan.common.CossanObject(super_args{:});
-            
-            obj.Shift = results.shift;
+        function obj = RandomVariable(varargin)                        
+            obj@opencossan.common.CossanObject(varargin{:});
         end              
         
         function CoV = get.CoV(obj)

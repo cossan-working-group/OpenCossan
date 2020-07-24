@@ -28,9 +28,11 @@ function [mean, std] = getMoments(obj, varargin)
     end
     
     % RandomVariables
-    mean(1, obj.RandomVariableNames) = {obj.RandomVariables.Mean};
-    if nargout > 1
-        std(1, obj.RandomVariableNames) = {obj.RandomVariables.Std};
+    if obj.NumberOfRandomVariables > 0
+        mean(1, obj.RandomVariableNames) = {obj.RandomVariables.Mean};
+        if nargout > 1
+            std(1, obj.RandomVariableNames) = {obj.RandomVariables.Std};
+        end
     end
     
     % RandomVariableSets

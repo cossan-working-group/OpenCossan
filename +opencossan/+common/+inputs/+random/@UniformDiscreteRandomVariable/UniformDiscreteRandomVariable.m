@@ -107,7 +107,7 @@ classdef UniformDiscreteRandomVariable < opencossan.common.inputs.random.RandomV
             %EVALPDF Uniform discrete probability density function.
             % Y = evalpdf(obj,X) returns the pdf of the uniform discrete
             % distribution, evaluated at the values X.
-            Vpdf_vX = pdf('unid',Vx - obj.Bounds(1) - obj.Shift,obj.Bounds(2) - obj.Bounds(1));
+            Vpdf_vX = pdf('unid',Vx - obj.Bounds(1),obj.Bounds(2) - obj.Bounds(1));
         end
     end
     

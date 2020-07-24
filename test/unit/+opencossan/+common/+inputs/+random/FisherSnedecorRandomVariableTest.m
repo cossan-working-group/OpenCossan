@@ -58,14 +58,6 @@ classdef FisherSnedecorRandomVariableTest < matlab.unittest.TestCase
             testCase.verifyEqual(random.Mean, testMean);   
         end
         
-        %% shifting
-        function shifting(testCase)
-            random = opencossan.common.inputs.random.FisherSnedecorRandomVariable('p1',1,'p2',0.5);
-            meanWithoutShift = random.Mean;
-            random.Shift = 1;
-            testCase.verifyEqual(random.Mean, meanWithoutShift + 1);
-        end
-        
          %% sample
         function SampleEmpty(testCase)
             random = opencossan.common.inputs.random.FisherSnedecorRandomVariable('p1',1,'p2',0.5);

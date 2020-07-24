@@ -27,9 +27,6 @@
 %  You should have received a copy of the GNU General Public License
 %  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
 % =====================================================================
-clear;
-close all
-clc;
 
 % Reset the random number generator in order to obtain always the same results.
 % DO NOT CHANGE THE VALUES OF THE SEED
@@ -40,38 +37,37 @@ opencossan.OpenCossan.resetRandomNumberGenerator(56236)
 %
 % Define a siple model based on a Matlab function
 % Construct a Mio object
-Xm=opencossan.workers.Mio('description', 'Performance function', ...
+mio = opencossan.workers.Mio('description', 'Performance function', ...
     'Script','for j=1:length(Tinput), Toutput(j).out1=sqrt(Tinput(j).RV1^2+Tinput(j).RV2^2); end', ...
     'OutputNames',{'out1'},...
     'InputNames',{'RV1' 'RV2'},...
     'Format','structure',...
     'IsFunction',false); % This flag specify if the .m file is a script or a function.
 % Construct the Evaluator
-Xeval1 = opencossan.workers.Evaluator('Xmio',Xm,'Sdescription','fist Evaluator');
+evaluator = opencossan.workers.Evaluator('Xmio',mio,'Sdescription','fist Evaluator');
 
 % In order to be able to test our Evaluator we need an Input object:
 % Define an Input
-RV1=opencossan.common.inputs.random.NormalRandomVariable('mean',0,'std',1);
-RV2=opencossan.common.inputs.random.NormalRandomVariable('mean',0,'std',1);
-Xpar1=opencossan.common.inputs.Parameter('value',3);
-Xpar2=opencossan.common.inputs.Parameter('value',6);
-% Define the RVset
-Xrvs1=opencossan.common.inputs.random.RandomVariableSet('names',{'RV1', 'RV2'},'members',[RV1; RV2]);
-% Define Xinput
-Xin = opencossan.common.inputs.Input('description','Input for Tutorial Evaluator');
-Xin = add(Xin,'Member',Xrvs1,'name','Xrvs1');
-Xin = add(Xin,'member',Xpar1,'name','Xpar1');
-Xin = add(Xin,'member',Xpar2,'name','Xpar2');
-Xin = sample(Xin,'Nsamples',2);
-% TestX evaluetor
-Xo1=Xeval1.apply(Xin);
-display(Xo1)
-Vout=Xo1.getValues('Cnames',Xeval1.Coutputnames);
+rv1 = opencossan.common.inputs.random.NormalRandomVariable('mean',0,'std',1);
+rv2 = opencossan.common.inputs.random.NormalRandomVariable('mean',0,'std',1);
+par1 = opencossan.common.inputs.Parameter('value',3);
+par2 = opencossan.common.inputs.Parameter('value',6);
 
+% Define the RVset
+rvset = opencossan.common.inputs.random.RandomVariableSet('names',["RV1", "RV2"],'members',[rv1; rv2]);
+% Define Input
+input = opencossan.common.inputs.Input();
+input = add(input,'Member',rvset,'name','Xrvs1');
+input = add(input,'member',par1,'name','Xpar1');
+input = add(input,'member',par2,'name','Xpar2');
+samples = sample(input,'samples',2);
+% TestX evaluetor
+out = evaluator.apply(samples);
+disp(out1.Samples);
 
 % Validate Solution
 Vreference= [1.1261e+00;7.6901e-01];
-assert(max(abs(Vout-Vreference))<1e-4,...
+assert(max(abs(out.Samples.out1-Vreference))<1e-4,...
     'CossanX:Tutorials:TutorialEvaluator','Reference Solution does not match.')
 
 %% Second example with multiple model evaluated sequentially. 
@@ -84,36 +80,30 @@ assert(max(abs(Vout-Vreference))<1e-4,...
 % factors computed internally to the evaluator object.
 
 % Construct a Mio object
-Xm2=opencossan.workers.Mio('description', 'Performance function', ...
-    'Script','for j=1:length(Tinput), Toutput(j).out2=Tinput(j).out1+3; end', ...
-    'OutputNames',{'out2'},...
-    'InputNames',{'out1'},...
-    'Format','structure',...
-    'IsFunction',false); % This flag specify if the .m file is a script or a function.
+mio2 = opencossan.workers.Mio('description', 'Performance function', ...
+    'FunctionHandle', @(x) x + 3, ...
+    'OutputNames',{'out2'}, ...
+    'InputNames',{'out1'}, ...
+    'Format','matrix', ...
+    'IsFunction', true); % This flag specify if the .m file is a script or a function.
 
 % Construct a Mio object
-Xm3=opencossan.workers.Mio('description', 'Performance function', ...
-    'Script','for j=1:length(Tinput), Toutput(j).out3=Tinput(j).out2+Tinput(j).RV1; end', ...
-    'OutputNames',{'out3'},...
-    'InputNames',{'out2' 'RV1'},...
-    'Format','structure',...
-    'IsFunction',false);
+mio3 = opencossan.workers.Mio('description', 'Performance function', ...
+    'FunctionHandle', @(x) x(:, 1) + x(:, 2), ...
+    'OutputNames',{'out3'}, ...
+    'InputNames',{'out2' 'RV1'}, ...
+    'Format','matrix', ...
+    'IsFunction', true);
 
-XevALL=opencossan.workers.Evaluator('CXmembers',{Xm Xm2 Xm3});
-XevALL.Cinputnames
-% The provided output are shows in the field Coutputnames
-XevALL.Coutputnames
-
+evalWithMultipleMios = opencossan.workers.Evaluator('CXmembers',{mio mio2 mio3});
 
 %% Deterministic Analysis
 %
-Xoutdet=XevALL.deterministicAnalysis(Xin);
-display(Xoutdet)
-Vout=Xoutdet.getValues('Sname','out3');
+outDeterministic = evalWithMultipleMios.deterministicAnalysis(input);
+disp(outDeterministic.Samples);
 
 % Validate Solution
-Vreference= 3;
-assert(abs(Vout-Vreference)<1e-4,...
+assert(outDeterministic.Samples.out3 == 3,...
     'CossanX:Tutorials:TutorialEvaluator','Reference Solution does not match.')
 
 %% Execution strategies
@@ -129,25 +119,26 @@ assert(abs(Vout-Vreference)<1e-4,...
 % models are exetuted before processing the next samples). 
 
 % The default option is HorizontalSplit
-display(XevALL.LverticalSplit)
+display(evalWithMultipleMios.LverticalSplit)
 
-XinTest(1) = sample(Xin,'Nsamples',1);
-XinTest(2) = sample(Xin,'Nsamples',10);
-XinTest(3) = sample(Xin,'Nsamples',100);
-XinTest(4) = sample(Xin,'Nsamples',1000);
+samples = {};
+samples{1} = sample(input,'samples',1);
+samples{2} = sample(input,'samples',10);
+samples{3} = sample(input,'samples',100);
+samples{4} = sample(input,'samples',1000);
 
-%  create an empty connector
-Xc=Connector;
-XevALLverticalSplit=Evaluator('CXmembers',{Xm Xm2 Xc Xm3},'LverticalSplit',true);
-XevALLhorizontalSplit=Evaluator('CXmembers',{Xm Xm2 Xc Xm3},'LverticalSplit',false);
+verticalSplit = opencossan.workers.Evaluator('CXmembers',{mio mio2 mio3},'LverticalSplit',true);
+horizontalSplit = opencossan.workers.Evaluator('CXmembers',{mio mio2 mio3},'LverticalSplit',false);
 
-Vtime=zeros(length(XinTest),2);
+time = zeros(length(samples), 2);
 
 % Here we are testing the performance
-for n=1:length(XinTest)
-    tic, [~]=XevALLverticalSplit.apply(XinTest(n)); Vtime(n,1)=toc;
-    tic, [~]=XevALLhorizontalSplit.apply(XinTest(n)); Vtime(n,2)=toc;
+for n=1:length(samples)
+    tic; verticalSplit.apply(samples{n}); time(n, 1) = toc;
+    tic; horizontalSplit.apply(samples{n}); time(n, 2) = toc;
 end
+
+disp(time);
 
 % Usually the horizontal split is the fasted method. However, some analysis
 % required to split the analyisis in vertical blocks. 

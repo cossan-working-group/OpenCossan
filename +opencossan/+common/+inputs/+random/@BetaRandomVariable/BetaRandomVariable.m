@@ -72,7 +72,6 @@ classdef BetaRandomVariable < opencossan.common.inputs.random.RandomVariable
         
         function mean = get.Mean(obj)
             [mean, ~] =  betastat(obj.Alpha,obj.Beta);
-            mean = mean + obj.Shift;
         end
         
         function std = get.Std(obj)
@@ -84,41 +83,41 @@ classdef BetaRandomVariable < opencossan.common.inputs.random.RandomVariable
             %CDF2PHYSICAL Inverse beta cumulative distribution function.
             % VX = cdf2physical(obj,VX) returns the inverse cdf of the
             % beta distribution, evaluated at the values VU.
-            VX = betainv(VU,obj.Alpha,obj.Beta) + obj.Shift;
+            VX = betainv(VU,obj.Alpha,obj.Beta);
         end
         
         function VX = map2physical(obj,VU)
             % MAP2PHYSICAL Map from standard normal into physical space.
             % VX = map2physical(obj,VU) maps the values in VU from standard
             % normal into physical space.
-            VX = betainv(normcdf(VU),obj.Alpha,obj.Beta) + obj.Shift;
+            VX = betainv(normcdf(VU),obj.Alpha,obj.Beta);
         end
         
         function VU = map2stdnorm(obj,VX)
             % MAP2STDNORM Map from physical into standard normal space.
             % VU = map2stdnorm(obj,VX) maps the values in VX from physical
             % into standard normal space.
-            VU = norminv(betacdf(VX - obj.Shift,obj.Alpha,obj.Beta));
+            VU = norminv(betacdf(VX,obj.Alpha,obj.Beta));
         end
         
         function VU = physical2cdf(obj,VX)
             %PHYSICAL2CDF Beta cumulative distribution function.
             % VU = physical2cdf(obj,VX) returns the cdf of the beta
             % distribution, evaluated at the values VX.
-            VU = betacdf(VX - obj.Shift,obj.Alpha,obj.Beta);
+            VU = betacdf(VX,obj.Alpha,obj.Beta);
         end
         
         function Vpdf_vX = evalpdf(obj,Vx)
             %EVALPDF Beta probability density function.
             % Y = evalpdf(obj,X) returns the pdf of the beta
             % distribution, evaluated at the values X.
-            Vpdf_vX = betapdf(Vx - obj.Shift,obj.Alpha,obj.Beta);
+            Vpdf_vX = betapdf(Vx,obj.Alpha,obj.Beta);
         end
     end
     
     methods (Access = protected)
         function samples = getSamples(obj,size)
-            samples = betarnd(obj.Alpha,obj.Beta,size) + obj.Shift;
+            samples = betarnd(obj.Alpha,obj.Beta,size);
         end
     end
     

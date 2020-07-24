@@ -38,11 +38,16 @@ function checkFunction(obj)
                 names(i), strjoin(names(idx), ','));
             
             for n = names(idx)
-                assert(ismember(n, blacklist(names(i))), ...
-                    'OpenCossan:Input:checkFunctions', ...
-                    'Circular dependency between functions %s and %s.', ...
-                    names(i), n);
-                blacklist(n) = [blacklist(n) names(i)];
+                if isKey(blacklist, names(i))
+                    assert(~ismember(n, blacklist(names(i))), ...
+                        'OpenCossan:Input:checkFunctions', ...
+                        'Circular dependency between functions %s and %s.', ...
+                        names(i), n);
+                    blacklist(n) = [blacklist(n) names(i)];
+                else
+                    blacklist(n) = names(i);
+                end
+                
             end
         end
     end

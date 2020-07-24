@@ -77,7 +77,6 @@ classdef GeneralizedParetoRandomVariable < opencossan.common.inputs.random.Rando
         
         function mean = get.Mean(obj)
             [mean,~] = gpstat(obj.K,obj.Sigma,obj.Theta);
-            mean = mean + obj.Shift;
         end
         
         function std = get.Std(obj)
@@ -89,41 +88,41 @@ classdef GeneralizedParetoRandomVariable < opencossan.common.inputs.random.Rando
             %CDF2PHYSICAL Inverse exponential cumulative distribution function.
             % VX = cdf2physical(obj,VX) returns the inverse cdf of the
             % exponential distribution, evaluated at the values VU.
-            VX = gpinv(VU,obj.K,obj.Sigma,obj.Theta) + obj.Shift;
+            VX = gpinv(VU,obj.K,obj.Sigma,obj.Theta);
         end
         
         function VX = map2physical(obj,VU)
             % MAP2PHYSICAL Map from standard normal into physical space.
             % VX = map2physical(obj,VU) maps the values in VU from standard
             % normal into physical space.
-            VX = gpinv(normcdf(VU),obj.K,obj.Sigma,obj.Theta) + obj.Shift;
+            VX = gpinv(normcdf(VU),obj.K,obj.Sigma,obj.Theta);
         end
         
         function VU = map2stdnorm(obj,VX)
             % MAP2STDNORM Map from physical into standard normal space.
             % VU = map2stdnorm(obj,VX) maps the values in VX from physical
             % into standard normal space.
-            VU = norminv(gpcdf(VX - obj.Shift,obj.K,obj.Sigma,obj.Theta));
+            VU = norminv(gpcdf(VX,obj.K,obj.Sigma,obj.Theta));
         end
         
         function VU = physical2cdf(obj,VX)
             %PHYSICAL2CDF Generalized pareto cumulative distribution function.
             % VU = physical2cdf(obj,VX) returns the cdf of the Generalized 
             % pareto distribution, evaluated at the values VX.
-            VU = gpcdf(VX - obj.Shift,obj.K,obj.Sigma,obj.Theta);
+            VU = gpcdf(VX,obj.K,obj.Sigma,obj.Theta);
         end
         
         function Vpdf_vX = evalpdf(obj,Vx)
             %EVALPDF Generalized pareto probability density function.
             % Y = evalpdf(obj,X) returns the pdf of the generalized pareto
             % distribution, evaluated at the values X.
-            Vpdf_vX = gppdf(Vx - obj.Shift,obj.K,obj.Sigma,obj.Theta);
+            Vpdf_vX = gppdf(Vx,obj.K,obj.Sigma,obj.Theta);
         end
     end
     
     methods (Access = protected)
         function samples = getSamples(obj,size)
-            samples = gprnd(obj.K,obj.Theta,obj.Sigma,size) + obj.Shift;
+            samples = gprnd(obj.K,obj.Theta,obj.Sigma,size);
         end
     end
     

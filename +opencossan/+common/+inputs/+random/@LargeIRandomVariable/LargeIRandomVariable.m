@@ -72,7 +72,7 @@ classdef LargeIRandomVariable < opencossan.common.inputs.random.RandomVariable
         end
         
         function mean = get.Mean(obj)
-            mean = obj.Mean_ + obj.Shift;
+            mean = obj.Mean_;
         end
         
         function obj = set.Mean(obj,mean)
@@ -93,7 +93,7 @@ classdef LargeIRandomVariable < opencossan.common.inputs.random.RandomVariable
             % large-I distribution, evaluated at the values VU.
             large_alpha = pi/(sqrt(6)*obj.Std);
             large_u = obj.Mean - 0.5772156/large_alpha;
-            VX = large_u - log(-log(VU))/large_alpha + obj.Shift;
+            VX = large_u - log(-log(VU))/large_alpha;
         end
         
         function VX = map2physical(obj,VU)
@@ -102,7 +102,7 @@ classdef LargeIRandomVariable < opencossan.common.inputs.random.RandomVariable
             % normal into physical space.
             large_alpha = pi/(sqrt(6)*obj.Std);
             large_u = obj.Mean - 0.5772156/large_alpha;
-            VX = large_u - log(-log(normcdf(VU)))/large_alpha + obj.Shift;
+            VX = large_u - log(-log(normcdf(VU)))/large_alpha;
         end
         
         function VU = map2stdnorm(obj,VX)
@@ -129,15 +129,15 @@ classdef LargeIRandomVariable < opencossan.common.inputs.random.RandomVariable
             % distribution, evaluated at the values X.
             large_alpha = pi/(sqrt(6)*obj.Std);
             large_u = obj.Mean - 0.5772156/large_alpha;
-            Vpdf_vX = large_alpha * exp(-large_alpha*(Vx - obj.Shift - large_u)) .* exp(-exp(-large_alpha*(Vx - obj.Shift - large_u)));
+            Vpdf_vX = large_alpha * exp(-large_alpha*(Vx- large_u)) .* exp(-exp(-large_alpha*(Vx - large_u)));
         end
     end
     
     methods (Access = protected)
         function samples = getSamples(obj,size)
             large_alpha = pi/(sqrt(6)*obj.Std);
-            large_u = obj.Mean - 0.5772156/large_alpha - obj.Shift;
-            samples = large_u-log(-log(rand(size)))/large_alpha + obj.Shift;
+            large_u = obj.Mean - 0.5772156/large_alpha;
+            samples = large_u-log(-log(rand(size)))/large_alpha;
         end
     end
     

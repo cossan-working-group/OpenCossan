@@ -67,7 +67,7 @@ classdef DiscreteDesignVariable < opencossan.optimization.DesignVariable
             optional = opencossan.common.utilities.parseOptionalNameValuePairs(...
                 "nsamples", {1}, varargin{:});
 
-            samples = obj.Support(random('unid', length(obj.Support), optional.nsamples, 1));
+            samples = obj.Support(random('unid', length(obj.Support), optional.nsamples, 1))';
         end
 
         function values = getValues(obj, percentiles)

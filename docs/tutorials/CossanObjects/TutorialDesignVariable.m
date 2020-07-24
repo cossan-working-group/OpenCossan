@@ -31,58 +31,44 @@
 %  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
 % =====================================================================
 
-clear;
-close all
-clc;
-
 %% Define a Continuos Design Variable
 % This example shows how to define a continuos DesignVariable. The minValue and
 % maxValue property names are used to defined the bounds of the DesignVariable
-DV1 = opencossan.optimization.DesignVariable('value',30,'minvalue',10,'maxvalue',50);
+dv1 = opencossan.optimization.ContinuousDesignVariable('value',30,'lowerbound',10,'upperbound',50);
 
 % The content of the object can be see using the dispay method
-display(DV1)
+display(dv1)
 
 %%  Define a Discrete Design Variable
 % Discrete Desing Variable are define using the PropertyName Vsupport. It is not
 % necessary to specify the bounds of discrete DesignVariable
-DV2 = opencossan.optimization.DesignVariable('value',3,'Vsupport',1:2:13);
+dv2 = opencossan.optimization.DiscreteDesignVariable('value',3,'support',1:2:13);
 % The content of the object can be see using the dispay method
-display(DV2)
+display(dv2)
 
 %% Adding Design Variables to Input
-Xin   = opencossan.common.inputs.Input('description','Input Object of our model',...
-    'members',{DV1 DV2},'membersnames',{'DV1' 'DV2'});
-% It is possible to retrieve the name of the DesignVariable using the method
-% CnamesDesignVariabl@Input
-Xin.DesignVariableNames % Names of DVs
+input = opencossan.common.inputs.Input('description','Input Object of our model',...
+    'members',{dv1 dv2},'names',["DV1" "DV2"]);
 
-% The number of designVariable are shown by the method NdesignVariables@Input
-Xin.NdesignVariables     % Number of DVs
 
 %% Sampling values
 % The method sample is used to genarate samples of the object DesignVariable
-Vout1=DV1.sample('Nsamples',10)
+dv1.sample('samples',10)
 
-Vout2=DV2.sample('Nsamples',10)
+dv2.sample('samples',10)
 
 % The samples method can be applied directly to the Input object
-Xin=Xin.sample('Nsamples',10);
-% The matrix of sampled values is stored in the field MdoeDesignVariables of the
-% Samples object.
-disp(Xin.sample.setDesignVariable)
+samples = input.sample('samples',10);
 
 %% Sampling from DesignVariable with infinite support
 % Create a design variable with infinite support
 
-DV3 = DesignVariable('value',3);
+dv3 = opencossan.optimization.ContinuousDesignVariable('value',3);
 % Show Design Variable
-display(DV3)
+display(dv3)
 
-% Generate sample for DV3
+% Generate sample for dv3
 % It is necessary to define a parturbation around the actual value.
-Vout3=DV3.sample('Nsamples',10,'perturbation',3);
-
-Xinput=Input('Xdesignvariable',DV3);
+dv3.sample('samples',10,'perturbation',3);
 
 

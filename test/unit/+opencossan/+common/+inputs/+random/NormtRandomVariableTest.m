@@ -79,14 +79,6 @@ classdef NormtRandomVariableTest < matlab.unittest.TestCase
             testCase.verifyEqual(random.Bounds(1), 2);
         end
         
-        %% shifting
-        function shifting(testCase)
-            random = opencossan.common.inputs.random.NormtRandomVariable(...
-                'mu',1.5,'sigma',0.5,'bounds',[1;2]);
-            random.Shift = 1;
-            testCase.verifyEqual(2.2550, random.Mean, 'RelTol', 0.1);
-        end
-        
         %% sample
         function SampleEmpty(testCase)
             random = opencossan.common.inputs.random.NormtRandomVariable('mu',1.5,'sigma',0.5,'bounds',[1;2]);

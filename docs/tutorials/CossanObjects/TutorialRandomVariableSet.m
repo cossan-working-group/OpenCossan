@@ -70,15 +70,12 @@ Xrvs3_CovMtrx   = full(Xrvs3.Covariance);
 %% Methods
 
 % evaluation of the pdf in the physical space
-[Vpdf01, Vpdfrv01] = evalpdf(Xrvs1,'MXSamples',[1 2 ]);
+pdf01 = pdf(Xrvs1, table(1, 2, 'VariableNames', ["Xrv1", "Xrv2"]));
 %the number of columns of the input matrix must be equal to the number of
 %random variables in the set
 
 %evaluation of the pdf in the standard normal space
-[Vpdf02, Vpdfrv02] = evalpdf(Xrvs1,'MUSamples',[1 2;2 1]);
-
-%evaluation of the LOGARITHM of the pdf in the standard normal space
-[Vpdf03, Vpdfrv03] = evalpdf(Xrvs1,'MUSamples',[1 2],'Llog',true);
+pdf02 = pdf(Xrvs1, table([1;2], [2; 1], 'VariableNames', ["Xrv1", "Xrv2"]));
 
 % map2physical:converts the values (given as as an input) from the standard normal space
 % to the physical space

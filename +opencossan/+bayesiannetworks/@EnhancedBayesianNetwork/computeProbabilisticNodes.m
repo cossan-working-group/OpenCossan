@@ -155,9 +155,9 @@ for indCont=1:length(Cnodes2compute)
             'InputNames',{Parents{:}},...
             'Format','table');
         
-        Input      = sample(Input,'Nsamples',10000);
-        TableOutput = Xm.evaluate(Input.getTable);
-        values      = TableOutput.out; % Results of the model evaluation on the samples
+        input = sample(Input,'samples',10000);
+        output = Xm.evaluate(input);
+        values      = output.out; % Results of the model evaluation on the samples
         %% TO DO: INTRODUCE TRUNCATED RANDOM VARIABLE IF REQUESTED
         newCPD{combind{:}}  = UserDefinedRandomVariable('data',values,'Bounds',[1e-20,1-1e-20]); % Build UserDefRV on the results
     end

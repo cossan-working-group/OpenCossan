@@ -133,7 +133,7 @@ Xhydrostation.makeGraph;
 
 % The Enhanced Bayesian network must be reduced to a traditional BN
 % choose the sampling method and use reduce2BN method to reduce the EBN
-XMC=MonteCarlo('Nsamples',1000,'nseedrandomnumbergenerator',8128);
+XMC=MonteCarlo('samples',1000, 'seed',8128);
 XBNhydrostation=Xhydrostation.reduce2BN('SimulationObject',XMC);
 XBNhydrostation.makeGraph;
 

@@ -36,7 +36,7 @@ function [TableOutput] = executeWorkersVertical(Xobj,TableInput)
 assert(istable(TableInput),'OpenCossan:Evaluator:executeWorkersVertical:wrongInput',...
     'A Tables object is required as input.\nProvided class %s is not valid',class(TableInput))
 % Retrieve Analysis object;
-Xanalysis=OpenCossan.getAnalysis;
+Xanalysis=opencossan.OpenCossan.getAnalysis();
 
 % Preallocate table
 TableOutput=array2table(zeros(height(TableInput),length(Xobj.Coutputnames)),...
@@ -53,7 +53,7 @@ for ns=1:height(TableInput)
     
     % Evaluator execution
     for n=1:length(Xobj.CXsolvers)
-        OpenCossan.cossanDisp(['[Status:workers  ]  * Processing solver ' ...
+        opencossan.OpenCossan.cossanDisp(['[Status:workers  ]  * Processing solver ' ...
             num2str(n) '/' num2str(length(Xobj.CXsolvers))],4)
         
         % Merge tableInput with output produced by the workers and then
@@ -68,7 +68,7 @@ for ns=1:height(TableInput)
             % Execute worker. 
             % Only the input required by the worker are passes. No recheck
             % is needed in the evaluate method. 
-            TableOutputSolverTmp=Xobj.CXsolvers{n}.evaluate(TableSolver(:,Xobj.CXsolvers{n}.Cinputnames));
+            TableOutputSolverTmp=Xobj.CXsolvers{n}.evaluate(TableSolver(:,Xobj.CXsolvers{n}.InputNames));
         catch Exception
             warning('OpenCossan:Evaluator:executeWorkersVertical:workerFaild',...
             'Unable to execute worker %i of type %s',n,class(Xobj.CXsolvers{n}))
@@ -78,11 +78,11 @@ for ns=1:height(TableInput)
             causeException = MException(msgID,msg);
             
             % Store Exception in the Analysis object
-            Xanalysis.Cerrors{end+1} = addCause(Exception,causeException);
+            Xanalysis.ErrorsStack{end+1} = addCause(Exception,causeException);
             
             % Construct a tableOutputSolverTmp with NaN
-            TableOutputSolverTmp=array2table(NaN(1,length(Xobj.CXsolvers{n}.Coutputnames)),...
-                'VariableNames',Xobj.CXsolvers{n}.Coutputnames);
+            TableOutputSolverTmp=array2table(NaN(1,length(Xobj.CXsolvers{n}.OutputNames)),...
+                'VariableNames',Xobj.CXsolvers{n}.OutputNames);
         end
         % Merge workers output for the currenct analysis
         TableOutputSolver=[TableOutputSolver, TableOutputSolverTmp]; %#ok<AGROW>
