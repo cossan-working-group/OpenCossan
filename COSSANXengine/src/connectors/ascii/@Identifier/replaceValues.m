@@ -136,6 +136,9 @@ for ivar=1:length(Xidentifier)
             otherwise
                 Svalue=num2str(value,Xidentifier(ivar).Sfieldformat);
                 count=fprintf(Nfid,Xidentifier(ivar).Sfieldformat,value);
+                if count > Ndigits0
+                    Ndigits0 = count;
+                end
         end
         
         %% Used for debugging
