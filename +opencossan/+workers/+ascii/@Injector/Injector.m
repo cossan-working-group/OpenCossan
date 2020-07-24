@@ -137,7 +137,7 @@ classdef Injector < opencossan.common.CossanObject
                             ' Filename: %s'],  obj.ScanFileName,obj.FileName')
                     end
 
-                    %% Include orginal values in the input file
+                    %% Include original values in the input file
                     if ~isempty(obj.Identifiers)
                         obj.replaceIdentifiers();
                     else
@@ -239,14 +239,17 @@ classdef Injector < opencossan.common.CossanObject
                     end
                     
                     if length(s)==1
-                        Stline=strcat(Stline(1:s(it)-1),Snew{1},Stline(e(it)+1:end));
+                        % need to convert the char array into string
+                        % because now strcat remove trailing spaces from
+                        % char arrays!
+                        Stline=strcat(string(Stline(1:s(it)-1)),Snew{1},string(Stline(e(it)+1:end)));
                     else
-                        Stline_old=Stline;
-                        Stline=Stline_old(1:s(1)-1);
+                        Stline_old=Stline; % this is a character array
+                        Stline=string(Stline_old(1:s(1)-1));
                         for it=1:length(s)-1
-                            Stline=strcat(Stline,Snew{it},Stline_old(e(it)+1:s(it+1)-1));
+                            Stline=strcat(Stline,Snew{it},string(Stline_old(e(it)+1:s(it+1)-1)));
                         end
-                        Stline=strcat(Stline,Snew{end},Stline_old(e(end)+1:end));
+                        Stline=strcat(Stline,Snew{end},string(Stline_old(e(end)+1:end)));
                     end
                     
                 end
@@ -261,7 +264,7 @@ classdef Injector < opencossan.common.CossanObject
                 fullfile(obj.ScanFilePath,obj.FileName) ],4)
         end
         
-        inject(Xi,Pinput)
+        inject(obj,TableInput)
         
     end
     

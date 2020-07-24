@@ -1,4 +1,4 @@
-function inject(Xi,Tinput)
+function inject(obj,TableInput)
 %%
 %  Inject the input values into INPUT ASCII FILE
 %
@@ -19,12 +19,12 @@ import opencossan.OpenCossan
 % Process all the optional arguments and assign them the corresponding
 % default value if not passed as argument
 
-assert(isa(Tinput,'struct'),'openCOSSAN:injector:inject', ...
-    'At least the input values must be passed as a structure');
-fieldNames = fieldnames(Tinput);
+assert(isa(TableInput,'table'),'openCOSSAN:Injector:Inject', ...
+    'The input values must be passed in a table');
+fieldNames = TableInput.Properties.VariableNames;
 for i = 1:length(fieldNames)
-   assert(length(Tinput.(fieldNames{i}))==1,'openCOSSAN:injector:inject', ...
-    'Only one realization of the input parameters is allowed'); 
+   assert(length(TableInput.(fieldNames{i}))==1,'openCOSSAN:Injector:InjectTooManySamples', ...
+    'Only one realization of the input parameters can be injected at a time'); 
 end
 
 
@@ -55,7 +55,7 @@ if OpenCossan.getVerbosityLevel>3
 end
 
 %% Replace values in the FE input file
-SfullName=fullfile(Xi.Sworkingdirectory,Xi.Srelativepath,Xi.Sfile);
+SfullName=fullfile(opencossan.OpenCossan.getWorkingPath,obj.RelativePath,obj.FileName);
 
 OpenCossan.cossanDisp(['[openCOSSAN.Injector.inject] Replacing value in the file: ' SfullName ],2)
 
@@ -65,8 +65,8 @@ if OpenCossan.getVerbosityLevel>3
     type(SfullName)
 end
 
-if isa(Xi,'opencossan.workers.ascii.TableInjector')
-    Xi.doInject(Tinput);
+if isa(obj,'opencossan.workers.ascii.TableInjector')
+    obj.doInject(TableInput);
 else
     
     [Nfid,Serror] = fopen(SfullName,'r+'); % open ASCII file
@@ -77,14 +77,11 @@ else
         OpenCossan.cossanDisp(['[openCOSSAN.Injector.inject] Fid: ' num2str(Nfid)],4)
     end
     
-    if ~isempty(Serror)
-        OpenCossan.cossanDisp('[openCOSSAN.Injector.inject] Content of the current directory: ',1)
-        error('openCOSSAN:Injector:inject',...
-            ['Error opening file ' SfullName ' \n Error: ' Serror ]);
-    end
+    assert(isempty(Serror),'openCOSSAN:Injector:InjectFileOpenError',...
+            'Error opening file %s \nError: %s', SfullName, Serror );
     
-    if ~isempty(Xi.Xidentifier)
-        Xi.Xidentifier.replaceValues('Nfid',Nfid,'Tinput',Tinput);
+    if ~isempty(obj.Identifiers)
+        obj.Identifiers.replaceValues('FileID',Nfid,'TableInput',TableInput);
     else
         warning('openCOSSAN:Injector:inject',['No identifiers defined in input file.\n'...
             'Consider put your input file in CadditionalFiles of Connector instead']);

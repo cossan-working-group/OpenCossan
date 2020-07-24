@@ -1,4 +1,4 @@
-function replaceValues(Xidentifier,varargin)
+function replaceValues(obj,varargin)
 %REPLACEVALUES This method replace values in the open file
 %
 %
@@ -25,43 +25,43 @@ along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
 import opencossan.common.utilities.*
 
 %% Process Inputs
-% OpenCossan.validateCossanInputs(varargin{:});
-LuseOriginal = false;
-for k = 1:2:length(varargin)
-    switch(lower(varargin{k}))
-        case 'nfid'
-            Nfid=varargin{k+1};
-        case 'tinput'
-            Tinput=varargin{k+1};
-        otherwise
-            error('openCOSSAN:identifier:replaceValues',...
-                'Property Name not allowed')
-    end
+required = opencossan.common.utilities.parseRequiredNameValuePairs(...
+    ["FileID", "TableInput"], varargin{:});
+optional = opencossan.common.utilities.parseOptionalNameValuePairs(...
+    ["UseOriginalValues"],{[],[]}, varargin{:});
+
+FileID = required.fileid;
+TableInput = required.tableinput;
+
+if ~isempty(optional.useoriginalvalues)
+    UseOriginalValues = optional.useoriginalvalues;
+else
+    UseOriginalValues = false;
 end
 
-[filename, permission, machineformat, encoding] = fopen(Nfid);
+[filename, permission, machineformat, encoding] = fopen(FileID);
 %[Sfolder,~,~] = fileparts(filename);
-OpenCossan.cossanDisp('[COSSAN-X.Identifier.replaceValues] Open file:',4);
-OpenCossan.cossanDisp(['[COSSAN-X.Identifier.replaceValues] Filename:' filename ...
+opencossan.OpenCossan.cossanDisp('[COSSAN-X.Identifier.replaceValues] Open file:',4);
+opencossan.OpenCossan.cossanDisp(['[COSSAN-X.Identifier.replaceValues] Filename:' filename ...
     ' permission: ' permission ' machineformat: ' ...
     machineformat ' encoding: ' encoding],4);
 
-OpenCossan.cossanDisp('[COSSAN-X.Identifier.replaceValues] Inputs name:',4);
-OpenCossan.cossanDisp(fieldnames(Tinput),4);
+opencossan.OpenCossan.cossanDisp('[COSSAN-X.Identifier.replaceValues] Inputs name:',4);
+opencossan.OpenCossan.cossanDisp(TableInput.Properties.VariableNames,4);
 
 Svalue=[];
-for ivar=1:length(Xidentifier)
+for ivar=1:length(obj)
     % Check inputs
-    if ~(isfield(Tinput,Xidentifier(ivar).Sname)) && ~LuseOriginal
+    if ~(ismember(obj(ivar).Name,TableInput.Properties.VariableNames)) && ~UseOriginalValues
         % close file before to die
-        fclose(Nfid);
+        fclose(FileID);
         %Show the error
-        error('openCOSSAN:Identifier:replaceValues', ...
-            ['The variables ' Xidentifier(ivar).Sname ' present in the Injector \n' ...
-            'is not present in the input object ' ]);
+        error('openCOSSAN:Identifier:replaceValues:MissingInput', ...
+            ['The variables %s present in the Injector \n', ...
+            'is not present in the input sample.'], obj(ivar).Name);
     else
-        OpenCossan.cossanDisp(['[COSSAN-X.Identifier.replaceValues] Injector ' ...
-            Xidentifier(ivar).Sname ' Nfid= ' num2str(Nfid)],4)
+        opencossan.OpenCossan.cossanDisp(['[COSSAN-X.Identifier.replaceValues] Injector ' ...
+            obj(ivar).Name ' FileID= ' num2str(FileID)],4)
     end
     
     
@@ -71,14 +71,14 @@ for ivar=1:length(Xidentifier)
         Ndigits=Ndigits0+Ndigits;
     end
     
-    switch lower(Xidentifier(ivar).Sfieldformat)
+    switch lower(obj(ivar).FieldFormat)
         case {'nastran8'}
             Ndigits0 = 8;
         case {'nastran16'}
             Ndigits0 = 16;
         otherwise
-            % extract the format of the current value
-            s1=regexp(Xidentifier(ivar).Sfieldformat,'\%','split');
+            % extract the number of characters from the format
+            s1=regexp(obj(ivar).FieldFormat,'\%','split');
             SstringFormat1=s1(2);
             s2=regexp(SstringFormat1{1},'\.','split');
             SstringFormat2=s2(1);
@@ -87,61 +87,64 @@ for ivar=1:length(Xidentifier)
     
     % Update the Nposition based on the actual values of variables
     if ~isempty(Svalue)
-        Xidentifier(ivar).Nposition=Xidentifier(ivar).Nposition+Ndigits;%-ivar+1;
+        obj(ivar).Position=obj(ivar).Position+Ndigits;%-ivar+1;
     end
     
-    status = fseek(Nfid,Xidentifier(ivar).Nposition, 'bof');
+    status = fseek(FileID,obj(ivar).Position, 'bof');
     if ~isempty(status)
-        OpenCossan.cossanDisp(['[COSSAN-X.Identifier.replaceValues] Return to the beginning of file. status: ' num2str(status)],4)
+        opencossan.OpenCossan.cossanDisp(['[COSSAN-X.Identifier.replaceValues] Return to the beginning of file. status: ' num2str(status)],4)
     end
     
     %count=[];
     % get the value to be injected
-    if ~LuseOriginal
-        switch class(Tinput.(Xidentifier(ivar).Sname))
+    if ~UseOriginalValues
+        switch class(TableInput.(obj(ivar).Name))
             case 'opencossan.common.Dataseries'
                 % if an index is specified, assign to value the content of
                 % the property Mdata of the Dataseries object at the
                 % specified index
-                if ~isempty(Xidentifier(ivar).Nindex)
-                    Vdata = Tinput.(Xidentifier(ivar).Sname).Vdata;
-                    value = Vdata(Xidentifier(ivar).Nindex);
+                if ~isempty(obj(ivar).Nindex)
+                    Vdata = TableInput.(obj(ivar).Sname).Vdata;
+                    value = Vdata(obj(ivar).Index);
                 end
             case {'double','single','logical'}
-                value=Tinput.(Xidentifier(ivar).Sname)(Xidentifier(ivar).Nindex);
+                value=TableInput.(obj(ivar).Name)(obj(ivar).Index);
             otherwise
                 error('openCOSSAN:Identifier:replaceValues',['It is not possible '...
                     'to inject values from object of class %s '], ...
-                    class(Tinput.(Xidentifier(ivar).Sname)))
+                    class(TableInput.(obj(ivar).Name)))
         end
     else
-        value = str2double(Xidentifier(ivar).Soriginal);
+        value = obj(ivar).OriginalValue;
     end
     
     % write the value in the file with the specified format
-    switch lower(Xidentifier(ivar).Sfieldformat)
+    switch lower(obj(ivar).FieldFormat)
         case {'nastran8'}
             Svalue = num2nastran8(value);
-            count=fprintf(Nfid,'%8s',Svalue);
+            count=fprintf(FileID,'%8s',Svalue);
         case {'nastran16'}
             Svalue = num2nastran16(value);
-            count=fprintf(Nfid,'%16s',Svalue);
+            count=fprintf(FileID,'%16s',Svalue);
         otherwise
-            Svalue = num2str(value,Xidentifier(ivar).Sfieldformat);
-            count=fprintf(Nfid,Xidentifier(ivar).Sfieldformat,value);
+            Svalue = sprintf(obj(ivar).FieldFormat,value);
+            count=fprintf(FileID,obj(ivar).FieldFormat,value);
+            if count > Ndigits0
+                Ndigits0 = count;
+            end
     end
     
     %% Used for debugging
-    OpenCossan.cossanDisp(['[COSSAN-X.Identifier.replaceValues] Writing ' ...
-        Xidentifier(ivar).Sname '(' num2str(Xidentifier(ivar).Nindex) ...
-        ') with the format: ' Xidentifier(ivar).Sfieldformat],4)
+    opencossan.OpenCossan.cossanDisp(['[COSSAN-X.Identifier.replaceValues] Writing ' ...
+        obj(ivar).Name '(' num2str(obj(ivar).Index) ...
+        ') with the format: ' obj(ivar).FieldFormat],4)
     
-    OpenCossan.cossanDisp(['[COSSAN-X.Identifier.replaceValues] Field Format:' Xidentifier(ivar).Sfieldformat ],4);
-    OpenCossan.cossanDisp(['[COSSAN-X.Identifier.replaceValues] Value:' Svalue ' bytes written: ' num2str(count)],4);
+    opencossan.OpenCossan.cossanDisp(['[COSSAN-X.Identifier.replaceValues] Field Format:' obj(ivar).FieldFormat ],4);
+    opencossan.OpenCossan.cossanDisp(['[COSSAN-X.Identifier.replaceValues] Value:' Svalue ' bytes written: ' num2str(count)],4);
     
-    Smessage = ferror(Nfid);
+    Smessage = ferror(FileID);
     if ~isempty(Smessage)
-        OpenCossan.cossanDisp(['[COSSAN-X.Identifier.replaceValues] Error writing value: ' Smessage],4);
+        opencossan.OpenCossan.cossanDisp(['[COSSAN-X.Identifier.replaceValues] Error writing value: ' Smessage],4);
     end
     
 end
