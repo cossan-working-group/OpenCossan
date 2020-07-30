@@ -6,16 +6,15 @@ classdef Response
     % identifies a COSSAN output.
     
     properties
-        Sdescription           % Description of the object
-        Sname = ''             % Name of the associate COSSAN output
-        Sfieldformat = '%e'  % Format string '%' +  Maximum field width + conversion character (see fscanf for more information)
+        Name(1,:) char             % Name of the associate COSSAN output
+        FieldFormat(1,1) string  % Format string '%' +  Maximum field width + conversion character (see fscanf for more information)
         Clookoutfor = {}       % if present define the string to be searched inside the ASCII file in order to define the relative position
-        Svarname = ''          % if present Vcolnum and Vrownum are relative respect to the variable present in Svarname
-        Sregexpression = ''    % Regular expression
-        Ncolnum= 1             % Colum position in the ASCII file of the variables (length(Vcolnum)=Nresponse)
-        Nrownum= 1             % Row position in the ASCII file of the variables (length(Vcolnum)=Nresponse)
-        Nrepeat= 1             % Repeat the extraction of the value Nrepeat times
-        LoutputInColumns = true
+        Svarname(1,1) string = ''          % if present Vcolnum and Vrownum are relative respect to the variable present in Svarname
+        Sregexpression(1,1) string = ''    % Regular expression
+        Ncolnum(1,1)= 1             % Colum position in the ASCII file of the variables (length(Vcolnum)=Nresponse)
+        Nrownum(1,1)= 1             % Row position in the ASCII file of the variables (length(Vcolnum)=Nresponse)
+        Nrepeat(1,1)= 1             % Repeat the extraction of the value Nrepeat times
+        LoutputInColumns(1,1) logical = true
         VcoordIndex = []
         CSindexName = {}
     end
