@@ -154,7 +154,7 @@ if ~isempty(CombLow)
     indexTargetJoint(:)={':'};
 end
 
-for ibnet=1:Ncomb
+for ibnet=1:Ncomb % Probably change; multiply the dim of parents
     %... Build a bn
     if isempty(CombLow)
         combination(index)=num2cell(opencossan.common.utilities.myind2sub(VpboundsNodeSizes,ibnet));
@@ -163,12 +163,42 @@ for ibnet=1:Ncomb
     end
     for i=1:length(index)
         inode=index(i);
-        CPDNode=CPD{inode}; %cell with the two CPT
-        % build CPT
-        C=cell2mat(CPDNode{1});
-        NElementsPerOutcome=numel(C)/CN.NodesSize(CN.TopologicalOrder(inode));
-        FirstElement=combination{index(i)}*NElementsPerOutcome-NElementsPerOutcome+1;
-        C(FirstElement:FirstElement+NElementsPerOutcome-1)=[CPDNode{2}{FirstElement:FirstElement+NElementsPerOutcome-1}];
+        CPDNode=CPD{inode}; %cell with the two CPT's bounds 
+        % build CPT with Extreme Points
+        %================================
+        lowerb_mat = cell2mat(CPDNode{1});
+        upperb_mat = cell2mat(CPDNode{2});
+        BoundSize = size(lowerb_mat);
+        BoundElements = numel(BoundSize);
+        if Nodes(inode).Lroot == 1 % when root nodes
+            PermutedLowBound = lowerb_mat;
+            PermutedUppBound = upperb_mat;
+        else 
+            PermutedLowBound = permute(lowerb_mat, [BoundElements 1:1:BoundElements-1]);
+            PermutedUppBound = permute(upperb_mat, [BoundElements 1:1:BoundElements-1]);
+        end
+        LocalEP = prod(BoundSize(1:end-1));% Number of local EPs
+        NStates = BoundSize(end);
+        C = zeros(LocalEP,NStates); % Preallocation for speed
+        StatesComb = 1; % Initialize States combination
+        for EPComb = 1:LocalEP
+            LocalLowBound = PermutedLowBound(StatesComb:1:EPComb*NStates);% Optimize these with permutedLowBound
+            LocalUppBound = PermutedUppBound(StatesComb:1:EPComb*NStates);
+            r = randi(10,1,1); % random restart for EPs
+            [EP,EPc] = CN.extremePoints('inode',inode,'LowerBound',LocalLowBound,'UpperBound',LocalUppBound); % Extreme points of local credal set
+            if r <= 5
+                C(EPComb,1:1:NStates) = EP;% Extreme Point
+            else
+                C(EPComb,1:1:NStates) = EPc; % complement Extreme Point
+            end
+            StatesComb = StatesComb + NStates;
+        end
+        C = reshape(C,BoundSize);
+        %================================
+%         C=cell2mat(CPDNode{1});
+%         NElementsPerOutcome=numel(C)/CN.NodesSize(CN.TopologicalOrder(inode));
+%         FirstElement=combination{index(i)}*NElementsPerOutcome-NElementsPerOutcome+1;
+%         C(FirstElement:FirstElement+NElementsPerOutcome-1)=[CPDNode{2}{FirstElement:FirstElement+NElementsPerOutcome-1}];
         if isempty(Nodes(inode).Parents)
             bnet.CPD{inode}=tabular_CPD(bnet,inode,'CPT',C); % build tabular CPT
         else
