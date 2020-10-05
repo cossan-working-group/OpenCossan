@@ -1,4 +1,4 @@
-classdef IntervalPredictorModel < opencossan.metamodels.MetaModel
+classdef IntervalPredictorModelRadialBasisFunctions < opencossan.metamodels.MetaModel
     %IntervalPredictorModel
     %
     %   This method is the constructor of the class IntervalPredictorModel. It is
@@ -11,8 +11,8 @@ classdef IntervalPredictorModel < opencossan.metamodels.MetaModel
     % University~of~Liverpool, United Kingdom
     
     properties
-        MaximumExponent {mustBeInteger} = [];
-        Exponents {mustBeInteger} = [];
+        Nterms {mustBeInteger} = [];
+        BasisScale = 1;
         Bound(1,1) string {mustBeMember(Bound,{'Lower','lower','upper','Upper'})} = 'Lower';
         ChanceConstraint(1,1) {mustBePositive, ...
             mustBeLessThanOrEqual(ChanceConstraint,1)} = 1;
@@ -22,7 +22,12 @@ classdef IntervalPredictorModel < opencossan.metamodels.MetaModel
         PUpper %The IPM Parameters
         PLower
         RescaleInputs
+        Mcenters = [];
+        Msigma = [];
         k {mustBeInteger} = 0
+        lb = [];
+        ub = [];
+        net = [];
     end
     
     methods
@@ -30,7 +35,7 @@ classdef IntervalPredictorModel < opencossan.metamodels.MetaModel
         XSimDataOutput  = evaluate(Xobj,Pinput)
         [Xobj,varargout] = validate(Xobj,varargin)
         
-        function obj = IntervalPredictorModel(varargin)
+        function obj = IntervalPredictorModelRadialBasisFunctions(varargin)
             %IntervalPredictorModel
             %
             %   This method is the constructor of the class IntervalPredictorModel. It is
@@ -58,10 +63,10 @@ classdef IntervalPredictorModel < opencossan.metamodels.MetaModel
                         obj.Description   = varargin{k+1};
                     case {'sbound'}
                         obj.Bound   = lower(varargin{k+1});
-                    case {'nmaximumexponent','nexponent'}
-                        obj.MaximumExponent = varargin{k+1};
-                    case {'mexponents'}
-                        obj.Exponents = varargin{k+1};
+                    case {'basisscale'}
+                        obj.BasisScale = varargin{k+1};
+                    case {'nterms'}
+                        obj.Nterms = varargin{k+1};
                     case {'outputnames'}
                         % Response of interst
                         obj.OutputNames  = varargin{k+1};
@@ -114,18 +119,16 @@ classdef IntervalPredictorModel < opencossan.metamodels.MetaModel
                             'openCOSSAN:IntervalPredictorModel',...
                             'PropertyName %s must be an object of type SimulationData',varargin{k});
                         % Other cases
+                    case{'parambound'}
+                        obj.lb = varargin{k+1}(:,1);
+                        obj.ub = varargin{k+1}(:,2);
                     otherwise
                         error('openCOSSAN:IntervalPredictorModel',...
                             'PropertyName %s not allowed for a IntervalPredictorModel object', varargin{k})
                 end
             end
             
-            % Check that either the maximum exponent or the matrix of
-            % exponents is passed but not both (xor!).
-            assert(xor(isempty(obj.MaximumExponent),isempty(obj.Exponents)),...
-                'openCOSSAN:IntervalPredictorModel',...
-                'Must pass either maximum exponent or the matrix of exponents.');
-            
+ 
             assert(length(obj.OutputNames) == 1,...
                 'openCOSSAN:IntervalPredictorModel',...
                 'Currently only one output name is supported');
@@ -147,69 +150,59 @@ classdef IntervalPredictorModel < opencossan.metamodels.MetaModel
             
             for iresponse=1:size(Moutputs,2)
                 
-                if isempty(obj.Exponents)
-                    % create a full polynomial model of maximum
-                    % power NmaximumExponent.
-                    % These two lines get all the possible
-                    % combination of the exponents (got it from
-                    % http://groups.google.com/group/comp.soft-sys.matlab/browse_thread/thread/878717e082473f68)
-                    obj.Exponents = fullfact((obj.MaximumExponent+1)*ones(1,Nvar))-1;
-                    obj.Exponents(sum(obj.Exponents,2)>obj.MaximumExponent,:) = [];
-                    % then, the exponents are sorted in a nice way,
-                    % e.g., fist the zeros, then all the linear
-                    % terms, then exponents that sums to 2 with
-                    % precedence to interaction terms, and so on...
-                    [~,isort]=sort(prod((obj.MaximumExponent-1).^(obj.Exponents),2)...
-                        +sum((obj.MaximumExponent-1).^(obj.Exponents),2));
-                    obj.Exponents=obj.Exponents(isort,:);
-                else
-                    % check that the custom model has the right
-                    % number of inputs
-                    assert(size(obj.Exponents,2)==Nvar,...
-                        'openCOSSAN:IntervalPredictorModel:calibrate',...
-                        ['The training data has %d inputs, while '...
-                        'the user defined model has %d inputs.'],...
-                        Nvar,size(obj.Exponents,2))
-                end
-                Nterms=size(obj.Exponents,1);
-                
                 obj.RescaleInputs=mean(abs(Minputs));
                 Minputs=Minputs./obj.RescaleInputs;
                 
+                obj.Mcenters=zeros(obj.Nterms,Nvar); %Centers should be uniformly distributed throughout inputs
+                obj.Msigma=zeros([Nvar Nvar obj.Nterms]);
+
+                obj.net=newrb(Minputs',Moutputs',0,obj.BasisScale,obj.Nterms-1);
+% 
+                obj.Mcenters(1,:)=zeros(Nvar,1);
+                obj.Mcenters(2:obj.Nterms,:)=obj.net.IW{1};
+%                 obj.Mcenters = transp(linspace(min(Minputs),max(Minputs),obj.Nterms));
+                obj.Msigma(:,:,1)=eye(Nvar)/eps;%add the constant term
+
+                for i=2:obj.Nterms
+                    obj.Msigma(:,:,i)=obj.net.b{1}(i-1)^-2*eye(Nvar);
+                end
+
                 % call regstats with the custom model to train
                 % the response surface
-                MD = x2fx(Minputs,obj.Exponents);
+                MD = x2fxExp(Minputs,obj.Mcenters,obj.Msigma);
                 MDSum=(mean(abs(MD)));
                 objective=[-MDSum,MDSum];
                 
                 %Get constraints
                 Aeq=[];
                 beq=[];
-                lb=[];
-                ub=[];
+%                 lb=[];
+%                 ub=[];
+                lowerb = repmat(obj.lb,2*obj.Nterms,1);
+                upperb = repmat(obj.ub,2*obj.Nterms,1);
                 
-                Mconstraint=zeros(2*NDataPoints+Nterms,Nterms*2);
-                Mconstraint(1:NDataPoints,1:Nterms)=-(MD-abs(MD))/2;
-                Mconstraint(NDataPoints+1:2*NDataPoints,1:Nterms)=(MD+abs(MD))/2;
-                Mconstraint(1:NDataPoints,Nterms+1:Nterms*2)=-(MD+abs(MD))/2;
-                Mconstraint(NDataPoints+1:2*NDataPoints,Nterms+1:Nterms*2)=(MD-abs(MD))/2;
-                Mconstraint(2*NDataPoints+1:2*NDataPoints+Nterms,1:Nterms)=eye(Nterms);
-                Mconstraint(2*NDataPoints+1:2*NDataPoints+Nterms,Nterms+1:Nterms*2)=-eye(Nterms);
-                b=[-Moutputs;Moutputs;zeros(Nterms,1)];
+                Mconstraint=zeros(2*NDataPoints+obj.Nterms,obj.Nterms*2);
+                Mconstraint(1:NDataPoints,1:obj.Nterms)=-(MD-abs(MD))/2;
+                Mconstraint(NDataPoints+1:2*NDataPoints,1:obj.Nterms)=(MD+abs(MD))/2;
+                Mconstraint(1:NDataPoints,obj.Nterms+1:obj.Nterms*2)=-(MD+abs(MD))/2;
+                Mconstraint(NDataPoints+1:2*NDataPoints,obj.Nterms+1:obj.Nterms*2)=(MD-abs(MD))/2;
+                Mconstraint(2*NDataPoints+1:2*NDataPoints+obj.Nterms,1:obj.Nterms)=eye(obj.Nterms);
+                Mconstraint(2*NDataPoints+1:2*NDataPoints+obj.Nterms,obj.Nterms+1:obj.Nterms*2)=-eye(obj.Nterms);
+                b=[-Moutputs;Moutputs;zeros(obj.Nterms,1)];
                 
                 options = optimoptions('fmincon','MaxIter',1000000,...
                     'Algorithm','sqp');
                 
-                [MIPMParameters]=linprog(objective,Mconstraint,b,Aeq,beq,lb,ub);
+                [MIPMParameters]=linprog(objective,Mconstraint,b,Aeq,beq,lowerb,upperb);
                 if obj.ChanceConstraint~=1
                     %we can solve quickly with linprog if all inputs are
                     %enclosed, otherwise need to use fmincon
-                    nonlinconstraint=@(x) nonlincons(x,Mconstraint(1:2*NDataPoints,1:Nterms*2),b(1:2*NDataPoints),obj.ChanceConstraint);
+                    nonlinconstraint=@(x) nonlincons(x,Mconstraint(1:2*NDataPoints,1:obj.Nterms*2),b(1:2*NDataPoints),obj.ChanceConstraint);
                     
-                    [MIPMParameters]=fmincon(@(x) objective*x, MIPMParameters,Mconstraint(2*NDataPoints+1:end,1:Nterms*2),b(2*NDataPoints+1:end),[],[],[],[],nonlinconstraint,options);
+                    [MIPMParameters]=fmincon(@(x) objective*x, MIPMParameters,Mconstraint(2*NDataPoints+1:end,1:obj.Nterms*2),b(2*NDataPoints+1:end),[],[],[],[],nonlinconstraint,options);
                     
                     tolerance=10^-12;
-                    obj.k=sum(tolerance<=Mconstraint(1:2*NDataPoints,1:Nterms*2)*MIPMParameters-b(1:2*NDataPoints));
+                    obj.k=sum(tolerance<=Mconstraint(1:2*NDataPoints,1:obj.Nterms*2)*MIPMParameters-b(1:2*NDataPoints));
                 end
                 
                 assert(size(MD,2)<=size(Minputs,1),...
@@ -280,8 +273,7 @@ classdef IntervalPredictorModel < opencossan.metamodels.MetaModel
         
         function reliability = getReliability(obj, epsilon)
             nDataPoints = length(obj.McalibrationTarget);
-            Nterms = size(obj.Exponents, 1);
-            d = 2 * Nterms;
+            d = 2 * obj.Nterms;
             
             assert(epsilon >= 0 && epsilon <=1,...
                 'openCOSSAN:IntervalPredictorModel:getReliability',...
@@ -298,4 +290,16 @@ classdef IntervalPredictorModel < opencossan.metamodels.MetaModel
             end
         end
     end
+end
+% 
+function out = x2fxExp(Minputs,Mcenters,Msigma)
+%Generate radial basis
+NDataPoints=size(Minputs,1);
+Nterms=size(Mcenters,1);
+out=zeros(NDataPoints,Nterms);
+for i=1:NDataPoints
+    for j=1:Nterms
+        out(i,j)=exp(-((Minputs(i,:)-Mcenters(j,:))/(Msigma(:,:,j)))*transpose(Minputs(i,:)-Mcenters(j,:)));
+    end
+end
 end
