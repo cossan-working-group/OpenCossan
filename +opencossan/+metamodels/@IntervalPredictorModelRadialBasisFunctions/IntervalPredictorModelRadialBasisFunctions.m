@@ -1,4 +1,4 @@
-classdef IntervalPredictorModel < opencossan.metamodels.MetaModel
+classdef IntervalPredictorModelRadialBasisFunctions < opencossan.metamodels.MetaModel
     %IntervalPredictorModel
     %
     %   This method is the constructor of the class IntervalPredictorModel. It is
@@ -35,7 +35,7 @@ classdef IntervalPredictorModel < opencossan.metamodels.MetaModel
         XSimDataOutput  = evaluate(Xobj,Pinput)
         [Xobj,varargout] = validate(Xobj,varargin)
         
-        function obj = IntervalPredictorModel(varargin)
+        function obj = IntervalPredictorModelRadialBasisFunctions(varargin)
             %IntervalPredictorModel
             %
             %   This method is the constructor of the class IntervalPredictorModel. It is
