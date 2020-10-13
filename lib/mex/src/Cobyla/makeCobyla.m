@@ -3,7 +3,7 @@
 
 disp('Compiling the COBYLA mex interface ..');
 
-assert(~isempty(OpenCossan.getCossanRoot),'openCOSSAN:makeCobyla','Please initialize OpenCossan')
+assert(~isempty(opencossan.OpenCossan.getRoot),'openCOSSAN:makeCobyla','Please initialize OpenCossan')
 
 if isunix
     mex CFLAGS#"-D_GNU_SOURCE -fPIC -pthread   -fexceptions -D_FILE_OFFSET_BITS=64 -Wall -fPIC -O3" cobyla_matlab.c cobyla.h cobyla.c
@@ -14,8 +14,11 @@ end
 % List of created mex files
 r=dir('*.mex*');
 
-Spath=fullfile(OpenCossan.getCossanRoot,'mex','bin');
-
+Spath=fullfile(opencossan.OpenCossan.getRoot,'lib','mex','bin');
+if ~exist(Spath,'dir')
+    mkdir(Spath);
+    addpath(Spath);
+end
 
 for n=1:length(r)
     % Move the compiled file in the appropriate folder

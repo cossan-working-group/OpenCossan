@@ -113,9 +113,13 @@ function optimum = apply(obj, varargin)
     
     startTime = tic;
     
-    [optimalSolution, exitFlag] = cobyla_matlab(obj, x0, 100, ...
-        obj.InitialTrustRegion, obj.FinalTrustRegion, Ndv, N_ineq);
-    
+    if ~isempty(which('cobyla_matlab'))
+        [optimalSolution, exitFlag] = cobyla_matlab(obj, x0, 100, ...
+            obj.InitialTrustRegion, obj.FinalTrustRegion, Ndv, N_ineq);
+    else
+        error('OpenCossan:cobyla:MissingMEX','MEX file for COBYLA missing. Run the compilation script in lib/mex/src/Cobyla.')
+    end
+
     totalTime = toc(startTime);
     
     optimum = opencossan.optimization.Optimum(...
