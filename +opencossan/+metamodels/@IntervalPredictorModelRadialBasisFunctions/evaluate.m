@@ -13,7 +13,7 @@ function tableOutput = evaluate(obj, inputs)
 inputs = table2array(inputs);
 
 inputs = inputs./obj.RescaleInputs;
-MD = x2fx(inputs,obj.Exponents);
+MD = x2fxExp(inputs,obj.Mcenters,obj.Msigma);
 
 assert(length(obj.OutputNames) == 1, ...
     'Currently only one output name is supported')
