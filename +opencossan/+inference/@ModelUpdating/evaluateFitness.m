@@ -16,24 +16,23 @@ Wt=Xobj.Mweightregularisation;
 %Get the 'Xmodel' from the 'ModelUpdating' Xobj
 XmodelUpdated=Xobj.Xmodel;
 %Get all the 'Inputnames' used by the previous model (Xmodel)
-CfullInputnames=XmodelUpdated.Cinputnames;
+CfullInputnames=XmodelUpdated.InputNames;
 %Verify if the names are members of the ModelUpdating input names
 CmodelInputnames=CfullInputnames(~ismember(CfullInputnames,Xobj.Cinputnames));
 %Get all the 'Outputnames' from the 'ModelUpdating ' class
 Coutputnames=Xobj.Coutputnames;
-XinputData=Xobj.XupdatingData.split('Cnames',CmodelInputnames);
-MoutputProvidedData=Xobj.XupdatingData.getValues('Cnames',Coutputnames);
+XinputData=Xobj.XupdatingData.Samples(:,CmodelInputnames);
+MoutputProvidedData=Xobj.XupdatingData.Samples{:,Coutputnames};
 Vfobj=zeros(Ncandidates,1);
  if Xobj.LuseRegularization
-     VinitialValues=Xobj.Xmodel.Xinput.getValues('Cnames',Xobj.Cinputnames);
+     TinitialValues=Xobj.Xmodel.Input.getDefaultValues();
+     VinitialValues=TinitialValues{:,Xobj.Cinputnames};
  end
 for n=1:Ncandidates  %Loop over all the candidate solutions
-    XinputDataDesignVariable=SimulationData( ...
-                                                'Mvalues',repmat(Mx(n,:),XinputData.Nsamples,1),...
-                                                'Cnames',Xobj.Cinputnames);
-    XfullInputData=XinputData.merge(XinputDataDesignVariable);
-    XsimDataPredicted=XmodelUpdated.apply(XfullInputData.Tvalues);
-    MoutputPredictedData=XsimDataPredicted.getValues('Cnames',Coutputnames);
+    XinputDataDesignVariable = array2table(repmat(Mx(n,:),height(XinputData),1),'VariableNames',Xobj.Cinputnames);
+    XfullInputData=[XinputData XinputDataDesignVariable];
+    XsimDataPredicted=XmodelUpdated.apply(XfullInputData);
+    MoutputPredictedData=XsimDataPredicted.Samples{:,Coutputnames};
     %Vfobj(n)=sum(sum((MoutputProvidedData-MoutputPredictedData).^2));
     Vfobj(n)=sum(sum((MoutputProvidedData-MoutputPredictedData)*We*(MoutputProvidedData-MoutputPredictedData)'));
     if Xobj.LuseRegularization

@@ -24,7 +24,7 @@ classdef ModelUpdating
             if nargin==0
                 return                         % Return an empty object
             end
-            OpenCossan.validateCossanInputs(varargin{:})
+%            OpenCossan.validateCossanInputs(varargin{:})
             %%  Set the values of the previous defined public properties
             for k=1:2:nargin
                 switch lower(varargin{k}),
@@ -68,9 +68,9 @@ classdef ModelUpdating
                 'openCOSSAN:ModelUpdating','A model is required to construct a ModelUpdating object')
             %Verify if the 'cinputnames' property is valid
             if isempty(Xobj.Cinputnames)  %If there is not a 'Cinputnames' assume all the 'Cinputnames' from Xmodel as parameters to be updated
-                Xobj.Cinputnames=Xobj.Xmodel.Cinputnames;
+                Xobj.Cinputnames=Xobj.Xmodel.InputNames;
             else
-                CinputnamesModel=Xobj.Xmodel.Cinputnames;  %If there exists, verify if it is a subset from Cinputnames of the Xmodel
+                CinputnamesModel=Xobj.Xmodel.InputNames;  %If there exists, verify if it is a subset from Cinputnames of the Xmodel
                 for n=1:length(Xobj.Cinputnames)  %If some of the 'Xobj.Cinputnames' does not belong to 'Xobj.Xmodel.Cinputnames' property give an warning message
                     assert(any(strcmp(Xobj.Cinputnames{n},CinputnamesModel)), ...
                         'openCOSSAN:ModelUpdating',...
@@ -82,9 +82,9 @@ classdef ModelUpdating
             end
             %%Verify if the 'CrequiredOutputs' property is valid
             if isempty(Xobj.Coutputnames)  %If there is not a 'CrequiredOutputs' assume all the 'Coutputnames' as 'CrequiredOutputs'
-                Xobj.Coutputnames=Xobj.Xmodel.Coutputnames;
+                Xobj.Coutputnames=Xobj.Xmodel.OutputNames;
             else
-                CoutputnamesModel=Xobj.Xmodel.Coutputnames;
+                CoutputnamesModel=Xobj.Xmodel.OutputNames;
                 for n=1:length(Xobj.Coutputnames)   %If some of the 'CrequiredOutputs' does not belong to 'CrequiredOutputs' property give an warning message
                     assert(any(strcmp(Xobj.Coutputnames{n},CoutputnamesModel)), ...
                         'openCOSSAN:ModelUpdating',...

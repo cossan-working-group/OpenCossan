@@ -4,17 +4,17 @@ function [XmodelOut,varargout] = updateSensitivity(Xobj,varargin )
 % Default values in case it were not passed by the user
 
 %% Setting default optimizer
-Xoptimizer=Cobyla;% default value
-Xobj.Mweighterror=eye(size(Xobj.Xmodel.Xevaluator.Coutputnames,2));
-Xobj.Mweightregularisation=eye(size(Xobj.Xmodel.Xevaluator.Coutputnames,2));
+Xoptimizer=opencossan.optimization.Cobyla;% default value
+Xobj.Mweighterror=eye(size(Xobj.Xmodel.Evaluator.Coutputnames,2));
+Xobj.Mweightregularisation=eye(size(Xobj.Xmodel.Evaluator.Coutputnames,2));
 
 %% Process input
-OpenCossan.validateCossanInputs(varargin{:});
+%OpenCossan.validateCossanInputs(varargin{:});
 for k=1:2:length(varargin)
     switch(lower(varargin{k}))
         case{'xoptimizer'}
             % optimizer
-            assert(isa(varargin{k+1},'Optimizer'),'OpenCossan:ModelUpdating:updateSensitivity',...
+            assert(isa(varargin{k+1},'opencossan.optimization.Optimizer'),'OpenCossan:ModelUpdating:updateSensitivity',...
              'The object after the PropertyName Xoptimizer must be of an Optimizer subclass.')
             Xoptimizer = varargin{k+1};
         case{'regularizationfactor'} % regularization factor
@@ -37,43 +37,41 @@ assert(~isempty(Xoptimizer),'OpenCossan:ModelUpdating:updateSensitivity',...
 % object 'Xmdl'
 Xmdl=Xobj.Xmodel;
 % Update the inputs of this model with those from the optimisation problem
-VdefaultValues=Xobj.Xmodel.Xinput.getValues('Cnames',Xobj.Cinputnames);
+TableDefaultValues = Xobj.Xmodel.Input.getDefaultValues();
+VdefaultValues=TableDefaultValues{:,Xobj.Cinputnames};
 for n=1:length(VdefaultValues)
-    Xdv=DesignVariable('Sdescription',Xobj.Cinputnames{n},...
+    Xdv=opencossan.optimization.ContinuousDesignVariable('description',Xobj.Cinputnames{n},...
                                      'value',VdefaultValues(n),...
                                      'lowerBound',Xobj.VlowerBounds(n),...
                                      'upperBound',Xobj.VupperBounds(n));
-   Xmdl.Xinput.Xparameters  = rmfield(Xmdl.Xinput.Xparameters,Xobj.Cinputnames{n}); % Remove parameter from Input object
-   Xmdl.Xinput.XdesignVariable.(Xobj.Cinputnames{n})=Xdv;                             % Add Design Variable to input object
+    Xmdl.Input = Xmdl.Input.remove('Name',Xobj.Cinputnames{n}); % Remove parameter from Input object
+    Xmdl.Input=Xmdl.Input.add('Member',Xdv,'Name',Xobj.Cinputnames{n});                             % Add Design Variable to input object
 end
 % Creating objective function to be optimized. Summ of errors over all
 % experimental data
-Xobjfun=ObjectiveFunction('Sdescription','objective function', ...
-                                             'Afunction',@(x)evaluateFitness(Xobj,x),...
-                                             'Cinputnames',Xobj.Cinputnames,...
-                                             'Coutputnames',{'fitness'},...
-                                             'Lfunction',true,...
-                                             'Liomatrix',true, ...
-                                             'Liostructure',false);
-Xop=OptimizationProblem('Sdescription','Optimization problem',...
-                                           'Xmodel',Xmdl,...
-                                           'VinitialSolution',VdefaultValues,...
-                                           'XobjectiveFunction',Xobjfun);
-Xoptimum=Xop.optimize('Xoptimizer',Xoptimizer);
-%Get values from optimum object
-for iDV=1:length(VdefaultValues)
-    VupdatedValue(iDV,:)=Xoptimum.XdesignVariable(iDV).Vdata;
-end
+Xobjfun=opencossan.optimization.ObjectiveFunction('description','objective function', ...
+                                             'FunctionHandle',@(x)evaluateFitness(Xobj,x),...
+                                             'IsFunction',true,...
+                                             'InputNames',Xobj.Cinputnames,...
+                                             'OutputNames',{'fitness'},...
+                                             'format','matrix');
+Xop=opencossan.optimization.OptimizationProblem('Description','Optimization problem',...
+                                           'Model',Xmdl,...
+                                           'InitialSolution',VdefaultValues,...
+                                           'objectivefunctions',Xobjfun);
+Xoptimum=Xop.optimize('optimizer',Xoptimizer);
+
 % Set Model to be outputed with the updated parameters 
 XmodelOut=Xobj.Xmodel;
-XinputUpdated=XmodelOut.Xinput;
+XinputUpdated=XmodelOut.Input;
 %Updates only the input parameters of the model
 for iDV=1:length(VdefaultValues)
-         XinputUpdated=XinputUpdated.set('Sname',Xobj.Cinputnames{iDV},...
-                                                                 'SpropertyName','parametervalue',...
-                                                                 'value',VupdatedValue(iDV,end) );
+    Xparameter = XinputUpdated.Parameters(iDV);
+    Xparameter.Value = Xoptimum.OptimalSolution(iDV);
+    XinputUpdated=XinputUpdated.remove('Name',Xobj.Cinputnames{iDV});
+    XinputUpdated=XinputUpdated.add('Member',Xparameter,'Name',Xobj.Cinputnames{iDV});
 end
-XmodelOut.Xinput=XinputUpdated;    
+XmodelOut.Input=XinputUpdated;    
 varargout{1}=Xoptimum;
 end
 
