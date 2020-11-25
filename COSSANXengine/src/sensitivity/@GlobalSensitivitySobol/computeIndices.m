@@ -61,8 +61,11 @@ OpenCossan.cossanDisp(['Generating samples from the ' class(Xobj.Xsimulator) ],4
 OpenCossan.cossanDisp('Creating Samples object',4)
 
 % The two input sample matrices are: with dimension(N,k) each
+Xobj.Xsimulator.Nsamples = Nsamples*2; % double the number of samples
 XA=Xobj.Xsimulator.sample('Xinput',Xobj.Xinput);
-XB=Xobj.Xsimulator.sample('Xinput',Xobj.Xinput);
+XB=XA; % copy the sample object
+XB.MsamplesPhysicalSpace=XB.MsamplesPhysicalSpace(Nsamples+1:2*Nsamples,:); % keep the second half of samples for B
+XA.MsamplesPhysicalSpace=XA.MsamplesPhysicalSpace(1:Nsamples,:); % keep the first half of samples for A
 
 % Evaluate the model
 OpenCossan.cossanDisp('Evaluating the model ' ,4)
@@ -99,8 +102,9 @@ end
 MoutA=XoutA.getValues('Cnames',Xobj.Coutputnames);
 MoutB=XoutB.getValues('Cnames',Xobj.Coutputnames);
 % % Normalise the output vector of the model
-% MoutA=(MoutA-mean(MoutA));
-% MoutB=(MoutB-mean(MoutB));
+mean_out = mean([MoutA;MoutB]);
+MoutA=(MoutA-mean_out);
+MoutB=(MoutB-mean_out);
 
 
 %% Preallocate memory for the computation of Indices
@@ -189,7 +193,7 @@ end
         %% Define a function handle to estimate the paraemeters
         % This function handle is also used by the bootstraping method to estimate
         % the variance of the estimators, in Sobol.1993
-        Vf02=(sum([MoutA;MoutB],1)/(2*Nsamples)).^2; % fo² from Saltelli 2008
+        Vf02=((sum([MoutA;MoutB],1)-mean_out)/(2*Nsamples)).^2; % fo² from Saltelli 2008
         
         hcomputeindices=@(MxA,MxB)sum(MxA.*MxB)/(size(MxA,1))-Vf02;
         % Computing Total variance of the outputs from the above method, also
@@ -228,7 +232,7 @@ end
             Xout = Xout.merge(XoutC);
             
             % Extract the output vector of the model
-            MoutC=XoutC.getValues('Cnames',Xobj.Coutputnames);
+            MoutC=XoutC.getValues('Cnames',Xobj.Coutputnames) - mean_out;
             
             % Estimate V(E(Y|X_i))
             Dy(irv,:)=hcomputeindices(MoutA,MoutC);
@@ -313,7 +317,7 @@ end
             
             Xout = Xout.merge(XoutC);
             % Extract the output vectors
-            MoutC=XoutC.getValues('Cnames',Xobj.Coutputnames);
+            MoutC=XoutC.getValues('Cnames',Xobj.Coutputnames) - mean_out;
             
             % Estimate V(E(Y|X_i))
             Dy(irv,:)=hindices_first(MoutA,MoutB,MoutC);
@@ -399,7 +403,7 @@ end
             
             Xout = Xout.merge(XoutC);
             % Extract the output vectors
-            MoutC=XoutC.getValues('Cnames',Xobj.Coutputnames);
+            MoutC=XoutC.getValues('Cnames',Xobj.Coutputnames) - mean_out;
             
             % Estimate V(E(Y|X_i))
             Dy(irv,:)=hindices_first(MoutB,MoutC);
