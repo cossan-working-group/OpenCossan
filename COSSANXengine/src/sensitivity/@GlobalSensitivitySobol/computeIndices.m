@@ -63,6 +63,7 @@ OpenCossan.cossanDisp('Creating Samples object',4)
 % The two input sample matrices are: with dimension(N,k) each
 Xobj.Xsimulator.Nsamples = Nsamples*2; % double the number of samples
 XA=Xobj.Xsimulator.sample('Xinput',Xobj.Xinput);
+XA.MsamplesPhysicalSpace(:,:) = XA.MsamplesPhysicalSpace(randperm(2 * Nsamples),:); % shuffle samples to make QMC stable
 XB=XA; % copy the sample object
 XB.MsamplesPhysicalSpace=XB.MsamplesPhysicalSpace(Nsamples+1:2*Nsamples,:); % keep the second half of samples for B
 XA.MsamplesPhysicalSpace=XA.MsamplesPhysicalSpace(1:Nsamples,:); % keep the first half of samples for A
