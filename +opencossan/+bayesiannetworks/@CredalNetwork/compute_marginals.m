@@ -9,6 +9,8 @@ function [prob_low, prob_hi] = compute_marginals(states, data, conf)
     %   - conf: desired confidence level between [0, 1]
     %%%
 
+    import opencossan.bayesiannetworks.CredalNetwork.confidence_box
+
     observed_low = zeros(length(states), 1);
     observed_hi = zeros(length(states), 1);
     
@@ -41,7 +43,7 @@ function [prob_low, prob_hi] = compute_marginals(states, data, conf)
         k_lo = observed_low(i);
         k_hi = observed_hi(i);
     
-        [c_lo, c_hi] = confidence([k_lo, k_hi], [n, n], conf);
+        [c_lo, c_hi] = confidenc_box([k_lo, k_hi], [n, n], conf);
         prob_low(i) = c_lo;
         prob_hi(i) = c_hi;
     end

@@ -13,6 +13,8 @@ function [prob_low, prob_hi] = compute_conditionals(parent_states, parent_data, 
     %
     %%%
 
+    import opencossan.bayesiannetworks.CredalNetwork.confidence_box
+
     num_states = [];
     num_states_node = length(node_states);
     num_samples = length(parent_data{1});
@@ -97,7 +99,7 @@ function [prob_low, prob_hi] = compute_conditionals(parent_states, parent_data, 
             k_lo = observed_low(ii);
             k_hi = observed_high(ii);
             
-            [cond_lo, cond_hi] = confidence([k_lo, k_hi], [n_lo, n_hi], conf);
+            [cond_lo, cond_hi] = confidence_box([k_lo, k_hi], [n_lo, n_hi], conf);
             
 
             indexes = num2cell([combins(i,:), ii]);
