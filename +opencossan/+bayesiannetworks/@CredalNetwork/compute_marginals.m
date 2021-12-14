@@ -43,7 +43,7 @@ function [prob_low, prob_hi] = compute_marginals(states, data, conf)
         k_lo = observed_low(i);
         k_hi = observed_hi(i);
     
-        [c_lo, c_hi] = confidenc_box([k_lo, k_hi], [n, n], conf);
+        [c_lo, c_hi] = confidence_box([k_lo, k_hi], [n, n], conf);
         prob_low(i) = c_lo;
         prob_hi(i) = c_hi;
     end
