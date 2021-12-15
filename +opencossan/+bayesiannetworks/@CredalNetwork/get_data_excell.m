@@ -1,4 +1,4 @@
-function [variable_states, variable_data] = get_data_xcell(sheetname, variable)
+function [variable_states, variable_data] = get_data_excell(sheetname, variable)
     %%%
     % Gets a variable's states and data from an XCELL spread sheet.
     %   States and data will be returned as strings. Missing data will be returned as "?"
