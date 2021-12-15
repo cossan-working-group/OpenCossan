@@ -6,7 +6,7 @@ try
     import matlab.unittest.plugins.ToFile;
     import matlab.unittest.plugins.CodeCoveragePlugin;
     import matlab.unittest.plugins.codecoverage.*;
-
+    
     %% Initialize OpenCossan
     workingDirectory = fullfile(fileparts(which(mfilename())),'tmp');
     if ~exist(workingDirectory,'dir')
@@ -16,13 +16,13 @@ try
     import opencossan.OpenCossan;
     clc
     OpenCossan.setVerbosityLevel(0);
-
+    
     %% Add tests folders
     addpath(genpath(fullfile(OpenCossan.getRoot(),'test','unit')));
-
+    
     %% Create TestRunner
     runner = TestRunner.withTextOutput;
-
+    
     % Add XMLPlugin
     % The XMLPlugin provides a jUnit style file  to interface with Jenkins
     xmlFile = 'unit_test_results.xml';
@@ -30,15 +30,15 @@ try
         delete(xmlFile);
     end
     runner.addPlugin(XMLPlugin.producingJUnitFormat(xmlFile));
-
+    
     % Produce html coverage report when running atleast R2019a
     if (~verLessThan('matlab', '9.6'))
-    runner.addPlugin(CodeCoveragePlugin.forPackage(...
-        'opencossan', ...
-        'IncludingSubpackages', true, ...
-        'Producing', CoverageReport('coverage')));
+        runner.addPlugin(CodeCoveragePlugin.forPackage(...
+            'opencossan', ...
+            'IncludingSubpackages', true, ...
+            'Producing', CoverageReport('coverage')));
     end
-
+    
     % Produce cobertura report when running in headless mode (Jenkins)
     if ~usejava('desktop')
         runner.addPlugin(CodeCoveragePlugin.forPackage(...
@@ -46,12 +46,12 @@ try
             'IncludingSubpackages', true, ...
             'Producing', CoberturaFormat('cobertura.xml')));
     end
-
+    
     % Create TestSuites
     suite = TestSuite.fromPackage('opencossan','IncludingSubpackages',true);
     % Run test suites with coverage
     runner.run(suite)
-
+    
     
     OpenCossan.setVerbosityLevel(3);
 catch e
