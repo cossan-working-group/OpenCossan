@@ -17,13 +17,12 @@ function [prob_low, prob_hi] = compute_conditionals(parent_states, parent_data, 
 
     num_states = [];
     num_states_node = length(node_states);
-    num_samples = length(parent_data{1});
     for i = 1:length(parent_states)
         num_states = [num_states, length(parent_states{i})];
     end
 
-    prob_low = cell([num_states, length(node_states)]);
-    prob_hi = cell([num_states, length(node_states)]);
+    prob_low = cell([num_states, num_states_node]);
+    prob_hi = cell([num_states, num_states_node]);
     
 
     for ii = 1:length(parent_states)
