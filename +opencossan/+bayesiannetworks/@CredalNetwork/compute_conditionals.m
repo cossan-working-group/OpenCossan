@@ -17,16 +17,17 @@ function [prob_low, prob_hi] = compute_conditionals(parent_states, parent_data, 
 
     num_states = [];
     num_states_node = length(node_states);
-    
-    for i = 1:length(parent_states)
+    num_parents = length(parent_states);
+
+    for i = 1:num_parents
         num_states = [num_states, length(parent_states{i})];
     end
 
     prob_low = cell([num_states, num_states_node]);
     prob_hi = cell([num_states, num_states_node]);
     
-    elems = cell(length(parent_states), 1);
-    for ii = 1:length(parent_states)
+    elems = cell(num_parents, 1);
+    for ii = 1:num_parents
         elems{ii} = 1:num_states(ii);
     end
     
@@ -36,17 +37,17 @@ function [prob_low, prob_hi] = compute_conditionals(parent_states, parent_data, 
     combinations = cellfun(@(x) x(:), combinations,'uniformoutput',false);
     combins = [combinations{:}];
 
-    misses = cell(length(parent_states), 1);
-    for i = 1:length(parent_states)
+    misses = cell(num_parents, 1);
+    for i = 1:num_parents
         misses{i} = parent_data{i} == "?";
     end
 
     for i = 1:length(combins)
         
-        bools1 = cell(length(parent_states), 1);
-        bools2 = cell(length(parent_states), 1);
+        bools1 = cell(num_parents, 1);
+        bools2 = cell(num_parents, 1);
 
-        for j = 1:length(parent_states)
+        for j = 1:num_parents
             bools1{j} = parent_data{j} == parent_states{j}(combins(i,j));
             bools2{j} = bools1{j} | misses{j};
         end
@@ -54,7 +55,7 @@ function [prob_low, prob_hi] = compute_conditionals(parent_states, parent_data, 
         bools_only = bools1{1};
         bools_misses = bools2{1};
 
-        for j = 2:length(parent_states)
+        for j = 2:num_parents
             bools_only = bools_only .* bools1{j};
             bools_misses = bools_misses .* bools2{j};
         end
@@ -110,7 +111,7 @@ function [prob_low, prob_hi] = compute_conditionals(parent_states, parent_data, 
 
             prob_low(indexes{:}) = {cond_lo};
             prob_hi(indexes{:}) = {cond_hi};
-            
+
         end
     end
 end
