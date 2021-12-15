@@ -1,45 +1,54 @@
-%%%%%% 
-%   Bayesian netork from excell dataset
-%%%%%%
+%%%
+%   Get data from excell
+%%%
 
-get_data
 
-% Import
+import opencossan.bayesiannetworks.CredalNetwork.read_data
 
-import opencossan.bayesiannetworks.BayesianNetwork
-import opencossan.bayesiannetworks.DiscreteNode
+excelsheet = "sample_excell.xlsx";
+
+%%%
+%   read_data will get the unique states and data from "excelsheet". Variable
+%   name must be as it appears on the sheet
+%%%
+
+[weather_states, weather_data] = read_data(excelsheet, "Weather Conditions");
+
+[type_states, type_data] = read_data(excelsheet, "Road Type");
+
+[dist_type, dist_data] = read_data(excelsheet, "Disruption Type");
+
+[condition_type, condition_data] = read_data(excelsheet, "Road Condition");
+
+
+%% Build network
+
 import opencossan.bayesiannetworks.CredalNode
 import opencossan.bayesiannetworks.CredalNetwork
 import opencossan.bayesiannetworks.CredalNetwork.compute_marginals
 import opencossan.bayesiannetworks.CredalNetwork.compute_conditionals
-import opencossan.bayesiannetworks.CredalNetwork.confidence_box
-
-opencossan.OpenCossan.getInstance();    % Initialise and add to path
-
-% Construct marginal input probabilities
 
 c = 95;     % Desired confidence
 
 
-
 %%%
-%   Road  Hierarchy
+%   Road  Types
 %%%
 
-[hierarchy_prob_low, hierarchy_prob_hi] = compute_marginals(hierarchy_states, hierarchy_data, c);
+[type_prob_low, type_prob_hi] = compute_marginals(type_states, type_data, c);
 
 
 n = 0;
 
-Num_hierarchy = length(hierarchy_states);
+Num_types = length(type_states);
 
 n = n + 1;
-CPD_hier_lo = cell(1,Num_hierarchy);  
-CPD_hier_hi = cell(1,Num_hierarchy);  
+CPD_type_lo = cell(1,Num_types);  
+CPD_type_hi = cell(1,Num_types);  
 
-CPD_hier_lo(1, 1:Num_hierarchy )  = num2cell(hierarchy_prob_low);
-CPD_hier_hi(1, 1:Num_hierarchy )  = num2cell(hierarchy_prob_hi);
-Nodes(1,n) = CredalNode('Name', 'hierarchy', 'CPDLow', CPD_hier_lo, 'CPDUp', CPD_hier_hi);
+CPD_type_lo(1, 1:Num_types )  = num2cell(type_prob_low);
+CPD_type_hi(1, 1:Num_types )  = num2cell(type_prob_hi);
+Nodes(1,n) = CredalNode('Name', 'Type', 'CPDLow', CPD_type_lo, 'CPDUp', CPD_type_hi);
 
 
 %%%
@@ -57,29 +66,54 @@ CPD_weather_hi = cell(1,Num_weather);
 
 CPD_weather_lo(1, 1:Num_weather )  = num2cell(weather_prob_low);
 CPD_weather_hi(1, 1:Num_weather )  = num2cell(weather_prob_hi);
-Nodes(1,n) = CredalNode('Name', 'weather', 'CPDLow', CPD_weather_lo, 'CPDUp', CPD_weather_hi);
+Nodes(1,n) = CredalNode('Name', 'Weather', 'CPDLow', CPD_weather_lo, 'CPDUp', CPD_weather_hi);
 
 %%%
-% Children nodes 
+%   Children nodes
 %%%
 
+% Disruption type
 
-parent_states = {hierarchy_states, weather_states};
-parent_data = {hierarchy_data, weather_data};
+parent_states = {type_states, weather_states};
+parent_data = {type_data, weather_data};
 
 [cond_lo, cond_hi] = compute_conditionals(parent_states, parent_data, dist_type, dist_data, c);
 
+n = n + 1;
+
+Nodes(1,n) = CredalNode('Name', 'Disruption', 'CPDLow', cond_lo, 'CPDUp', cond_hi, 'Parents', ["Type", "Weather"]);
+
+
+% Road condition
+
+parent_states = {type_states, weather_states};
+parent_data = {type_data, weather_data};
+
+[cond_lo, cond_hi] = compute_conditionals(parent_states, parent_data, condition_type, condition_data, c);
 
 n = n + 1;
 
-Nodes(1,n) = CredalNode('Name', 'Disruption', 'CPDLow', cond_lo, 'CPDUp', cond_hi, 'Parents', ["hierarchy", "weather"]);
+Nodes(1,n) = CredalNode('Name', 'Condition', 'CPDLow', cond_lo, 'CPDUp', cond_hi, 'Parents', ["Type", "Weather"]);
 
+
+% Build network
 credal_net = CredalNetwork('Nodes', Nodes);
 
+% Visualise
 credal_net.makeGraph
 
+%%%
+% Do some calculations
+%%%
+
+% Compute marginals
 
 tic;    %%%% Compute marginal for disruption
 dis_marg = credal_net.computeInference('MarginalProbability', "Disruption", ...
+    'useBNT', true, 'Algorithm', "Junction Tree");
+toc;
+
+tic;    %%%% Compute marginal for disruption
+condition_marg = credal_net.computeInference('MarginalProbability', "Condition", ...
     'useBNT', true, 'Algorithm', "Junction Tree");
 toc;
