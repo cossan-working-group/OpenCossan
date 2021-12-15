@@ -17,6 +17,7 @@ function [prob_low, prob_hi] = compute_conditionals(parent_states, parent_data, 
 
     num_states = [];
     num_states_node = length(node_states);
+    
     for i = 1:length(parent_states)
         num_states = [num_states, length(parent_states{i})];
     end
@@ -24,7 +25,7 @@ function [prob_low, prob_hi] = compute_conditionals(parent_states, parent_data, 
     prob_low = cell([num_states, num_states_node]);
     prob_hi = cell([num_states, num_states_node]);
     
-
+    elems = cell(length(parent_states), 1);
     for ii = 1:length(parent_states)
         elems{ii} = 1:num_states(ii);
     end
@@ -34,12 +35,16 @@ function [prob_low, prob_hi] = compute_conditionals(parent_states, parent_data, 
     
     combinations = cellfun(@(x) x(:), combinations,'uniformoutput',false);
     combins = [combinations{:}];
-    
+
+    misses = cell(length(parent_states), 1);
     for i = 1:length(parent_states)
         misses{i} = parent_data{i} == "?";
     end
 
     for i = 1:length(combins)
+        
+        bools1 = cell(length(parent_states), 1);
+        bools2 = cell(length(parent_states), 1);
 
         for j = 1:length(parent_states)
             bools1{j} = parent_data{j} == parent_states{j}(combins(i,j));
@@ -105,7 +110,7 @@ function [prob_low, prob_hi] = compute_conditionals(parent_states, parent_data, 
 
             prob_low(indexes{:}) = {cond_lo};
             prob_hi(indexes{:}) = {cond_hi};
+            
         end
-
     end
 end
