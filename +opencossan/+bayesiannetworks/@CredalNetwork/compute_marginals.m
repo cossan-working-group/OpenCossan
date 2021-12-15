@@ -11,30 +11,24 @@ function [prob_low, prob_hi] = compute_marginals(states, data, conf)
 
     import opencossan.bayesiannetworks.CredalNetwork.confidence_box
 
-    observed_low = zeros(length(states), 1);
-    observed_hi = zeros(length(states), 1);
-    
-    prob_low = zeros(length(states),1);
-    prob_hi = zeros(length(states),1);
-    
-    n = length(data);
+    num_data = length(data);
+    num_states = length(states);
 
-    for i = 1:length(states)
-        num = 0;
-        for j = 1:length(data)
-            if isequal(data{j},states{i})
-                num = num +1;
-            end
-        end
+    observed_low = zeros(num_states, 1);
+    observed_hi = zeros(num_states, 1);
+    
+    prob_low = zeros(num_states,1);
+    prob_hi = zeros(num_states,1);
+    
+    
+    for i = 1:num_states
+
+        num = sum(data(:) == states{i});
         observed_low(i) = num;
+
     end
     
-    num_unknown = 0;
-    for j = 1:length(data)
-        if isequal(data{j},'?')
-            num_unknown = num_unknown +1;
-        end
-    end
+    num_unknown = sum(data == "?");
     
     observed_hi = observed_low + num_unknown;
     
@@ -43,10 +37,10 @@ function [prob_low, prob_hi] = compute_marginals(states, data, conf)
         k_lo = observed_low(i);
         k_hi = observed_hi(i);
     
-        [c_lo, c_hi] = confidence_box([k_lo, k_hi], [n, n], conf);
+        [c_lo, c_hi] = confidence_box([k_lo, k_hi], [num_data, num_data], conf);
         prob_low(i) = c_lo;
         prob_hi(i) = c_hi;
+        
     end
-
 end
 
