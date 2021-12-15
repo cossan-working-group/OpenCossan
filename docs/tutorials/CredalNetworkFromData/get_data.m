@@ -23,12 +23,10 @@ excelsheet = "sample_excell.xlsx";
 [distruption, distruption_data] = read_data(excelsheet, "Disruption Caused");
 
 % Sometimes further clean-up is required
-for i = 1:length(weather_data)
-    if weather_data{i} == "UNKNOWN"
-        weather_data{i} = '?';
-    end
-end
 
+
+ids = weather_data  == "UNKNOWN";
+weather_data(ids) = "?";
 weather_states = setdiff(weather_states, "UNKNOWN");
 
 ids = distruption_data == "false";
