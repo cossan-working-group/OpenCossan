@@ -13,12 +13,9 @@ excelsheet = "sample_excell.xlsx";
 %%%
 
 [weather_states, weather_data] = read_data(excelsheet, "Weather Conditions");
-
 [type_states, type_data] = read_data(excelsheet, "Road Type");
-
 [dist_type, dist_data] = read_data(excelsheet, "Disruption Type");
 
-[condition_type, condition_data] = read_data(excelsheet, "Road Condition");
 
 
 %% Build network
@@ -84,18 +81,6 @@ n = n + 1;
 Nodes(1,n) = CredalNode('Name', 'Disruption', 'CPDLow', cond_lo, 'CPDUp', cond_hi, 'Parents', ["Type", "Weather"]);
 
 
-% Road condition
-
-parent_states = {type_states, weather_states};
-parent_data = {type_data, weather_data};
-
-[cond_lo, cond_hi] = compute_conditionals(parent_states, parent_data, condition_type, condition_data, c);
-
-n = n + 1;
-
-Nodes(1,n) = CredalNode('Name', 'Condition', 'CPDLow', cond_lo, 'CPDUp', cond_hi, 'Parents', ["Type", "Weather"]);
-
-
 % Build network
 credal_net = CredalNetwork('Nodes', Nodes);
 
@@ -110,10 +95,5 @@ credal_net.makeGraph
 
 tic;    %%%% Compute marginal for disruption
 dis_marg = credal_net.computeInference('MarginalProbability', "Disruption", ...
-    'useBNT', true, 'Algorithm', "Junction Tree");
-toc;
-
-tic;    %%%% Compute marginal for disruption
-condition_marg = credal_net.computeInference('MarginalProbability', "Condition", ...
     'useBNT', true, 'Algorithm', "Junction Tree");
 toc;
