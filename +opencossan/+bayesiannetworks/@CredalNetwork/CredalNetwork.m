@@ -93,9 +93,9 @@ classdef CredalNetwork < opencossan.bayesiannetworks.EnhancedBayesianNetwork
     %% Static methods
     methods (Static = true)
         [variable_states, variable_data] = read_data(varargin);
-        varargout  =  confidence_box(varargin);
-        varargout  =  compute_marginals(varargin);
-        varargout  =  compute_conditionals(varargin);
+        [conf_lo, conf_hi] = confidence_box(k, n, c);
+        [prob_low, prob_hi] = compute_marginals(states, data, conf);
+        [prob_low, prob_hi] = compute_conditionals(parent_states, parent_data, node_states, node_data, conf);
     end
     
     %% Private methods
