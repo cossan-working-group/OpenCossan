@@ -10,17 +10,17 @@ import opencossan.bayesiannetworks.CredalNetwork.get_data_excell
 import opencossan.bayesiannetworks.CredalNode
 opencossan.OpenCossan.getInstance();    % Initialise and add to path
 
-xcellsheet = "sample_excell.xlsx";
+excelsheet = "sample_excell.xlsx";
 
-[weather_states, weather_data] = CredalNetwork.get_data_excell(xcellsheet, "Weather Conditions");
+[weather_states, weather_data] = get_data_excel(excelsheet, "Weather Conditions");
 
-[hierarchy_states, hierarchy_data] = get_data_excell(xcellsheet, "Maintenance Hierarchy");
+[hierarchy_states, hierarchy_data] = get_data_excel(excelsheet, "Maintenance Hierarchy");
 
-[dist_type, dist_data] = get_data_excell(xcellsheet, "Disruption Type");
+[dist_type, dist_data] = get_data_excel(excelsheet, "Disruption Type");
 
-[condition_type, condition_data] = get_data_excell(xcellsheet, "Road Condition");
+[condition_type, condition_data] = get_data_excel(excelsheet, "Road Condition");
 
-[distruption, distruption_data] = get_data_excell(xcellsheet, "Disruption Caused");
+[distruption, distruption_data] = get_data_excel(excelsheet, "Disruption Caused");
 
 
 
