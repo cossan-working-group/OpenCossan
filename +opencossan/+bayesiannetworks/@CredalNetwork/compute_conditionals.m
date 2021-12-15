@@ -67,32 +67,16 @@ function [prob_low, prob_hi] = compute_conditionals(parent_states, parent_data, 
         observed_high = zeros(num_states_node, 1);
 
         for ii = 1:num_states_node
-            num = 0;
-            for jj = 1:length(cond_samples)
-                if isequal(cond_samples(jj), node_states{ii})
-                    num = num + 1;
-                end
-            end
-            observed_low(ii) = num;
-        end
-        
-        for ii = 1:num_states_node
-            num = 0;
-            for jj = 1:length(cond_samples2)
-                if isequal(cond_samples2(jj), node_states{ii})
-                    num = num + 1;
-                end
-            end
-            observed_high(ii) = num;
-        end
-        
-        num_unknown = 0;
+            
+            num_lo = sum(cond_samples == node_states{ii});
+            observed_low(ii) = num_lo;
 
-        for ii = 1:length(cond_samples2)
-            if isequal(cond_samples2(ii), "?")
-                num_unknown = num_unknown + 1;
-            end
+            num_hi = sum(cond_samples2 == node_states{ii});
+            observed_high(ii) = num_hi;
+
         end
+
+        num_unknown = sum(cond_samples2 == "?");
         
         observed_high = observed_high + num_unknown;
         
