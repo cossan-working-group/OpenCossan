@@ -6,7 +6,7 @@
 import opencossan.bayesiannetworks.BayesianNetwork
 import opencossan.bayesiannetworks.DiscreteNode
 import opencossan.bayesiannetworks.CredalNetwork
-import opencossan.bayesiannetworks.CredalNetwork.get_data_excell
+import opencossan.bayesiannetworks.CredalNetwork.get_data_excel
 import opencossan.bayesiannetworks.CredalNode
 opencossan.OpenCossan.getInstance();    % Initialise and add to path
 
