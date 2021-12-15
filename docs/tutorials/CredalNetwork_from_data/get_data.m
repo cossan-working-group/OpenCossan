@@ -1,5 +1,5 @@
 %%%
-%   Getting data for iris dataset
+%   Getting data from excell
 %%%
 
 
@@ -10,7 +10,7 @@ import opencossan.bayesiannetworks.CredalNetwork.get_data_excell
 import opencossan.bayesiannetworks.CredalNode
 opencossan.OpenCossan.getInstance();    % Initialise and add to path
 
-xcellsheet = "../All_Flooding_RIS.xlsx";
+xcellsheet = "sample_excell.xlsx";
 
 [weather_states, weather_data] = CredalNetwork.get_data_excell(xcellsheet, "Weather Conditions");
 
