@@ -92,7 +92,7 @@ classdef CredalNetwork < opencossan.bayesiannetworks.EnhancedBayesianNetwork
     
     %% Static methods
     methods (Static = true)
-        varargout  =  get_data_excel(varargin);
+        [variable_states, variable_data] = read_data(varargin);
         varargout  =  confidence_box(varargin);
         varargout  =  compute_marginals(varargin);
         varargout  =  compute_conditionals(varargin);

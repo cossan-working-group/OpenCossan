@@ -6,24 +6,21 @@
 import opencossan.bayesiannetworks.BayesianNetwork
 import opencossan.bayesiannetworks.DiscreteNode
 import opencossan.bayesiannetworks.CredalNetwork
-import opencossan.bayesiannetworks.CredalNetwork.get_data_excel
+import opencossan.bayesiannetworks.CredalNetwork.read_data
 import opencossan.bayesiannetworks.CredalNode
 opencossan.OpenCossan.getInstance();    % Initialise and add to path
 
 excelsheet = "sample_excell.xlsx";
 
-[weather_states, weather_data] = get_data_excel(excelsheet, "Weather Conditions");
+[weather_states, weather_data] = read_data(excelsheet, "Weather Conditions");
 
-[hierarchy_states, hierarchy_data] = get_data_excel(excelsheet, "Maintenance Hierarchy");
+[hierarchy_states, hierarchy_data] = read_data(excelsheet, "Maintenance Hierarchy");
 
-[dist_type, dist_data] = get_data_excel(excelsheet, "Disruption Type");
+[dist_type, dist_data] = read_data(excelsheet, "Disruption Type");
 
-[condition_type, condition_data] = get_data_excel(excelsheet, "Road Condition");
+[condition_type, condition_data] = read_data(excelsheet, "Road Condition");
 
-[distruption, distruption_data] = get_data_excel(excelsheet, "Disruption Caused");
-
-
-
+[distruption, distruption_data] = read_data(excelsheet, "Disruption Caused");
 
 % Sometimes further clean-up is required
 for i = 1:length(weather_data)
