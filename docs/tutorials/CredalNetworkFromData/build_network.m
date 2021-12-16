@@ -14,7 +14,7 @@ excelsheet = "sample_excell.csv";
 
 [weather_states, weather_data] = read_data(excelsheet, "Weather Conditions");
 [type_states, type_data] = read_data(excelsheet, "Road Type");
-[dist_type, dist_data] = read_data(excelsheet, "Disruption Type");
+[dist_type, dist_data] = read_data(excelsheet, "Disruption Caused");
 
 
 
@@ -124,8 +124,6 @@ title("Disruption marginal")
 h_gca=gca;
 h_gca.FontSize=24;
 
-saveas(gcf,"Disruption_marginal"+ string(c) + ".png")
-
 
 figure('Position', [10 10 900 900])
 X = categorical(dist_type);
@@ -136,5 +134,3 @@ ylabel("probs")
 title("Disruption conditioned")
 h_gca=gca;
 h_gca.FontSize=24;
-
-saveas(gcf,"Disruption_marginal_conditioned"+ string(c) + ".png")
