@@ -5,7 +5,7 @@
 
 import opencossan.bayesiannetworks.CredalNetwork.read_data
 
-excelsheet = "sample_excell.xlsx";
+excelsheet = "sample_excell.csv";
 
 %%%
 %   read_data will get the unique states and data from "excelsheet". Variable
