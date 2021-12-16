@@ -97,3 +97,44 @@ tic;    %%%% Compute marginal for disruption
 dis_marg = credal_net.computeInference('MarginalProbability', "Disruption", ...
     'useBNT', true, 'Algorithm', "Junction Tree");
 toc;
+
+% Condition on some observations
+
+observed_type = "Motorway";
+evidence_type = find(type_states == observed_type);
+
+observed_weather = "RAINING WITH HIGH WINDS";
+evidence_weather = find(weather_states == observed_weather);
+
+tic;
+dis_cond = credal_net.computeInference('MarginalProbability', "Disruption", ...
+    'useBNT', true, 'Algorithm', "Junction Tree", 'ObservedNode', ["Type", "Weather"], 'Evidence', [evidence_type, evidence_weather]);
+toc;
+
+% Plot distributions
+
+
+figure('Position', [10 10 900 900])
+X = categorical(dist_type);
+bar(X,dis_marg.Disruption.UpperBound)
+hold on
+bar(X,dis_marg.Disruption.LowerBound)
+ylabel("probs")
+title("Disruption marginal")
+h_gca=gca;
+h_gca.FontSize=24;
+
+saveas(gcf,"Disruption_marginal"+ string(c) + ".png")
+
+
+figure('Position', [10 10 900 900])
+X = categorical(dist_type);
+bar(X,dis_cond.Disruption.UpperBound)
+hold on
+bar(X,dis_cond.Disruption.LowerBound)
+ylabel("probs")
+title("Disruption conditioned")
+h_gca=gca;
+h_gca.FontSize=24;
+
+saveas(gcf,"Disruption_marginal_conditioned"+ string(c) + ".png")
