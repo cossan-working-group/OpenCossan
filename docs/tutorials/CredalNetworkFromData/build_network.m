@@ -95,7 +95,7 @@ credal_net.makeGraph
 
 tic;    %%%% Compute marginal for disruption
 dis_marg = credal_net.computeInference('MarginalProbability', "Disruption", ...
-    'useBNT', true, 'Algorithm', "Junction Tree");
+    'useBNT', true, 'Algorithm', "Variable Elimination");
 toc;
 
 % Condition on some observations
@@ -108,7 +108,7 @@ evidence_weather = find(weather_states == observed_weather);
 
 tic;
 dis_cond = credal_net.computeInference('MarginalProbability', "Disruption", ...
-    'useBNT', true, 'Algorithm', "Junction Tree", 'ObservedNode', ["Type", "Weather"], 'Evidence', [evidence_type, evidence_weather]);
+    'useBNT', true, 'Algorithm', "Variable Elimination", 'ObservedNode', ["Type", "Weather"], 'Evidence', [evidence_type, evidence_weather]);
 toc;
 
 % Plot distributions
