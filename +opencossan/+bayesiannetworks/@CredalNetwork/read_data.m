@@ -10,7 +10,7 @@ function [variable_states, variable_data] = read_data(filename, variable)
     
     data = readcell(filename);
     
-    indexes = data(1,:) == variable;
+    indexes = cellfun(@(v) v == variable, data(1,:));
     
     if ~any(indexes)
         error('OpenCossan:CredalNetwork:VariableNotFound',...
