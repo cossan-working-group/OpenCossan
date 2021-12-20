@@ -107,10 +107,10 @@ classdef PoissonRandomVariableTest < matlab.unittest.TestCase
         %% fit
         function fit(testCase)
             random = opencossan.common.inputs.random.PoissonRandomVariable('lambda',1);
-            samples = random.sample(100);
+            samples = random.sample(10000);
             phat = opencossan.common.inputs.random.PoissonRandomVariable.fit(...
                 'data',samples,'frequency',[],'censoring',[],'alpha',0.05);
-            testCase.verifyEqual(phat.Lambda,1.0,'RelTol',0.2);
+            testCase.verifyEqual(phat.Lambda,1.0,'RelTol',0.1);
         end
         
         %qqplot
