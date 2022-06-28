@@ -137,7 +137,7 @@ while isempty(exitFlag)   % Cycle over the number of batches
             Mg=reshape(Vg_subset ...
                 (end-Xobj.seedsamples*Nseeds+1:end), ...
                 [],Xobj.seedsamples);
-            Mindicator_g=Mg<gFl(ilevel);
+            Mindicator_g=Mg<max(gFl(ilevel),0);
             Mcorr = zeros(Nseeds,Xobj.seedsamples);
             
             for isample=1:Nseeds
