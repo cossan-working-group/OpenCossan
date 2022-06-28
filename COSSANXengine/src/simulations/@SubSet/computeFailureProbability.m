@@ -135,7 +135,7 @@ while isempty(SexitFlag)   % Cycle over the number of batches
             Mg=reshape(Vg_subset ...
                 (end-Xobj.Nmarkovchainsamples*Nmarkovchains+1:end), ...
                 [],Xobj.Nmarkovchainsamples);
-            Mindicator_g=Mg<VgFl(ilevel);
+            Mindicator_g=Mg<=max(VgFl(ilevel),0);
             Mcorr = zeros(Nmarkovchains,Xobj.Nmarkovchainsamples);
             
             for isample=1:Nmarkovchains
