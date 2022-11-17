@@ -228,6 +228,7 @@ while isempty(exitFlag)   % Cycle over the number of batches
         % the common initial points
         % Define initial points (Xobj.Nseedsamples,components of the samples)
         MU=repmat(Msort,Xobj.seedsamples,1);
+        absPositionSamples = [];
         
         if Xobj.updateStd
             %mean and variance across all seeds
