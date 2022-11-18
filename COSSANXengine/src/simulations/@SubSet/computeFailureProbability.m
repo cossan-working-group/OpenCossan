@@ -143,18 +143,18 @@ while isempty(SexitFlag)   % Cycle over the number of batches
                 for deltak = 0:(Xobj.Nmarkovchainsamples-1),
                     V1 = V(1:end-deltak);
                     V2 = V(1+deltak:end);
-                    Mcorr(deltak+1,isample) = (1/length(V1))*sum(V1.*V2);
+                    Mcorr(isample,deltak+1) = sum(V1.*V2);
                 end
             end %end correlation estimation
             
             %Eq. (25)
-            VIcorr = sum(Mcorr,2) / Nmarkovchains - VpFl(ilevel)^2;
-            
+            VIcorr = (sum(Mcorr,1))./(Xobj.NinitialSamples:-Nmarkovchains:Nmarkovchains) - VpFl(ilevel)^2;
+                        
             % Eq. 27
             Vrho = VIcorr / VIcorr(1);
             gammal=2*sum((1-(1:Xobj.Nmarkovchainsamples-1)* ...
                 Nmarkovchains/Ninitialsamples).* ...
-                Vrho(1:Xobj.Nmarkovchainsamples-1)');
+                Vrho(1:Xobj.Nmarkovchainsamples-1));
             % Eq. 28
             VcovpFl(ilevel)=sqrt((1-VpFl(ilevel))/ ...
                 (VpFl(ilevel)*Ninitialsamples)*(1+gammal));
