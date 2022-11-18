@@ -130,35 +130,34 @@ while isempty(exitFlag)   % Cycle over the number of batches
             %CoV in the case of Monte Carlo simulation
             covpFl(1) = sqrt(  (1 - pFl(1)) / (pFl(1) * Ninitialsamples ));  %Eq. (28)
         else
-            % correlation of the states of the markov chain
+            % correlation of the states of the  markov chain
             Mg=reshape(Vg_subset ...
                 (end-Xobj.markovchainsamples*markovchains+1:end), ...
                 [],Xobj.markovchainsamples);
             Mindicator_g=Mg<max(gFl(ilevel),0);
             Mcorr = zeros(markovchains,Xobj.markovchainsamples);
             
-            for isample=1:markovchains
+            for isample=1:markovchains % for each chain
                 V = Mindicator_g(isample,:);
-                for deltak = 0:(Xobj.markovchainsamples-1)
+                for deltak = 0:(Xobj.markovchainsamples-1), 
                     V1 = V(1:end-deltak);
                     V2 = V(1+deltak:end);
-                    Mcorr(deltak+1,isample) = (1/length(V1))*sum(V1.*V2);
+                    Mcorr(isample,deltak+1) = sum(V1.*V2);
                 end
-            end %end correlation estimation
+            end %end correlation estimation   
             
             %Eq. (25)
-            VIcorr = sum(Mcorr,2) / markovchains - pFl(ilevel)^2;
+            VIcorr = (sum(Mcorr,1))./(Xobj.initialSamples:-markovchains:markovchains) - pFl(ilevel)^2;
             
             % Eq. 27
             Vrho = VIcorr / VIcorr(1);
             gammal=2*sum((1-(1:Xobj.markovchainsamples-1)* ...
                 markovchains/Ninitialsamples).* ...
-                Vrho(1:Xobj.markovchainsamples-1)');
+                Vrho(1:Xobj.markovchainsamples-1));
             % Eq. 28
             covpFl(ilevel)=sqrt((1-pFl(ilevel))/ ...
                 (pFl(ilevel)*Ninitialsamples)*(1+gammal));
-        end
-        
+        end        
         
         % SubSim-MCMC
         if KeepSeeds

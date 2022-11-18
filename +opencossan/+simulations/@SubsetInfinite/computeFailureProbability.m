@@ -140,23 +140,23 @@ while isempty(exitFlag)   % Cycle over the number of batches
             Mindicator_g=Mg<max(gFl(ilevel),0);
             Mcorr = zeros(Nseeds,Xobj.seedsamples);
             
-            for isample=1:Nseeds
+            for isample=1:Nseeds % for each chain
                 V = Mindicator_g(isample,:);
-                for deltak = 0:(Xobj.seedsamples-1),
+                for deltak = 0:(Xobj.seedsamples-1), 
                     V1 = V(1:end-deltak);
                     V2 = V(1+deltak:end);
-                    Mcorr(deltak+1,isample) = (1/length(V1))*sum(V1.*V2);
+                    Mcorr(isample,deltak+1) = sum(V1.*V2);
                 end
-            end %end correlation estimation
+            end %end correlation estimation   
             
             %Eq. (25)
-            VIcorr = sum(Mcorr,2) / Nseeds - pFl(ilevel)^2;
+            VIcorr = (sum(Mcorr,1))./(Xobj.initialSamples:-Nseeds:Nseeds) - pFl(ilevel)^2;
             
             % Eq. 27
             Vrho = VIcorr / VIcorr(1);
             gammal=2*sum((1-(1:Xobj.seedsamples-1)* ...
                 Nseeds/Ninitialsamples).* ...
-                Vrho(1:Xobj.seedsamples-1)');
+                Vrho(1:Xobj.seedsamples-1));
             % Eq. 28
             covpFl(ilevel)=sqrt((1-pFl(ilevel))/ ...
                 (pFl(ilevel)*Ninitialsamples)*(1+gammal));
