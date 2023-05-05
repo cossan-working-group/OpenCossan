@@ -71,7 +71,6 @@ classdef ChiRandomVariable < opencossan.common.inputs.random.RandomVariable
         
         function mean = get.Mean(obj)
             [mean,~] = chi2stat(obj.Nu);
-            mean = mean + obj.Shift;
         end
         
         function std = get.Std(obj)
@@ -83,41 +82,41 @@ classdef ChiRandomVariable < opencossan.common.inputs.random.RandomVariable
             %CDF2PHYSICAL Inverse exponential cumulative distribution function.
             % VX = cdf2physical(obj,VX) returns the inverse cdf of the
             % chi-square distribution, evaluated at the values VU.
-            VX = chi2inv(VU,obj.Nu) + obj.Shift;
+            VX = chi2inv(VU,obj.Nu);
         end
         
         function VX = map2physical(obj,VU)
             % MAP2PHYSICAL Map from standard normal into physical space.
             % VX = map2physical(obj,VU) maps the values in VU from standard
             % normal into physical space.
-            VX = chi2inv(normcdf(VU),obj.Nu) + obj.Shift;
+            VX = chi2inv(normcdf(VU),obj.Nu);
         end
         
         function VU = map2stdnorm(obj,VX)
             % MAP2STDNORM Map from physical into standard normal space.
             % VU = map2stdnorm(obj,VX) maps the values in VX from physical
             % into standard normal space.
-            VU = norminv(chi2cdf(VX - obj.Shift,obj.Nu));
+            VU = norminv(chi2cdf(VX,obj.Nu));
         end
         
         function VU = physical2cdf(obj,VX)
             %PHYSICAL2CDF Chi-square cumulative distribution function.
             % VU = physical2cdf(obj,VX) returns the cdf of the chi-square
             % distribution, evaluated at the values VX.
-            VU = chi2cdf(VX - obj.Shift,obj.Nu);
+            VU = chi2cdf(VX,obj.Nu);
         end
         
         function Vpdf_vX = evalpdf(obj,Vx)
             %EVALPDF Chi-square probability density function.
             % Y = evalpdf(obj,X) returns the pdf of the chi-square
             % distribution, evaluated at the values X.
-            Vpdf_vX = pdf('CHI2',Vx - obj.Shift,obj.Nu);
+            Vpdf_vX = pdf('CHI2',Vx,obj.Nu);
         end
     end
     
     methods (Access = protected)
         function samples = getSamples(obj,size)
-            samples = chi2rnd(obj.Nu,size) + obj.Shift;
+            samples = chi2rnd(obj.Nu,size);
         end
     end
     

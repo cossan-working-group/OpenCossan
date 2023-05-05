@@ -83,11 +83,7 @@ classdef IntervalPredictorModel < opencossan.metamodels.MetaModel
                         else
                             obj.XcalibrationInput  = varargin{k+1};
                         end
-                        
-                        assert(isa(obj.XcalibrationInput,'Input'), ...
-                            'openCOSSAN:IntervalPredictorModel',...
-                            'PropertyName %s must be an object of type Input',varargin{k});
-                        
+                                                
                     case{'xcalibrationoutput','cxcalibrationoutput'}
                         if isa(varargin{k+1},'cell')
                             obj.XcalibrationOutput  = varargin{k+1}{1};
@@ -95,9 +91,6 @@ classdef IntervalPredictorModel < opencossan.metamodels.MetaModel
                             obj.XcalibrationOutput  = varargin{k+1};
                         end
                         
-                        assert(isa(obj.XcalibrationOutput,'SimulationData'), ...
-                            'openCOSSAN:IntervalPredictorModel',...
-                            'PropertyName %s must be an object of type SimulationData',varargin{k});
                     case{'xvalidationinput','cxvalidationinput'}
                         
                         if isa(varargin{k+1},'cell')

@@ -30,7 +30,6 @@ function [TableOutput, Mout]= getStatistics(Xobj,varargin)
 % =====================================================================
 
 %% Validate input arguments
-OpenCossan.validateCossanInputs(varargin{:})
 
 
 %% Process input arguments

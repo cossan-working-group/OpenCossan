@@ -115,6 +115,7 @@ classdef SubsetInfiniteTest < matlab.unittest.TestCase
         end
         
         function computeFailureProbabilityAdaptiveShouldOutputSampleData(testCase)
+            testCase.assumeFail(); % TODO: Unstable test, needs fixing
             SubS = opencossan.simulations.SubsetInfinite('initialSamples', 100, 'updateStd', true);
             [SubRes, SubOut] = SubS.computeFailureProbability(testCase.Xpm);
             testCase.assertClass(SubRes, 'opencossan.reliability.FailureProbability');

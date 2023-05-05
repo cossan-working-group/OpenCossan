@@ -3,7 +3,7 @@ classdef (Abstract) RandomVariable < matlab.mixin.Heterogeneous & opencossan.com
     %   several specializations.
     %
     % See also: RandomVariableSet, Input
-    
+
     %{
     This file is part of OpenCossan <https://cossan.co.uk>.
     Copyright (C) 2006-2018 COSSAN WORKING GROUP
@@ -22,10 +22,6 @@ classdef (Abstract) RandomVariable < matlab.mixin.Heterogeneous & opencossan.com
     along with OpenCossan. If not, see <http://www.gnu.org/licenses/>.
     %}
     
-    properties
-        Shift(1,1) double {mustBeNumeric} = 0; % Distribution shift
-    end
-    
     properties (Dependent)
         CoV; % Coefficient of variation
     end
@@ -36,17 +32,8 @@ classdef (Abstract) RandomVariable < matlab.mixin.Heterogeneous & opencossan.com
     end
     
     methods
-        %% Constructor
-        function obj = RandomVariable(varargin)
-            names = "Shift";
-            defaults = {0};
-            
-            [results, super_args] = opencossan.common.utilities.parseOptionalNameValuePairs(...
-                names, defaults, varargin{:});
-                        
-            obj@opencossan.common.CossanObject(super_args{:});
-            
-            obj.Shift = results.shift;
+        function obj = RandomVariable(varargin)                        
+            obj@opencossan.common.CossanObject(varargin{:});
         end              
         
         function CoV = get.CoV(obj)
@@ -82,19 +69,19 @@ classdef (Abstract) RandomVariable < matlab.mixin.Heterogeneous & opencossan.com
             % TRANSFORM2DESIGNVARIABLE this method transforms a RandomVariable into
             % a DesignVariable
             
-            designVariable = opencossan.optimization.DesignVariable();
+            designVariable = opencossan.optimization.ContinuousDesignVariable();
 
             if ~isinf(obj.Mean) && ~isnan(obj.Mean)
-                designVariable.value = obj.Mean;
+                designVariable.Value = obj.Mean;
             else
                 error('openCOSSAN:RandomVariable:randomVariable2designVariable',...
                     'The mean of the distribution is not defined')
             end
             if ~isinf(obj.Bounds(1)) && ~isnan(obj.Bounds(1))
-                designVariable.lowerBound = obj.Bounds(1);
+                designVariable.LowerBound = obj.Bounds(1);
             end
             if ~isinf(obj.Bounds(2)) && ~isnan(obj.Bounds(2))
-                designVariable.upperBound = obj.Bounds(2);
+                designVariable.UpperBound = obj.Bounds(2);
             end
         end
         

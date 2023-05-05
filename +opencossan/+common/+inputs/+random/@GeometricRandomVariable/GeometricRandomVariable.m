@@ -71,7 +71,6 @@ classdef GeometricRandomVariable < opencossan.common.inputs.random.RandomVariabl
         
         function mean = get.Mean(obj)
             [mean,~] = geostat(obj.Lambda);
-            mean = mean + obj.Shift;
         end
         
         function std = get.Std(obj)
@@ -84,41 +83,41 @@ classdef GeometricRandomVariable < opencossan.common.inputs.random.RandomVariabl
             %CDF2PHYSICAL Inverse geometric cumulative distribution function.
             % VX = cdf2physical(obj,VX) returns the inverse cdf of the
             % geometric distribution, evaluated at the values VU.
-            VX = icdf('geometric', VU,obj.Lambda) + obj.Shift;
+            VX = icdf('geometric', VU,obj.Lambda);
         end
         
         function VX = map2physical(obj,VU)
             % MAP2PHYSICAL Map from standard normal into physical space.
             % VX = map2physical(obj,VU) maps the values in VU from standard
             % normal into physical space.
-            VX = icdf('geometric',normcdf(VU),obj.Lambda) + obj.Shift;
+            VX = icdf('geometric',normcdf(VU),obj.Lambda);
         end
         
         function VU = map2stdnorm(obj,VX)
             % MAP2STDNORM Map from physical into standard normal space.
             % VU = map2stdnorm(obj,VX) maps the values in VX from physical
             % into standard normal space.
-            VU = norminv(cdf('geometric',VX - obj.Shift,obj.Lambda));
+            VU = norminv(cdf('geometric',VX,obj.Lambda));
         end
         
         function VU = physical2cdf(obj,VX)
             %PHYSICAL2CDF Geometric cumulative distribution function.
             % VU = physical2cdf(obj,VX) returns the cdf of the geometric
             % distribution, evaluated at the values VX.
-            VU = cdf('geometric',VX - obj.Shift,obj.Lambda);
+            VU = cdf('geometric',VX,obj.Lambda);
         end
         
         function Vpdf_vX = evalpdf(obj,Vx)
             %EVALPDF Geometric probability density function.
             % Y = evalpdf(obj,X) returns the pdf of the geometric
             % distribution, evaluated at the values X.
-            Vpdf_vX = pdf('geometric',Vx - obj.Shift,obj.Lambda);
+            Vpdf_vX = pdf('geometric',Vx,obj.Lambda);
         end
     end
     
     methods (Access = protected)
         function samples = getSamples(obj,size)
-            samples = random('geometric',obj.Lambda,size) + obj.Shift;
+            samples = random('geometric',obj.Lambda,size);
         end
     end
     

@@ -22,7 +22,7 @@ function varargout=computeIndices(Xobj,varargin)
 %  along with openCOSSAN.  If not, see <http://www.gnu.org/licenses/>.
 % =====================================================================
 %% Check inputs
-OpenCossan.validateCossanInputs(varargin{:})
+opencossan.OpenCossan.validateCossanInputs(varargin{:})
 % OpenCossan.resetRandomNumberGenerator(357357)
 %% Process inputs
 for k=1:2:length(varargin)
@@ -45,14 +45,19 @@ for k=1:2:length(varargin)
 end
 %% Set the analysis name when not deployed
 if ~isdeployed
-    OpenCossan.setAnalysisName(class(Xobj));
+    opencossan.OpenCossan.setAnalysisName(class(Xobj));
 end
 %% Set the analysis ID
-OpenCossan.setAnalysisID;
+if isempty(opencossan.OpenCossan.getAnalysisId())
+    opencossan.OpenCossan.setAnalysisId(1)
+else
+    opencossan.OpenCossan.setAnalysisId(opencossan.OpenCossan.getAnalysisId()+1)
+end
+
 % Insert entry in Analysis Database
-if ~isempty(OpenCossan.getDatabaseDriver)
-    insertRecord(OpenCossan.getDatabaseDriver,'StableType','Analysis',...
-        'Nid',OpenCossan.getAnalysisID);
+if ~isempty(opencossan.OpenCossan.getDatabaseDriver)
+    insertRecord(opencossan.OpenCossan.getDatabaseDriver,'StableType','Analysis',...
+        'Nid',opencossan.OpenCossan.getAnalysisID);
 end
 %%
 

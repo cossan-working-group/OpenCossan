@@ -71,7 +71,6 @@ classdef PoissonRandomVariable < opencossan.common.inputs.random.RandomVariable
         
         function mean = get.Mean(obj)
             [mean,~] = poisstat(obj.Lambda);
-            mean = mean + obj.Shift;
         end
         
         function std = get.Std(obj)
@@ -83,41 +82,41 @@ classdef PoissonRandomVariable < opencossan.common.inputs.random.RandomVariable
             %CDF2PHYSICAL Inverse poisson cumulative distribution function.
             % VX = cdf2physical(obj,VX) returns the inverse cdf of the
             % poisson distribution, evaluated at the values VU.
-            VX = icdf('poisson',VU,obj.Lambda) + obj.Shift;
+            VX = icdf('poisson',VU,obj.Lambda);
         end
         
         function VX = map2physical(obj,VU)
             % MAP2PHYSICAL Map from standard normal into physical space.
             % VX = map2physical(obj,VU) maps the values in VU from standard
             % normal into physical space.
-            VX = icdf('poisson',normcdf(VU),obj.Lambda) + obj.Shift;
+            VX = icdf('poisson',normcdf(VU),obj.Lambda);
         end
         
         function VU = map2stdnorm(obj,VX)
             % MAP2STDNORM Map from physical into standard normal space.
             % VU = map2stdnorm(obj,VX) maps the values in VX from physical
             % into standard normal space.
-            VU = norminv(cdf('poisson',VX - obj.Shift,obj.Lambda));
+            VU = norminv(cdf('poisson',VX,obj.Lambda));
         end
         
         function VU = physical2cdf(obj,VX)
             %PHYSICAL2CDF Poisson cumulative distribution function.
             % VU = physical2cdf(obj,VX) returns the cdf of the exponential
             % poisson, evaluated at the values VX.
-            VU = cdf('poisson',VX - obj.Shift,obj.Lambda);
+            VU = cdf('poisson',VX,obj.Lambda);
         end
         
         function Vpdf_vX = evalpdf(obj,Vx)
             %EVALPDF Poisson probability density function.
             % Y = evalpdf(obj,X) returns the pdf of the poisson
             % distribution, evaluated at the values X.
-            Vpdf_vX = pdf('poisson',Vx - obj.Shift,obj.Lambda);
+            Vpdf_vX = pdf('poisson',Vx,obj.Lambda);
         end
     end
     
     methods (Access = protected)
         function samples = getSamples(obj,size)
-            samples = random('poisson',obj.Lambda,size) + obj.Shift;
+            samples = random('poisson',obj.Lambda,size);
         end
     end
     

@@ -64,7 +64,7 @@ classdef GlobalSensitivityRandomBalanceDesign < opencossan.sensitivity.Sensitivi
             % =====================================================================
             
             %% Check inputs
-            OpenCossan.validateCossanInputs(varargin{:})
+            opencossan.OpenCossan.validateCossanInputs(varargin{:})
             
             %% Process inputs
             for k=1:2:nargin

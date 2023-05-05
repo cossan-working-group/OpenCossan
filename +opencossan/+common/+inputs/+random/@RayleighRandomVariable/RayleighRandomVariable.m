@@ -70,7 +70,6 @@ classdef RayleighRandomVariable< opencossan.common.inputs.random.RandomVariable
         
         function mean = get.Mean(obj)
             [mean,~] = raylstat(obj.Sigma);
-            mean = mean + obj.Shift;
         end
         
         function std = get.Std(obj)
@@ -82,41 +81,41 @@ classdef RayleighRandomVariable< opencossan.common.inputs.random.RandomVariable
             %CDF2PHYSICAL Inverse rayleigh cumulative distribution function.
             % VX = cdf2physical(obj,VX) returns the inverse cdf of the
             % rayleigh distribution, evaluated at the values VU.
-            VX = raylinv(VU,obj.Sigma) + obj.Shift;
+            VX = raylinv(VU,obj.Sigma);
         end
         
         function VX = map2physical(obj,VU)
             % MAP2PHYSICAL Map from standard normal into physical space.
             % VX = map2physical(obj,VU) maps the values in VU from standard
             % normal into physical space.
-            VX = raylinv(normcdf(VU),obj.Sigma) + obj.Shift;
+            VX = raylinv(normcdf(VU),obj.Sigma);
         end
         
         function VU = map2stdnorm(obj,VX)
             % MAP2STDNORM Map from physical into standard normal space.
             % VU = map2stdnorm(obj,VX) maps the values in VX from physical
             % into standard normal space.
-            VU = norminv(raylcdf((VX - obj.Shift - (obj.Mean - obj.Std*1.91305838027110)),obj.Std/sqrt(2 - pi/2)));
+            VU = norminv(raylcdf((VX - (obj.Mean - obj.Std*1.91305838027110)),obj.Std/sqrt(2 - pi/2)));
         end
         
         function VU = physical2cdf(obj,VX)
             %PHYSICAL2CDF Rayleigh cumulative distribution function.
             % VU = physical2cdf(obj,VX) returns the cdf of the rayleigh
             % distribution, evaluated at the values VX.
-            VU = (raylcdf((VX - obj.Shift - (obj.Mean - obj.Std*1.91305838027110)),obj.Std/sqrt(2 - pi/2)));
+            VU = (raylcdf((VX - (obj.Mean - obj.Std*1.91305838027110)),obj.Std/sqrt(2 - pi/2)));
         end
         
         function Vpdf_vX = evalpdf(obj,Vx)
             %EVALPDF Rayleigh probability density function.
             % Y = evalpdf(obj,X) returns the pdf of the rayleigh
             % distribution, evaluated at the values X.
-            Vpdf_vX = raylpdf(Vx - obj.Shift,obj.Sigma);
+            Vpdf_vX = raylpdf(Vx,obj.Sigma);
         end
     end
     
     methods (Access = protected)
         function samples = getSamples(obj,size)
-            samples = raylrnd(obj.Sigma,size) + obj.Shift;
+            samples = raylrnd(obj.Sigma,size);
         end
     end
     

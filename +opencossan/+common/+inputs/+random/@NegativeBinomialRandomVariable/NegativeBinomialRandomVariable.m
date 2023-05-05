@@ -73,7 +73,7 @@ classdef NegativeBinomialRandomVariable < opencossan.common.inputs.random.Random
         
         function mean = get.Mean(obj)
             dist = makedist('negativebinomial','R',obj.R,'P',obj.P);
-            mean = dist.mean() + obj.Shift;
+            mean = dist.mean();
         end
         
         function std = get.Std(obj)
@@ -85,41 +85,41 @@ classdef NegativeBinomialRandomVariable < opencossan.common.inputs.random.Random
             %CDF2PHYSICAL Inverse negative binomial cumulative distribution function.
             % VX = cdf2physical(obj,VX) returns the inverse cdf of the
             % negative binomial distribution, evaluated at the values VU.
-            VX = icdf('negative binomial', VU, obj.R, obj.P) + obj.Shift;
+            VX = icdf('negative binomial', VU, obj.R, obj.P);
         end
         
         function VX = map2physical(obj,VU)
             % MAP2PHYSICAL Map from standard normal into physical space.
             % VX = map2physical(obj,VU) maps the values in VU from standard
             % normal into physical space.
-            VX = icdf('negative binomial', normcdf(VU),obj.R,obj.P) + obj.Shift;
+            VX = icdf('negative binomial', normcdf(VU),obj.R,obj.P);
         end
         
         function VU = map2stdnorm(obj,VX)
             % MAP2STDNORM Map from physical into standard normal space.
             % VU = map2stdnorm(obj,VX) maps the values in VX from physical
             % into standard normal space.
-            VU = norminv(cdf('negative binomial',VX - obj.Shift,obj.R,obj.P));
+            VU = norminv(cdf('negative binomial',VX,obj.R,obj.P));
         end
         
         function VU = physical2cdf(obj,VX)
             %PHYSICAL2CDF Negative binomial cumulative distribution function.
             % VU = physical2cdf(obj,VX) returns the cdf of the negative
             % binomial distribution, evaluated at the values VX.
-            VU = cdf('negative binomial',VX - obj.Shift,obj.R,obj.P);
+            VU = cdf('negative binomial',VX,obj.R,obj.P);
         end
         
         function Vpdf_vX = evalpdf(obj,Vx)
             %EVALPDF Negative binomial probability density function.
             % Y = evalpdf(obj,X) returns the pdf of the negative binomial
             % distribution, evaluated at the values X.
-            Vpdf_vX = pdf('negative binomial',Vx - obj.Shift,obj.R,obj.P);
+            Vpdf_vX = pdf('negative binomial',Vx,obj.R,obj.P);
         end
     end
     
     methods (Access = protected)
         function samples = getSamples(obj,size)
-            samples = random('negative binomial',obj.R,obj.P,size) + obj.Shift;
+            samples = random('negative binomial',obj.R,obj.P,size);
         end
     end
     

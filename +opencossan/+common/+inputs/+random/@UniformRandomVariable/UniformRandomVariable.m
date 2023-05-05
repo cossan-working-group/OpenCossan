@@ -89,14 +89,14 @@ classdef UniformRandomVariable < opencossan.common.inputs.random.RandomVariable
             % MAP2STDNORM Map from physical into standard normal space.
             % VU = map2stdnorm(obj,VX) maps the values in VX from physical
             % into standard normal space.
-            VU = norminv(unifcdf(VX - obj.Shift,obj.Bounds(1),obj.Bounds(2)));
+            VU = norminv(unifcdf(VX,obj.Bounds(1),obj.Bounds(2)));
         end
         
         function VU = physical2cdf(obj,VX)
             %PHYSICAL2CDF Uniform cumulative distribution function.
             % VU = physical2cdf(obj,VX) returns the cdf of the uniform
             % distribution, evaluated at the values VX.
-            VU = unifcdf(VX - obj.Shift,obj.Bounds(1),obj.Bounds(2));
+            VU = unifcdf(VX,obj.Bounds(1),obj.Bounds(2));
         end
         
         function Vpdf_vX = evalpdf(obj,Vx)

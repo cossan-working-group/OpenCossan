@@ -59,14 +59,6 @@ classdef LognormalRandomVariableTest < matlab.unittest.TestCase
             testCase.verifyEqual(random.Mean, testMean);   
         end
         
-        %% shifting
-        function shifting(testCase)
-            random = opencossan.common.inputs.random.LognormalRandomVariable('mu',1,'sigma',0.5);
-            meanWithoutShift = random.Mean;
-            random.Shift = 1;
-            testCase.verifyEqual(random.Mean, meanWithoutShift + 1);
-        end
-        
          %% sample
         function SampleEmpty(testCase)
             random = opencossan.common.inputs.random.LognormalRandomVariable('mu',1,'sigma',0.5);

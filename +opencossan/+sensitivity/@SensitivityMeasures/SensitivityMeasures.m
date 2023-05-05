@@ -65,7 +65,7 @@ classdef SensitivityMeasures
             % Author: Edoardo Patelli
             
             %% Validate input arguments
-            OpenCossan.validateCossanInputs(varargin{:})
+            opencossan.OpenCossan.validateCossanInputs(varargin{:})
             
             %%  Set values passed by the user
             for k=1:2:length(varargin)
@@ -188,9 +188,9 @@ classdef SensitivityMeasures
                 'length of CsobolComponentsIndices '])
             
             if ~isempty(Xobj.CinputNames)
-                assert(iscellstr(Xobj.CinputNames),...
+                assert(isstring(Xobj.CinputNames),...
                     'openCOSSAN:output:SensitivityMeasures',...
-                    'The CinputNames must be a cell of string')
+                    'The CinputNames must be a string vector')
             end
             
             %% Check consistency of input parameters
