@@ -125,14 +125,14 @@ classdef RandomVariableSet < opencossan.common.CossanObject
             [required, varargin] = opencossan.common.utilities.parseRequiredNameValuePairs(...
                     ["Number","RandomVariable"], varargin{:});
             
-            [optional, ~] = opencossan.common.utilities.parseOptionalNameValuePairs(...
-                    "NamePrefix","RV_", varargin{:});
+            [optional, varargin] = opencossan.common.utilities.parseOptionalNameValuePairs(...
+                    "NamePrefix","RV", varargin{:});
                 
             
-            members(1:p.Results.n) = required.randomvariable;
+            members(1:required.number) = required.randomvariable;
             
-            names = strings(1,n);
-            for i = 1:p.Results.n
+            names = strings(1,required.number);
+            for i = 1:required.number
                 names(i) = sprintf("%s_%d", optional.nameprefix, i);
             end
             

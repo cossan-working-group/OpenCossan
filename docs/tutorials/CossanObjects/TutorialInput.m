@@ -40,14 +40,20 @@ x4  = opencossan.common.inputs.random.UniformRandomVariable('Bounds',[5, 1]);
 Xrvs2   = opencossan.common.inputs.random.RandomVariableSet('names',{'x3','x4'},'members',[x3 x4]);
 
 % Create RandomVariableSet with IID RandomVariable
-Xrvs3 = opencossan.common.inputs.random.RandomVariableSet('members',x1,'Nrv',10,'names',{'x1'});
+% It is necessary to use the static method fromIidRandomVariable and
+% providing the mandatory arguments "RandomVarible", "Number" and the
+% optional field "NamePrefix". 
+Xrvs3 = opencossan.common.inputs.random.RandomVariableSet.fromIidRandomVariables('RandomVariable',x1,'number',10,'NamePrefix','x1');
+% If "NamePrefix" is not provided, the default
+% prefix RV_ is used.
+Xrvs4 = opencossan.common.inputs.random.RandomVariableSet.fromIidRandomVariables('RandomVariable',x1,'number',10);
     
 %% Create Functions
-Xfun1   = Function('Description','function #1', ...
+Xfun1   = opencossan.common.inputs.Function('Description','function #1', ...
     'Expression','<&x3&>+<&x4&>');
-Xfun2   = Function('Description','function #2', ...
+Xfun2   = opencossan.common.inputs.Function('Description','function #2', ...
     'Expression','<&Xmat3&>./<&x1&>');
-Xfun3   = Function('Description','function #2', ...
+Xfun3   = opencossan.common.inputs.Function('Description','function #2', ...
     'Expression','<&Xmat3&>+1');
 
 %% Create an Input passing all the objects at once
@@ -55,7 +61,7 @@ Xfun3   = Function('Description','function #2', ...
 %% Create an Input passing one object per type, then adding the others
 
 %% Create an Input object that contains all the object already prepared
-Xin=Input('Description','My first Input'); % initialize Input object
+Xin=opencossan.common.inputs.Input('Description','My first Input'); % initialize Input object
 
 % Add parameters to the input object
 Xin = Xin.add('Member',Xconfiguration,'Name','Xconfiguration');
