@@ -73,6 +73,8 @@ The following packages are used by OpenCossan and are required for some function
 If you use this software, please read and cite these open-access articles:
 
 1. Patelli, E., 2017. COSSAN: a multidisciplinary software suite for uncertainty quantification and risk management. Handbook of uncertainty quantification, pp.1909-1977. DOI: https://dx.doi.org/10.1007/978-3-319-11259-6_59-1
+2. Patelli, Edoardo, Hindolo George-Williams, Jonathan Sadeghi, Roberto Rocchetta, Matteo Broggi, and Marco de Angelis. 2018. ‘OpenCossan 2.0: An Efficient Computational Toolbox for Risk, Reliability and Resilience Analysis’. In Proceedings of the Joint ICVRAM ISUMA UNCERTAINTIES Conference, edited by André T. Beck, Gilberto F. M. de Souza, and Marcelo A. Trindade. http://icvramisuma2018.org/cd/web/PDF/ICVRAMISUMA2018-0022.PDF.
+
 
 ## Publications
 
